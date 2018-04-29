@@ -16,7 +16,7 @@
  * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.tron.common.utils;
+package org.gsc.common.utils;
 
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
