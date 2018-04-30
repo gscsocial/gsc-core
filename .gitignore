@@ -1,0 +1,39 @@
+# IDEA
+.idea
+*iml
+.DS_Store
+
+# gradle
+.gradle
+build
+
+# log
+logs
+
+# lombok
+out
+
+# levelDB
+database*
+
+# doc
+doc
+
+# protobuf generated classes
+src/main/gen
+
+/bin/
+
+# Eclipse IDE specific files and folders
+/.project
+/.classpath
+/.settings/
+/.apt_generated/
+
+# output directory
+/output-directory/
+
+/output_manager/
+/output_witness/
+
+nodeId.properties
