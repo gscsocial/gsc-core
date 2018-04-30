@@ -9,7 +9,7 @@ apply plugin: 'com.github.johnrengelman.shadow'
 
 sourceCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-mainClassName = 'org.gsc.program.gsc'
+mainClassName = 'org.gsc.program.Start'
 
 repositories {
     maven { url 'http://mvnrepository.com' }
