@@ -2,42 +2,39 @@ package org.gsc.program;
 
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.app.Application;
-import org.gsc.common.app.ApplicationFactory;
+import org.gsc.common.app.ApplicationImpl;
 import org.gsc.config.Args;
 import org.gsc.config.DefaultConfig;
-import org.gsc.core.Constant;
-import org.gsc.service.RpcApiService;
 import org.gsc.service.NetService;
+import org.gsc.service.RpcApiService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-@Slf4j
 
+@Slf4j
 public class Start {
 
   /**
    * Start the FullNode.
    */
   public static void main(String[] args) throws InterruptedException {
-    logger.info("Full node running.");
-    Args.setParam(args, Constant.TESTNET_CONF);
-    Args cfgArgs = Args.getInstance();
+    logger.info("gsc node running.");
 
     ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    Args config = context.getBean(Args.class);
+    config.setParam(args, "test.conf");
 
-    if (cfgArgs.isHelp()) {
-      logger.info("Here is the help message.");
-      return;
-    }
-    Application appT = ApplicationFactory.create(context);
+    Application appT = context.getBean(ApplicationImpl.class);
     shutdown(appT);
-    //appT.init(cfgArgs);
+
     RpcApiService rpcApiService = context.getBean(RpcApiService.class);
+    NetService netService = context.getBean(NetService.class);
     appT.addService(rpcApiService);
-    if (cfgArgs.isWitness()) {
-      appT.addService(new WitnessService(appT));
-    }
-    appT.initServices(cfgArgs);
+    appT.addService(netService);
+    //TODO: add producer code
+
+    appT.initServices(config);
     appT.startServices();
     appT.startup();
     rpcApiService.blockUntilShutdown();
