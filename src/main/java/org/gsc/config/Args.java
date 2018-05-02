@@ -11,6 +11,11 @@ public class Args {
   @Setter
   private int rpcPort;
 
+  @Getter
+  @Setter
+  private int nodeP2pVersion;
+
+
   public void setParam(final String[] args, final String confFileName) {
   }
 }

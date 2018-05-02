@@ -1,7 +1,7 @@
 package org.gsc.net.message;
 
 import static io.netty.buffer.Unpooled.wrappedBuffer;
-import common.utils.Sha256Hash;
+import org.gsc.common.utils.Sha256Hash;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import org.apache.commons.lang3.ArrayUtils;
