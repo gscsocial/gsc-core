@@ -1,7 +1,6 @@
 package org.gsc.net.message;
 
 import static io.netty.buffer.Unpooled.wrappedBuffer;
-
 import common.utils.Sha256Hash;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
@@ -31,8 +30,8 @@ public abstract class Message {
     unpacked = false;
   }
 
-  public ByteBuf getSendData(){
-    return wrappedBuffer(ArrayUtils.add(this.getData(), 0 ,type));
+  public ByteBuf getSendData() {
+    return wrappedBuffer(ArrayUtils.add(this.getData(), 0, type));
   }
 
   public Sha256Hash getMessageId() {
