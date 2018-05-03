@@ -20,11 +20,9 @@ package org.gsc.net.discover;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,11 +31,15 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.utils.CollectionUtils;
 import org.gsc.config.Args;
+import org.gsc.net.discover.NodeHandler.State;
 import org.gsc.net.discover.table.NodeTable;
 import org.gsc.net.message.discover.FindNodeMessage;
 import org.gsc.net.message.discover.Message;
 import org.gsc.net.message.discover.NeighborsMessage;
+import org.gsc.net.message.discover.PingMessage;
+import org.gsc.net.message.discover.PongMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,7 +51,7 @@ public class NodeManager implements Consumer<DiscoveryEvent> {
   private Args args;
 
   @Autowired
-  private Manager dbManager;
+  //private Manager dbManager;
 
   private static final long LISTENER_REFRESH_RATE = 1000;
   private static final long DB_COMMIT_RATE = 1 * 60 * 1000;
@@ -79,12 +81,16 @@ public class NodeManager implements Consumer<DiscoveryEvent> {
   public NodeManager() {
     discoveryEnabled = args.isNodeDiscoveryEnable();
 
-    homeNode = new Node(Args.getMyKey().getNodeId(), args.getNodeExternalIp(),
-        args.getNodeListenPort());
+    //TODO: inital home node and boot nodes
 
-    for (String boot : args.getSeedNode().getIpList()) {
-      bootNodes.add(Node.instanceOf(boot));
-    }
+//    homeNode = new Node(Args.getMyKey().getNodeId(), args.getNodeExternalIp(),
+//        args.getNodeListenPort());
+
+//    for (String boot : args.getSeedNode().getIpList()) {
+//      bootNodes.add(Node.instanceOf(boot));
+//    }
+
+    homeNode = new Node("");
 
     logger.info("homeNode : {}", homeNode);
     logger.info("bootNodes : size= {}", bootNodes.size());
@@ -121,23 +127,27 @@ public class NodeManager implements Consumer<DiscoveryEvent> {
         }
       }, LISTENER_REFRESH_RATE, LISTENER_REFRESH_RATE);
 
-      if (args.isNodeDiscoveryPersist()) {
-        dbRead();
-        nodeManagerTasksTimer.scheduleAtFixedRate(new TimerTask() {
-          @Override
-          public void run() {
-            dbWrite();
-          }
-        }, DB_COMMIT_RATE, DB_COMMIT_RATE);
-      }
+
+      //TODO: get neighbours from nodes data persistence
+//      if (args.isNodeDiscoveryPersist()) {
+//        dbRead();
+//        nodeManagerTasksTimer.scheduleAtFixedRate(new TimerTask() {
+//          @Override
+//          public void run() {
+//            dbWrite();
+//          }
+//        }, DB_COMMIT_RATE, DB_COMMIT_RATE);
+//      }
 
       for (Node node : bootNodes) {
         getNodeHandler(node);
       }
 
-      for (Node node : args.getNodeActive()) {
-        getNodeHandler(node).getNodeStatistics().setPredefined(true);
-      }
+      //TODO: init active nodes
+
+//      for (Node node : args.getNodeActive()) {
+//        getNodeHandler(node).getNodeStatistics().setPredefined(true);
+//      }
     }
   }
 
@@ -148,25 +158,27 @@ public class NodeManager implements Consumer<DiscoveryEvent> {
   }
 
   private void dbRead() {
-    Set<Node> Nodes = this.dbManager.readNeighbours();
-    logger.info("Reading Node statistics from PeersStore: " + Nodes.size() + " nodes.");
-    Nodes.forEach(node -> getNodeHandler(node).getNodeStatistics()
-        .setPersistedReputation(node.getReputation()));
+    //TODO: nodes data persistence
+//    Set<Node> Nodes = this.dbManager.readNeighbours();
+//    logger.info("Reading Node statistics from PeersStore: " + Nodes.size() + " nodes.");
+//    Nodes.forEach(node -> getNodeHandler(node).getNodeStatistics()
+//        .setPersistedReputation(node.getReputation()));
   }
 
   private void dbWrite() {
-    Set<Node> batch = new HashSet<>();
-    synchronized (this) {
-      for (NodeHandler nodeHandler : nodeHandlerMap.values()) {
-        //if (isNodeAlive(nodeHandler)) {
-        nodeHandler.getNode()
-            .setReputation(nodeHandler.getNodeStatistics().getPersistedReputation());
-        batch.add(nodeHandler.getNode());
-        //}
-      }
-    }
-    logger.info("Write Node statistics to PeersStore: " + batch.size() + " nodes.");
-    dbManager.clearAndWriteNeighbours(batch);
+    //TODO: nodes data persistence
+//    Set<Node> batch = new HashSet<>();
+//    synchronized (this) {
+//      for (NodeHandler nodeHandler : nodeHandlerMap.values()) {
+//        //if (isNodeAlive(nodeHandler)) {
+//        nodeHandler.getNode()
+//            .setReputation(nodeHandler.getNodeStatistics().getPersistedReputation());
+//        batch.add(nodeHandler.getNode());
+//        //}
+//      }
+//    }
+//    logger.info("Write Node statistics to PeersStore: " + batch.size() + " nodes.");
+//    dbManager.clearAndWriteNeighbours(batch);
   }
 
   public void setMessageSender(Consumer<DiscoveryEvent> messageSender) {

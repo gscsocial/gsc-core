@@ -26,11 +26,10 @@ import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import java.net.BindException;
 import java.util.concurrent.TimeUnit;
+import org.gsc.config.Args;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.tron.common.overlay.server.WireTrafficStats;
-import org.tron.core.config.args.Args;
 
 @Component
 public class UDPListener {
@@ -43,9 +42,7 @@ public class UDPListener {
   private NodeManager nodeManager;
 
   @Autowired
-  WireTrafficStats stats;
-
-  Args args = Args.getInstance();
+  private Args args;
 
   private Channel channel;
   private volatile boolean shutdown = false;
@@ -84,7 +81,8 @@ public class UDPListener {
               @Override
               public void initChannel(NioDatagramChannel ch)
                   throws Exception {
-                ch.pipeline().addLast(stats.udp);
+                //TODO: wire statistics
+                //ch.pipeline().addLast(stats.udp);
                 ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
                 ch.pipeline().addLast(new ProtobufVarint32FrameDecoder());
                 ch.pipeline().addLast(new PacketDecoder());

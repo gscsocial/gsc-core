@@ -17,11 +17,10 @@
  */
 package org.gsc.net.discover;
 
-import org.tron.common.overlay.discover.table.KademliaOptions;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.gsc.net.discover.table.KademliaOptions;
 
 public class DiscoveryExecutor {
 

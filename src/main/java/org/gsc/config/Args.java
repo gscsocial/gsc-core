@@ -19,7 +19,9 @@ public class Args {
   @Setter
   private boolean nodeDiscoveryEnable;
 
-  private
+  @Getter
+  @Setter
+  private int nodeListenPort;
 
   public void setParam(final String[] args, final String confFileName) {
   }

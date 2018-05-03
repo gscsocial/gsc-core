@@ -17,13 +17,16 @@
  */
 package org.gsc.net.discover;
 
-import org.slf4j.LoggerFactory;
-import org.spongycastle.util.encoders.Hex;
-import org.tron.common.overlay.discover.message.*;
-
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.gsc.net.message.discover.FindNodeMessage;
+import org.gsc.net.message.discover.Message;
+import org.gsc.net.message.discover.NeighborsMessage;
+import org.gsc.net.message.discover.PingMessage;
+import org.gsc.net.message.discover.PongMessage;
+import org.slf4j.LoggerFactory;
+import org.spongycastle.util.encoders.Hex;
 
 /**
  * The instance of this class responsible for discovery messages exchange with the specified Node

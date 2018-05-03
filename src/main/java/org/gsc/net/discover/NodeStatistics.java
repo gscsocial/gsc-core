@@ -21,8 +21,7 @@ package org.gsc.net.discover;
 import static java.lang.Math.min;
 
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.tron.common.overlay.message.ReasonCode;
+import org.gsc.net.message.p2p.ReasonCode;
 
 public class NodeStatistics {
 
@@ -72,11 +71,11 @@ public class NodeStatistics {
   public final StatHandler p2pOutHello = new StatHandler();
   public final StatHandler p2pInHello = new StatHandler();
   public final StatHandler p2pHandShake = new StatHandler();
-  public final StatHandler tronOutMessage = new StatHandler();
-  public final StatHandler tronInMessage = new StatHandler();
+  public final StatHandler gscOutMessage = new StatHandler();
+  public final StatHandler gscInMessage = new StatHandler();
 
-  private ReasonCode tronLastRemoteDisconnectReason = null;
-  private ReasonCode tronLastLocalDisconnectReason = null;
+  private ReasonCode gscLastRemoteDisconnectReason = null;
+  private ReasonCode gscLastLocalDisconnectReason = null;
   private long lastDisconnectedTime = 0;
 
 
@@ -100,18 +99,18 @@ public class NodeStatistics {
 
     int reput = 0;
     reput += p2pHandShake.get() > 0 ? 20 : 0;
-    reput += min(tronInMessage.get(), 10) * 3;
+    reput += min(gscInMessage.get(), 10) * 3;
 
     if (wasDisconnected()) {
-      if (tronLastLocalDisconnectReason == null && tronLastRemoteDisconnectReason == null) {
+      if (gscLastLocalDisconnectReason == null && gscLastRemoteDisconnectReason == null) {
         // means connection was dropped without reporting any reason - bad
         reput *= 0.3;
-      } else if (tronLastLocalDisconnectReason != ReasonCode.REQUESTED) {
+      } else if (gscLastLocalDisconnectReason != ReasonCode.REQUESTED) {
         // the disconnect was not initiated by discover mode
-        if (tronLastRemoteDisconnectReason == ReasonCode.TOO_MANY_PEERS) {
+        if (gscLastRemoteDisconnectReason == ReasonCode.TOO_MANY_PEERS) {
           // The peer is popular, but we were unlucky
           reput *= 0.3;
-        } else if (tronLastRemoteDisconnectReason != ReasonCode.REQUESTED) {
+        } else if (gscLastRemoteDisconnectReason != ReasonCode.REQUESTED) {
           // other disconnect reasons
           reput *= 0.2;
         }
@@ -125,63 +124,63 @@ public class NodeStatistics {
   }
 
   public ReasonCode getDisconnectReason() {
-    if (tronLastLocalDisconnectReason != null) {
-      return tronLastLocalDisconnectReason;
+    if (gscLastLocalDisconnectReason != null) {
+      return gscLastLocalDisconnectReason;
     }
-    if (tronLastRemoteDisconnectReason != null) {
-      return tronLastRemoteDisconnectReason;
+    if (gscLastRemoteDisconnectReason != null) {
+      return gscLastRemoteDisconnectReason;
     }
     return ReasonCode.UNKNOWN;
   }
 
   public boolean isReputationPenalized() {
 
-    if (wasDisconnected() && tronLastRemoteDisconnectReason == ReasonCode.TOO_MANY_PEERS &&
+    if (wasDisconnected() && gscLastRemoteDisconnectReason == ReasonCode.TOO_MANY_PEERS &&
         System.currentTimeMillis() - lastDisconnectedTime < TOO_MANY_PEERS_PENALIZE_TIMEOUT) {
       return true;
     }
 
-    if (wasDisconnected() && tronLastRemoteDisconnectReason == ReasonCode.DUPLICATE_PEER &&
+    if (wasDisconnected() && gscLastRemoteDisconnectReason == ReasonCode.DUPLICATE_PEER &&
         System.currentTimeMillis() - lastDisconnectedTime < TOO_MANY_PEERS_PENALIZE_TIMEOUT) {
       return true;
     }
 
-    return tronLastLocalDisconnectReason == ReasonCode.NULL_IDENTITY ||
-        tronLastRemoteDisconnectReason == ReasonCode.NULL_IDENTITY ||
-        tronLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
-        tronLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
-        tronLastLocalDisconnectReason == ReasonCode.BAD_PROTOCOL ||
-        tronLastRemoteDisconnectReason == ReasonCode.BAD_PROTOCOL ||
-        tronLastLocalDisconnectReason == ReasonCode.BAD_BLOCK ||
-        tronLastRemoteDisconnectReason == ReasonCode.BAD_BLOCK ||
-        tronLastLocalDisconnectReason == ReasonCode.BAD_TX ||
-        tronLastRemoteDisconnectReason == ReasonCode.BAD_TX ||
-        tronLastLocalDisconnectReason == ReasonCode.FORKED ||
-        tronLastRemoteDisconnectReason == ReasonCode.FORKED ||
-        tronLastLocalDisconnectReason ==  ReasonCode.UNLINKABLE ||
-        tronLastRemoteDisconnectReason == ReasonCode.UNLINKABLE ||
-        tronLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_VERSION ||
-        tronLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_VERSION ||
-        tronLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_CHAIN ||
-        tronLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_CHAIN;
+    return gscLastLocalDisconnectReason == ReasonCode.NULL_IDENTITY ||
+        gscLastRemoteDisconnectReason == ReasonCode.NULL_IDENTITY ||
+        gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
+        gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
+        gscLastLocalDisconnectReason == ReasonCode.BAD_PROTOCOL ||
+        gscLastRemoteDisconnectReason == ReasonCode.BAD_PROTOCOL ||
+        gscLastLocalDisconnectReason == ReasonCode.BAD_BLOCK ||
+        gscLastRemoteDisconnectReason == ReasonCode.BAD_BLOCK ||
+        gscLastLocalDisconnectReason == ReasonCode.BAD_TX ||
+        gscLastRemoteDisconnectReason == ReasonCode.BAD_TX ||
+        gscLastLocalDisconnectReason == ReasonCode.FORKED ||
+        gscLastRemoteDisconnectReason == ReasonCode.FORKED ||
+        gscLastLocalDisconnectReason ==  ReasonCode.UNLINKABLE ||
+        gscLastRemoteDisconnectReason == ReasonCode.UNLINKABLE ||
+        gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_VERSION ||
+        gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_VERSION ||
+        gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_CHAIN ||
+        gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_CHAIN;
   }
 
   public boolean isPenalized() {
-    return tronLastLocalDisconnectReason == ReasonCode.NULL_IDENTITY ||
-            tronLastRemoteDisconnectReason == ReasonCode.NULL_IDENTITY ||
-            tronLastLocalDisconnectReason == ReasonCode.BAD_PROTOCOL ||
-            tronLastRemoteDisconnectReason == ReasonCode.BAD_PROTOCOL;
+    return gscLastLocalDisconnectReason == ReasonCode.NULL_IDENTITY ||
+            gscLastRemoteDisconnectReason == ReasonCode.NULL_IDENTITY ||
+            gscLastLocalDisconnectReason == ReasonCode.BAD_PROTOCOL ||
+            gscLastRemoteDisconnectReason == ReasonCode.BAD_PROTOCOL;
   }
 
   public void nodeDisconnectedRemote(ReasonCode reason) {
     lastDisconnectedTime = System.currentTimeMillis();
-    tronLastRemoteDisconnectReason = reason;
+    gscLastRemoteDisconnectReason = reason;
     disconnectTimes++;
   }
 
   public void nodeDisconnectedLocal(ReasonCode reason) {
     lastDisconnectedTime = System.currentTimeMillis();
-    tronLastLocalDisconnectReason = reason;
+    gscLastLocalDisconnectReason = reason;
     disconnectTimes++;
   }
 
@@ -210,10 +209,10 @@ public class NodeStatistics {
         discoverOutNeighbours + "/" + discoverInFind + " " +
         ((int) discoverMessageLatency.getAvrg()) + "ms" +
         ", p2p: " + p2pHandShake + "/" + p2pInHello + "/" + p2pOutHello + " " +
-        ", tron: " + tronInMessage + "/" + tronOutMessage + " " +
+        ", gsc: " + gscInMessage + "/" + gscOutMessage + " " +
         (wasDisconnected() ? "X " + disconnectTimes : "") +
-        (tronLastLocalDisconnectReason != null ? ("<=" + tronLastLocalDisconnectReason) : " ") +
-        (tronLastRemoteDisconnectReason != null ? ("=>" + tronLastRemoteDisconnectReason) : " ");
+        (gscLastLocalDisconnectReason != null ? ("<=" + gscLastLocalDisconnectReason) : " ") +
+        (gscLastRemoteDisconnectReason != null ? ("=>" + gscLastRemoteDisconnectReason) : " ");
   }
 
   public class SimpleStatter {

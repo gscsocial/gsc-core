@@ -21,10 +21,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.codec.MessageToMessageDecoder;
-import org.slf4j.LoggerFactory;
-import org.tron.common.overlay.discover.message.Message;
-
 import java.util.List;
+import org.gsc.net.message.discover.Message;
+import org.slf4j.LoggerFactory;
 
 public class PacketDecoder extends MessageToMessageDecoder<DatagramPacket> {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger("discover");
