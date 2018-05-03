@@ -15,6 +15,11 @@ public class Args {
   @Setter
   private int nodeP2pVersion;
 
+  @Getter
+  @Setter
+  private boolean nodeDiscoveryEnable;
+
+  private
 
   public void setParam(final String[] args, final String confFileName) {
   }

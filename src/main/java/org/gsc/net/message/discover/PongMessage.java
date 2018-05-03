@@ -5,7 +5,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.config.Args;
-import org.gsc.net.discover.table.Node;
+import org.gsc.net.discover.Node;
 import org.gsc.protos.Discover;
 import org.gsc.protos.Discover.Endpoint;
 import org.springframework.beans.factory.annotation.Autowired;

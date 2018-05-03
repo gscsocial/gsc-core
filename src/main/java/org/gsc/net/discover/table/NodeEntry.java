@@ -1,6 +1,8 @@
 
 package org.gsc.net.discover.table;
 
+import org.gsc.net.discover.Node;
+
 public class NodeEntry {
 
   private byte[] ownerId;

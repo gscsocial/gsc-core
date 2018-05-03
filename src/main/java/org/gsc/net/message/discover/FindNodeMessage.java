@@ -4,7 +4,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.net.discover.table.Node;
+import org.gsc.net.discover.Node;
 import org.gsc.protos.Discover;
 import org.gsc.protos.Discover.Endpoint;
 import org.gsc.protos.Discover.FindNeighbours;
