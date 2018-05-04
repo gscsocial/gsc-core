@@ -23,6 +23,14 @@ public class Args {
   @Setter
   private int nodeListenPort;
 
+  @Getter
+  @Setter
+  private int nodeConnectionTimeout;
+
+  @Getter
+  @Setter
+  private int nodeMaxActiveNodes;
+
   public void setParam(final String[] args, final String confFileName) {
   }
 }
