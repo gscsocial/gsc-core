@@ -26,8 +26,10 @@ import io.scalecube.transport.MessageCodec;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
+import org.gsc.net.discover.Node;
 import org.gsc.net.discover.NodeManager;
 import org.gsc.net.discover.NodeStatistics;
+import org.gsc.net.message.p2p.P2pMessage;
 import org.gsc.net.message.p2p.ReasonCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,8 +52,7 @@ public class Channel {
     @Autowired
     private NodeManager nodeManager;
 
-    @Autowired
-    private StaticMessages staticMessages;
+
 
     @Autowired
     private WireTrafficStats stats;
@@ -62,8 +63,7 @@ public class Channel {
     @Autowired
     private P2pHandler p2pHandler;
 
-    @Autowired
-    private GscHandler gscHandler;
+
 
     private ChannelManager channelManager;
 
@@ -72,8 +72,6 @@ public class Channel {
     private Node node;
 
     private long startTime;
-
-    private PeerConnectionDelegate peerDel;
 
 
 
@@ -88,7 +86,7 @@ public class Channel {
     private PeerStatistics peerStats = new PeerStatistics();
 
     public void init(ChannelPipeline pipeline, String remoteId, boolean discoveryMode,
-                     ChannelManager channelManager, PeerConnectionDelegate peerDel) {
+                     ChannelManager channelManager) {
         this.channelManager = channelManager;
         this.remoteId = remoteId;
 
@@ -103,29 +101,11 @@ public class Channel {
         pipeline.addLast("handshakeHandler", handshakeHandler);
 
         this.discoveryMode = discoveryMode;
-        this.peerDel = peerDel;
-
-        messageCodec.setChannel(this);
-        msgQueue.setChannel(this);
-        handshakeHandler.setChannel(this, remoteId);
-        p2pHandler.setChannel(this);
-        gscHandler.setChannel(this);
-
-        p2pHandler.setMsgQueue(msgQueue);
-        gscHandler.setMsgQueue(msgQueue);
-        gscHandler.setPeerDel(peerDel);
 
     }
 
-    public void publicHandshakeFinished(ChannelHandlerContext ctx, HelloMessage msg) throws IOException, InterruptedException {
-        ctx.pipeline().remove(handshakeHandler);
-        ctx.pipeline().addLast("messageCodec", messageCodec);
-        ctx.pipeline().addLast("p2p", p2pHandler);
-        ctx.pipeline().addLast("data", gscHandler);
-        setStartTime(msg.getTimestamp());
-        setGscState(GscState.HANDSHAKE_FINISHED);
-        getNodeStatistics().p2pHandShake.add();
-        logger.info("Finish handshake with {}.", ctx.channel().remoteAddress());
+    public void publicHandshakeFinished(ChannelHandlerContext ctx, P2pMessage msg) throws IOException, InterruptedException {
+
     }
 
     public void setInetSocketAddress(InetSocketAddress inetSocketAddress) {
@@ -170,10 +150,7 @@ public class Channel {
         return node == null ? "<null>" : node.getHexId();
     }
 
-    public String getPeerIdShort() {
-        return node == null ? (remoteId != null && remoteId.length() >= 8 ? remoteId.substring(0,8) :remoteId)
-                : node.getHexIdShort();
-    }
+
 
     public byte[] getNodeId() {
         return node == null ? null : node.getId();
@@ -186,9 +163,7 @@ public class Channel {
         return isActive;
     }
 
-    public ByteArrayWrapper getNodeIdWrapper() {
-        return node == null ? null : new ByteArrayWrapper(node.getId());
-    }
+
 
     public void disconnect(ReasonCode reason) {
         logger.info("Channel disconnect {}, reason:{}", inetSocketAddress, reason);

@@ -20,7 +20,6 @@ package org.gsc.net.server;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -43,7 +42,7 @@ public class SyncPool {
 
   private static final long WORKER_TIMEOUT = 15;
 
-  private final List<PeerConnection> activePeers = Collections.synchronizedList(new ArrayList<PeerConnection>());
+  private final List<Channel> activePeers = Collections.synchronizedList(new ArrayList<Channel>());
 
   @Autowired
   private NodeManager nodeManager;
@@ -53,9 +52,8 @@ public class SyncPool {
 
   private ChannelManager channelManager;
 
-  private PeerConnectionDelegate peerDel;
-
-  private Args args = Args.getInstance();
+  @Autowired
+  private Args args ;
 
   private int maxActiveNodes = args.getNodeMaxActiveNodes() > 0 ? args.getNodeMaxActiveNodes() : 30;
 
@@ -63,16 +61,14 @@ public class SyncPool {
 
   private ScheduledExecutorService logExecutor = Executors.newSingleThreadScheduledExecutor();
 
-  private PeerClient peerClient;
+
 
   @Autowired
-  public SyncPool(PeerClient peerClient) {
-    this.peerClient = peerClient;
+  public SyncPool() {
+
   }
 
-  public void init(PeerConnectionDelegate peerDel) {
-    this.peerDel = peerDel;
-
+  public void init() {
     channelManager = ctx.getBean(ChannelManager.class);
 
     poolLoopExecutor.scheduleWithFixedDelay(() -> {
@@ -99,60 +95,32 @@ public class SyncPool {
     nodesInUse.add(nodeManager.getPublicHomeNode().getHexId());
 
     List<NodeHandler> newNodes = nodeManager.getNodes(new NodeSelector(nodesInUse), lackSize);
-    newNodes.forEach(n ->  peerClient.connectAsync(n.getNode().getHost(), n.getNode().getPort(),
-                n.getNode().getHexId(), false));
+//    newNodes.forEach(n ->  peerClient.connectAsync(n.getNode().getHost(), n.getNode().getPort(),
+//                n.getNode().getHexId(), false));
   }
 
   private synchronized void prepareActive() {
     for (Channel channel : channelManager.getActivePeers()) {
       if (!activePeers.contains(channel)) {
-        activePeers.add((PeerConnection)channel);
-        peerDel.onConnectPeer((PeerConnection)channel);
+//        activePeers.add((PeerConnection)channel);
+//        peerDel.onConnectPeer((PeerConnection)channel);
       }
     }
     activePeers.sort(Comparator.comparingDouble(c -> c.getPeerStats().getAvgLatency()));
   }
 
   synchronized void logActivePeers() {
-    logger.info("-------- active node {}", nodeManager.dumpActiveNodes().size());
-    nodeManager.dumpActiveNodes().forEach(handler -> logger.info("address: {}:{}, ID:{} {}",
-            handler.getNode().getHost(),handler.getNode().getPort(),handler.getNode().getHexIdShort(), handler.getNodeStatistics().toString()));
 
-    logger.info("-------- active channel {}, node in user size {}", channelManager.getActivePeers().size(),
-            channelManager.nodesInUse().size());
-    for (Channel channel: channelManager.getActivePeers()){
-      logger.info(channel.toString());
-    }
-
-    if (logger.isInfoEnabled()) {
-      StringBuilder sb = new StringBuilder("Peer stats:\n");
-      sb.append("Active peers\n");
-      sb.append("============\n");
-      Set<Node> activeSet = new HashSet<>();
-      for (PeerConnection peer : new ArrayList<>(activePeers)) {
-        sb.append(peer.logSyncStats()).append('\n');
-        activeSet.add(peer.getNode());
-      }
-      sb.append("Other connected peers\n");
-      sb.append("============\n");
-      for (Channel peer : new ArrayList<>(channelManager.getActivePeers())) {
-        if (!activeSet.contains(peer.getNode())) {
-          sb.append(peer.logSyncStats()).append('\n');
-        }
-      }
-      logger.info(sb.toString());
-    }
   }
 
-  public synchronized List<PeerConnection> getActivePeers() {
+  public synchronized List<Channel> getActivePeers() {
     return new ArrayList<>(activePeers);
   }
 
   public synchronized void onDisconnect(Channel peer) {
     if (activePeers.contains(peer)) {
       activePeers.remove(peer);
-      peerDel.onDisconnectPeer((PeerConnection)peer);
-    }
+     }
   }
 
   public void close() {

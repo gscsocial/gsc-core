@@ -46,8 +46,7 @@ public class PeerServer {
 
     private boolean listening;
 
-    @Autowired
-    private NodeImpl p2pNode;
+
 
     EventLoopGroup bossGroup;
     EventLoopGroup workerGroup;
@@ -63,8 +62,6 @@ public class PeerServer {
         bossGroup = new NioEventLoopGroup(1);
         workerGroup = new NioEventLoopGroup();
         gscChannelInitializer = ctx.getBean(GscChannelInitializer.class, "");
-
-        gscChannelInitializer.setNodeImpl(p2pNode);
 
         try {
             ServerBootstrap b = new ServerBootstrap();

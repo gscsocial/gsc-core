@@ -21,12 +21,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.List;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.config.Args;
 import org.gsc.net.discover.NodeManager;
-import org.gsc.net.message.p2p.ReasonCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.util.encoders.Hex;
@@ -60,52 +56,13 @@ public class HandshakeHandler extends ByteToMessageDecoder {
     channel.setInetSocketAddress((InetSocketAddress) ctx.channel().remoteAddress());
     if (remoteId.length == 64) {
       channel.initWithNode(remoteId, ((InetSocketAddress) ctx.channel().remoteAddress()).getPort());
-      ctx.writeAndFlush(new HelloMessage(nodeManager.getPublicHomeNode(), System.currentTimeMillis()).getSendData()).sync();
+      //TODO: say hello
       channel.getNodeStatistics().p2pOutHello.add();
     }
   }
 
   @Override
   protected void decode(ChannelHandlerContext ctx, ByteBuf buffer, List<Object> out) throws Exception {
-    P2pMessageFactory factory = new P2pMessageFactory();
-
-    byte[] encoded = new byte[buffer.readableBytes()];
-    buffer.readBytes(encoded);
-
-    P2pMessage msg = factory.create(encoded);
-
-    if (!(msg instanceof HelloMessage)) {
-      if (msg instanceof DisconnectMessage && remoteId.length == 64) {
-        channel.getNodeStatistics()
-            .nodeDisconnectedRemote(ReasonCode.fromInt(((DisconnectMessage)msg).getReason()));
-        logger.info("rcv disconnect msg  {}, {}", ctx.channel().remoteAddress()
-            , ReasonCode.fromInt (((DisconnectMessage)msg).getReason()));
-      } else {
-        logger.info("rcv not hello msg, {}", ctx.channel().remoteAddress());
-      }
-      ctx.close();
-      return;
-    }
-
-    final HelloMessage helloMessage = (HelloMessage) msg;
-
-    if (remoteId.length != 64) { //not initiator
-      remoteId = ByteArray.fromHexString(helloMessage.getPeerId());
-      channel.initWithNode(remoteId, helloMessage.getListenPort());
-
-      if (!checkVersion(helloMessage, ctx.channel().remoteAddress())) {
-        channel.getNodeStatistics().nodeDisconnectedLocal(ReasonCode.INCOMPATIBLE_PROTOCOL);
-        ctx.writeAndFlush(new DisconnectMessage(ReasonCode.INCOMPATIBLE_PROTOCOL).getSendData());
-        ctx.close();
-        return;
-      }
-      ctx.writeAndFlush(new HelloMessage(nodeManager.getPublicHomeNode(), ((HelloMessage) msg).getTimestamp()).getSendData()).sync();
-      channel.getNodeStatistics().p2pOutHello.add();
-    }
-
-    channel.getNodeStatistics().p2pInHello.add();
-
-    channel.publicHandshakeFinished(ctx, helloMessage);
   }
 
   @Override
@@ -118,13 +75,5 @@ public class HandshakeHandler extends ByteToMessageDecoder {
     this.remoteId = Hex.decode(remoteId);
   }
 
-  private boolean checkVersion(HelloMessage helloMessage, SocketAddress address) {
-    if (helloMessage.getVersion() != Args.getInstance().getNodeP2pVersion()) {
-      logger.info("version not support, you[{}] version[{}], my version[{}]",
-          address, helloMessage.getVersion(), Args.getInstance().getNodeP2pVersion());
-      return false;
-    }
-    return true;
-  }
 
 }

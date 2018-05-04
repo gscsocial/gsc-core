@@ -19,13 +19,7 @@ package org.gsc.net.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import org.gsc.net.message.p2p.ReasonCode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.gsc.net.message.p2p.P2pMessage;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -34,79 +28,9 @@ import org.springframework.stereotype.Component;
 @Scope("prototype")
 public class P2pHandler extends SimpleChannelInboundHandler<P2pMessage> {
 
-  private final static Logger logger = LoggerFactory.getLogger("P2pHandler");
-
-  private static ScheduledExecutorService pingTimer =
-      Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "P2pPingTimer"));
-
-  private MessageQueue msgQueue;
-
-  private Channel channel;
-
-  private ScheduledFuture<?> pingTask;
 
   @Override
-  public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-    msgQueue.activate(ctx);
-    pingTask = pingTimer.scheduleAtFixedRate(() -> {
-      try {
-        msgQueue.sendMessage(PING_MESSAGE);
-      } catch (Throwable t) {
-        logger.error("startTimers exception", t);
-      }
-    }, 2, 10, TimeUnit.SECONDS);
-  }
+  protected void channelRead0(ChannelHandlerContext ctx, P2pMessage msg) throws Exception {
 
-  @Override
-  public void channelRead0(final ChannelHandlerContext ctx, P2pMessage msg) throws InterruptedException {
-    switch (msg.getType()) {
-      case P2P_DISCONNECT:
-        msgQueue.receivedMessage(msg);
-        channel.getNodeStatistics()
-            .nodeDisconnectedRemote(ReasonCode.fromInt(((DisconnectMessage) msg).getReason()));
-        logger.info("rcv disconnect msg  {}, {}", ctx.channel().remoteAddress(),
-               ReasonCode.fromInt (((DisconnectMessage) msg).getReason()));
-        ctx.close();
-        break;
-      case P2P_PING:
-        msgQueue.receivedMessage(msg);
-        msgQueue.sendMessage(PONG_MESSAGE);
-        break;
-      case P2P_PONG:
-        msgQueue.receivedMessage(msg);
-        channel.getNodeStatistics().lastPongReplyTime.set(System.currentTimeMillis());
-        break;
-      default:
-        logger.info("Receive error msg, {}", ctx.channel().remoteAddress());
-        ctx.close();
-        break;
-    }
   }
-
-  @Override
-  public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-    logger.info("channel inactive {}", ctx.channel().remoteAddress());
-    closeChannel(ctx);
-  }
-
-  @Override
-  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-    logger.error("exception caught, {}", ctx.channel().remoteAddress(), cause);
-    ctx.close();
-    closeChannel(ctx);
-  }
-
-  public void closeChannel(ChannelHandlerContext ctx) {
-    pingTask.cancel(false);
-    msgQueue.close();
-  }
-
-  public void setMsgQueue(MessageQueue msgQueue) {
-        this.msgQueue = msgQueue;
-  }
-
-  public void setChannel(Channel channel) {
-    this.channel = channel;
-  }
-
 }

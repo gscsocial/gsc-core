@@ -24,8 +24,6 @@ import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.core.sync.ChainContorller;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
@@ -67,9 +65,9 @@ public class GscChannelInitializer extends ChannelInitializer<NioSocketChannel> 
                 return;
             }
 
-            final Channel channel = ctx.getBean(PeerConnection.class);
+            final Channel channel = ctx.getBean(Channel.class);
 
-            channel.init(ch.pipeline(), remoteId, peerDiscoveryMode, channelManager, p2pNode);
+            channel.init(ch.pipeline(), remoteId, peerDiscoveryMode, channelManager);
 
             if(!peerDiscoveryMode) {
                 channelManager.add(channel);
@@ -101,7 +99,4 @@ public class GscChannelInitializer extends ChannelInitializer<NioSocketChannel> 
         this.peerDiscoveryMode = peerDiscoveryMode;
     }
 
-    public void setNodeImpl(NodeImpl p2pNode) {
-        this.p2pNode = p2pNode;
-    }
 }

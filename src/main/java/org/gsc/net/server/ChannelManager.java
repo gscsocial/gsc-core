@@ -53,16 +53,15 @@ public class ChannelManager {
 
   private List<Channel> newPeers = new CopyOnWriteArrayList<>();
 
-  private final Map<ByteArrayWrapper, Channel> activePeers = new ConcurrentHashMap<>();
+  private final Map<String, Channel> activePeers = new ConcurrentHashMap<>();
 
   private Map<InetAddress, Date> recentlyDisconnected = Collections
       .synchronizedMap(new LRUMap<InetAddress, Date>(500));
 
   private ScheduledExecutorService mainWorker = Executors.newSingleThreadScheduledExecutor();
 
-  private Args args = Args.getInstance();
-
-  private int maxActivePeers = args.getNodeMaxActiveNodes() > 0 ? args.getNodeMaxActiveNodes() : 30;
+  @Autowired
+  private Args args;
 
   private PeerServer peerServer;
 
@@ -82,7 +81,7 @@ public class ChannelManager {
     }, 0, 1, TimeUnit.SECONDS);
 
     if (this.args.getNodeListenPort() > 0) {
-      new Thread(() -> peerServer.start(Args.getInstance().getNodeListenPort()),
+      new Thread(() -> peerServer.start(args.getNodeListenPort()),
           "PeerServerThread").start();
     }
   }
@@ -106,27 +105,7 @@ public class ChannelManager {
 
       newPeers.sort(Comparator.comparingLong(c -> c.getStartTime()));
 
-      for (Channel peer : newPeers) {
-          if (!peer.isProtocolsInitialized()) {
-              continue;
-          }else if (peer.getNodeStatistics().isPenalized()) {
-              disconnect(peer, peer.getNodeStatistics().getDisconnectReason());
-          }else if (!peer.isActive() && activePeers.size() >= maxActivePeers) {
-              disconnect(peer, TOO_MANY_PEERS);
-          }else if (activePeers.containsKey(peer.getNodeIdWrapper())) {
-              Channel channel = activePeers.get(peer.getNodeIdWrapper());
-              if (channel.getStartTime() > peer.getStartTime()) {
-                  logger.info("disconnect connection established later, {}", channel.getNode());
-                  disconnect(channel, DUPLICATE_PEER);
-              } else {
-                  disconnect(peer, DUPLICATE_PEER);
-              }
-          }else {
-              activePeers.put(peer.getNodeIdWrapper(), peer);
-              newPeers.remove(peer);
-              logger.info("Add active peer {}, total active peers: {}", peer, activePeers.size());
-          }
-      }
+    //todo:
   }
 
   public void disconnect(Channel peer, ReasonCode reason) {

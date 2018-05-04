@@ -29,6 +29,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.gsc.net.message.Message;
 import org.gsc.net.message.p2p.ReasonCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,10 +122,10 @@ public class MessageQueue {
   }
 
   public void sendMessage(Message msg) {
-    if (msg instanceof PingMessage) {
-      if (hasPing) return;
-      hasPing = true;
-    }
+//    if (msg instanceof PingMessage) {
+//      if (hasPing) return;
+//      hasPing = true;
+//    }
 
     if (msg.getAnswerMessage() != null)
       requestQueue.add(new MessageRoundtrip(msg));
@@ -134,7 +135,7 @@ public class MessageQueue {
 
   public void disconnect(ReasonCode reason) {
     if (sendMsgFlag){
-      ctx.writeAndFlush(new DisconnectMessage(reason).getSendData());
+      //TODO: send disconnect msg
       ctx.close();
     }
   }
@@ -147,7 +148,7 @@ public class MessageQueue {
       MessageRoundtrip messageRoundtrip = requestQueue.peek();
       Message waitingMessage = messageRoundtrip.getMsg();
 
-      if (waitingMessage instanceof PingMessage) hasPing = false;
+//      if (waitingMessage instanceof PingMessage) hasPing = false;
 
       if (waitingMessage.getAnswerMessage() != null
           && msg.getClass() == waitingMessage.getAnswerMessage()) {
