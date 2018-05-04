@@ -23,6 +23,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.sync.ChainContorller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +47,7 @@ public class GscChannelInitializer extends ChannelInitializer<NioSocketChannel> 
     @Autowired
     ChannelManager channelManager;
 
-    private NodeImpl p2pNode;
+    private ChainContorller chainContorller;
 
     private String remoteId;
 
