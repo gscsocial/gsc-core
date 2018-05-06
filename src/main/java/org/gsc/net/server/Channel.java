@@ -52,8 +52,6 @@ public class Channel {
     @Autowired
     private NodeManager nodeManager;
 
-
-
     @Autowired
     private WireTrafficStats stats;
 
@@ -63,7 +61,8 @@ public class Channel {
     @Autowired
     private P2pHandler p2pHandler;
 
-
+    @Autowired
+    private GscHandler gscHandler;
 
     private ChannelManager channelManager;
 
