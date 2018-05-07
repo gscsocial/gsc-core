@@ -2,9 +2,8 @@ package org.gsc.net.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.gsc.net.message.gsc.GscMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -15,10 +14,9 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
+@Slf4j
 @Scope("prototype")
 public class GscHandler extends SimpleChannelInboundHandler<GscMessage> {
-
-  private final static Logger logger = LoggerFactory.getLogger("TronHandler");
 
   protected Channel channel;
 
