@@ -10,65 +10,47 @@ import java.util.Map;
 public enum ReasonCode {
 
   /**
-   * [0x00] Disconnect request by other peer
-   */
-  REQUESTED(0x00),
-
-  /**
    * [0x02] Packets can not be parsed
    */
-  BAD_PROTOCOL(0x02),
+  BAD_PROTOCOL(0x01),
 
   /**
    * [0x04] Already too many connections with other peers
    */
-  TOO_MANY_PEERS(0x04),
+  TOO_MANY_PEERS(0x02),
 
   /**
    * [0x05] Already have a running connection with this peer
    */
-  DUPLICATE_PEER(0x05),
+  DUPLICATE_PEER(0x03),
 
   /**
    * [0x06] Version of the p2p protocol is not the same as ours
    */
-  INCOMPATIBLE_PROTOCOL(0x06),
-
-  /**
-   * [0x07]
-   */
-  NULL_IDENTITY(0x07),
+  INCOMPATIBLE_PROTOCOL(0x04),
 
   /**
    * [0x08] Peer quit voluntarily
    */
-  PEER_QUITING(0x08),
+  PEER_QUITING(0x05),
 
-  UNEXPECTED_IDENTITY(0x09),
+  LOCAL_IDENTITY(0x06),
 
-  LOCAL_IDENTITY(0x0A),
+  PING_TIMEOUT(0x07),
 
-  PING_TIMEOUT(0x0B),
+  TIME_OUT(0x08),
 
-  USER_REASON(0x10),
+  BAD_TX(0x09),
 
-  RESET(0x11),
+  BAD_BLOCK(0x0A),
 
-  SYNC_FAIL(0x12),
+  FORKED(0x0B),
 
-  TIME_OUT(0x13),
+  UNLINKABLE(0x0C),
 
-  BAD_TX(0x14),
+  INCOMPATIBLE_VERSION(0x0D),
 
-  BAD_BLOCK(0x15),
-
-  FORKED(0x16),
-
-  UNLINKABLE(0x17),
-
-  INCOMPATIBLE_VERSION(0x18),
-
-  INCOMPATIBLE_CHAIN(0x19),
+  INCOMPATIBLE_CHAIN(0x0E),
 
   /**
    * [0xFF] Reason not specified

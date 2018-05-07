@@ -105,12 +105,12 @@ public class NodeStatistics {
       if (gscLastLocalDisconnectReason == null && gscLastRemoteDisconnectReason == null) {
         // means connection was dropped without reporting any reason - bad
         reput *= 0.3;
-      } else if (gscLastLocalDisconnectReason != ReasonCode.REQUESTED) {
+      } else if (gscLastLocalDisconnectReason != ReasonCode.PEER_QUITING) {
         // the disconnect was not initiated by discover mode
         if (gscLastRemoteDisconnectReason == ReasonCode.TOO_MANY_PEERS) {
           // The peer is popular, but we were unlucky
           reput *= 0.3;
-        } else if (gscLastRemoteDisconnectReason != ReasonCode.REQUESTED) {
+        } else if (gscLastRemoteDisconnectReason != ReasonCode.PEER_QUITING) {
           // other disconnect reasons
           reput *= 0.2;
         }
@@ -145,9 +145,7 @@ public class NodeStatistics {
       return true;
     }
 
-    return gscLastLocalDisconnectReason == ReasonCode.NULL_IDENTITY ||
-        gscLastRemoteDisconnectReason == ReasonCode.NULL_IDENTITY ||
-        gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
+    return gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
         gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
         gscLastLocalDisconnectReason == ReasonCode.BAD_PROTOCOL ||
         gscLastRemoteDisconnectReason == ReasonCode.BAD_PROTOCOL ||
@@ -166,9 +164,7 @@ public class NodeStatistics {
   }
 
   public boolean isPenalized() {
-    return gscLastLocalDisconnectReason == ReasonCode.NULL_IDENTITY ||
-            gscLastRemoteDisconnectReason == ReasonCode.NULL_IDENTITY ||
-            gscLastLocalDisconnectReason == ReasonCode.BAD_PROTOCOL ||
+    return gscLastLocalDisconnectReason == ReasonCode.BAD_PROTOCOL ||
             gscLastRemoteDisconnectReason == ReasonCode.BAD_PROTOCOL;
   }
 

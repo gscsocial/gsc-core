@@ -46,8 +46,6 @@ public class PeerServer {
 
     private boolean listening;
 
-
-
     EventLoopGroup bossGroup;
     EventLoopGroup workerGroup;
     ChannelFuture channelFuture;

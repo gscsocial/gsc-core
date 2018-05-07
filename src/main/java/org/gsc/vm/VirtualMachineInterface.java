@@ -1,4 +1,4 @@
-package java.org.gsc.vm;
+package org.gsc.vm;
 
 public interface VirtualMachineInterface {
 
