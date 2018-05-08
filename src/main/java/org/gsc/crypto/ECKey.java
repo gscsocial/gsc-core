@@ -1,5 +1,9 @@
 package org.gsc.crypto;
 
+import static java.util.Arrays.copyOfRange;
+import static org.gsc.common.utils.BIUtil.isLessThan;
+import static org.gsc.common.utils.ByteUtil.bigIntegerToBytes;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -7,10 +11,13 @@ import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.interfaces.ECPrivateKey;
@@ -20,7 +27,9 @@ import java.util.Arrays;
 import javax.annotation.Nullable;
 import javax.crypto.KeyAgreement;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.utils.ByteUtil;
 import org.gsc.crypto.jce.ECKeyAgreement;
+import org.gsc.crypto.jce.ECKeyFactory;
 import org.gsc.crypto.jce.ECKeyPairGenerator;
 import org.gsc.crypto.jce.ECSignatureFactory;
 import org.gsc.crypto.jce.SpongyCastleProvider;
@@ -52,7 +61,6 @@ import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.util.BigIntegers;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
-import sun.security.ec.ECKeyFactory;
 
 @Slf4j
 public class ECKey implements Serializable {
@@ -347,8 +355,34 @@ public class ECKey implements Serializable {
    * @return 21-byte address
    */
   public static byte[] computeAddress(byte[] pubBytes) {
-    return Hash.sha3omit12(
+    return sha3omit12(
         Arrays.copyOfRange(pubBytes, 1, pubBytes.length));
+  }
+
+  /**
+   * Calculates RIGTMOST160(SHA3(input)). This is used in address calculations. *
+   *
+   * @param input - data
+   * @return - add_pre_fix + 20 right bytes of the hash keccak of the data
+   */
+  public static byte[] sha3omit12(byte[] input) {
+    byte[] hash = sha3(input);
+    byte[] address = copyOfRange(hash, 11, hash.length);
+    return address;
+  }
+
+  public static byte[] sha3(byte[] input) {
+    MessageDigest digest;
+    try {
+      digest = MessageDigest.getInstance("GSC-KECCAK-256",
+          Security.getProvider("SC"));
+      digest.update(input);
+      return digest.digest();
+    } catch (NoSuchAlgorithmException e) {
+      logger.error("Can't find such algorithm", e);
+      throw new RuntimeException(e);
+    }
+
   }
 
   /**
@@ -490,7 +524,8 @@ public class ECKey implements Serializable {
   }
 
   /**
-   * <p>Verifies the given ECDSA signature against the message bytes using the public key bytes.</p>
+   * <p>Verifies the given ECDSA signature against the message bytes using the public key
+   * bytes.</p>
    * <p> <p>When using native ECDSA verification, data must be 32 bytes, and no element may be
    * larger than 520 bytes.</p>
    *
@@ -552,10 +587,10 @@ public class ECKey implements Serializable {
    * <p>Given the components of a signature and a selector value, recover and return the public key
    * that generated the signature according to the algorithm in SEC1v2 section 4.1.6.</p>
    *
-   * <p> <p>The recId is an index from 0 to 3 which indicates which of the 4 possible allKeys is the
-   * correct one. Because the key recovery operation yields multiple potential allKeys, the correct
-   * key must either be stored alongside the signature, or you must be willing to try each recId in
-   * turn until you find one that outputs the key you are expecting.</p>
+   * <p> <p>The recId is an index from 0 to 3 which indicates which of the 4 possible allKeys is
+   * the correct one. Because the key recovery operation yields multiple potential allKeys, the
+   * correct key must either be stored alongside the signature, or you must be willing to try each
+   * recId in turn until you find one that outputs the key you are expecting.</p>
    *
    * <p> <p>If this method returns null it means recovery was not possible and recId should be
    * iterated.</p>
@@ -1187,7 +1222,7 @@ public class ECKey implements Serializable {
 
       return ByteUtil.merge(
           ByteUtil.bigIntegerToBytes(this.r, 32),
-          ByteUtil.bigIntegerToBytes(this.s,32),
+          ByteUtil.bigIntegerToBytes(this.s, 32),
           new byte[]{fixedV});
     }
 
