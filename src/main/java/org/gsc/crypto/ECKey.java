@@ -20,6 +20,10 @@ import java.util.Arrays;
 import javax.annotation.Nullable;
 import javax.crypto.KeyAgreement;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.crypto.jce.ECKeyAgreement;
+import org.gsc.crypto.jce.ECKeyPairGenerator;
+import org.gsc.crypto.jce.ECSignatureFactory;
+import org.gsc.crypto.jce.SpongyCastleProvider;
 import org.spongycastle.asn1.ASN1InputStream;
 import org.spongycastle.asn1.ASN1Integer;
 import org.spongycastle.asn1.DLSequence;
@@ -145,7 +149,7 @@ public class ECKey implements Serializable {
    * @param secureRandom -
    */
   public ECKey(SecureRandom secureRandom) {
-    this(TronCastleProvider.getInstance(), secureRandom);
+    this(SpongyCastleProvider.getInstance(), secureRandom);
   }
 
   /**
@@ -181,7 +185,7 @@ public class ECKey implements Serializable {
    */
   public ECKey(@Nullable BigInteger priv, ECPoint pub) {
     this(
-        TronCastleProvider.getInstance(),
+        SpongyCastleProvider.getInstance(),
         privateKeyFromBigInteger(priv),
         pub
     );
@@ -216,7 +220,7 @@ public class ECKey implements Serializable {
     } else {
       try {
         return ECKeyFactory
-            .getInstance(TronCastleProvider.getInstance())
+            .getInstance(SpongyCastleProvider.getInstance())
             .generatePrivate(new ECPrivateKeySpec(priv,
                 CURVE_SPEC));
       } catch (InvalidKeySpecException ex) {
