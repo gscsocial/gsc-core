@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import org.gsc.net.discover.Node;
 import org.gsc.net.discover.NodeManager;
 import org.gsc.net.discover.NodeStatistics;
+import org.gsc.net.gsc.GscHandler;
 import org.gsc.net.message.p2p.P2pMessage;
 import org.gsc.net.message.p2p.ReasonCode;
 import org.slf4j.Logger;
