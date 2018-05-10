@@ -9,16 +9,10 @@ import org.gsc.net.server.MessageQueue;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-/**
- * Process the messages between peers with 'eth' capability on the network<br>
- * Contains common logic to all supported versions
- * delegating version specific stuff to its descendants
- *
- */
 @Component
 @Slf4j
 @Scope("prototype")
-public class GscHandler extends SimpleChannelInboundHandler<GscMessage> {
+public abstract class GscHandler extends SimpleChannelInboundHandler<GscMessage> implements Gsc {
 
   protected Channel channel;
 
@@ -45,7 +39,8 @@ public class GscHandler extends SimpleChannelInboundHandler<GscMessage> {
 //    peerDel.onConnectPeer(peer);
 //  }
 
-  protected void sendMessage(GscMessage message) {
+  @Override
+  public void sendMessage(GscMessage message) {
     msgQueue.sendMessage(message);
   }
 
