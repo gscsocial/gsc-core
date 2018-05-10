@@ -6,7 +6,7 @@ import org.gsc.core.chain.BlockId;
 import org.gsc.core.chain.BlockWrapper;
 import org.gsc.core.chain.TransactionWrapper;
 
-public interface ChainContorller {
+public interface ChainController {
 
   BlockWrapper getHead() throws HeaderNotFound ;
 
