@@ -25,6 +25,16 @@ public enum MessageTypes {
 
   BLOCK(0x10),
 
+  TRANSACTION(0x11),
+
+  FETCH(0x12),
+
+  SYNC(0x13),
+
+  ATTENTION(0x14),
+
+  TIME(0x15),
+
   LAST(0xFF);
 
   private final int type;

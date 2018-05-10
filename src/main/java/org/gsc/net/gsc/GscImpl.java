@@ -2,8 +2,13 @@ package org.gsc.net.gsc;
 
 import io.netty.channel.ChannelHandlerContext;
 import org.gsc.core.sync.ChainControllerImpl;
+import org.gsc.net.message.gsc.AttentionMessage;
 import org.gsc.net.message.gsc.BlockMessage;
+import org.gsc.net.message.gsc.FetchMessage;
 import org.gsc.net.message.gsc.GscMessage;
+import org.gsc.net.message.gsc.SyncMessage;
+import org.gsc.net.message.gsc.TimeMessage;
+import org.gsc.net.message.gsc.TransactionMessage;
 import org.gsc.net.message.p2p.ReasonCode;
 import org.gsc.service.NetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +31,16 @@ public class GscImpl extends GscHandler{
     switch (msg.getType()) {
       case BLOCK:
         netService.handleMessage(this, (BlockMessage) msg);
+      case TRANSACTION:
+        netService.handleMessage(this, (TransactionMessage) msg);
+      case SYNC:
+        netService.handleMessage(this, (SyncMessage) msg);
+      case TIME:
+        netService.handleMessage(this, (TimeMessage) msg);
+      case FETCH:
+        netService.handleMessage(this, (FetchMessage) msg);
+      case ATTENTION:
+        netService.handleMessage(this, (AttentionMessage) msg);
     }
   }
 
