@@ -42,4 +42,5 @@ public class NetService implements Service{
   public void handleMessage(Gsc gsc, BlockMessage msg) {
     logger.info("get block message");
   }
+
 }
