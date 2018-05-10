@@ -23,6 +23,8 @@ public enum MessageTypes {
 
   P2P_PONG(0x08),
 
+  BLOCK(0x10),
+
   LAST(0xFF);
 
   private final int type;
