@@ -31,6 +31,14 @@ public class Args {
   @Setter
   private int nodeMaxActiveNodes;
 
+  @Getter
+  @Setter
+  private int minParticipationRate;
+
+  @Getter
+  @Setter
+  private boolean needSyncCheck;
+
   public void setParam(final String[] args, final String confFileName) {
   }
 }

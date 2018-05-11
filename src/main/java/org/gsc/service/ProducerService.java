@@ -5,18 +5,11 @@ import com.google.protobuf.ByteString;
 import java.util.Map;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.exception.ContractExeException;
-import org.gsc.common.exception.ContractValidateException;
-import org.gsc.common.exception.UnLinkedBlockException;
-import org.gsc.common.exception.ValidateScheduleException;
-import org.gsc.common.exception.ValidateSignatureException;
-import org.gsc.common.utils.ByteArray;
 import org.gsc.config.Args;
+import org.gsc.config.GscConstants.ChainConstant;
 import org.gsc.consensus.BlockProductionCondition;
 import org.gsc.consensus.Producer;
 import org.gsc.core.chain.BlockWrapper;
-import org.gsc.crypto.ECKey;
-import org.gsc.net.message.gsc.BlockMessage;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,7 +18,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ProducerService implements Service{
 
-  //private static final int MIN_PARTICIPATION_RATE = Args.getInstance().getMinParticipationRate(); // MIN_PARTICIPATION_RATE * 1%
+  @Autowired
+  private Args config;
+
+  private int MIN_PARTICIPATION_RATE; // MIN_PARTICIPATION_RATE * 1%
   private static final int PRODUCE_TIME_OUT = 500; // ms
   @Getter
   protected Map<ByteString, Producer> localWitnessStateMap = Maps
@@ -33,8 +29,6 @@ public class ProducerService implements Service{
   private Thread generateThread;
   private volatile boolean isRunning = false;
   private Map<ByteString, byte[]> privateKeyMap = Maps.newHashMap();
-  //private boolean needSyncCheck = Args.getInstance().isNeedSyncCheck();
-  boolean needSyncCheck;
 
   @Autowired
   private ProducerService controller;
@@ -44,6 +38,7 @@ public class ProducerService implements Service{
    */
   public ProducerService() {
     generateThread = new Thread(scheduleProductionLoop);
+    MIN_PARTICIPATION_RATE = config.getMinParticipationRate();
   }
 
   /**
@@ -58,7 +53,7 @@ public class ProducerService implements Service{
 
         while (isRunning) {
           try {
-            if (this.needSyncCheck) {
+            if (config.isNeedSyncCheck()) {
               Thread.sleep(500L);
             } else {
               DateTime time = DateTime.now();
