@@ -64,6 +64,7 @@ public class BlockWrapper extends BlockHeaderWrapper{
 //        .collect(Collectors.toCollection(Vector::new));
 //
 //    return MerkleTree.getInstance().createTree(ids).getRoot().getHash();
+    return Sha256Hash.ZERO_HASH;
   }
 
   public void setMerkleRoot() {
@@ -73,14 +74,6 @@ public class BlockWrapper extends BlockHeaderWrapper{
 //
 //    this.block = this.block.toBuilder().setBlockHeader(
 //        this.block.getBlockHeader().toBuilder().setRawData(blockHeaderRaw)).build();
-  }
-
-  public Sha256Hash getMerkleRoot() {
-    //  return Sha256Hash.wrap(this.block.getBlockHeader().getRawData().getTxTrieRoot());
-  }
-
-  public ByteString getWitnessAddress() {
-    //  return this.block.getBlockHeader().getRawData().getWitnessAddress();
   }
 
 
