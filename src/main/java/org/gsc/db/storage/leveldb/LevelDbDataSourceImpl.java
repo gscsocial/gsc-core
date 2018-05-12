@@ -33,6 +33,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.config.Args;
+import org.gsc.db.iterator.StoreIterator;
+import org.gsc.db.storage.DbSourceInter;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBException;
@@ -40,10 +43,8 @@ import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
 import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
-import org.tron.common.storage.DbSourceInter;
-import org.tron.common.utils.FileUtil;
-import org.tron.core.config.args.Args;
-import org.tron.core.db.common.iterator.StoreIterator;
+import org.springframework.beans.factory.annotation.Autowired;
+
 
 @Slf4j
 @NoArgsConstructor
@@ -56,11 +57,15 @@ public class LevelDbDataSourceImpl implements DbSourceInter<byte[]>,
   private String parentName;
   private ReadWriteLock resetDbLock = new ReentrantReadWriteLock();
 
+  @Autowired
+  private Args config;
+
   /**
    * constructor.
    */
   public LevelDbDataSourceImpl(String parentName, String name) {
-    parentName += Args.getInstance().getStorage().getDirectory();
+    //TODO: set db path
+    //parentName += config.getStorage().getDirectory();
     this.parentName = parentName;
     this.dataBaseName = name;
   }
@@ -131,7 +136,7 @@ public class LevelDbDataSourceImpl implements DbSourceInter<byte[]>,
    */
   public void resetDb() {
     closeDB();
-    FileUtil.recursiveDelete(getDbPath().toString());
+    //FileUtil.recursiveDelete(getDbPath().toString());
     initDB();
   }
 
@@ -387,8 +392,8 @@ public class LevelDbDataSourceImpl implements DbSourceInter<byte[]>,
   }
 
   @Override
-  public DBIterator iterator() {
-    return new StoreIterator(database.iterator());
+  public org.gsc.db.iterator.DBIterator iterator() {
+    return new StoreIterator((org.gsc.db.iterator.DBIterator) database.iterator());
   }
 
   public Stream<Entry<byte[], byte[]>> stream() {

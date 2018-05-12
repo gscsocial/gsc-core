@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
-import org.iq80.leveldb.DBIterator;
+
 
 @Slf4j
-public final class StoreIterator implements org.tron.core.db.common.iterator.DBIterator {
+public final class StoreIterator implements org.gsc.db.iterator.DBIterator {
 
   private DBIterator dbIterator;
   private boolean first = true;
@@ -59,5 +59,10 @@ public final class StoreIterator implements org.tron.core.db.common.iterator.DBI
   @Override
   public void forEachRemaining(Consumer<? super Entry<byte[], byte[]>> action) {
     dbIterator.forEachRemaining(action);
+  }
+
+  @Override
+  public void seekToFirst() {
+
   }
 }
