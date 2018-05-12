@@ -39,6 +39,17 @@ public class Args {
   @Setter
   private boolean needSyncCheck;
 
+  private String storageDir;
+
+  public String getStorageDir() {
+    return storageDir;
+  }
+
+  public void setStorageDir(String storageDir) {
+    this.storageDir = storageDir;
+  }
+
+
   public void setParam(final String[] args, final String confFileName) {
   }
 }

@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.utils.FileUtil;
 import org.gsc.config.Args;
 import org.gsc.db.iterator.StoreIterator;
 import org.gsc.db.storage.DbSourceInter;
@@ -65,7 +66,7 @@ public class LevelDbDataSourceImpl implements DbSourceInter<byte[]>,
    */
   public LevelDbDataSourceImpl(String parentName, String name) {
     //TODO: set db path
-    //parentName += config.getStorage().getDirectory();
+    parentName += config.getStorageDir();
     this.parentName = parentName;
     this.dataBaseName = name;
   }
@@ -136,7 +137,7 @@ public class LevelDbDataSourceImpl implements DbSourceInter<byte[]>,
    */
   public void resetDb() {
     closeDB();
-    //FileUtil.recursiveDelete(getDbPath().toString());
+    FileUtil.recursiveDelete(getDbPath().toString());
     initDB();
   }
 
