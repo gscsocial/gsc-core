@@ -17,7 +17,6 @@ import org.gsc.common.utils.Sha256Hash;
 import org.gsc.core.chain.BlockId;
 import org.gsc.core.chain.BlockWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 public class ForkDatabase {
   private class ForkBlock {
