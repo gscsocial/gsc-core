@@ -5,11 +5,14 @@ import java.util.List;
 import org.gsc.common.exception.BadItemException;
 import org.gsc.common.exception.ValidateSignatureException;
 import org.gsc.common.utils.Sha256Hash;
+import org.gsc.protos.Protocol.Block;
 
 public class BlockWrapper extends BlockHeaderWrapper{
+
   private BlockId blockId;
 
   private Block block;
+
   public boolean generatedByMyself = false;
 
   public BlockWrapper(long number, Sha256Hash hash, long when, ByteString witnessAddress) {

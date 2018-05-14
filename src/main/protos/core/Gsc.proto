@@ -15,8 +15,8 @@ message BlockHeader {
     bytes txTrieRoot = 2;
     bytes parentHash = 3;
     int64 number = 7;
-    int64 witness_id = 8;
-    bytes witness_address = 9;
+    int64 producer_id = 8;
+    bytes producer_address = 9;
   }
   raw raw_data = 1;
   bytes witness_signature = 2;

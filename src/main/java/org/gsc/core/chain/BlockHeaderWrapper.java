@@ -2,8 +2,11 @@ package org.gsc.core.chain;
 
 import com.google.protobuf.ByteString;
 import org.gsc.common.utils.Sha256Hash;
+import org.gsc.protos.Protocol;
 
 public class BlockHeaderWrapper {
+
+  private Protocol.BlockHeader blockHeader;
 
   public Sha256Hash getParentHash() {
     return Sha256Hash.ZERO_HASH;
@@ -15,13 +18,12 @@ public class BlockHeaderWrapper {
 
 
   public Sha256Hash getMerkleRoot() {
-    //  return Sha256Hash.wrap(this.block.getBlockHeader().getRawData().getTxTrieRoot());
-    return Sha256Hash.ZERO_HASH;
+    return Sha256Hash.wrap(this.blockHeader.getRawData().getTxTrieRoot());
+
   }
 
-  public ByteString getWitnessAddress() {
-    //  return this.block.getBlockHeader().getRawData().getWitnessAddress();
-    return null;
+  public ByteString getProducerAddress() {
+    return this.blockHeader.getRawData().getProducerAddress();
   }
 
 }
