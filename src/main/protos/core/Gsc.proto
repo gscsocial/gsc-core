@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "core/Discover.proto";
+
+package protocol;
+
+
+option java_package = "org.gsc.protos"; //Specify the name of the package that generated the Java file
+option java_outer_classname = "Protocol"; //Specify the class name of the generated Java file
+
+message BlockHeader {
+  message raw {
+    int64 timestamp = 1;
+    bytes txTrieRoot = 2;
+    bytes parentHash = 3;
+    int64 number = 7;
+    int64 witness_id = 8;
+    bytes witness_address = 9;
+  }
+  raw raw_data = 1;
+  bytes witness_signature = 2;
+}
+
+// block
+message Block {
+  repeated Transaction transactions = 1;
+  BlockHeader block_header = 2;
+}
+
+message Transaction {
+}
