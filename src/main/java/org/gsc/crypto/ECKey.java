@@ -4,6 +4,7 @@ import static java.util.Arrays.copyOfRange;
 import static org.gsc.common.utils.BIUtil.isLessThan;
 import static org.gsc.common.utils.ByteUtil.bigIntegerToBytes;
 
+import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -442,6 +443,17 @@ public class ECKey implements Serializable {
             Arrays.copyOfRange(signatureEncoded, 1, 33),
             Arrays.copyOfRange(signatureEncoded, 33, 65),
             (byte) (signatureEncoded[0] & 0xFF)));
+  }
+
+  public static String getBase64FromByteString(ByteString sign) {
+    byte[] r = sign.substring(0, 32).toByteArray();
+    byte[] s = sign.substring(32, 64).toByteArray();
+    byte v = sign.byteAt(64);
+    if (v < 27) {
+      v += 27; //revId -> v
+    }
+    ECDSASignature signature = ECDSASignature.fromComponents(r, s, v);
+    return signature.toBase64();
   }
 
   public static byte[] signatureToKeyBytes(byte[] messageHash,

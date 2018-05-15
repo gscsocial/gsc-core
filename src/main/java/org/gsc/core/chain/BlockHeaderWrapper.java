@@ -7,7 +7,7 @@ import org.gsc.protos.Protocol.BlockHeader;
 
 public class BlockHeaderWrapper {
 
-  private Protocol.BlockHeader blockHeader;
+  protected Protocol.BlockHeader blockHeader;
 
   public Sha256Hash getParentHash() {
     return Sha256Hash.ZERO_HASH;
@@ -17,14 +17,28 @@ public class BlockHeaderWrapper {
     return 0;
   }
 
+  public BlockHeaderWrapper(long number, Sha256Hash hash, long when, ByteString producerAddress) {
+    // blockheader raw
+    BlockHeader.raw.Builder blockHeaderRawBuild = BlockHeader.raw.newBuilder();
+    BlockHeader.raw blockHeaderRaw = blockHeaderRawBuild
+        .setNumber(number)
+        .setParentHash(hash.getByteString())
+        .setTimestamp(when)
+        .setProducerAddress(producerAddress).build();
+
+    // block header
+    BlockHeader.Builder blockHeaderBuild = BlockHeader.newBuilder();
+    blockHeader = blockHeaderBuild.setRawData(blockHeaderRaw).build();
+  }
+
   public BlockHeaderWrapper(BlockHeader blockHeader) {
     this.blockHeader = blockHeader;
   }
 
+  public BlockHeaderWrapper() {}
 
   public Sha256Hash getMerkleRoot() {
     return Sha256Hash.wrap(this.blockHeader.getRawData().getTxTrieRoot());
-
   }
 
   public ByteString getProducerAddress() {

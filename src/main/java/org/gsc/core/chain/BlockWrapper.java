@@ -1,6 +1,9 @@
 package org.gsc.core.chain;
 
 import com.google.protobuf.ByteString;
+import com.google.protobuf.InvalidProtocolBufferException;
+import java.security.SignatureException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
@@ -8,6 +11,8 @@ import org.gsc.common.exception.BadItemException;
 import org.gsc.common.exception.ValidateSignatureException;
 import org.gsc.common.utils.MerkleTree;
 import org.gsc.common.utils.Sha256Hash;
+import org.gsc.crypto.ECKey;
+import org.gsc.crypto.ECKey.ECDSASignature;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.BlockHeader;
 import org.gsc.protos.Protocol.Transaction;
@@ -20,23 +25,17 @@ public class BlockWrapper extends BlockHeaderWrapper{
 
   public boolean generatedByMyself = false;
 
-  public BlockWrapper(long number, Sha256Hash hash, long when, ByteString witnessAddress) {
-    // blockheader raw
+  public BlockWrapper(long timestamp, Sha256Hash parentHash, long number,  ByteString producerAddress,
+      List<Transaction> transactionList) {
+    super(timestamp, parentHash, number, producerAddress);
 
-  }
-
-  public BlockWrapper(long number, ByteString hash, long when, ByteString witnessAddress) {
-    // blockheader raw
-
-  }
-
-  public BlockWrapper(long timestamp, ByteString parentHash, long number,
-      List<TransactionWrapper> transactionList) {
-
+    Block.Builder blockBuild = Block.newBuilder();
+    transactionList.forEach(trx -> blockBuild.addTransactions(trx));
+    this.block = blockBuild.setBlockHeader(blockHeader).build();
   }
 
   public void addTransaction(TransactionWrapper pendingTrx) {
-
+    this.block = this.block.toBuilder().addTransactions(pendingTrx.getInstance()).build();
   }
 
   public List<TransactionWrapper> getTransactions() {
@@ -44,7 +43,14 @@ public class BlockWrapper extends BlockHeaderWrapper{
   }
 
   public void sign(byte[] privateKey) {
+    ECKey ecKey = ECKey.fromPrivate(privateKey);
+    ECDSASignature signature = ecKey.sign(getRawHash().getBytes());
+    ByteString sig = ByteString.copyFrom(signature.toByteArray());
 
+    BlockHeader blockHeader = this.block.getBlockHeader().toBuilder().setWitnessSignature(sig)
+        .build();
+
+    this.block = this.block.toBuilder().setBlockHeader(blockHeader).build();
   }
 
   private Sha256Hash getRawHash() {
@@ -52,7 +58,14 @@ public class BlockWrapper extends BlockHeaderWrapper{
   }
 
   public boolean validateSignature() throws ValidateSignatureException {
-    return true;
+    try {
+      return Arrays
+          .equals(ECKey.signatureToAddress(getRawHash().getBytes(),
+              ECKey.getBase64FromByteString(block.getBlockHeader().getWitnessSignature())),
+              block.getBlockHeader().getRawData().getProducerAddress().toByteArray());
+    } catch (SignatureException e) {
+      throw new ValidateSignatureException(e.getMessage());
+    }
   }
 
   public BlockId getBlockId() {
@@ -83,14 +96,18 @@ public class BlockWrapper extends BlockHeaderWrapper{
   }
 
   public BlockWrapper(byte[] data) throws BadItemException {
-
+    try {
+      this.block = Block.parseFrom(data);
+      this.blockHeader = this.block.getBlockHeader();
+    } catch (InvalidProtocolBufferException e) {
+      throw new BadItemException();
+    }
   }
-
 
   public byte[] getData() {
-    return null;
-  }
+    return this.block.toByteArray();
 
+  }
 
   private StringBuffer toStringBuff = new StringBuffer();
 

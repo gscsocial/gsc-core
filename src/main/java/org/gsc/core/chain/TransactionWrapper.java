@@ -14,4 +14,8 @@ public class TransactionWrapper {
   public Sha256Hash getHash() {
     return Sha256Hash.of(this.transaction.toByteArray());
   }
+
+  public Transaction getInstance() {
+    return transaction;
+  }
 }
