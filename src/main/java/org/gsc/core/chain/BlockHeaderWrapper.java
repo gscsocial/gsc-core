@@ -35,6 +35,15 @@ public class BlockHeaderWrapper {
     this.blockHeader = blockHeader;
   }
 
+  private Sha256Hash getRawHash() {
+    return Sha256Hash.of(this.blockHeader.getRawData().toByteArray());
+  }
+
+  public BlockId getBlockId() {
+     return new BlockId(Sha256Hash.of(this.blockHeader.toByteArray()), getNum())
+  }
+
+
   public BlockHeaderWrapper() {}
 
   public Sha256Hash getMerkleRoot() {

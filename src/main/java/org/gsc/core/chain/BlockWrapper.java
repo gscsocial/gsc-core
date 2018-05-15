@@ -19,8 +19,6 @@ import org.gsc.protos.Protocol.Transaction;
 
 public class BlockWrapper extends BlockHeaderWrapper{
 
-  private BlockId blockId;
-
   private Block block;
 
   public boolean generatedByMyself = false;
@@ -53,9 +51,6 @@ public class BlockWrapper extends BlockHeaderWrapper{
     this.block = this.block.toBuilder().setBlockHeader(blockHeader).build();
   }
 
-  private Sha256Hash getRawHash() {
-    return Sha256Hash.ZERO_HASH;
-  }
 
   public boolean validateSignature() throws ValidateSignatureException {
     try {
@@ -66,10 +61,6 @@ public class BlockWrapper extends BlockHeaderWrapper{
     } catch (SignatureException e) {
       throw new ValidateSignatureException(e.getMessage());
     }
-  }
-
-  public BlockId getBlockId() {
-    return blockId;
   }
 
   public void setMerkleRoot() {
