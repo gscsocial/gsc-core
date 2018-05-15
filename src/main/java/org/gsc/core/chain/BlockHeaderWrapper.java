@@ -9,14 +9,6 @@ public class BlockHeaderWrapper {
 
   protected Protocol.BlockHeader blockHeader;
 
-  public Sha256Hash getParentHash() {
-    return Sha256Hash.ZERO_HASH;
-  }
-
-  public long getNum() {
-    return 0;
-  }
-
   public BlockHeaderWrapper(long number, Sha256Hash hash, long when, ByteString producerAddress) {
     // blockheader raw
     BlockHeader.raw.Builder blockHeaderRawBuild = BlockHeader.raw.newBuilder();
@@ -35,7 +27,7 @@ public class BlockHeaderWrapper {
     this.blockHeader = blockHeader;
   }
 
-  private Sha256Hash getRawHash() {
+  protected Sha256Hash getRawHash() {
     return Sha256Hash.of(this.blockHeader.getRawData().toByteArray());
   }
 
@@ -43,6 +35,29 @@ public class BlockHeaderWrapper {
      return new BlockId(Sha256Hash.of(this.blockHeader.toByteArray()), getNum())
   }
 
+  public BlockId getParentBlockId() {
+    return new BlockId(getParentHash(), getNum() - 1);
+  }
+
+  public ByteString getParentHashStr() {
+    return this.blockHeader.getRawData().getParentHash();
+  }
+
+  public long getNum() {
+    return this.blockHeader.getRawData().getNumber();
+  }
+
+  public long getTimeStamp() {
+    return this.blockHeader.getRawData().getTimestamp();
+  }
+
+  public BlockHeader getInstance() {
+    return this.blockHeader;
+  }
+
+  public Sha256Hash getParentHash() {
+    return Sha256Hash.wrap(this.blockHeader.getRawData().getParentHash());
+  }
 
   public BlockHeaderWrapper() {}
 

@@ -23,6 +23,8 @@ public class BlockWrapper extends BlockHeaderWrapper{
 
   public boolean generatedByMyself = false;
 
+  private List<TransactionWrapper> transactions;
+
   public BlockWrapper(long timestamp, Sha256Hash parentHash, long number,  ByteString producerAddress,
       List<Transaction> transactionList) {
     super(timestamp, parentHash, number, producerAddress);
@@ -34,10 +36,20 @@ public class BlockWrapper extends BlockHeaderWrapper{
 
   public void addTransaction(TransactionWrapper pendingTrx) {
     this.block = this.block.toBuilder().addTransactions(pendingTrx.getInstance()).build();
+    transactions.add(pendingTrx);
   }
 
   public List<TransactionWrapper> getTransactions() {
-    return null;
+    if (transactions == null) {
+      synchronized (BlockWrapper.class) {
+        if (transactions == null) {
+          transactions = this.block.getTransactionsList().stream()
+              .map(trx -> new TransactionWrapper(trx))
+              .collect(Collectors.toList());
+        }
+      }
+    }
+    return transactions;
   }
 
   public void sign(byte[] privateKey) {
