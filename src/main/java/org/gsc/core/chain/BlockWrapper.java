@@ -2,10 +2,15 @@ package org.gsc.core.chain;
 
 import com.google.protobuf.ByteString;
 import java.util.List;
+import java.util.Vector;
+import java.util.stream.Collectors;
 import org.gsc.common.exception.BadItemException;
 import org.gsc.common.exception.ValidateSignatureException;
+import org.gsc.common.utils.MerkleTree;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.protos.Protocol.Block;
+import org.gsc.protos.Protocol.BlockHeader;
+import org.gsc.protos.Protocol.Transaction;
 
 public class BlockWrapper extends BlockHeaderWrapper{
 
@@ -54,33 +59,26 @@ public class BlockWrapper extends BlockHeaderWrapper{
     return blockId;
   }
 
-  public Sha256Hash calcMerkleRoot() {
-//    List<Transaction> transactionsList = this.block.getTransactionsList();
-//
-//    if (CollectionUtils.isEmpty(transactionsList)) {
-//      return Sha256Hash.ZERO_HASH;
-//    }
-//
-//    Vector<Sha256Hash> ids = transactionsList.stream()
-//        .map(TransactionCapsule::new)
-//        .map(TransactionCapsule::getHash)
-//        .collect(Collectors.toCollection(Vector::new));
-//
-//    return MerkleTree.getInstance().createTree(ids).getRoot().getHash();
-    return Sha256Hash.ZERO_HASH;
-  }
-
   public void setMerkleRoot() {
-//    BlockHeader.raw blockHeaderRaw =
-//        this.block.getBlockHeader().getRawData().toBuilder()
-//            .setTxTrieRoot(calcMerkleRoot().getByteString()).build();
-//
-//    this.block = this.block.toBuilder().setBlockHeader(
-//        this.block.getBlockHeader().toBuilder().setRawData(blockHeaderRaw)).build();
+    List<Transaction> transactionsList = this.block.getTransactionsList();
+
+    Vector<Sha256Hash> ids = transactionsList.stream()
+        .map(TransactionWrapper::new)
+        .map(TransactionWrapper::getHash)
+        .collect(Collectors.toCollection(Vector::new));
+
+    BlockHeader.raw blockHeaderRaw =
+        this.block.getBlockHeader().getRawData().toBuilder()
+            .setTxTrieRoot(MerkleTree.getInstance().createTree(ids).getRoot().getHash()
+                .getByteString()).build();
+
+    this.block = this.block.toBuilder().setBlockHeader(
+        this.block.getBlockHeader().toBuilder().setRawData(blockHeaderRaw)).build();
   }
 
 
   public BlockWrapper(Block block) {
+    super(block.getBlockHeader());
     this.block = block;
   }
 

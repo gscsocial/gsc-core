@@ -3,6 +3,7 @@ package org.gsc.core.chain;
 import com.google.protobuf.ByteString;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.protos.Protocol;
+import org.gsc.protos.Protocol.BlockHeader;
 
 public class BlockHeaderWrapper {
 
@@ -14,6 +15,10 @@ public class BlockHeaderWrapper {
 
   public long getNum() {
     return 0;
+  }
+
+  public BlockHeaderWrapper(BlockHeader blockHeader) {
+    this.blockHeader = blockHeader;
   }
 
 
