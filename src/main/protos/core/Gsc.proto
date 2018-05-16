@@ -86,6 +86,6 @@ message Transaction {
   }
 
   raw raw_data = 1;
-  repeated bytes signature = 2;
-  repeated Result ret = 5;
+  bytes signature = 2;
+  Result ret = 5;
 }
