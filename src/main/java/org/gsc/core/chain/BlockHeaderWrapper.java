@@ -32,7 +32,7 @@ public class BlockHeaderWrapper {
   }
 
   public BlockId getBlockId() {
-     return new BlockId(Sha256Hash.of(this.blockHeader.toByteArray()), getNum())
+     return new BlockId(Sha256Hash.of(this.blockHeader.toByteArray()), getNum());
   }
 
   public BlockId getParentBlockId() {
