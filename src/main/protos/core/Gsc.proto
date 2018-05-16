@@ -22,6 +22,12 @@ message BlockHeader {
   bytes witness_signature = 2;
 }
 
+enum AccountType {
+  Normal = 0;
+  AssetIssue = 1;
+  Contract = 2;
+}
+
 // block
 message Block {
   repeated Transaction transactions = 1;
