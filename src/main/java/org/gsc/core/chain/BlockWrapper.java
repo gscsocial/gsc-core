@@ -17,7 +17,7 @@ import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.BlockHeader;
 import org.gsc.protos.Protocol.Transaction;
 
-public class BlockWrapper extends BlockHeaderWrapper{
+public class BlockWrapper extends BlockHeaderWrapper {
 
   private Block block;
 

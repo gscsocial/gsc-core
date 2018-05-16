@@ -5,8 +5,6 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.SignatureException;
 import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.exception.ValidateSignatureException;
@@ -15,12 +13,10 @@ import org.gsc.common.utils.Sha256Hash;
 import org.gsc.crypto.ECKey;
 import org.gsc.crypto.ECKey.ECDSASignature;
 import org.gsc.protos.Protocol.Transaction;
-import org.gsc.protos.Protocol.Transaction.Contract;
 import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
 
-
 @Slf4j
-public class TransactionWrapper {
+public class TransactionWrapper implements ProtoWrapper<Transaction> {
 
   private Transaction transaction;
   @Setter

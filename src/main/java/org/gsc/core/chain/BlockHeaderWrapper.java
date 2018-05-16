@@ -5,7 +5,7 @@ import org.gsc.common.utils.Sha256Hash;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.BlockHeader;
 
-public class BlockHeaderWrapper {
+public class BlockHeaderWrapper implements ProtoWrapper<BlockHeader>{
 
   protected Protocol.BlockHeader blockHeader;
 
@@ -51,6 +51,12 @@ public class BlockHeaderWrapper {
     return this.blockHeader.getRawData().getTimestamp();
   }
 
+  @Override
+  public byte[] getData() {
+    return this.blockHeader.toByteArray();
+  }
+
+  @Override
   public BlockHeader getInstance() {
     return this.blockHeader;
   }
