@@ -1,17 +1,9 @@
 package org.gsc.core.chain;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.security.SignatureException;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.exception.ValidateSignatureException;
-import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.crypto.ECKey;
 import org.gsc.protos.Protocol.Transaction;
 
 @Slf4j
@@ -37,6 +29,10 @@ public class TransactionWrapper {
       logger.debug(e.getMessage());
     }
   }
+
+  public Transaction getInstance() {return transaction;}
+
+  public Sha256Hash getHash() {return Sha256Hash.ZERO_HASH;}
 
 
 }

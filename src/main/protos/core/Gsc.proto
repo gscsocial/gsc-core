@@ -29,4 +29,63 @@ message Block {
 }
 
 message Transaction {
+  message Contract {
+    enum ContractType {
+      AccountCreateContract = 0;
+      TransferContract = 1;
+      TransferAssetContract = 2;
+      VoteAssetContract = 3;
+      VoteWitnessContract = 4;
+      WitnessCreateContract = 5;
+      AssetIssueContract = 6;
+      DeployContract = 7;
+      WitnessUpdateContract = 8;
+      ParticipateAssetIssueContract = 9;
+      AccountUpdateContract = 10;
+      FreezeBalanceContract = 11;
+      UnfreezeBalanceContract = 12;
+      WithdrawBalanceContract = 13;
+      UnfreezeAssetContract = 14;
+      CustomContract = 20;
+    }
+    ContractType type = 1;
+    google.protobuf.Any parameter = 2;
+    bytes provider = 3;
+    bytes ContractName = 4;
+
+  }
+
+  message authority {
+    message AccountId {
+      bytes name = 1;
+      bytes address = 2;
+    }
+    AccountId account = 1;
+    bytes permission_name = 2;
+  }
+
+  message Result {
+    enum code {
+      SUCCESS = 0;
+      FAILED = 1;
+    }
+    int64 fee = 1;
+    code ret = 2;
+  }
+
+  message raw {
+    bytes ref_block_bytes = 1;
+    int64 ref_block_num = 3;
+    bytes ref_block_hash = 4;
+    int64 expiration = 8;
+    authority auth = 9;
+    Contract contract = 11;
+    // scripts not used
+    bytes scripts = 12;
+    int64 timestamp = 14;
+  }
+
+  raw raw_data = 1;
+  repeated bytes signature = 2;
+  repeated Result ret = 5;
 }
