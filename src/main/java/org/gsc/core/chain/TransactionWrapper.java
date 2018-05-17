@@ -1,5 +1,7 @@
 package org.gsc.core.chain;
 
+import static org.gsc.core.chain.ProtoUtil.getOwner;
+
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -8,6 +10,7 @@ import java.util.Arrays;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.exception.ValidateSignatureException;
+import org.gsc.common.utils.AddressUtil;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.crypto.ECKey;
@@ -40,8 +43,8 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
     }
   }
 
-  public void setResult(TransactionWrapper ret) {
-   // this.getInstance().toBuilder().setRet((tx.getInstance()).build();)
+  public void setResult(TransactionResultWrapper ret) {
+    this.getInstance().toBuilder().setRet(ret.getInstance()).build();
   }
 
   public void setReference(long blockNum, byte[] blockHash) {
@@ -96,43 +99,27 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
    * cheack balance of the address.
    */
   public boolean checkBalance(byte[] address, byte[] to, long amount, long balance) {
-//    if (!Wallet.addressValid(address)) {
-//      logger.error("address invalid");
-//      return false;
-//    }
-//
-//    if (!Wallet.addressValid(to)) {
-//      logger.error("address invalid");
-//      return false;
-//    }
-//
-//    if (amount <= 0) {
-//      logger.error("amount required a positive number");
-//      return false;
-//    }
-//
-//    if (amount > balance) {
-//      logger.error("don't have enough money");
-//      return false;
-//    }
+    if (!AddressUtil.addressValid(address)) {
+      logger.error("address invalid");
+      return false;
+    }
+
+    if (!AddressUtil.addressValid(to)) {
+      logger.error("address invalid");
+      return false;
+    }
+
+    if (amount <= 0) {
+      logger.error("amount required a positive number");
+      return false;
+    }
+
+    if (amount > balance) {
+      logger.error("don't have enough money");
+      return false;
+    }
 
     return true;
-  }
-
-//  @Deprecated
-//  public void sign(byte[] privateKey) {
-//    ECKey ecKey = ECKey.fromPrivate(privateKey);
-//    ECDSASignature signature = ecKey.sign(getRawHash().getBytes());
-//    ByteString sig = ByteString.copyFrom(signature.toBase64().getBytes());
-//    this.transaction = this.transaction.toBuilder().addSignature(sig).build();
-//  }
-
-  public static byte[] getOwner(Transaction.Contract contract) {
-    return null;
-  }
-
-  public static byte[] getToAddress(Transaction.Contract contract) {
-    return null;
   }
 
   public static String getBase64FromByteString(ByteString sign) {
