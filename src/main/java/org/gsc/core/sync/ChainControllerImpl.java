@@ -3,8 +3,8 @@ package org.gsc.core.sync;
 import org.gsc.common.exception.HeaderNotFound;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.core.chain.BlockId;
-import org.gsc.core.chain.BlockWrapper;
-import org.gsc.core.chain.TransactionWrapper;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.springframework.stereotype.Component;
 
 @Component

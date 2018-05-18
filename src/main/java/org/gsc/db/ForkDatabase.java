@@ -15,7 +15,7 @@ import lombok.Getter;
 import org.gsc.common.exception.UnLinkedBlockException;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.core.chain.BlockId;
-import org.gsc.core.chain.BlockWrapper;
+import org.gsc.core.wrapper.BlockWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class ForkDatabase {

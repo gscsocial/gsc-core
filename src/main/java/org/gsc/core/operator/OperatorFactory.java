@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.chain.TransactionWrapper;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.db.Manager;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Transaction.Contract;

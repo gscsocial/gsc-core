@@ -1,6 +1,7 @@
 package org.gsc.core.chain;
 
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.ProtoWrapper;
 import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Result;
 

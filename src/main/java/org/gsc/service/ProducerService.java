@@ -9,7 +9,7 @@ import org.gsc.config.Args;
 import org.gsc.config.GscConstants.ChainConstant;
 import org.gsc.consensus.BlockProductionCondition;
 import org.gsc.consensus.Producer;
-import org.gsc.core.chain.BlockWrapper;
+import org.gsc.core.wrapper.BlockWrapper;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

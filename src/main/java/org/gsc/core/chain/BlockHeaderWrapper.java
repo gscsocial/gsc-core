@@ -2,10 +2,11 @@ package org.gsc.core.chain;
 
 import com.google.protobuf.ByteString;
 import org.gsc.common.utils.Sha256Hash;
+import org.gsc.core.wrapper.ProtoWrapper;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.BlockHeader;
 
-public class BlockHeaderWrapper implements ProtoWrapper<BlockHeader>{
+public class BlockHeaderWrapper implements ProtoWrapper<BlockHeader> {
 
   protected Protocol.BlockHeader blockHeader;
 
