@@ -95,3 +95,46 @@ message Transaction {
   bytes signature = 2;
   Result ret = 5;
 }
+
+// Account
+message Account {
+  // frozen balance
+  message Frozen {
+    // the frozen balance
+    int64 frozen_balance = 1;
+    // the expire time
+    int64 expire_time = 2;
+  }
+
+  bytes account_name = 1;
+  AccountType type = 2;
+  // the create address
+  bytes address = 3;
+  // the balance
+  int64 balance = 4;
+  // the votes
+  repeated Vote votes = 5;
+  // the other asset owned by this account
+  map<string, int64> asset = 6;
+  // the frozen balance
+  repeated Frozen frozen = 7;
+  // bandwidth, get from frozen
+  int64 bandwidth = 8;
+  // this account create time
+  int64 create_time = 9;
+  // this last operation time, including transfer, voting and so on. //FIXME fix grammar
+  int64 latest_operation_time = 10;
+
+  // witness block producing allowance
+  int64 allowance = 11;
+  // last withdraw time
+  int64 latest_withdraw_time = 12;
+  // not used so far
+  bytes code = 13;
+  bool is_witness = 14;
+  bool is_committee = 15;
+  // frozen asset(for asset issuer)
+  repeated Frozen frozen_supply = 16;
+  // asset_issued_name
+  bytes asset_issued_name = 17;
+}
