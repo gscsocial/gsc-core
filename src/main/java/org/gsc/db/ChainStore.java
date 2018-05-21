@@ -11,6 +11,9 @@ public abstract class ChainStore<T extends ProtoWrapper> extends Store<T> {
   @Autowired
   private UndoStore undoStore;
 
+  @Autowired(required = false)
+  protected Object indexHelper;
+
   protected ChainStore(String dbName) {
   }
 
