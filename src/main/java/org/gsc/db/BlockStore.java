@@ -43,20 +43,6 @@ public class BlockStore extends ChainStore<BlockWrapper> {
     }
   }
 
-  /**
-   * create fun.
-   */
-  public static BlockStore create(String dbName) {
-    if (instance == null) {
-      synchronized (BlockStore.class) {
-        if (instance == null) {
-          instance = new BlockStore(dbName);
-        }
-      }
-    }
-    return instance;
-  }
-
   @Override
   public BlockWrapper get(byte[] key) throws ItemNotFoundException, BadItemException {
     byte[] value = dbSource.getData(key);
