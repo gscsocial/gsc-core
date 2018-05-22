@@ -17,7 +17,7 @@ public abstract class AbstractIterator<T> implements Iterator<Entry<byte[], T>> 
     return iterator.hasNext();
   }
 
-  protected abstract T of(byte[] value);
+  abstract protected T of(byte[] value);
 
   @Override
   public Entry<byte[], T> next() {

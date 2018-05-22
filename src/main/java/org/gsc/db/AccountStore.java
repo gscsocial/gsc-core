@@ -91,7 +91,7 @@ public class AccountStore extends ChainStore<AccountWrapper> {
    * Max TRX account.
    */
   public AccountWrapper getPhoton() {
-    byte[] data = dbSource.getData(assertsAddress.get("hoton"));
+    byte[] data = dbSource.getData(assertsAddress.get("Photon"));
     AccountWrapper accountCapsule = new AccountWrapper(data);
     return accountCapsule;
   }
