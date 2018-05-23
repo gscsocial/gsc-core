@@ -1,6 +1,6 @@
 package org.gsc.core.wrapper;
 
-public interface ProtoWrapper<T> {
+public interface StoreWrapper<T> {
 
   byte[] getData();
 

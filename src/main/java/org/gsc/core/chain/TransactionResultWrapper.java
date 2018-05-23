@@ -1,12 +1,12 @@
 package org.gsc.core.chain;
 
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.wrapper.ProtoWrapper;
+import org.gsc.core.wrapper.StoreWrapper;
 import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Result;
 
 @Slf4j
-public class TransactionResultWrapper implements ProtoWrapper<Result> {
+public class TransactionResultWrapper implements StoreWrapper<Result> {
 
   private Transaction.Result transactionResult;
 

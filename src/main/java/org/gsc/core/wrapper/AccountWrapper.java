@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gsc.protos.Protocol.Account;
 
 @Slf4j
-public class AccountWrapper implements ProtoWrapper<Account>, Comparable<AccountWrapper> {
+public class AccountWrapper implements StoreWrapper<Account>, Comparable<AccountWrapper> {
 
   private Account account;
 

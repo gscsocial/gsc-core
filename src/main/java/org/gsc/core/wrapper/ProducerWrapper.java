@@ -8,7 +8,7 @@ import org.gsc.crypto.ECKey;
 import org.gsc.protos.Protocol.Producer;
 
 @Slf4j
-public class ProducerWrapper implements ProtoWrapper<Producer>, Comparable<ProducerWrapper> {
+public class ProducerWrapper implements StoreWrapper<Producer>, Comparable<ProducerWrapper> {
 
   private Producer producer;
 

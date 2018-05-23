@@ -2,11 +2,11 @@ package org.gsc.db;
 
 import java.util.Objects;
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.core.wrapper.ProtoWrapper;
+import org.gsc.core.wrapper.StoreWrapper;
 import org.gsc.db.UndoStore.UndoTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class ChainStore<T extends ProtoWrapper> extends Store<T> {
+public abstract class ChainStore<T extends StoreWrapper> extends Store<T> {
 
   @Autowired
   private UndoStore undoStore;

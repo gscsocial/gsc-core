@@ -20,7 +20,7 @@ import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
 
 @Slf4j
-public class TransactionWrapper implements ProtoWrapper<Transaction> {
+public class TransactionWrapper implements StoreWrapper<Transaction> {
 
   private Transaction transaction;
   @Setter
