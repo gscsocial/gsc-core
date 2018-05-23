@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-
 @Slf4j
 @Component
 public class ProducerStore extends ChainStore<ProducerWrapper> {
@@ -49,7 +48,7 @@ public class ProducerStore extends ChainStore<ProducerWrapper> {
   /**
    * get all witnesses.
    */
-  public List<ProducerWrapper> getAllWitnesses() {
+  public List<ProducerWrapper> getAllProducers() {
     return dbSource
         .allValues()
         .stream()
