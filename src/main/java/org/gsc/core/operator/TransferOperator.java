@@ -27,8 +27,8 @@ public class TransferOperator extends AbstractOperator {
   private byte[] toAddress;
   private long amount;
 
-  TransferOperator(Any contract, Manager dbManager) {
-    super(contract, dbManager);
+  TransferOperator(Any contract) {
+    super(contract);
     try {
       transferContract = contract.unpack(TransferContract.class);
     } catch (InvalidProtocolBufferException e) {
@@ -42,28 +42,29 @@ public class TransferOperator extends AbstractOperator {
   @Override
   public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
-    try {
-      // if account with to_address does not exist, create it first.
-      AccountWrapper toAccount = dbManager.getAccountStore()
-          .get(transferContract.getToAddress().toByteArray());
-      if (toAccount == null) {
-        toAccount = new AccountWrapper(ByteString.copyFrom(toAddress), AccountType.Normal,
-            dbManager.getHeadBlockTimeStamp());
-        dbManager.getAccountStore().put(toAddress, toAccount);
-      }
-      dbManager.adjustBalance(transferContract.getOwnerAddress().toByteArray(), -fee);
-      ret.setStatus(fee, code.SUCCESS);
-      dbManager.adjustBalance(transferContract.getOwnerAddress().toByteArray(), -amount);
-      dbManager.adjustBalance(transferContract.getToAddress().toByteArray(), amount);
-    } catch (BalanceInsufficientException e) {
-      logger.debug(e.getMessage(), e);
-      ret.setStatus(fee, code.FAILED);
-      throw new ContractExeException(e.getMessage());
-    } catch (ArithmeticException e) {
-      logger.debug(e.getMessage(), e);
-      ret.setStatus(fee, code.FAILED);
-      throw new ContractExeException(e.getMessage());
-    }
+    //TODO
+//    try {
+//      // if account with to_address does not exist, create it first.
+//      AccountWrapper toAccount = dbManager.getAccountStore()
+//          .get(transferContract.getToAddress().toByteArray());
+//      if (toAccount == null) {
+//        toAccount = new AccountWrapper(ByteString.copyFrom(toAddress), AccountType.Normal,
+//            dbManager.getHeadBlockTimeStamp());
+//        dbManager.getAccountStore().put(toAddress, toAccount);
+//      }
+//      dbManager.adjustBalance(transferContract.getOwnerAddress().toByteArray(), -fee);
+//      ret.setStatus(fee, code.SUCCESS);
+//      dbManager.adjustBalance(transferContract.getOwnerAddress().toByteArray(), -amount);
+//      dbManager.adjustBalance(transferContract.getToAddress().toByteArray(), amount);
+//    } catch (BalanceInsufficientException e) {
+//      logger.debug(e.getMessage(), e);
+//      ret.setStatus(fee, code.FAILED);
+//      throw new ContractExeException(e.getMessage());
+//    } catch (ArithmeticException e) {
+//      logger.debug(e.getMessage(), e);
+//      ret.setStatus(fee, code.FAILED);
+//      throw new ContractExeException(e.getMessage());
+//    }
     return true;
   }
 
