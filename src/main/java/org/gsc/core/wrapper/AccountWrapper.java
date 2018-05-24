@@ -1,8 +1,10 @@
 package org.gsc.core.wrapper;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.protos.Protocol.Account;
+import org.gsc.protos.Protocol.AccountType;
 
 @Slf4j
 public class AccountWrapper implements StoreWrapper<Account>, Comparable<AccountWrapper> {
@@ -32,7 +34,27 @@ public class AccountWrapper implements StoreWrapper<Account>, Comparable<Account
     }
   }
 
+  /**
+   * get account from address.
+   */
+  public AccountWrapper(ByteString address,
+      AccountType accountType, long createTime) {
+    this.account = Account.newBuilder()
+        .setType(accountType)
+        .setAddress(address)
+        .setCreateTime(createTime)
+        .build();
+  }
+
   public long getBalance() {
     return this.account.getBalance();
+  }
+
+  public void setBalance(long balance) {
+    this.account = this.account.toBuilder().setBalance(balance).build();
+  }
+
+  public ByteString getAddress() {
+    return this.account.getAddress();
   }
 }

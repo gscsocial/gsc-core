@@ -14,7 +14,6 @@ import org.gsc.common.exception.ContractValidateException;
 import org.gsc.common.utils.AddressUtil;
 import org.gsc.core.chain.TransactionResultWrapper;
 import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.db.Manager;
 import org.gsc.protos.Contract.TransferContract;
 import org.gsc.protos.Protocol.AccountType;
 import org.gsc.protos.Protocol.Transaction.Result.code;
@@ -42,29 +41,28 @@ public class TransferOperator extends AbstractOperator {
   @Override
   public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
-    //TODO
-//    try {
-//      // if account with to_address does not exist, create it first.
-//      AccountWrapper toAccount = dbManager.getAccountStore()
-//          .get(transferContract.getToAddress().toByteArray());
-//      if (toAccount == null) {
-//        toAccount = new AccountWrapper(ByteString.copyFrom(toAddress), AccountType.Normal,
-//            dbManager.getHeadBlockTimeStamp());
-//        dbManager.getAccountStore().put(toAddress, toAccount);
-//      }
-//      dbManager.adjustBalance(transferContract.getOwnerAddress().toByteArray(), -fee);
-//      ret.setStatus(fee, code.SUCCESS);
-//      dbManager.adjustBalance(transferContract.getOwnerAddress().toByteArray(), -amount);
-//      dbManager.adjustBalance(transferContract.getToAddress().toByteArray(), amount);
-//    } catch (BalanceInsufficientException e) {
-//      logger.debug(e.getMessage(), e);
-//      ret.setStatus(fee, code.FAILED);
-//      throw new ContractExeException(e.getMessage());
-//    } catch (ArithmeticException e) {
-//      logger.debug(e.getMessage(), e);
-//      ret.setStatus(fee, code.FAILED);
-//      throw new ContractExeException(e.getMessage());
-//    }
+    try {
+      // if account with to_address does not exist, create it first.
+      AccountWrapper toAccount = dbManager.getAccountStore()
+          .get(transferContract.getToAddress().toByteArray());
+      if (toAccount == null) {
+        toAccount = new AccountWrapper(ByteString.copyFrom(toAddress), AccountType.Normal,
+            dbManager.getHeadBlockTimeStamp());
+        dbManager.getAccountStore().put(toAddress, toAccount);
+      }
+      dbManager.adjustBalance(transferContract.getOwnerAddress().toByteArray(), -fee);
+      ret.setStatus(fee, code.SUCCESS);
+      dbManager.adjustBalance(transferContract.getOwnerAddress().toByteArray(), -amount);
+      dbManager.adjustBalance(transferContract.getToAddress().toByteArray(), amount);
+    } catch (BalanceInsufficientException e) {
+      logger.debug(e.getMessage(), e);
+      ret.setStatus(fee, code.FAILED);
+      throw new ContractExeException(e.getMessage());
+    } catch (ArithmeticException e) {
+      logger.debug(e.getMessage(), e);
+      ret.setStatus(fee, code.FAILED);
+      throw new ContractExeException(e.getMessage());
+    }
     return true;
   }
 
@@ -95,9 +93,8 @@ public class TransferOperator extends AbstractOperator {
         throw new ContractValidateException("Cannot transfer trx to yourself.");
       }
 
-      AccountWrapper ownerAccount = new AccountWrapper();
-//      AccountWrapper ownerAccount; = dbManager.getAccountStore()
-//          .get(transferContract.getOwnerAddress().toByteArray());
+      AccountWrapper ownerAccount = dbManager.getAccountStore()
+          .get(transferContract.getOwnerAddress().toByteArray());
 
       if (ownerAccount == null) {
         throw new ContractValidateException("Validate TransferContract error, no OwnerAccount.");
