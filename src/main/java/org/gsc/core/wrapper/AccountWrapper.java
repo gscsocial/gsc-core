@@ -2,7 +2,9 @@ package org.gsc.core.wrapper;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.utils.ByteArray;
 import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.AccountType;
 
@@ -56,5 +58,37 @@ public class AccountWrapper implements StoreWrapper<Account>, Comparable<Account
 
   public ByteString getAddress() {
     return this.account.getAddress();
+  }
+
+
+  /**
+   * reduce asset amount.
+   */
+  public boolean reduceTokenAmount(ByteString name, long amount) {
+    Map<String, Long> assetMap = this.account.getAssetMap();
+    String nameKey = ByteArray.toStr(name.toByteArray());
+    Long currentAmount = assetMap.get(nameKey);
+    if (amount > 0 && null != currentAmount && amount <= currentAmount) {
+      this.account = this.account.toBuilder()
+          .putAsset(nameKey, Math.subtractExact(currentAmount, amount)).build();
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * add asset amount.
+   */
+  public boolean addTokenAmount(ByteString name, long amount) {
+    Map<String, Long> assetMap = this.account.getAssetMap();
+    String nameKey = ByteArray.toStr(name.toByteArray());
+    Long currentAmount = assetMap.get(nameKey);
+    if (currentAmount == null) {
+      currentAmount = 0L;
+    }
+    this.account = this.account.toBuilder().putAsset(nameKey, Math.addExact(currentAmount, amount))
+        .build();
+    return true;
   }
 }
