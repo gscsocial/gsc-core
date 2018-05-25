@@ -22,8 +22,8 @@ public class Manager {
   private AssetIssueStore assetIssueStore;
 //  @Autowired
 //  private DynamicPropertiesStore dynamicPropertiesStore;
-//  @Autowired
-//  private BlockIndexStore blockIndexStore;
+  @Autowired
+  private BlockIndexStore blockIndexStore;
 //  @Autowired
 //  private AccountIndexStore accountIndexStore;
   @Autowired
