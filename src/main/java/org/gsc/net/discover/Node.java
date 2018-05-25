@@ -3,6 +3,7 @@ package org.gsc.net.discover;
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import org.gsc.common.utils.ByteArray;
 import org.spongycastle.util.encoders.Hex;
 
@@ -125,7 +126,7 @@ public class Node implements Serializable {
     }
 
     if (o instanceof Node) {
-      return getId().equals(((Node) o).getId());
+      return Arrays.equals(getId(), (((Node) o).getId()));
     }
 
     return false;

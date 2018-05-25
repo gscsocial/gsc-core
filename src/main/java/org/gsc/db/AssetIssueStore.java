@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.core.wrapper.AssetIssueWrapper;
+import org.gsc.db.storage.Iterator.AssetIssueIterator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -66,7 +67,8 @@ public class AssetIssueStore extends ChainStore<AssetIssueWrapper> {
   public void put(byte[] key, AssetIssueWrapper item) {
     super.put(key, item);
     if (Objects.nonNull(indexHelper)) {
-      indexHelper.update(item.getInstance());
+      //TODO
+      //indexHelper.update(item.getInstance());
     }
   }
 
@@ -94,7 +96,8 @@ public class AssetIssueStore extends ChainStore<AssetIssueWrapper> {
     if (Objects.nonNull(indexHelper)) {
       AssetIssueWrapper item = get(key);
       if (Objects.nonNull(item)) {
-        indexHelper.remove(item.getInstance());
+        //TODO
+        //indexHelper.remove(item.getInstance());
       }
     }
   }

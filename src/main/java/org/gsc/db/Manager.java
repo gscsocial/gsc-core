@@ -18,8 +18,8 @@ public class Manager {
   @Autowired
   private ProducerStore prodStore;
 
-//  @Autowired
-//  private AssetIssueStore assetIssueStore;
+  @Autowired
+  private AssetIssueStore assetIssueStore;
 //  @Autowired
 //  private DynamicPropertiesStore dynamicPropertiesStore;
 //  @Autowired
