@@ -17,8 +17,10 @@ package org.gsc.core.wrapper;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.protos.Contract.AssetIssueContract;
+import org.gsc.protos.Contract.AssetIssueContract.FrozenSupply;
 
 @Slf4j
 public class AssetIssueWrapper implements StoreWrapper<AssetIssueContract> {

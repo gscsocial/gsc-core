@@ -33,7 +33,7 @@ public interface ProtoUtil {
         case TransferContract:
           owner = contractParameter.unpack(TransferContract.class).getOwnerAddress();
           break;
-        case TransferAssetContract:
+        case TransferTokenContract:
           owner = contractParameter.unpack(TransferAssetContract.class).getOwnerAddress();
           break;
         case VoteAssetContract:
@@ -91,7 +91,7 @@ public interface ProtoUtil {
         case TransferContract:
           to = contractParameter.unpack(TransferContract.class).getToAddress();
           break;
-        case TransferAssetContract:
+        case TransferTokenContract:
           to = contractParameter.unpack(TransferAssetContract.class).getToAddress();
           break;
         case ParticipateAssetIssueContract:
