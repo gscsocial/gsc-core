@@ -30,6 +30,8 @@ public class Args {
 
   private String outputDirectory;
 
+  private long maintenanceTimeInterval;
+
 
   public void setParam(final String[] args, final String confFileName) {
   }
