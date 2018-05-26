@@ -206,4 +206,20 @@ public class ByteUtil {
     return ByteBuffer.allocate(4).putInt(val).array();
   }
 
+  public static String intArrayToString(int[] a) {
+    StringBuilder sb = new StringBuilder();
+    for (int i : a) {
+      sb.append(i);
+    }
+    return sb.toString();
+  }
+
+  public static int[] stringToIntArray(String s) {
+    int length = s.length();
+    int[] result = new int[length];
+    for (int i = 0; i < length; ++i) {
+      result[i] = Integer.parseInt(s.substring(i, i + 1));
+    }
+    return result;
+  }
 }
