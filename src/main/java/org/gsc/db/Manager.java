@@ -20,8 +20,8 @@ public class Manager {
 
   @Autowired
   private AssetIssueStore assetIssueStore;
-//  @Autowired
-//  private DynamicPropertiesStore dynamicPropertiesStore;
+  @Autowired
+  private DynamicPropertiesStore dynamicPropertiesStore;
   @Autowired
   private BlockIndexStore blockIndexStore;
 //  @Autowired
