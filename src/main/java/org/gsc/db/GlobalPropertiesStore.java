@@ -78,6 +78,7 @@ public class GlobalPropertiesStore extends ChainStore<BytesWrapper> {
   @Autowired
   private GlobalPropertiesStore(@Qualifier("properties") String dbName) {
     super(dbName);
+
     try {
       this.getMaintenanceTimeInterval();
     } catch (IllegalArgumentException e) {
@@ -229,8 +230,7 @@ public class GlobalPropertiesStore extends ChainStore<BytesWrapper> {
     try {
       this.getNextMaintenanceTime();
     } catch (IllegalArgumentException e) {
-      this.saveNextMaintenanceTime(
-          Long.parseLong(Args.getInstance().getGenesisBlock().getTimestamp()));
+      this.saveNextMaintenanceTime(config.getGenesisBlockTimestamp());
     }
 
   }

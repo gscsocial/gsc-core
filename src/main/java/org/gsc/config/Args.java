@@ -32,6 +32,8 @@ public class Args {
 
   private long maintenanceTimeInterval;
 
+  private long genesisBlockTimestamp;
+
 
   public void setParam(final String[] args, final String confFileName) {
   }

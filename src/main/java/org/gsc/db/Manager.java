@@ -28,8 +28,8 @@ public class Manager {
 //  private AccountIndexStore accountIndexStore;
   @Autowired
   private ProducerScheduleStore prodScheduleStore;
-//  @Autowired
-//  private RecentBlockStore recentBlockStore;
+  @Autowired
+  private TaposBlockStore taposStore;
 //  @Autowired
 //  private VotesStore votesStore;
 //
