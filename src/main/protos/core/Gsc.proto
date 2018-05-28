@@ -109,6 +109,13 @@ message Transaction {
   Result ret = 5;
 }
 
+// Vote Change
+message Votes {
+  bytes address = 1;
+  repeated Vote old_votes = 2;
+  repeated Vote new_votes = 3;
+}
+
 // vote message
 message Vote {
   // the super rep address
