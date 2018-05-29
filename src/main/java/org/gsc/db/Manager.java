@@ -70,4 +70,8 @@ public class Manager {
     //return getDynamicPropertiesStore().getLatestBlockHeaderTimestamp();
   }
 
+  public boolean lastHeadBlockIsMaintenance() {
+    return getGlobalPropertiesStore().getStateFlag() == 1;
+  }
+
 }
