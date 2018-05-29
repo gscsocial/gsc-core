@@ -199,7 +199,7 @@ public class ByteUtil {
   /**
    * Converts int value into a byte array.
    *
-   * @param val - int value to convert
+   * @ param val - int value to convert
    * @return <code>byte[]</code> of length 4, representing the int value
    */
   public static byte[] intToBytes(int val) {

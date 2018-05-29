@@ -10,8 +10,10 @@ public class Manager {
 
   @Autowired
   private AccountStore accountStore;
+
   @Autowired
   private TransactionStore transactionStore;
+
   @Autowired
   private BlockStore blockStore;
 
@@ -20,23 +22,25 @@ public class Manager {
 
   @Autowired
   private AssetIssueStore assetIssueStore;
+
   @Autowired
   private GlobalPropertiesStore globalPropertiesStore;
+
   @Autowired
   private BlockIndexStore blockIndexStore;
 //  @Autowired
 //  private AccountIndexStore accountIndexStore;
   @Autowired
   private ProducerScheduleStore prodScheduleStore;
+
   @Autowired
   private TaposBlockStore taposStore;
-//  @Autowired
-//  private VotesStore votesStore;
-//
-//  // for network
-//  @Autowired
-//  private PeersStore peersStore;
 
+  @Autowired
+  private VotesStore votesStore;
+//
+  @Autowired
+  private PeersStore peersStore;
 
   @Autowired
   private ForkDatabase forkDB;
