@@ -11,14 +11,18 @@ import org.gsc.common.exception.BadItemException;
 import org.gsc.common.exception.ValidateSignatureException;
 import org.gsc.common.utils.MerkleTree;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.chain.BlockHeaderWrapper;
 import org.gsc.crypto.ECKey;
 import org.gsc.crypto.ECKey.ECDSASignature;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.BlockHeader;
 import org.gsc.protos.Protocol.Transaction;
 
-public class BlockWrapper extends BlockHeaderWrapper {
+public class BlockWrapper extends org.gsc.core.chain.BlockHeader implements StoreWrapper<Block>{
+
+  @Override
+  public Block getInstance() {
+    return block;
+  }
 
   private Block block;
 
@@ -100,6 +104,7 @@ public class BlockWrapper extends BlockHeaderWrapper {
   }
 
   public BlockWrapper(byte[] data) throws BadItemException {
+    super();
     try {
       this.block = Block.parseFrom(data);
       this.blockHeader = this.block.getBlockHeader();

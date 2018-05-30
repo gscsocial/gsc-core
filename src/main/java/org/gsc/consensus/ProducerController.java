@@ -13,6 +13,7 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.ProducerWrapper;
+import org.gsc.db.GlobalPropertiesStore;
 import org.gsc.db.Manager;
 import org.gsc.db.ProducerScheduleStore;
 import org.gsc.db.ProducerStore;
@@ -32,6 +33,9 @@ public class ProducerController {
 
   @Autowired
   private ProducerStore prodStore;
+
+  @Autowired
+  private GlobalPropertiesStore globalStore;
 
   @Setter
   @Getter
@@ -90,7 +94,7 @@ public class ProducerController {
    * get absolute Slot At Time
    */
   public long getAbSlotAtTime(long when) {
-    return (when - getGenesisBlock().getTimeStamp()) / ChainConstant.BLOCK_PRODUCED_INTERVAL;
+    return (when - manager.getGenesisBlock().getTimeStamp()) / ChainConstant.BLOCK_PRODUCED_INTERVAL;
   }
 
   /**
@@ -103,16 +107,16 @@ public class ProducerController {
     long interval = ChainConstant.BLOCK_PRODUCED_INTERVAL;
 
     if (manager.getGlobalPropertiesStore().getLatestBlockHeaderNumber() == 0) {
-      return getGenesisBlock().getTimeStamp() + slotNum * interval;
+      return manager.getGenesisBlock().getTimeStamp() + slotNum * interval;
     }
 
     if (lastHeadBlockIsMaintenance()) {
-      slotNum += manager.getSkipSlotInMaintenance();
+      slotNum += globalStore.getMaintenanceSkipSlots();
     }
 
     long headSlotTime = manager.getGlobalPropertiesStore().getLatestBlockHeaderTimestamp();
     headSlotTime = headSlotTime
-        - ((headSlotTime - getGenesisBlock().getTimeStamp()) % interval);
+        - ((headSlotTime - manager.getGenesisBlock().getTimeStamp()) % interval);
 
     return headSlotTime + interval * slotNum;
   }
@@ -185,7 +189,7 @@ public class ProducerController {
   }
 
   public long getHeadSlot() {
-    return (manager.getGlobalPropertiesStore().getLatestBlockHeaderTimestamp() - getGenesisBlock()
+    return (manager.getGlobalPropertiesStore().getLatestBlockHeaderTimestamp() - manager.getGenesisBlock()
         .getTimeStamp())
         / ChainConstant.BLOCK_PRODUCED_INTERVAL;
   }

@@ -3,6 +3,7 @@ package org.gsc.db;
 import lombok.Getter;
 import org.gsc.common.exception.BalanceInsufficientException;
 import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.BlockWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Getter
@@ -44,6 +45,9 @@ public class Manager {
 
   @Autowired
   private ForkDatabase forkDB;
+
+  @Getter
+  private BlockWrapper genesisBlock;
 
 
   /**
