@@ -61,6 +61,15 @@ public class AccountWrapper implements StoreWrapper<Account>, Comparable<Account
   }
 
 
+  public long getPower() {
+    long p = 0;
+    //long now = Time.getCurrentMillis();
+    for (int i = 0; i < account.getFrozenCount(); ++i) {
+      p += account.getFrozen(i).getFrozenBalance();
+    }
+    return p;
+  }
+
   /**
    * reduce asset amount.
    */

@@ -1,22 +1,27 @@
 package org.gsc.consensus;
 
+import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.exception.HeaderNotFound;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.config.Parameter.ChainConstant;
+import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.ProducerWrapper;
+import org.gsc.db.AccountStore;
 import org.gsc.db.GlobalPropertiesStore;
 import org.gsc.db.Manager;
 import org.gsc.db.ProducerScheduleStore;
 import org.gsc.db.ProducerStore;
+import org.gsc.db.VotesStore;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -124,16 +129,16 @@ public class ProducerController {
   /**
    * validate witness schedule.
    */
-  public boolean validateWitnessSchedule(BlockWrapper block) {
+  public boolean validateProducerSchedule(BlockWrapper block) {
 
     ByteString witnessAddress = block.getInstance().getBlockHeader().getRawData()
-        .getWitnessAddress();
+        .getProducerAddress();
     //to deal with other condition later
     if (manager.getGlobalPropertiesStore().getLatestBlockHeaderNumber() != 0 && manager
         .getGlobalPropertiesStore().getLatestBlockHeaderHash()
         .equals(block.getParentHash())) {
       long slot = getSlotAtTime(block.getTimeStamp());
-      final ByteString scheduledWitness = getScheduledWitness(slot);
+      final ByteString scheduledWitness = getScheduledProducer(slot);
       if (!scheduledWitness.equals(witnessAddress)) {
         logger.warn(
             "Witness is out of order, scheduledWitness[{}],blockWitnessAddress[{}],blockTimeStamp[{}],slot[{}]",
@@ -162,7 +167,7 @@ public class ProducerController {
   /**
    * get ScheduledWitness by slot.
    */
-  public ByteString getScheduledWitness(final long slot) {
+  public ByteString getScheduledProducer(final long slot) {
 
     final long currentSlot = getHeadSlot() + slot;
 
@@ -193,4 +198,57 @@ public class ProducerController {
         .getTimeStamp())
         / ChainConstant.BLOCK_PRODUCED_INTERVAL;
   }
+
+  private Map<ByteString, Long> countVote(VotesStore votesStore) {
+    final Map<ByteString, Long> countWitness = Maps.newHashMap();
+    final List<VotesWrapper> votesList = votesStore.getAllVotes();
+    AccountStore accountStore = this.manager.getAccountStore();
+    logger.info("there is {} new votes in this epoch", votesList.size());
+    votesList.forEach(votes -> {
+//      logger.info("there is account ,account address is {}",
+//          account.createReadableString());
+
+      Optional<Long> sum = votes.getNewVotes().stream().map(vote -> vote.getVoteCount())
+          .reduce((a, b) -> a + b);
+      if (sum.isPresent()) {
+        AccountWrapper account = accountStore.get(votes.createDbKey());
+        if (sum.get() <= account.getPower()) {
+          // TODO add vote reward
+          // long reward = Math.round(sum.get() * this.manager.getDynamicPropertiesStore()
+          //    .getVoteRewardRate());
+          //account.setBalance(account.getBalance() + reward);
+          //accountStore.put(account.createDbKey(), account);
+          votes.getOldVotes().forEach(vote -> {
+            //TODO validate witness //active_witness
+            ByteString voteAddress = vote.getVoteAddress();
+            long voteCount = vote.getVoteCount();
+            if (countWitness.containsKey(voteAddress)) {
+              countWitness.put(voteAddress, countWitness.get(voteAddress) - voteCount);
+            } else {
+              countWitness.put(voteAddress, -voteCount);
+            }
+          });
+          votes.getNewVotes().forEach(vote -> {
+            //TODO validate witness //active_witness
+            ByteString voteAddress = vote.getVoteAddress();
+            long voteCount = vote.getVoteCount();
+            if (countWitness.containsKey(voteAddress)) {
+              countWitness.put(voteAddress, countWitness.get(voteAddress) + voteCount);
+            } else {
+              countWitness.put(voteAddress, voteCount);
+            }
+          });
+        } else {
+          logger.info(
+              "account" + ByteArray.fromHexString(account.getAddress(.toByteArray())
+                  + ",Power[" + account.getPower()
+                  + "] < voteSum["
+                  + sum.get() + "]");
+        }
+      }
+    });
+    votesStore.reset();
+    return countWitness;
+  }
+
 }
