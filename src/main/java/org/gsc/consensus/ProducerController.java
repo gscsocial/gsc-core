@@ -42,6 +42,12 @@ public class ProducerController {
   @Autowired
   private GlobalPropertiesStore globalStore;
 
+  @Autowired
+  private VotesStore votesStore;
+
+  @Autowired
+  private AccountStore accountStore;
+
   @Setter
   @Getter
   private boolean isGeneratingBlock;
@@ -69,7 +75,7 @@ public class ProducerController {
   }
 
   public ProducerWrapper getProdByAddress(ByteString address) {
-    return this.manager.getProdStore().get(address.toByteArray());
+    return prodStore.get(address.toByteArray());
   }
 
   public void addProd(ByteString address) {
@@ -251,4 +257,89 @@ public class ProducerController {
     return countWitness;
   }
 
+  /**
+   * update prod.
+   */
+  public void updateProducer() {
+    Map<ByteString, Long> countWitness = countVote(votesStore);
+
+    //Only possible during the initialization phase
+    if (countWitness.size() == 0) {
+      logger.info("No vote, no change to witness.");
+    } else {
+      List<ByteString> currentWits = prodScheduleStore.getActiveProducers();
+      List<ByteString> newWitnessAddressList = new ArrayList<>();
+      prodStore.getAllProducers().forEach(witnessCapsule -> {
+        newWitnessAddressList.add(witnessCapsule.getAddress());
+      });
+
+      countWitness.forEach((address, voteCount) -> {
+        final ProducerWrapper witnessCapsule = prodStore
+            .get(StringUtil.createDbKey(address));
+        if (null == witnessCapsule) {
+          logger.warn("witnessCapsule is null.address is {}",
+              StringUtil.createReadableString(address));
+          return;
+        }
+
+        AccountWrapper account = accountStore
+            .get(StringUtil.createDbKey(address));
+        if (account == null) {
+          logger.warn(
+              "witnessAccount[" + StringUtil.createReadableString(address) + "] not exists");
+        } else {
+          witnessCapsule.setVoteCount(witnessCapsule.getVoteCount() + voteCount);
+          witnessCapsule.setIsJobs(false);
+          prodStore.put(witnessCapsule.createDbKey(), witnessCapsule);
+          logger.info("address is {}  ,countVote is {}", witnessCapsule.createReadableString(),
+              witnessCapsule.getVoteCount());
+
+        }
+      });
+
+      sortProds(newWitnessAddressList);
+      if (newWitnessAddressList.size() > ChainConstant.MAX_ACTIVE_WITNESS_NUM) {
+        prodScheduleStore.saveActiveProducers(newWitnessAddressList.subList(0, ChainConstant.MAX_ACTIVE_WITNESS_NUM));
+      } else {
+        prodScheduleStore.saveActiveProducers(newWitnessAddressList);
+      }
+
+      if (newWitnessAddressList.size() > ChainConstant.WITNESS_STANDBY_LENGTH) {
+        payStandbyWitness(newWitnessAddressList.subList(0, ChainConstant.WITNESS_STANDBY_LENGTH));
+      } else {
+        payStandbyWitness(newWitnessAddressList);
+      }
+
+      prodScheduleStore.getActiveProducers().forEach(address -> {
+        ProducerWrapper prod = getProdByAddress(address);
+        prod.setIsJobs(true);
+        ProducerStore.put(prod.createDbKey(), prod);
+      });
+
+      logger.info(
+          "updateWitness,before:{} ", StringUtil.getAddressStringList(currentWits)
+              + ",\nafter:{} " + StringUtil.getAddressStringList( prodScheduleStore.getActiveProducers()));
+    }
+
+  }
+
+  public int calculateParticipationRate() {
+    return globalStore.calculateFilledSlotsCount();
+  }
+
+  private void payStandbyWitness(List<ByteString> list) {
+    long voteSum = 0;
+    long totalPay = ChainConstant.WITNESS_STANDBY_ALLOWANCE;
+    for (ByteString b : list) {
+      voteSum += getProdByAddress(b).getVoteCount();
+    }
+    if (voteSum > 0) {
+      for (ByteString b : list) {
+        long pay = getProdByAddress(b).getVoteCount() * totalPay / voteSum;
+        AccountWrapper accountCapsule = manager.getAccountStore().get(b.toByteArray());
+        accountCapsule.setAllowance(accountCapsule.getAllowance() + pay);
+        manager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+      }
+    }
+  }
 }
