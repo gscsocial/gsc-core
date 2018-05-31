@@ -1,8 +1,13 @@
 package org.gsc.db;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import javafx.util.Pair;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.gsc.common.exception.BadItemException;
 import org.gsc.common.exception.BalanceInsufficientException;
 import org.gsc.common.exception.ContractExeException;
@@ -11,11 +16,14 @@ import org.gsc.common.exception.DupTransactionException;
 import org.gsc.common.exception.ItemNotFoundException;
 import org.gsc.common.exception.RevokingStoreIllegalStateException;
 import org.gsc.common.exception.TaposException;
+import org.gsc.common.exception.UnLinkedBlockException;
+import org.gsc.common.exception.ValidateScheduleException;
 import org.gsc.common.exception.ValidateSignatureException;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.core.Constant;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.BytesWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -223,4 +231,138 @@ public class Manager {
   }
 
 
+  private void applyBlock(BytesWrapper block)
+      throws ContractValidateException, ContractExeException, ValidateSignatureException, ValidateBandwidthException, TransactionExpirationException, TooBigTransactionException, DupTransactionException, TaposException {
+    processBlock(block);
+    this.blockStore.put(block.getBlockId().getBytes(), block);
+    this.blockIndexStore.put(block.getBlockId());
+  }
+
+  private void switchFork(BytesWrapper newHead) {
+    Pair<LinkedList<BytesWrapper>, LinkedList<BytesWrapper>> binaryTree =
+        khaosDb.getBranch(
+            newHead.getBlockId(), getDynamicPropertiesStore().getLatestBlockHeaderHash());
+
+    if (CollectionUtils.isNotEmpty(binaryTree.getValue())) {
+      while (!getDynamicPropertiesStore()
+          .getLatestBlockHeaderHash()
+          .equals(binaryTree.getValue().peekLast().getParentHash())) {
+        try {
+          eraseBlock();
+        } catch (BadItemException e) {
+          logger.info(e.getMessage());
+        } catch (ItemNotFoundException e) {
+          logger.info(e.getMessage());
+        }
+      }
+    }
+
+    if (CollectionUtils.isNotEmpty(binaryTree.getKey())) {
+      LinkedList<BytesWrapper> branch = binaryTree.getKey();
+      Collections.reverse(branch);
+      branch.forEach(
+          item -> {
+            // todo  process the exception carefully later
+            try (Dialog tmpDialog = revokingStore.buildDialog()) {
+              applyBlock(item);
+              tmpDialog.commit();
+            } catch (ValidateBandwidthException e) {
+              logger.debug("high freq", e);
+            } catch (ValidateSignatureException e) {
+              logger.debug(e.getMessage(), e);
+            } catch (ContractValidateException e) {
+              logger.debug(e.getMessage(), e);
+            } catch (ContractExeException e) {
+              logger.debug(e.getMessage(), e);
+            } catch (RevokingStoreIllegalStateException e) {
+              logger.debug(e.getMessage(), e);
+            } catch (TaposException e) {
+              logger.debug(e.getMessage(), e);
+            } catch (DupTransactionException e) {
+              logger.debug(e.getMessage(), e);
+            } catch (TooBigTransactionException e) {
+              logger.debug(e.getMessage(), e);
+            } catch (TransactionExpirationException e) {
+              logger.debug(e.getMessage(), e);
+            }
+          });
+      return;
+    }
+  }
+
+  // TODO: if error need to rollback.
+
+  private synchronized void filterPendingTrx(List<TransactionCapsule> listTrx) {
+  }
+
+  /**
+   * save a block.
+   */
+  public synchronized void pushBlock(final BytesWrapper block)
+      throws ValidateSignatureException, ContractValidateException, ContractExeException,
+      UnLinkedBlockException, ValidateScheduleException, ValidateBandwidthException, TaposException, TooBigTransactionException, DupTransactionException, TransactionExpirationException, BadNumberBlockException {
+
+    try (PendingManager pm = new PendingManager(this)) {
+
+      if (!block.generatedByMyself) {
+        if (!block.validateSignature()) {
+          logger.info("The siganature is not validated.");
+          // TODO: throw exception here.
+          return;
+        }
+
+        if (!block.calcMerkleRoot().equals(block.getMerkleRoot())) {
+          logger.info(
+              "The merkler root doesn't match, Calc result is "
+                  + block.calcMerkleRoot()
+                  + " , the headers is "
+                  + block.getMerkleRoot());
+          // TODO:throw exception here.
+          return;
+        }
+      }
+
+      // checkWitness
+      if (!witnessController.validateWitnessSchedule(block)) {
+        throw new ValidateScheduleException("validateWitnessSchedule error");
+      }
+
+      BytesWrapper newBlock = this.khaosDb.push(block);
+
+      // DB don't need lower block
+      if (getDynamicPropertiesStore().getLatestBlockHeaderHash() == null) {
+        if (newBlock.getNum() != 0) {
+          return;
+        }
+      } else {
+        if (newBlock.getNum() <= getDynamicPropertiesStore().getLatestBlockHeaderNumber()) {
+          return;
+        }
+
+        if (newBlock.getTimeStamp() <= getDynamicPropertiesStore()
+            .getLatestBlockHeaderTimestamp()) {
+          return;
+        }
+
+        // switch fork
+        if (!newBlock
+            .getParentHash()
+            .equals(globalPropertiesStore().getLatestBlockHeaderHash())) {
+          switchFork(newBlock);
+          return;
+        }
+        try (Dialog tmpDialog = revokingStore.buildDialog()) {
+          applyBlock(newBlock);
+          tmpDialog.commit();
+        } catch (RevokingStoreIllegalStateException e) {
+          logger.error(e.getMessage(), e);
+        } catch (Throwable throwable) {
+          logger.error(throwable.getMessage(), throwable);
+          khaosDb.removeBlk(block.getBlockId());
+          throw throwable;
+        }
+      }
+      logger.info("save block: " + newBlock);
+    }
+  }
 }
