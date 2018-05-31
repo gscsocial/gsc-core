@@ -22,6 +22,8 @@ public interface Parameter {
     int BLOCK_PRODUCED_INTERVAL = 3000; //ms,produce block period, must be divisible by 60. millisecond
     long CLOCK_MAX_DELAY = 3600 * 1000; //ms
     long BATCH_FETCH_RESPONSE_SIZE = 1000; //for each inventory message from peer, the max count of fetch inv message
+    long WITNESS_STANDBY_ALLOWANCE = 230_400_000_000L;// 6 * 1200 * 32000000
+    int WITNESS_STANDBY_LENGTH = 127;
   }
 
 }

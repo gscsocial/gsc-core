@@ -100,4 +100,17 @@ public class AccountWrapper implements StoreWrapper<Account>, Comparable<Account
         .build();
     return true;
   }
+
+  public void setAllowance(long allowance) {
+    this.account = this.account.toBuilder().setAllowance(allowance).build();
+  }
+
+  public long getAllowance() {
+    return getInstance().getAllowance();
+  }
+
+  public byte[] createDbKey() {
+    return getAddress().toByteArray();
+  }
+
 }

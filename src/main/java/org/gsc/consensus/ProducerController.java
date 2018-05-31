@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
+import org.gsc.common.utils.StringUtil;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.BlockWrapper;
@@ -246,7 +247,7 @@ public class ProducerController {
           });
         } else {
           logger.info(
-              "account" + ByteArray.fromHexString(account.getAddress(.toByteArray())
+              "account" + ByteArray.toHexString(account.getAddress().toByteArray())
                   + ",Power[" + account.getPower()
                   + "] < voteSum["
                   + sum.get() + "]");
@@ -313,7 +314,7 @@ public class ProducerController {
       prodScheduleStore.getActiveProducers().forEach(address -> {
         ProducerWrapper prod = getProdByAddress(address);
         prod.setIsJobs(true);
-        ProducerStore.put(prod.createDbKey(), prod);
+        prodStore.put(prod.createDbKey(), prod);
       });
 
       logger.info(
