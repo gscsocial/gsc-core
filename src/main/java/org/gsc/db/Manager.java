@@ -1,9 +1,11 @@
 package org.gsc.db;
 
+import static org.gsc.config.Parameter.ChainConstant.MAXIMUM_TIME_UNTIL_EXPIRATION;
+import static org.gsc.config.Parameter.ChainConstant.TRANSACTION_MAX_BYTE_SIZE;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import javafx.util.Pair;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +18,14 @@ import org.gsc.common.exception.DupTransactionException;
 import org.gsc.common.exception.ItemNotFoundException;
 import org.gsc.common.exception.RevokingStoreIllegalStateException;
 import org.gsc.common.exception.TaposException;
+import org.gsc.common.exception.TooBigTransactionException;
+import org.gsc.common.exception.TransactionExpirationException;
 import org.gsc.common.exception.UnLinkedBlockException;
+import org.gsc.common.exception.ValidateBandwidthException;
 import org.gsc.common.exception.ValidateScheduleException;
 import org.gsc.common.exception.ValidateSignatureException;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.Constant;
+import org.gsc.core.chain.BlockId;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.BytesWrapper;
@@ -133,7 +138,8 @@ public class Manager {
             "Tapos failed, different block hash, %s, %s , recent block %s, solid block %s head block %s",
             ByteArray.toLong(refBlockNumBytes), Hex.toHexString(refBlockHash),
             Hex.toHexString(blockHash),
-            getSolidBlockId().getString(), getHeadBlockId().getString()).toString();
+            getSolidBlockId(),
+            globalPropertiesStore.getLatestBlockHeaderHash());
         logger.info(str);
         throw new TaposException(str);
 
@@ -142,22 +148,41 @@ public class Manager {
       String str = String.
           format("Tapos failed, block not found, ref block %s, %s , solid block %s head block %s",
               ByteArray.toLong(refBlockNumBytes), Hex.toHexString(refBlockHash),
-              getSolidBlockId().getString(), getHeadBlockId().getString()).toString();
+              getSolidBlockId(),
+              globalPropertiesStore.getLatestBlockHeaderHash()).toString();
       logger.info(str);
       throw new TaposException(str);
     }
   }
 
+  public BlockId getSolidBlockId() {
+    try {
+      long num = globalPropertiesStore.getLatestSolidifiedBlockNum();
+      return getBlockIdByNum(num);
+    } catch (Exception e) {
+      return getGenesisBlockId();
+    }
+  }
+
+  public BlockId getBlockIdByNum(final long num) throws ItemNotFoundException {
+    return this.blockIndexStore.get(num);
+  }
+
+  public BlockId getGenesisBlockId() {
+    return this.genesisBlock.getBlockId();
+  }
+
+
   void validateCommon(TransactionWrapper transactionCapsule)
       throws TransactionExpirationException, TooBigTransactionException {
-    if (transactionCapsule.getData().length > Constant.TRANSACTION_MAX_BYTE_SIZE) {
+    if (transactionCapsule.getData().length > TRANSACTION_MAX_BYTE_SIZE) {
       throw new TooBigTransactionException(
           "too big transaction, the size is " + transactionCapsule.getData().length + " bytes");
     }
     long transactionExpiration = transactionCapsule.getExpiration();
     long headBlockTime = getHeadBlockTimeStamp();
     if (transactionExpiration <= headBlockTime ||
-        transactionExpiration > headBlockTime + Constant.MAXIMUM_TIME_UNTIL_EXPIRATION) {
+        transactionExpiration > headBlockTime + MAXIMUM_TIME_UNTIL_EXPIRATION) {
       throw new TransactionExpirationException(
           "transaction expiration, transaction expiration time is " + transactionExpiration
               + ", but headBlockTime is " + headBlockTime);

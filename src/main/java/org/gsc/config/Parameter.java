@@ -24,6 +24,8 @@ public interface Parameter {
     long BATCH_FETCH_RESPONSE_SIZE = 1000; //for each inventory message from peer, the max count of fetch inv message
     long WITNESS_STANDBY_ALLOWANCE = 230_400_000_000L;// 6 * 1200 * 32000000
     int WITNESS_STANDBY_LENGTH = 127;
+    long TRANSACTION_MAX_BYTE_SIZE = 500 * 1_024L;
+    long MAXIMUM_TIME_UNTIL_EXPIRATION = 24 * 60 * 60 * 1_000L; //one day
   }
 
 }
