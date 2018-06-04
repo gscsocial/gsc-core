@@ -95,6 +95,7 @@ public class Manager {
   private List<TransactionWrapper> pendingTransactions;
 
   // transactions popped
+  @Getter
   private List<TransactionWrapper> popedTransactions =
       Collections.synchronizedList(Lists.newArrayList());
 
