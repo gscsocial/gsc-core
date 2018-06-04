@@ -3,9 +3,11 @@ package org.gsc.db;
 import static org.gsc.config.Parameter.ChainConstant.MAXIMUM_TIME_UNTIL_EXPIRATION;
 import static org.gsc.config.Parameter.ChainConstant.TRANSACTION_MAX_BYTE_SIZE;
 
+import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import javafx.util.Pair;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -25,11 +27,14 @@ import org.gsc.common.exception.ValidateBandwidthException;
 import org.gsc.common.exception.ValidateScheduleException;
 import org.gsc.common.exception.ValidateSignatureException;
 import org.gsc.common.utils.ByteArray;
+import org.gsc.common.utils.DialogOptional;
+import org.gsc.consensus.ProducerController;
 import org.gsc.core.chain.BlockId;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.BytesWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
+import org.gsc.db.UndoStore.Dialog;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -80,6 +85,18 @@ public class Manager {
   @Autowired
   private UndoStore undoStore;
 
+  @Autowired
+  private DialogOptional dialog;
+
+  @Autowired
+  private ProducerController prodController;
+
+  // transactions cache
+  private List<TransactionWrapper> pendingTransactions;
+
+  // transactions popped
+  private List<TransactionWrapper> popedTransactions =
+      Collections.synchronizedList(Lists.newArrayList());
 
   /**
    * judge balance.
@@ -216,7 +233,7 @@ public class Manager {
         dialog.setValue(undoStore.buildDialog());
       }
 
-      try (dialog.Dialog tmpDialog = dialog.buildDialog()) {
+      try (Dialog tmpDialog = undoStore.buildDialog()) {
         processTransaction(trx);
         pendingTransactions.add(trx);
         tmpDialog.merge();
@@ -227,9 +244,13 @@ public class Manager {
     return true;
   }
 
+  private void processTransaction(TransactionWrapper trx) {
+    //TODO
+  }
+
   public void consumeBandwidth(TransactionWrapper trx) throws ValidateBandwidthException {
-    BandwidthProcessor processor = new BandwidthProcessor(this);
-    processor.consumeBandwidth(trx);
+//    BandwidthProcessor processor = new BandwidthProcessor(this);
+//    processor.consumeBandwidth(trx);
   }
   /**
    * when switch fork need erase blocks on fork branch.
@@ -239,7 +260,7 @@ public class Manager {
     BlockWrapper oldHeadBlock =
         getBlockStore().get(globalPropertiesStore.getLatestBlockHeaderHash().getBytes());
     try {
-      revokingStore.pop();
+      undoStore.pop();
     } catch (RevokingStoreIllegalStateException e) {
       logger.info(e.getMessage(), e);
     }
@@ -250,26 +271,18 @@ public class Manager {
 
   private void applyBlock(BlockWrapper block)
       throws ContractValidateException, ContractExeException, ValidateSignatureException, ValidateBandwidthException, TransactionExpirationException, TooBigTransactionException, DupTransactionException, TaposException {
-    processBlock(block);
-    this.blockStore.put(block.getBlockId().getBytes(), block);
-    this.blockIndexStore.put(block.getBlockId());
+//    processBlock(block);
+//    this.blockStore.put(block.getBlockId().getBytes(), block);
+//    this.blockIndexStore.put(block.getBlockId());
   }
 
-
-  private void applyBlock(BytesWrapper block)
-      throws ContractValidateException, ContractExeException, ValidateSignatureException, ValidateBandwidthException, TransactionExpirationException, TooBigTransactionException, DupTransactionException, TaposException {
-    processBlock(block);
-    this.blockStore.put(block.getBlockId().getBytes(), block);
-    this.blockIndexStore.put(block.getBlockId());
-  }
-
-  private void switchFork(BytesWrapper newHead) {
-    Pair<LinkedList<BytesWrapper>, LinkedList<BytesWrapper>> binaryTree =
-        khaosDb.getBranch(
-            newHead.getBlockId(), getDynamicPropertiesStore().getLatestBlockHeaderHash());
+  private void switchFork(BlockWrapper newHead) {
+    Pair<LinkedList<BlockWrapper>, LinkedList<BlockWrapper>> binaryTree =
+        forkDB.getBranch(
+            newHead.getBlockId(), globalPropertiesStore.getLatestBlockHeaderHash());
 
     if (CollectionUtils.isNotEmpty(binaryTree.getValue())) {
-      while (!getDynamicPropertiesStore()
+      while (!globalPropertiesStore
           .getLatestBlockHeaderHash()
           .equals(binaryTree.getValue().peekLast().getParentHash())) {
         try {
@@ -283,12 +296,12 @@ public class Manager {
     }
 
     if (CollectionUtils.isNotEmpty(binaryTree.getKey())) {
-      LinkedList<BytesWrapper> branch = binaryTree.getKey();
+      LinkedList<BlockWrapper> branch = binaryTree.getKey();
       Collections.reverse(branch);
       branch.forEach(
           item -> {
             // todo  process the exception carefully later
-            try (Dialog tmpDialog = revokingStore.buildDialog()) {
+            try (Dialog tmpDialog = undoStore.buildDialog()) {
               applyBlock(item);
               tmpDialog.commit();
             } catch (ValidateBandwidthException e) {
@@ -317,13 +330,13 @@ public class Manager {
 
   // TODO: if error need to rollback.
 
-  private synchronized void filterPendingTrx(List<TransactionCapsule> listTrx) {
+  private synchronized void filterPendingTrx(List<TransactionWrapper> listTrx) {
   }
 
   /**
    * save a block.
    */
-  public synchronized void pushBlock(final BytesWrapper block)
+  public synchronized void pushBlock(final BlockWrapper block)
       throws ValidateSignatureException, ContractValidateException, ContractExeException,
       UnLinkedBlockException, ValidateScheduleException, ValidateBandwidthException, TaposException, TooBigTransactionException, DupTransactionException, TransactionExpirationException, BadNumberBlockException {
 
@@ -348,23 +361,23 @@ public class Manager {
       }
 
       // checkWitness
-      if (!witnessController.validateWitnessSchedule(block)) {
+      if (!prodController.validateProducerSchedule(block)) {
         throw new ValidateScheduleException("validateWitnessSchedule error");
       }
 
-      BytesWrapper newBlock = this.khaosDb.push(block);
+      BlockWrapper newBlock = forkDB.push(block);
 
       // DB don't need lower block
-      if (getDynamicPropertiesStore().getLatestBlockHeaderHash() == null) {
+      if (globalPropertiesStore.getLatestBlockHeaderHash() == null) {
         if (newBlock.getNum() != 0) {
           return;
         }
       } else {
-        if (newBlock.getNum() <= getDynamicPropertiesStore().getLatestBlockHeaderNumber()) {
+        if (newBlock.getNum() <= globalPropertiesStore.getLatestBlockHeaderNumber()) {
           return;
         }
 
-        if (newBlock.getTimeStamp() <= getDynamicPropertiesStore()
+        if (newBlock.getTimeStamp() <= globalPropertiesStore
             .getLatestBlockHeaderTimestamp()) {
           return;
         }
@@ -372,18 +385,18 @@ public class Manager {
         // switch fork
         if (!newBlock
             .getParentHash()
-            .equals(globalPropertiesStore().getLatestBlockHeaderHash())) {
+            .equals(globalPropertiesStore.getLatestBlockHeaderHash())) {
           switchFork(newBlock);
           return;
         }
-        try (Dialog tmpDialog = revokingStore.buildDialog()) {
+        try (Dialog tmpDialog = undoStore.buildDialog()) {
           applyBlock(newBlock);
           tmpDialog.commit();
         } catch (RevokingStoreIllegalStateException e) {
           logger.error(e.getMessage(), e);
         } catch (Throwable throwable) {
           logger.error(throwable.getMessage(), throwable);
-          khaosDb.removeBlk(block.getBlockId());
+          forkDB.removeBlk(block.getBlockId());
           throw throwable;
         }
       }

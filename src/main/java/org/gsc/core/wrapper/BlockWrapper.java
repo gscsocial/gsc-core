@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.gsc.common.exception.BadItemException;
 import org.gsc.common.exception.ValidateSignatureException;
 import org.gsc.common.utils.MerkleTree;
@@ -68,6 +69,20 @@ public class BlockWrapper extends org.gsc.core.chain.BlockHeader implements Stor
     this.block = this.block.toBuilder().setBlockHeader(blockHeader).build();
   }
 
+  public Sha256Hash calcMerkleRoot() {
+    List<Transaction> transactionsList = this.block.getTransactionsList();
+
+    if (CollectionUtils.isEmpty(transactionsList)) {
+      return Sha256Hash.ZERO_HASH;
+    }
+
+    Vector<Sha256Hash> ids = transactionsList.stream()
+        .map(TransactionWrapper::new)
+        .map(TransactionWrapper::getMerkleHash)
+        .collect(Collectors.toCollection(Vector::new));
+
+    return MerkleTree.getInstance().createTree(ids).getRoot().getHash();
+  }
 
   public boolean validateSignature() throws ValidateSignatureException {
     try {
@@ -85,7 +100,7 @@ public class BlockWrapper extends org.gsc.core.chain.BlockHeader implements Stor
 
     Vector<Sha256Hash> ids = transactionsList.stream()
         .map(TransactionWrapper::new)
-        .map(TransactionWrapper::getHash)
+        .map(TransactionWrapper::getMerkleHash)
         .collect(Collectors.toCollection(Vector::new));
 
     BlockHeader.raw blockHeaderRaw =
@@ -96,7 +111,6 @@ public class BlockWrapper extends org.gsc.core.chain.BlockHeader implements Stor
     this.block = this.block.toBuilder().setBlockHeader(
         this.block.getBlockHeader().toBuilder().setRawData(blockHeaderRaw)).build();
   }
-
 
   public BlockWrapper(Block block) {
     super(block.getBlockHeader());

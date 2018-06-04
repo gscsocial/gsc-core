@@ -87,7 +87,7 @@ public class TransactionWrapper implements StoreWrapper<Transaction> {
     transaction = Transaction.newBuilder().setRawData(transactionBuilder.build()).build();
   }
 
-  public Sha256Hash getHash() {
+  public Sha256Hash getMerkleHash() {
     byte[] transBytes = this.transaction.toByteArray();
     return Sha256Hash.of(transBytes);
   }
