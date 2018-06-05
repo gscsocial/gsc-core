@@ -12,12 +12,14 @@ public interface Parameter {
 
   interface ChainConstant {
 
+    int BLOCK_SIZE = 2_000_000;
     long TRANSFER_FEE = 0; // free
     long ASSET_ISSUE_FEE = 0;
     long WITNESS_PAY_PER_BLOCK = 0;
     double SOLIDIFIED_THRESHOLD = 0.7;
     int PRIVATE_KEY_LENGTH = 64;
     int MAX_ACTIVE_WITNESS_NUM = 31;
+    double BLOCK_PRODUCED_TIME_OUT = 0.75;
     int TRXS_SIZE = 2_000_000; // < 2MiB
     int BLOCK_PRODUCED_INTERVAL = 3000; //ms,produce block period, must be divisible by 60. millisecond
     long CLOCK_MAX_DELAY = 3600 * 1000; //ms

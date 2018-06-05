@@ -6,15 +6,17 @@ import static org.gsc.config.Parameter.ChainConstant.TRANSACTION_MAX_BYTE_SIZE;
 import com.google.common.collect.Lists;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javafx.util.Pair;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.gsc.common.exception.AccountResourceInsufficientException;
-import org.gsc.common.exception.BadBlockException;
 import org.gsc.common.exception.BadItemException;
+import org.gsc.common.exception.BadNumberBlockException;
 import org.gsc.common.exception.BalanceInsufficientException;
 import org.gsc.common.exception.ContractExeException;
 import org.gsc.common.exception.ContractValidateException;
@@ -25,17 +27,24 @@ import org.gsc.common.exception.TaposException;
 import org.gsc.common.exception.TooBigTransactionException;
 import org.gsc.common.exception.TransactionExpirationException;
 import org.gsc.common.exception.UnLinkedBlockException;
-import org.gsc.common.exception.ValidateBandwidthException;
 import org.gsc.common.exception.ValidateScheduleException;
 import org.gsc.common.exception.ValidateSignatureException;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.DialogOptional;
+import org.gsc.common.utils.Sha256Hash;
+import org.gsc.common.utils.StringUtil;
+import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.consensus.ProducerController;
 import org.gsc.core.chain.BlockId;
+import org.gsc.core.chain.TransactionResultWrapper;
+import org.gsc.core.operator.Operator;
+import org.gsc.core.operator.OperatorFactory;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.ProducerWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.db.UndoStore.Dialog;
+import org.joda.time.DateTime;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -183,10 +192,6 @@ public class Manager {
     }
   }
 
-  public BlockId getBlockIdByNum(final long num) throws ItemNotFoundException {
-    return this.blockIndexStore.get(num);
-  }
-
   public BlockId getGenesisBlockId() {
     return this.genesisBlock.getBlockId();
   }
@@ -250,11 +255,9 @@ public class Manager {
   }
 
 
-  private void processTransaction(TransactionWrapper trx) {
+  public void consumeBandwidth(TransactionWrapper trx)
+      throws ContractValidateException, AccountResourceInsufficientException {
     //TODO
-  }
-
-  public void consumeBandwidth(TransactionWrapper trx) throws ValidateBandwidthException {
 //    BandwidthProcessor processor = new BandwidthProcessor(this);
 //    processor.consumeBandwidth(trx);
   }
@@ -275,8 +278,11 @@ public class Manager {
     popedTransactions.addAll(oldHeadBlock.getTransactions());
   }
 
-  private void applyBlock(BlockWrapper block)
-      throws ContractValidateException, ContractExeException, ValidateSignatureException, ValidateBandwidthException, TransactionExpirationException, TooBigTransactionException, DupTransactionException, TaposException {
+  private void applyBlock(BlockWrapper block) throws ContractValidateException,
+      ContractExeException, ValidateSignatureException, AccountResourceInsufficientException,
+      TransactionExpirationException, TooBigTransactionException, DupTransactionException,
+      TaposException, ValidateScheduleException {
+    //TODO
 //    processBlock(block);
 //    this.blockStore.put(block.getBlockId().getBytes(), block);
 //    this.blockIndexStore.put(block.getBlockId());
@@ -310,8 +316,8 @@ public class Manager {
             try (Dialog tmpDialog = undoStore.buildDialog()) {
               applyBlock(item);
               tmpDialog.commit();
-            } catch (ValidateBandwidthException e) {
-              logger.debug("high freq", e);
+            } catch (AccountResourceInsufficientException e) {
+              logger.debug(e.getMessage(), e);
             } catch (ValidateSignatureException e) {
               logger.debug(e.getMessage(), e);
             } catch (ContractValidateException e) {
@@ -328,6 +334,8 @@ public class Manager {
               logger.debug(e.getMessage(), e);
             } catch (TransactionExpirationException e) {
               logger.debug(e.getMessage(), e);
+            } catch (ValidateScheduleException e) {
+              logger.debug(e.getMessage(), e);
             }
           });
       return;
@@ -342,16 +350,16 @@ public class Manager {
   /**
    * save a block.
    */
-  public synchronized void pushBlock (final BlockWrapper block)
+  public synchronized void pushBlock(final BlockWrapper block)
       throws ValidateSignatureException, ContractValidateException, ContractExeException,
-      UnLinkedBlockException, BadBlockException, ValidateScheduleException, ValidateBandwidthException, TaposException, TooBigTransactionException, DupTransactionException, TransactionExpirationException, BadNumberBlockException {
+      UnLinkedBlockException, ValidateScheduleException, AccountResourceInsufficientException, TaposException, TooBigTransactionException, DupTransactionException, TransactionExpirationException, BadNumberBlockException {
 
     try (PendingManager pm = new PendingManager(this)) {
 
       if (!block.generatedByMyself) {
         if (!block.validateSignature()) {
           logger.info("The signature is not validated.");
-          throw new BadBlockException("signature check fail");
+          // TODO: throw exception here.
           return;
         }
 
@@ -361,17 +369,12 @@ public class Manager {
                   + block.calcMerkleRoot()
                   + " , the headers is "
                   + block.getMerkleRoot());
-          throw new BadBlockException("merkle check fail");
+          // TODO:throw exception here.
           return;
         }
       }
 
-      // checkWitness
-      if (!prodController.validateProducerSchedule(block)) {
-        throw new ValidateScheduleException("validateWitnessSchedule error");
-      }
-
-      BlockWrapper newBlock = forkDB.push(block);
+      BlockWrapper newBlock = this.forkDB.push(block);
 
       // DB don't need lower block
       if (globalPropertiesStore.getLatestBlockHeaderHash() == null) {
@@ -383,15 +386,15 @@ public class Manager {
           return;
         }
 
-        if (newBlock.getTimeStamp() <= globalPropertiesStore
-            .getLatestBlockHeaderTimestamp()) {
-          return;
-        }
-
         // switch fork
         if (!newBlock
             .getParentHash()
             .equals(globalPropertiesStore.getLatestBlockHeaderHash())) {
+          logger.warn(
+              "switch fork! new head num = {}, blockid = {}",
+              newBlock.getNum(),
+              newBlock.getBlockId());
+
           switchFork(newBlock);
           return;
         }
@@ -409,4 +412,264 @@ public class Manager {
       logger.info("save block: " + newBlock);
     }
   }
+
+
+  public void updateDynamicProperties(BlockWrapper block) {
+    long slot = 1;
+    if (block.getNum() != 1) {
+      slot = prodController.getSlotAtTime(block.getTimeStamp());
+    }
+    for (int i = 1; i < slot; ++i) {
+      if (!prodController.getScheduledProducer(i).equals(block.getProducerAddress())) {
+        ProducerWrapper prod =
+            prodStore.get(StringUtil.createDbKey(prodController.getScheduledProducer(i)));
+        prod.setTotalMissed(prod.getTotalMissed() + 1);
+        this.prodStore.put(prod.createDbKey(), prod);
+        logger.info(
+            "{} miss a block. totalMissed = {}", prod.createReadableString(), prod.getTotalMissed());
+      }
+      globalPropertiesStore.applyBlock(false);
+    }
+    globalPropertiesStore.applyBlock(true);
+
+    if (slot <= 0) {
+      logger.warn("missedBlocks [" + slot + "] is illegal");
+    }
+
+    logger.info("update head, num = {}", block.getNum());
+    globalPropertiesStore.saveLatestBlockHeaderHash(block.getBlockId().getByteString());
+
+    globalPropertiesStore.saveLatestBlockHeaderNumber(block.getNum());
+    globalPropertiesStore.saveLatestBlockHeaderTimestamp(block.getTimeStamp());
+
+    undoStore.setMaxSize(
+            (int)
+                (globalPropertiesStore.getLatestBlockHeaderNumber()
+                    - globalPropertiesStore.getLatestSolidifiedBlockNum()
+                    + 1));
+    forkDB.setMaxSize((int)
+        (globalPropertiesStore.getLatestBlockHeaderNumber()
+            - globalPropertiesStore.getLatestSolidifiedBlockNum()
+            + 1));
+  }
+
+  /**
+   * Get the fork branch.
+   */
+  public LinkedList<BlockId> getBlockChainHashesOnFork(final BlockId forkBlockHash) {
+    final Pair<LinkedList<BlockWrapper>, LinkedList<BlockWrapper>> branch =
+        this.forkDB.getBranch(
+            globalPropertiesStore.getLatestBlockHeaderHash(), forkBlockHash);
+
+    LinkedList<BlockWrapper> blockCapsules = branch.getValue();
+
+    if (blockCapsules.isEmpty()) {
+      logger.info("empty branch {}", forkBlockHash);
+      return Lists.newLinkedList();
+    }
+
+    LinkedList<BlockId> result = blockCapsules.stream()
+        .map(blockCapsule -> blockCapsule.getBlockId())
+        .collect(Collectors.toCollection(LinkedList::new));
+
+    result.add(blockCapsules.peekLast().getParentBlockId());
+
+    return result;
+  }
+
+  /**
+   * judge id.
+   *
+   * @param blockHash blockHash
+   */
+  public boolean containBlock(final Sha256Hash blockHash) {
+    try {
+      return this.forkDB.containBlock(blockHash)
+          || blockStore.get(blockHash.getBytes()) != null;
+    } catch (ItemNotFoundException e) {
+      return false;
+    } catch (BadItemException e) {
+      return false;
+    }
+  }
+
+  public boolean containBlockInMainChain(BlockId blockId) {
+    try {
+      return blockStore.get(blockId.getBytes()) != null;
+    } catch (ItemNotFoundException e) {
+      return false;
+    } catch (BadItemException e) {
+      return false;
+    }
+  }
+
+  public void setBlockReference(TransactionWrapper trans) {
+    byte[] headHash = globalPropertiesStore.getLatestBlockHeaderHash().getBytes();
+    long headNum =globalPropertiesStore.getLatestBlockHeaderNumber();
+    trans.setReference(headNum, headHash);
+  }
+
+  /**
+   * Get a BlockCapsule by id.
+   */
+  public BlockWrapper getBlockById(final Sha256Hash hash)
+      throws BadItemException, ItemNotFoundException {
+    return this.forkDB.containBlock(hash)
+        ? this.forkDB.getBlock(hash)
+        : blockStore.get(hash.getBytes());
+  }
+
+
+  /**
+   * judge has blocks.
+   */
+  public boolean hasBlocks() {
+    return blockStore.dbSource.allKeys().size() > 0 || this.forkDB.hasData();
+  }
+
+  /**
+   * Process transaction.
+   */
+  public boolean processTransaction(final TransactionWrapper trxCap)
+      throws ValidateSignatureException, ContractValidateException, ContractExeException,
+      AccountResourceInsufficientException, TransactionExpirationException, TooBigTransactionException,
+      DupTransactionException, TaposException {
+
+    if (trxCap == null) {
+      return false;
+    }
+    validateTapos(trxCap);
+    validateCommon(trxCap);
+
+    if (trxCap.getInstance().getRawData().getContract() == null) {
+      throw new ContractValidateException("null tx");
+    }
+
+    validateDup(trxCap);
+
+    if (!trxCap.validateSignature()) {
+      throw new ValidateSignatureException("trans sig validate failed");
+    }
+
+    final Operator op = OperatorFactory.createActuator(trxCap, this);
+    TransactionResultWrapper ret = new TransactionResultWrapper();
+
+    consumeBandwidth(trxCap);
+
+    op.validate();
+    op.execute(ret);
+    trxCap.setResult(ret);
+
+    transactionStore.put(trxCap.getTransactionId().getBytes(), trxCap);
+    return true;
+  }
+
+  /**
+   * Get the block id from the number.
+   */
+  public BlockId getBlockIdByNum(final long num) throws ItemNotFoundException {
+    return this.blockIndexStore.get(num);
+  }
+
+  public BlockWrapper getBlockByNum(final long num) throws ItemNotFoundException, BadItemException {
+    return getBlockById(getBlockIdByNum(num));
+  }
+
+  /**
+   * Generate a block.
+   */
+  public synchronized BlockWrapper generateBlock(
+      final ProducerWrapper witnessCapsule, final long when, final byte[] privateKey)
+      throws ValidateSignatureException, ContractValidateException, ContractExeException,
+      UnLinkedBlockException, ValidateScheduleException, AccountResourceInsufficientException {
+
+    final long timestamp = globalPropertiesStore.getLatestBlockHeaderTimestamp();
+    final long number = globalPropertiesStore.getLatestBlockHeaderNumber();
+    final Sha256Hash preHash = globalPropertiesStore.getLatestBlockHeaderHash();
+
+    // judge create block time
+    if (when < timestamp) {
+      throw new IllegalArgumentException("generate block timestamp is invalid.");
+    }
+
+    long postponedTrxCount = 0;
+
+    final BlockWrapper blockCapsule =
+        new BlockWrapper(number + 1, preHash, when, witnessCapsule.getAddress());
+    dialog.reset();
+    dialog.setValue(undoStore.buildDialog());
+    Iterator iterator = pendingTransactions.iterator();
+    while (iterator.hasNext()) {
+      TransactionWrapper trx = (TransactionWrapper) iterator.next();
+      if (DateTime.now().getMillis() - when
+          > ChainConstant.BLOCK_PRODUCED_INTERVAL * 0.5 * ChainConstant.BLOCK_PRODUCED_TIME_OUT) {
+        logger.warn("Processing transaction time exceeds the 50% producing time。");
+        break;
+      }
+      // check the block size
+      if ((blockCapsule.getInstance().getSerializedSize() + trx.getSerializedSize() + 3) > ChainConstant.BLOCK_SIZE) {
+        postponedTrxCount++;
+        continue;
+      }
+      // apply transaction
+      try (Dialog tmpDialog = undoStore.buildDialog()) {
+        processTransaction(trx);
+        tmpDialog.merge();
+        // push into block
+        blockCapsule.addTransaction(trx);
+        iterator.remove();
+      } catch (ContractExeException e) {
+        logger.info("contract not processed during execute");
+        logger.debug(e.getMessage(), e);
+      } catch (ContractValidateException e) {
+        logger.info("contract not processed during validate");
+        logger.debug(e.getMessage(), e);
+      } catch (RevokingStoreIllegalStateException e) {
+        logger.info("contract not processed during RevokingStoreIllegalState");
+        logger.debug(e.getMessage(), e);
+      } catch (TaposException e) {
+        logger.info("contract not processed during TaposException");
+        logger.debug(e.getMessage(), e);
+      } catch (DupTransactionException e) {
+        logger.info("contract not processed during DupTransactionException");
+        logger.debug(e.getMessage(), e);
+      } catch (TooBigTransactionException e) {
+        logger.info("contract not processed during TooBigTransactionException");
+        logger.debug(e.getMessage(), e);
+      } catch (TransactionExpirationException e) {
+        logger.info("contract not processed during TransactionExpirationException");
+        logger.debug(e.getMessage(), e);
+      }
+    }
+
+    dialog.reset();
+
+    if (postponedTrxCount > 0) {
+      logger.info("{} transactions over the block size limit", postponedTrxCount);
+    }
+
+    logger.info(
+        "postponedTrxCount[" + postponedTrxCount + "],TrxLeft[" + pendingTransactions.size()
+            + "]");
+    blockCapsule.setMerkleRoot();
+    blockCapsule.sign(privateKey);
+    blockCapsule.generatedByMyself = true;
+    try {
+      this.pushBlock(blockCapsule);
+      return blockCapsule;
+    } catch (TaposException e) {
+      logger.info("contract not processed during TaposException");
+    } catch (TooBigTransactionException e) {
+      logger.info("contract not processed during TooBigTransactionException");
+    } catch (DupTransactionException e) {
+      logger.info("contract not processed during DupTransactionException");
+    } catch (TransactionExpirationException e) {
+      logger.info("contract not processed during TransactionExpirationException");
+    } catch (BadNumberBlockException e) {
+      logger.info("generate block using wrong number");
+    }
+
+    return null;
+  }
+
 }
