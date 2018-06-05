@@ -38,25 +38,29 @@ public class BlockWrapper extends org.gsc.core.chain.BlockHeader implements Stor
     Block.Builder blockBuild = Block.newBuilder();
     transactionList.forEach(trx -> blockBuild.addTransactions(trx));
     this.block = blockBuild.setBlockHeader(blockHeader).build();
+    initTxs();
+  }
+
+  public BlockWrapper(long timestamp, Sha256Hash parentHash, long number,  ByteString producerAddress) {
+    super(timestamp, parentHash, number, producerAddress);
+    initTxs();
   }
 
   public void addTransaction(TransactionWrapper pendingTrx) {
     this.block = this.block.toBuilder().addTransactions(pendingTrx.getInstance()).build();
-    transactions.add(pendingTrx);
+    getTransactions().add(pendingTrx);
   }
 
   public List<TransactionWrapper> getTransactions() {
-    if (transactions == null) {
-      synchronized (BlockWrapper.class) {
-        if (transactions == null) {
-          transactions = this.block.getTransactionsList().stream()
-              .map(trx -> new TransactionWrapper(trx))
-              .collect(Collectors.toList());
-        }
-      }
-    }
     return transactions;
   }
+
+  private void initTxs() {
+    transactions = this.block.getTransactionsList().stream()
+        .map(trx -> new TransactionWrapper(trx))
+        .collect(Collectors.toList());
+  }
+
 
   public void sign(byte[] privateKey) {
     ECKey ecKey = ECKey.fromPrivate(privateKey);
@@ -115,6 +119,7 @@ public class BlockWrapper extends org.gsc.core.chain.BlockHeader implements Stor
   public BlockWrapper(Block block) {
     super(block.getBlockHeader());
     this.block = block;
+    initTxs();
   }
 
   public BlockWrapper(byte[] data) throws BadItemException {
@@ -122,8 +127,9 @@ public class BlockWrapper extends org.gsc.core.chain.BlockHeader implements Stor
     try {
       this.block = Block.parseFrom(data);
       this.blockHeader = this.block.getBlockHeader();
+      initTxs();
     } catch (InvalidProtocolBufferException e) {
-      throw new BadItemException();
+      throw new BadItemException("Block proto data parse exception");
     }
   }
 
