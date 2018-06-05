@@ -9,6 +9,7 @@ import java.security.SignatureException;
 import java.util.Arrays;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.exception.BadItemException;
 import org.gsc.common.exception.ValidateSignatureException;
 import org.gsc.common.utils.AddressUtil;
 import org.gsc.common.utils.ByteArray;
@@ -36,11 +37,11 @@ public class TransactionWrapper implements StoreWrapper<Transaction> {
   /**
    * get account from bytes data.
    */
-  public TransactionWrapper(byte[] data) {
+  public TransactionWrapper(byte[] data) throws BadItemException {
     try {
       this.transaction = Transaction.parseFrom(data);
     } catch (InvalidProtocolBufferException e) {
-      logger.debug(e.getMessage());
+      throw new BadItemException("Transaction proto data parse exception");
     }
   }
 

@@ -12,6 +12,8 @@ import javafx.util.Pair;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.gsc.common.exception.AccountResourceInsufficientException;
+import org.gsc.common.exception.BadBlockException;
 import org.gsc.common.exception.BadItemException;
 import org.gsc.common.exception.BalanceInsufficientException;
 import org.gsc.common.exception.ContractExeException;
@@ -32,7 +34,6 @@ import org.gsc.consensus.ProducerController;
 import org.gsc.core.chain.BlockId;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.BlockWrapper;
-import org.gsc.core.wrapper.BytesWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.db.UndoStore.Dialog;
 import org.spongycastle.util.encoders.Hex;
@@ -208,19 +209,22 @@ public class Manager {
   }
 
   void validateDup(TransactionWrapper transactionCapsule) throws DupTransactionException {
-    if (getTransactionStore().get(transactionCapsule.getTransactionId().getBytes()) != null) {
-      logger.debug(
-          getTransactionStore().get(transactionCapsule.getTransactionId().getBytes()).toString());
+    try {
+      if (getTransactionStore().get(transactionCapsule.getTransactionId().getBytes()) != null) {
+        logger.debug(ByteArray.toHexString(transactionCapsule.getTransactionId().getBytes()));
+        throw new DupTransactionException("dup trans");
+      }
+    } catch (BadItemException e) {
+      logger.debug(ByteArray.toHexString(transactionCapsule.getTransactionId().getBytes()));
       throw new DupTransactionException("dup trans");
     }
   }
-
   /**
    * push transaction into db.
    */
   public boolean pushTransactions(final TransactionWrapper trx)
       throws ValidateSignatureException, ContractValidateException, ContractExeException,
-      ValidateBandwidthException, DupTransactionException, TaposException,
+      AccountResourceInsufficientException, DupTransactionException, TaposException,
       TooBigTransactionException, TransactionExpirationException {
     logger.info("push transaction");
 
@@ -244,6 +248,7 @@ public class Manager {
     }
     return true;
   }
+
 
   private void processTransaction(TransactionWrapper trx) {
     //TODO
@@ -337,16 +342,16 @@ public class Manager {
   /**
    * save a block.
    */
-  public synchronized void pushBlock(final BlockWrapper block)
+  public synchronized void pushBlock (final BlockWrapper block)
       throws ValidateSignatureException, ContractValidateException, ContractExeException,
-      UnLinkedBlockException, ValidateScheduleException, ValidateBandwidthException, TaposException, TooBigTransactionException, DupTransactionException, TransactionExpirationException, BadNumberBlockException {
+      UnLinkedBlockException, BadBlockException, ValidateScheduleException, ValidateBandwidthException, TaposException, TooBigTransactionException, DupTransactionException, TransactionExpirationException, BadNumberBlockException {
 
     try (PendingManager pm = new PendingManager(this)) {
 
       if (!block.generatedByMyself) {
         if (!block.validateSignature()) {
-          logger.info("The siganature is not validated.");
-          // TODO: throw exception here.
+          logger.info("The signature is not validated.");
+          throw new BadBlockException("signature check fail");
           return;
         }
 
@@ -356,7 +361,7 @@ public class Manager {
                   + block.calcMerkleRoot()
                   + " , the headers is "
                   + block.getMerkleRoot());
-          // TODO:throw exception here.
+          throw new BadBlockException("merkle check fail");
           return;
         }
       }

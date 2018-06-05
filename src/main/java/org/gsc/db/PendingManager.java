@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.exception.AccountResourceInsufficientException;
 import org.gsc.common.exception.BadItemException;
 import org.gsc.common.exception.ContractExeException;
 import org.gsc.common.exception.ContractValidateException;
@@ -11,7 +12,6 @@ import org.gsc.common.exception.DupTransactionException;
 import org.gsc.common.exception.TaposException;
 import org.gsc.common.exception.TooBigTransactionException;
 import org.gsc.common.exception.TransactionExpirationException;
-import org.gsc.common.exception.ValidateBandwidthException;
 import org.gsc.common.exception.ValidateSignatureException;
 import org.gsc.core.wrapper.TransactionWrapper;
 
@@ -68,8 +68,6 @@ public class PendingManager implements AutoCloseable {
             logger.debug("too big transaction");
           } catch (TransactionExpirationException e) {
             logger.debug("expiration transaction");
-          } catch (ValidateBandwidthException e) {
-            e.printStackTrace();
           }
         });
   }

@@ -5,6 +5,8 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.gsc.common.exception.BadItemException;
+import org.gsc.common.exception.StoreException;
 import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.db.storage.Iterator.TransactionIterator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +22,7 @@ public class TransactionStore extends ChainStore<TransactionWrapper> {
   }
 
   @Override
-  public TransactionWrapper get(byte[] key) {
+  public TransactionWrapper get(byte[] key) throws BadItemException {
     byte[] value = dbSource.getData(key);
     return ArrayUtils.isEmpty(value) ? null : new TransactionWrapper(value);
   }
@@ -78,10 +80,15 @@ public class TransactionStore extends ChainStore<TransactionWrapper> {
 
   private void deleteIndex(byte[] key) {
     if (Objects.nonNull(indexHelper)) {
-      TransactionWrapper item = get(key);
-      if (Objects.nonNull(item)) {
-        //TODO
-        //indexHelper.remove(item.getInstance());
+      TransactionWrapper item;
+      try {
+        item = get(key);
+        if (Objects.nonNull(item)) {
+          //TODO
+          //indexHelper.remove(item.getInstance());
+        }
+      } catch (StoreException e) {
+        return;
       }
     }
   }
