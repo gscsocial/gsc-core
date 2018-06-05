@@ -127,8 +127,8 @@ public class ForkDatabase {
   @Getter
   private ForkStore miniStore = new ForkStore();
 
-  @Getter
-  private ForkStore miniUnlinkedStore = new ForkStore();
+  //@Getter
+  //private ForkStore miniUnlinkedStore = new ForkStore();
 
   @Autowired
   protected ForkDatabase() {
@@ -144,23 +144,21 @@ public class ForkDatabase {
   }
 
   void removeBlk(Sha256Hash hash) {
-    if (!miniStore.remove(hash)) {
-      miniUnlinkedStore.remove(hash);
-    }
+    miniStore.remove(hash);
   }
 
   /**
    * check if the id is contained in the KhoasDB.
    */
   public Boolean containBlock(Sha256Hash hash) {
-    return miniStore.getByHash(hash) != null || miniUnlinkedStore.getByHash(hash) != null;
+    return miniStore.getByHash(hash) != null;
   }
 
   /**
    * Get the Block form KhoasDB, if it doesn't exist ,return null.
    */
   public BlockWrapper getBlock(Sha256Hash hash) {
-    return Stream.of(miniStore.getByHash(hash), miniUnlinkedStore.getByHash(hash))
+    return Stream.of(miniStore.getByHash(hash))
         .filter(Objects::nonNull)
         .map(block -> block.blk)
         .findFirst()
@@ -177,7 +175,6 @@ public class ForkDatabase {
       if (kblock != null) {
         block.setParent(kblock);
       } else {
-        miniUnlinkedStore.insert(block);
         throw new UnLinkedBlockException();
       }
     }
@@ -207,7 +204,6 @@ public class ForkDatabase {
   }
 
   public void setMaxSize(int maxSize) {
-    miniUnlinkedStore.setMaxCapcity(maxSize);
     miniStore.setMaxCapcity(maxSize);
   }
 
@@ -275,7 +271,7 @@ public class ForkDatabase {
 
   // only for unittest
   public BlockWrapper getParentBlock(Sha256Hash hash) {
-    return Stream.of(miniStore.getByHash(hash), miniUnlinkedStore.getByHash(hash))
+    return Stream.of(miniStore.getByHash(hash))
         .filter(Objects::nonNull)
         .map(ForkBlock::getParent)
         .map(khaosBlock -> khaosBlock == null ? null : khaosBlock.blk)
