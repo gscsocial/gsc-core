@@ -1,14 +1,21 @@
 package org.gsc.db;
 
 import static org.gsc.config.Parameter.ChainConstant.MAXIMUM_TIME_UNTIL_EXPIRATION;
+import static org.gsc.config.Parameter.ChainConstant.SOLIDIFIED_THRESHOLD;
 import static org.gsc.config.Parameter.ChainConstant.TRANSACTION_MAX_BYTE_SIZE;
+import static org.gsc.config.Parameter.ChainConstant.WITNESS_PAY_PER_BLOCK;
 
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import javafx.util.Pair;
 import lombok.Getter;
@@ -33,6 +40,7 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.DialogOptional;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.StringUtil;
+import org.gsc.config.Args;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.consensus.ProducerController;
 import org.gsc.core.chain.BlockId;
@@ -41,6 +49,7 @@ import org.gsc.core.operator.Operator;
 import org.gsc.core.operator.OperatorFactory;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.BytesWrapper;
 import org.gsc.core.wrapper.ProducerWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.db.UndoStore.Dialog;
@@ -510,7 +519,7 @@ public class Manager {
   }
 
   /**
-   * Get a BlockCapsule by id.
+   * Get a BlockWrapper by id.
    */
   public BlockWrapper getBlockById(final Sha256Hash hash)
       throws BadItemException, ItemNotFoundException {
@@ -671,5 +680,169 @@ public class Manager {
 
     return null;
   }
+  
+  /**
+   * process block.
+   */
+  public void processBlock(BlockWrapper block)
+      throws ValidateSignatureException, ContractValidateException, ContractExeException,
+      AccountResourceInsufficientException, TaposException, TooBigTransactionException,
+      DupTransactionException, TransactionExpirationException, ValidateScheduleException {
+    // todo set revoking db max size.
 
+    // checkWitness
+    if (!prodController.validateProducerSchedule(block)) {
+      throw new ValidateScheduleException("validateWitnessSchedule error");
+    }
+
+    for (TransactionWrapper transactionCapsule : block.getTransactions()) {
+      if (block.generatedByMyself) {
+        transactionCapsule.setVerified(true);
+      }
+      processTransaction(transactionCapsule);
+    }
+
+    boolean needMaint = needMaintenance(block.getTimeStamp());
+    if (needMaint) {
+      if (block.getNum() == 1) {
+         globalPropertiesStore.updateNextMaintenanceTime(block.getTimeStamp());
+      } else {
+        this.processMaintenance(block);
+      }
+    }
+    this.updateDynamicProperties(block);
+    this.updateSignedWitness(block);
+    this.updateLatestSolidifiedBlock();
+    this.updateTransHashCache(block);
+    updateMaintenanceState(needMaint);
+    //witnessController.updateWitnessSchedule();
+    updateRecentBlock(block);
+  }
+
+  private void updateTransHashCache(BlockWrapper block) {
+    for (TransactionWrapper transactionCapsule : block.getTransactions()) {
+      this.transactionIdCache.put(transactionCapsule.getTransactionId(), true);
+    }
+  }
+
+  public void updateRecentBlock(BlockWrapper block) {
+    this.taposStore.put(ByteArray.subArray(
+        ByteArray.fromLong(block.getNum()), 6, 8),
+        new BytesWrapper(ByteArray.subArray(block.getBlockId().getBytes(), 8, 16)));
+  }
+
+  /**
+   * update the latest solidified block.
+   */
+  public void updateLatestSolidifiedBlock() {
+    List<Long> numbers =
+        prodController
+            .getActiveWitnesses()
+            .stream()
+            .map(address -> witnessController.getWitnesseByAddress(address).getLatestBlockNum())
+            .sorted()
+            .collect(Collectors.toList());
+
+    long size = prodController.getActiveWitnesses().size();
+    int solidifiedPosition = (int) (size * (1 - SOLIDIFIED_THRESHOLD));
+    if (solidifiedPosition < 0) {
+      logger.warn(
+          "updateLatestSolidifiedBlock error, solidifiedPosition:{},wits.size:{}",
+          solidifiedPosition,
+          size);
+      return;
+    }
+    long latestSolidifiedBlockNum = numbers.get(solidifiedPosition);
+    //if current value is less than the previous value，keep the previous value.
+    if (latestSolidifiedBlockNum < globalPropertiesStore.getLatestSolidifiedBlockNum()) {
+      logger.warn("latestSolidifiedBlockNum = 0,LatestBlockNum:{}", numbers);
+      return;
+    }
+    globalPropertiesStore.saveLatestSolidifiedBlockNum(latestSolidifiedBlockNum);
+    logger.info("update solid block, num = {}", latestSolidifiedBlockNum);
+  }
+
+  public long getSyncBeginNumber() {
+    logger.info("headNumber:" + globalPropertiesStore.getLatestBlockHeaderNumber());
+    logger.info(
+        "syncBeginNumber:"
+            + (globalPropertiesStore.getLatestBlockHeaderNumber() - undoStore.size()));
+    logger.info("solidBlockNumber:" + globalPropertiesStore.getLatestSolidifiedBlockNum());
+    return globalPropertiesStore.getLatestBlockHeaderNumber() - undoStore.size();
+  }
+
+  public BlockId getSolidBlockId() {
+    try {
+      long num = globalPropertiesStore.getLatestSolidifiedBlockNum();
+      return getBlockIdByNum(num);
+    } catch (Exception e) {
+      return getGenesisBlockId();
+    }
+  }
+
+  /**
+   * Determine if the current time is maintenance time.
+   */
+  public boolean needMaintenance(long blockTime) {
+    return globalPropertiesStore.getNextMaintenanceTime() <= blockTime;
+  }
+
+  /**
+   * Perform maintenance.
+   */
+  private void processMaintenance(BlockWrapper block) {
+    prodController.updateProducer();
+    globalPropertiesStore.updateNextMaintenanceTime(block.getTimeStamp());
+  }
+
+  /**
+   * @param block the block update signed witness. set witness who signed block the 1. the latest
+   * block num 2. pay the trx to witness. 3. the latest slot num.
+   */
+  public void updateSignedWitness(BlockWrapper block) {
+    // TODO: add verification
+    ProducerWrapper witnessCapsule =
+        prodStore.get(
+            block.getInstance().getBlockHeader().getRawData().getProducerAddress().toByteArray());
+    witnessCapsule.setTotalProduced(witnessCapsule.getTotalProduced() + 1);
+    witnessCapsule.setLatestBlockNum(block.getNum());
+    witnessCapsule.setLatestSlotNum(prodController.getAbSlotAtTime(block.getTimeStamp()));
+
+    // Update memory witness status
+    ProducerWrapper wit = prodController.getProdByAddress(block.getProducerAddress());
+    if (wit != null) {
+      wit.setTotalProduced(witnessCapsule.getTotalProduced() + 1);
+      wit.setLatestBlockNum(block.getNum());
+      wit.setLatestSlotNum(prodController.getAbSlotAtTime(block.getTimeStamp()));
+    }
+
+    prodStore.put(witnessCapsule.getAddress().toByteArray(), witnessCapsule);
+
+    AccountWrapper sun = accountStore.getPhoton();
+    try {
+      adjustBalance(sun.getAddress().toByteArray(), - WITNESS_PAY_PER_BLOCK);
+    } catch (BalanceInsufficientException e) {
+      logger.debug(e.getMessage(), e);
+    }
+    try {
+      adjustAllowance(witnessCapsule.getAddress().toByteArray(), WITNESS_PAY_PER_BLOCK);
+    } catch (BalanceInsufficientException e) {
+      logger.debug(e.getMessage(), e);
+    }
+
+    logger.debug(
+        "updateSignedWitness. witness address:{}, blockNum:{}, totalProduced:{}",
+        witnessCapsule.createReadableString(),
+        block.getNum(),
+        witnessCapsule.getTotalProduced());
+  }
+
+  public void updateMaintenanceState(boolean needMaint) {
+    if (needMaint) {
+      globalPropertiesStore.saveStateFlag(1);
+    } else {
+      globalPropertiesStore.saveStateFlag(0);
+    }
+  }
+  
 }
