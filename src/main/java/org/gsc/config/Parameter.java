@@ -28,6 +28,7 @@ public interface Parameter {
     int WITNESS_STANDBY_LENGTH = 127;
     long TRANSACTION_MAX_BYTE_SIZE = 500 * 1_024L;
     long MAXIMUM_TIME_UNTIL_EXPIRATION = 24 * 60 * 60 * 1_000L; //one day
+    int MAX_TRANSACTION_PENDING = 2000;
   }
 
 }

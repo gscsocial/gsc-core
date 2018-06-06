@@ -34,6 +34,8 @@ public class Args {
 
   private long genesisBlockTimestamp;
 
+  private boolean prod;
+
 
   public void setParam(final String[] args, final String confFileName) {
   }

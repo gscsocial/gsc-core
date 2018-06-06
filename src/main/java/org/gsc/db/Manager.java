@@ -1,21 +1,19 @@
 package org.gsc.db;
 
 import static org.gsc.config.Parameter.ChainConstant.MAXIMUM_TIME_UNTIL_EXPIRATION;
+import static org.gsc.config.Parameter.ChainConstant.MAX_TRANSACTION_PENDING;
 import static org.gsc.config.Parameter.ChainConstant.SOLIDIFIED_THRESHOLD;
 import static org.gsc.config.Parameter.ChainConstant.TRANSACTION_MAX_BYTE_SIZE;
 import static org.gsc.config.Parameter.ChainConstant.WITNESS_PAY_PER_BLOCK;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import javafx.util.Pair;
 import lombok.Getter;
@@ -109,6 +107,13 @@ public class Manager {
 
   @Autowired
   private ProducerController prodController;
+
+  @Autowired
+  private  Args config;
+
+  @Getter
+  private Cache<Sha256Hash, Boolean> transactionIdCache = CacheBuilder
+      .newBuilder().maximumSize(100_000).recordStats().build();
 
   // transactions cache
   private List<TransactionWrapper> pendingTransactions;
@@ -736,14 +741,14 @@ public class Manager {
    */
   public void updateLatestSolidifiedBlock() {
     List<Long> numbers =
-        prodController
-            .getActiveWitnesses()
+        prodScheduleStore
+            .getActiveProducers()
             .stream()
-            .map(address -> witnessController.getWitnesseByAddress(address).getLatestBlockNum())
+            .map(address -> prodController.getProdByAddress(address).getLatestBlockNum())
             .sorted()
             .collect(Collectors.toList());
 
-    long size = prodController.getActiveWitnesses().size();
+    long size = prodScheduleStore.getActiveProducers().size();
     int solidifiedPosition = (int) (size * (1 - SOLIDIFIED_THRESHOLD));
     if (solidifiedPosition < 0) {
       logger.warn(
@@ -769,15 +774,6 @@ public class Manager {
             + (globalPropertiesStore.getLatestBlockHeaderNumber() - undoStore.size()));
     logger.info("solidBlockNumber:" + globalPropertiesStore.getLatestSolidifiedBlockNum());
     return globalPropertiesStore.getLatestBlockHeaderNumber() - undoStore.size();
-  }
-
-  public BlockId getSolidBlockId() {
-    try {
-      long num = globalPropertiesStore.getLatestSolidifiedBlockNum();
-      return getBlockIdByNum(num);
-    } catch (Exception e) {
-      return getGenesisBlockId();
-    }
   }
 
   /**
@@ -844,5 +840,63 @@ public class Manager {
       globalPropertiesStore.saveStateFlag(0);
     }
   }
-  
+
+  // To be added
+  public long getSkipSlotInMaintenance() {
+    return globalPropertiesStore.getMaintenanceSkipSlots();
+  }
+
+  public AssetIssueStore getAssetIssueStore() {
+    return assetIssueStore;
+  }
+
+  public void setAssetIssueStore(AssetIssueStore assetIssueStore) {
+    this.assetIssueStore = assetIssueStore;
+  }
+
+  public void setBlockIndexStore(BlockIndexStore indexStore) {
+    this.blockIndexStore = indexStore;
+  }
+
+
+  public void closeAllStore() {
+    System.err.println("******** begin to close store ********");
+    closeOneStore(accountStore);
+    closeOneStore(blockStore);
+    closeOneStore(blockIndexStore);
+
+    closeOneStore(prodStore);
+    closeOneStore(prodScheduleStore);
+    closeOneStore(assetIssueStore);
+    closeOneStore(globalPropertiesStore);
+    closeOneStore(transactionStore);
+    System.err.println("******** end to close store ********");
+  }
+
+  private void closeOneStore(Store database) {
+    System.err.println("******** begin to close " + database.getName() + " ********");
+    try {
+      database.close();
+    } catch (Exception e) {
+      System.err.println("failed to close  " + database.getName() + ". " + e);
+    } finally {
+      System.err.println("******** end to close " + database.getName() + " ********");
+    }
+  }
+
+  public boolean isTooManyPending() {
+    if (getPendingTransactions().size() + PendingManager.getTmpTransactions().size()
+        > MAX_TRANSACTION_PENDING) {
+      return true;
+    }
+    return false;
+  }
+
+  public boolean isGeneratingBlock() {
+    if (config.isProd()) {
+      return prodController.isGeneratingBlock();
+    }
+    return false;
+  }
+
 }
