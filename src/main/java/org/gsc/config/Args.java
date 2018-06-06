@@ -36,6 +36,8 @@ public class Args {
 
   private boolean prod;
 
+  private int validateSignThreadNum;
+
 
   public void setParam(final String[] args, final String confFileName) {
   }

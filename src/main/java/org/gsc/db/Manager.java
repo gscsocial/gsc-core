@@ -9,13 +9,21 @@ import static org.gsc.config.Parameter.ChainConstant.WITNESS_PAY_PER_BLOCK;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import javafx.util.Pair;
+import javax.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -118,6 +126,8 @@ public class Manager {
   // transactions cache
   private List<TransactionWrapper> pendingTransactions;
 
+  private ExecutorService validateSignService;
+
   // transactions popped
   @Getter
   private List<TransactionWrapper> popedTransactions =
@@ -149,6 +159,74 @@ public class Manager {
 
   public boolean lastHeadBlockIsMaintenance() {
     return getGlobalPropertiesStore().getStateFlag() == 1;
+  }
+
+  @PostConstruct
+  public void init() {
+    undoStore.disable();
+    this.pendingTransactions = Collections.synchronizedList(Lists.newArrayList());
+    this.initGenesis();
+    try {
+      this.forkDB.start(getBlockById(globalPropertiesStore.getLatestBlockHeaderHash()));
+    } catch (ItemNotFoundException e) {
+      logger.error(
+          "Can not find Dynamic highest block from DB! \nnumber={} \nhash={}",
+          globalPropertiesStore.getLatestBlockHeaderNumber(),
+          globalPropertiesStore.getLatestBlockHeaderHash());
+      logger.error(
+          "Please delete database directory({}) and restart",
+          config.getOutputDirectory());
+      System.exit(1);
+    } catch (BadItemException e) {
+      e.printStackTrace();
+      logger.error("DB data broken!");
+      logger.error(
+          "Please delete database directory({}) and restart",
+          config.getOutputDirectory());
+      System.exit(1);
+    }
+    undoStore.enable();
+
+    validateSignService = Executors
+        .newFixedThreadPool(config.getValidateSignThreadNum());
+  }
+
+  /**
+   * init genesis block.
+   */
+  public void initGenesis() {
+
+    //TODO
+//    this.genesisBlock = BlockUtil.newGenesisBlockCapsule();
+//    if (this.containBlock(this.genesisBlock.getBlockId())) {
+//      config.setChainId(this.genesisBlock.getBlockId().toString());
+//    } else {
+//      if (this.hasBlocks()) {
+//        logger.error(
+//            "genesis block modify, please delete database directory({}) and restart",
+//            config.getOutputDirectory());
+//        System.exit(1);
+//      } else {
+//        logger.info("create genesis block");
+//        config.setChainId(this.genesisBlock.getBlockId().toString());
+//        // this.pushBlock(this.genesisBlock);
+//        blockStore.put(this.genesisBlock.getBlockId().getBytes(), this.genesisBlock);
+//        this.blockIndexStore.put(this.genesisBlock.getBlockId());
+//
+//        logger.info("save block: " + this.genesisBlock);
+//        // init DynamicPropertiesStore
+//        globalPropertiesStore.saveLatestBlockHeaderNumber(0);
+//        globalPropertiesStore.saveLatestBlockHeaderHash(
+//            this.genesisBlock.getBlockId().getByteString());
+//        globalPropertiesStore.saveLatestBlockHeaderTimestamp(
+//            this.genesisBlock.getTimeStamp());
+//        this.initAccount();
+//        this.initWitness();
+//        this.witnessController.initWits();
+//        forkDB.start(genesisBlock);
+//        this.updateRecentBlock(genesisBlock);
+//      }
+//    }
   }
 
   public void adjustAllowance(byte[] accountAddress, long amount)
@@ -899,4 +977,50 @@ public class Manager {
     return false;
   }
 
+  private static class ValidateSignTask implements Callable<Boolean> {
+
+    private TransactionWrapper trx;
+    private CountDownLatch countDownLatch;
+
+    ValidateSignTask(TransactionWrapper trx, CountDownLatch countDownLatch) {
+      this.trx = trx;
+      this.countDownLatch = countDownLatch;
+    }
+
+    @Override
+    public Boolean call() throws ValidateSignatureException {
+      try {
+        trx.validateSignature();
+      } catch (ValidateSignatureException e) {
+        throw e;
+      } finally {
+        countDownLatch.countDown();
+      }
+      return true;
+    }
+  }
+
+  public synchronized void preValidateTransactionSign(BlockWrapper block)
+      throws InterruptedException, ValidateSignatureException {
+    logger.info("PreValidate Transaction Sign, size:" + block.getTransactions().size()
+        + ",block num:" + block.getNum());
+    int transSize = block.getTransactions().size();
+    CountDownLatch countDownLatch = new CountDownLatch(transSize);
+    List<Future<Boolean>> futures = new ArrayList<>(transSize);
+
+    for (TransactionWrapper transaction : block.getTransactions()) {
+      Future<Boolean> future = validateSignService
+          .submit(new ValidateSignTask(transaction, countDownLatch));
+      futures.add(future);
+    }
+    countDownLatch.await();
+
+    for (Future<Boolean> future : futures) {
+      try {
+        future.get();
+      } catch (ExecutionException e) {
+        throw new ValidateSignatureException(e.getCause().getMessage());
+      }
+    }
+  }
 }
