@@ -1,32 +1,16 @@
-/*
- * Copyright (c) [2016] [ <ether.camp> ]
- * This file is part of the ethereumJ library.
- *
- * The ethereumJ library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * The ethereumJ library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
- */
-
 package org.gsc.net.discover;
 
 import static java.lang.Math.min;
 
 import java.util.concurrent.atomic.AtomicLong;
-import org.gsc.net.message.p2p.ReasonCode;
+import org.gsc.protos.P2p.ReasonCode;
+
 
 public class NodeStatistics {
 
   public final static int REPUTATION_PREDEFINED = 100000;
-  public final static long TOO_MANY_PEERS_PENALIZE_TIMEOUT = 60 * 1000;
+  public final static long TOO_MANY_PEERS_PENALIZE_TIMEOUT = 60 * 1000L;
+  private static final long CLEAR_CYCLE_TIME = 60 * 60 * 1000L;
 
   public class StatHandler {
 
@@ -77,10 +61,11 @@ public class NodeStatistics {
   private ReasonCode gscLastRemoteDisconnectReason = null;
   private ReasonCode gscLastLocalDisconnectReason = null;
   private long lastDisconnectedTime = 0;
+  private long firstDisconnectedTime = 0;
 
 
   public NodeStatistics(Node node) {
-    discoverMessageLatency = new SimpleStatter(node.getId().toString());
+    discoverMessageLatency = new SimpleStatter(node.getIdString());
   }
 
   private int getSessionReputation() {
@@ -91,11 +76,12 @@ public class NodeStatistics {
     int discoverReput = 0;
 
     discoverReput +=
-            min(discoverInPong.get(), 1) * (discoverOutPing.get() == discoverInPong.get() ? 50 : 1);
-    discoverReput += min(discoverInNeighbours.get(), 10) * 10;
-    discoverReput += min(discoverInFind.get(), 50);
+        min(discoverInPong.get(), 1) * (discoverOutPing.get() == discoverInPong.get() ? 50 : 1);
 
-    //discoverReput += 20 / (min((int)discoverMessageLatency.getAvrg(), 1) / 100);
+    discoverReput +=
+        min(discoverInNeighbours.get(), 1) * (discoverOutFind.get() == discoverInNeighbours.get() ? 50 : 1);
+
+    discoverReput += (int)discoverMessageLatency.getAvrg() == 0 ? 0 : 1000 / discoverMessageLatency.getAvrg();
 
     int reput = 0;
     reput += p2pHandShake.get() > 0 ? 20 : 0;
@@ -105,18 +91,24 @@ public class NodeStatistics {
       if (gscLastLocalDisconnectReason == null && gscLastRemoteDisconnectReason == null) {
         // means connection was dropped without reporting any reason - bad
         reput *= 0.3;
-      } else if (gscLastLocalDisconnectReason != ReasonCode.PEER_QUITING) {
+      } else if (gscLastLocalDisconnectReason != ReasonCode.REQUESTED) {
         // the disconnect was not initiated by discover mode
         if (gscLastRemoteDisconnectReason == ReasonCode.TOO_MANY_PEERS) {
           // The peer is popular, but we were unlucky
           reput *= 0.3;
-        } else if (gscLastRemoteDisconnectReason != ReasonCode.PEER_QUITING) {
+        } else if (gscLastRemoteDisconnectReason != ReasonCode.REQUESTED) {
           // other disconnect reasons
           reput *= 0.2;
         }
       }
     }
-    return discoverReput + 10 * reput;
+    if (disconnectTimes > 20) {
+      return 0;
+    }
+    int score =
+        discoverReput + 10 * reput - (int) Math.pow(2, disconnectTimes) * (disconnectTimes > 0 ? 10
+            : 0);
+    return score > 0 ? score : 0;
   }
 
   public int getReputation() {
@@ -145,7 +137,18 @@ public class NodeStatistics {
       return true;
     }
 
-    return gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
+    if (firstDisconnectedTime > 0
+        && (System.currentTimeMillis() - firstDisconnectedTime) > CLEAR_CYCLE_TIME) {
+      gscLastLocalDisconnectReason = null;
+      gscLastRemoteDisconnectReason = null;
+      disconnectTimes = 0;
+      persistedReputation = 0;
+      firstDisconnectedTime = 0;
+    }
+
+    if (gscLastLocalDisconnectReason == ReasonCode.NULL_IDENTITY ||
+        gscLastRemoteDisconnectReason == ReasonCode.NULL_IDENTITY ||
+        gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
         gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
         gscLastLocalDisconnectReason == ReasonCode.BAD_PROTOCOL ||
         gscLastRemoteDisconnectReason == ReasonCode.BAD_PROTOCOL ||
@@ -155,29 +158,37 @@ public class NodeStatistics {
         gscLastRemoteDisconnectReason == ReasonCode.BAD_TX ||
         gscLastLocalDisconnectReason == ReasonCode.FORKED ||
         gscLastRemoteDisconnectReason == ReasonCode.FORKED ||
-        gscLastLocalDisconnectReason ==  ReasonCode.UNLINKABLE ||
+        gscLastLocalDisconnectReason == ReasonCode.UNLINKABLE ||
         gscLastRemoteDisconnectReason == ReasonCode.UNLINKABLE ||
         gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_VERSION ||
         gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_VERSION ||
         gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_CHAIN ||
-        gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_CHAIN;
-  }
-
-  public boolean isPenalized() {
-    return gscLastLocalDisconnectReason == ReasonCode.BAD_PROTOCOL ||
-            gscLastRemoteDisconnectReason == ReasonCode.BAD_PROTOCOL;
+        gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_CHAIN ||
+        gscLastRemoteDisconnectReason == ReasonCode.SYNC_FAIL ||
+        gscLastLocalDisconnectReason == ReasonCode.SYNC_FAIL) {
+      persistedReputation = 0;
+      return true;
+    }
+    return false;
   }
 
   public void nodeDisconnectedRemote(ReasonCode reason) {
     lastDisconnectedTime = System.currentTimeMillis();
     gscLastRemoteDisconnectReason = reason;
-    disconnectTimes++;
   }
 
   public void nodeDisconnectedLocal(ReasonCode reason) {
     lastDisconnectedTime = System.currentTimeMillis();
     gscLastLocalDisconnectReason = reason;
+  }
+
+  public void notifyDisconnect() {
+    lastDisconnectedTime = System.currentTimeMillis();
+    if (firstDisconnectedTime <= 0) {
+      firstDisconnectedTime = lastDisconnectedTime;
+    }
     disconnectTimes++;
+    persistedReputation = persistedReputation / 2;
   }
 
   public boolean wasDisconnected() {
@@ -186,10 +197,6 @@ public class NodeStatistics {
 
   public void setPredefined(boolean isPredefined) {
     this.isPredefined = isPredefined;
-  }
-
-  public int getPersistedReputation() {
-    return isReputationPenalized() ? 0 : (persistedReputation + getSessionFairReputation()) / 2;
   }
 
   public void setPersistedReputation(int persistedReputation) {
@@ -241,7 +248,7 @@ public class NodeStatistics {
     }
 
     public double getAvrg() {
-      return getSum() / getCount();
+      return count == 0 ? 0 : sum / count;
     }
 
     public String getName() {

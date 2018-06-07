@@ -1,10 +1,14 @@
 package org.gsc.net.discover;
 
+import static org.gsc.crypto.ECKey.sha3;
+
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
+import org.apache.commons.lang3.StringUtils;
 import org.gsc.common.utils.ByteArray;
+import org.gsc.crypto.ECKey;
+import org.gsc.net.discover.dht.Utils;
 import org.spongycastle.util.encoders.Hex;
 
 public class Node implements Serializable {
@@ -39,8 +43,8 @@ public class Node implements Serializable {
       // continue
     }
 
-    //TODO: need a crypto module
-    final String generatedNodeId = "nodeId";
+    final ECKey generatedNodeKey = ECKey.fromPrivate(sha3(addressOrEnode.getBytes()));
+    final String generatedNodeId = Hex.toHexString(generatedNodeKey.getNodeId());
     final Node node = new Node("enode://" + generatedNodeId + "@" + addressOrEnode);
     node.isFakeNodeId = true;
     return node;
@@ -77,6 +81,10 @@ public class Node implements Serializable {
     return Hex.toHexString(id);
   }
 
+  public String getHexIdShort() {
+    return Utils.getIdShort(getHexId());
+  }
+
   public boolean isDiscoveryNode() {
     return isFakeNodeId;
   }
@@ -99,6 +107,13 @@ public class Node implements Serializable {
 
   public void setPort(int port) {
     this.port = port;
+  }
+
+  public String getIdString() {
+    if (id == null) {
+      return null;
+    }
+    return new String(id);
   }
 
   @Override
@@ -126,7 +141,7 @@ public class Node implements Serializable {
     }
 
     if (o instanceof Node) {
-      return Arrays.equals(getId(), (((Node) o).getId()));
+      return StringUtils.equals(getIdString(), ((Node) o).getIdString());
     }
 
     return false;
