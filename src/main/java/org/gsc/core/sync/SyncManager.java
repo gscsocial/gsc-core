@@ -1,5 +1,5 @@
 package org.gsc.core.sync;
 
-public class SyncManage {
+public class SyncManager {
 
 }
