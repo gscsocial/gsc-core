@@ -1,37 +1,25 @@
-/*
- * Copyright (c) [2016] [ <ether.camp> ]
- * This file is part of the ethereumJ library.
- *
- * The ethereumJ library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * The ethereumJ library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
- */
+
 package org.gsc.net.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
-import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
+import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.scalecube.transport.MessageCodec;
-import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
+import org.gsc.core.sync.SyncManager;
 import org.gsc.net.discover.Node;
 import org.gsc.net.discover.NodeManager;
 import org.gsc.net.discover.NodeStatistics;
 import org.gsc.net.gsc.GscHandler;
-import org.gsc.net.message.p2p.P2pMessage;
-import org.gsc.net.message.p2p.ReasonCode;
+import org.gsc.net.message.p2p.DisconnectMessage;
+import org.gsc.net.message.p2p.HelloMessage;
+import org.gsc.net.message.p2p.StaticMessages;
+import org.gsc.protos.P2p.ReasonCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +42,9 @@ public class Channel {
     private NodeManager nodeManager;
 
     @Autowired
+    private StaticMessages staticMessages;
+
+    @Autowired
     private WireTrafficStats stats;
 
     @Autowired
@@ -67,27 +58,34 @@ public class Channel {
 
     private ChannelManager channelManager;
 
+    private ChannelHandlerContext ctx;
+
     private InetSocketAddress inetSocketAddress;
 
     private Node node;
 
     private long startTime;
 
+    @Autowired
+    private SyncManager syncManager;
 
-
-    private GscState gscState = GscState.INIT;
+    private TronState tronState = TronState.INIT;
 
     protected NodeStatistics nodeStatistics;
-    private boolean discoveryMode;
+
     private boolean isActive;
+
+    private volatile boolean isDisconnect;
 
     private String remoteId;
 
     private PeerStatistics peerStats = new PeerStatistics();
 
     public void init(ChannelPipeline pipeline, String remoteId, boolean discoveryMode,
-                     ChannelManager channelManager) {
+        ChannelManager channelManager, SyncManager syncManager) {
+
         this.channelManager = channelManager;
+
         this.remoteId = remoteId;
 
         isActive = remoteId != null && !remoteId.isEmpty();
@@ -96,91 +94,82 @@ public class Channel {
         pipeline.addLast("readTimeoutHandler", new ReadTimeoutHandler(60, TimeUnit.SECONDS));
         pipeline.addLast(stats.tcp);
         pipeline.addLast("protoPender", new ProtobufVarint32LengthFieldPrepender());
-        pipeline.addLast("lengthDecode", new ProtobufVarint32FrameDecoder());
+        pipeline.addLast("lengthDecode", new TrxProtobufVarint32FrameDecoder(this));
+
         //handshake first
         pipeline.addLast("handshakeHandler", handshakeHandler);
 
-        this.discoveryMode = discoveryMode;
+        this.syncManager = syncManager;
+
+        messageCodec.setChannel(this);
+        msgQueue.setChannel(this);
+        handshakeHandler.setChannel(this, remoteId);
+        p2pHandler.setChannel(this);
+        gscHandler.setChannel(this);
+
+        p2pHandler.setMsgQueue(msgQueue);
+        gscHandler.setMsgQueue(msgQueue);
+        gscHandler.setPeerDel(syncManager);
 
     }
 
-    public void publicHandshakeFinished(ChannelHandlerContext ctx, P2pMessage msg) throws IOException, InterruptedException {
-
-    }
-
-    public void setInetSocketAddress(InetSocketAddress inetSocketAddress) {
-        this.inetSocketAddress = inetSocketAddress;
-    }
-
-    public NodeStatistics getNodeStatistics() {
-        return nodeStatistics;
+    public void publicHandshakeFinished(ChannelHandlerContext ctx, HelloMessage msg) {
+        ctx.pipeline().remove(handshakeHandler);
+        msgQueue.activate(ctx);
+        ctx.pipeline().addLast("messageCodec", messageCodec);
+        ctx.pipeline().addLast("p2p", p2pHandler);
+        ctx.pipeline().addLast("data", tronHandler);
+        setStartTime(msg.getTimestamp());
+        setTronState(TronState.HANDSHAKE_FINISHED);
+        getNodeStatistics().p2pHandShake.add();
+        logger.info("Finish handshake with {}.", ctx.channel().remoteAddress());
     }
 
     /**
      * Set node and register it in NodeManager if it is not registered yet.
      */
-    public void initWithNode(byte[] nodeId, int remotePort) {
+    public void initNode(byte[] nodeId, int remotePort) {
         node = new Node(nodeId, inetSocketAddress.getHostString(), remotePort);
         nodeStatistics = nodeManager.getNodeStatistics(node);
     }
 
-    public Node getNode() {
-        return node;
-    }
-
-    public boolean isProtocolsInitialized() {
-        return gscState.ordinal() > GscState.INIT.ordinal();
-    }
-
-    public String logSyncStats() {
-//    int waitResp = lastReqSentTime > 0 ? (int) (System.currentTimeMillis() - lastReqSentTime) / 1000 : 0;
-//    long lifeTime = System.currentTimeMillis() - connectedTime;
-        return "";
-//        return String.format(
-//            "Peer %s: [ %18s, ping %6s ms, last know block num %s ]: needSyncFromPeer:%b needSyncFromUs:%b",
-//            this.getNode().getHost() + ":" + this.getNode().getPort(),
-//            this.getPeerIdShort(),
-//            (int)this.getPeerStats().getAvgLatency(),
-//            headBlockWeBothHave.getNum(),
-//            isNeedSyncFromPeer(),
-//            isNeedSyncFromUs());
-    }
-
-    public String getPeerId() {
-        return node == null ? "<null>" : node.getHexId();
-    }
-
-
-
-    public byte[] getNodeId() {
-        return node == null ? null : node.getId();
-    }
-
-    /**
-     * Indicates whether this connection was initiated by our peer
-     */
-    public boolean isActive() {
-        return isActive;
-    }
-
-
-
     public void disconnect(ReasonCode reason) {
-        logger.info("Channel disconnect {}, reason:{}", inetSocketAddress, reason);
-        getNodeStatistics()
-            .nodeDisconnectedLocal(reason);
-        msgQueue.disconnect(reason);
+        this.isDisconnect = true;
+        channelManager.processDisconnect(this, reason);
+        DisconnectMessage msg = new DisconnectMessage(reason);
+        logger.info("Send to {}, {}", ctx.channel().remoteAddress(), msg);
+        getNodeStatistics().nodeDisconnectedLocal(reason);
+        ctx.writeAndFlush(msg.getSendData()).addListener(future -> close());
     }
 
-    public InetSocketAddress getInetSocketAddress() {
-        return inetSocketAddress;
+    public void processException(Throwable throwable) {
+        Throwable baseThrowable = throwable;
+        while (baseThrowable.getCause() != null) {
+            baseThrowable = baseThrowable.getCause();
+        }
+        String errMsg = throwable.getMessage();
+        SocketAddress address = ctx.channel().remoteAddress();
+        if (throwable instanceof ReadTimeoutException) {
+            logger.error("Read timeout, {}", address);
+        } else if (baseThrowable instanceof P2pException) {
+            logger.error("type: {}, info: {}, {}", ((P2pException) baseThrowable).getType(),
+                baseThrowable.getMessage(), address);
+        } else if (errMsg != null && errMsg.contains("Connection reset by peer")) {
+            logger.error("{}, {}", errMsg, address);
+        } else {
+            logger.error("exception caught, {}", address, throwable);
+        }
+        close();
     }
 
-    public PeerStatistics getPeerStats() {
-        return peerStats;
+    public void close() {
+        this.isDisconnect = true;
+        p2pHandler.close();
+        msgQueue.close();
+        ctx.close();
     }
 
-    public enum GscState {
+    public enum TronState {
         INIT,
         HANDSHAKE_FINISHED,
         START_TO_SYNC,
@@ -189,37 +178,88 @@ public class Channel {
         SYNC_FAILED
     }
 
-    public boolean isIdle() {
-        // TODO: use peer's status.
-        return  true;
+    public PeerStatistics getPeerStats() {
+        return peerStats;
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public byte[] getNodeId() {
+        return node == null ? null : node.getId();
+    }
+
+    public ByteArrayWrapper getNodeIdWrapper() {
+        return node == null ? null : new ByteArrayWrapper(node.getId());
+    }
+
+    public String getPeerId() {
+        return node == null ? "<null>" : node.getHexId();
+    }
+
+    public void setChannelHandlerContext(ChannelHandlerContext ctx) {
+        this.ctx = ctx;
+        this.inetSocketAddress = ctx == null ? null : (InetSocketAddress) ctx.channel().remoteAddress();
+    }
+
+    public ChannelHandlerContext getChannelHandlerContext() {
+        return this.ctx;
+    }
+
+    public InetAddress getInetAddress() {
+        return ctx == null ? null : ((InetSocketAddress) ctx.channel().remoteAddress()).getAddress();
+    }
+
+    public NodeStatistics getNodeStatistics() {
+        return nodeStatistics;
     }
 
     public void setStartTime(long startTime) {
         this.startTime = startTime;
     }
 
-    public long getStartTime(){
+    public long getStartTime() {
         return startTime;
     }
 
-    public GscState getGscState() {
-        return gscState;
+    public void setTronState(TronState tronState) {
+        this.tronState = tronState;
     }
 
-    public void setGscState(GscState gscState) {
-        this.gscState = gscState;
+    public TronState getTronState() {
+        return tronState;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public boolean isDisconnect() {
+        return isDisconnect;
+    }
+
+    public boolean isProtocolsInitialized() {
+        return tronState.ordinal() > TronState.INIT.ordinal();
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
 
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Channel channel = (Channel) o;
-
-
-        if (inetSocketAddress != null ? !inetSocketAddress.equals(channel.inetSocketAddress) : channel.inetSocketAddress != null) return false;
-        if (node != null ? !node.equals(channel.node) : channel.node != null) return false;
+        if (inetSocketAddress != null ? !inetSocketAddress.equals(channel.inetSocketAddress)
+            : channel.inetSocketAddress != null) {
+            return false;
+        }
+        if (node != null ? !node.equals(channel.node) : channel.node != null) {
+            return false;
+        }
         return this == channel;
     }
 
@@ -232,7 +272,7 @@ public class Channel {
 
     @Override
     public String toString() {
-        return String.format("%s | %s", getPeerId(), inetSocketAddress);
+        return String.format("%s | %s", inetSocketAddress, getPeerId());
     }
 }
 

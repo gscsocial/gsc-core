@@ -30,7 +30,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.gsc.net.message.Message;
-import org.gsc.net.message.p2p.ReasonCode;
+import org.gsc.protos.P2p.ReasonCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;

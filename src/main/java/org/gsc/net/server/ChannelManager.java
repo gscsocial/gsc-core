@@ -18,26 +18,19 @@
 package org.gsc.net.server;
 
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.timeout.ReadTimeoutException;
+import static org.gsc.protos.P2p.ReasonCode.DUPLICATE_PEER;
+import static org.gsc.protos.P2p.ReasonCode.TOO_MANY_PEERS;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.commons.collections4.map.LRUMap;
 import org.gsc.config.Args;
-import org.gsc.net.message.p2p.ReasonCode;
+import org.gsc.net.client.PeerClient;
+import org.gsc.protos.P2p.ReasonCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,36 +42,34 @@ public class ChannelManager {
 
   private static final Logger logger = LoggerFactory.getLogger("ChannelManager");
 
-  private static final int inboundConnectionBanTimeout = 60 * 1000;
+  private static final int inboundConnectionBanTimeout = 30 * 1000;
 
-  private List<Channel> newPeers = new CopyOnWriteArrayList<>();
+  private final Map<ByteArrayWrapper, Channel> activePeers = new ConcurrentHashMap<>();
 
-  private final Map<String, Channel> activePeers = new ConcurrentHashMap<>();
+  private Cache<InetAddress, ReasonCode> badPeers = CacheBuilder.newBuilder().maximumSize(10000)
+      .expireAfterWrite(1, TimeUnit.HOURS).recordStats().build();
 
-  private Map<InetAddress, Date> recentlyDisconnected = Collections
-      .synchronizedMap(new LRUMap<InetAddress, Date>(500));
-
-  private ScheduledExecutorService mainWorker = Executors.newSingleThreadScheduledExecutor();
+  private Cache<InetAddress, ReasonCode> recentlyDisconnected = CacheBuilder.newBuilder().maximumSize(1000)
+      .expireAfterWrite(30, TimeUnit.SECONDS).recordStats().build();
 
   @Autowired
   private Args args;
 
+  private int maxActivePeers = args.getNodeMaxActiveNodes() > 0 ? args.getNodeMaxActiveNodes() : 30;
+
   private PeerServer peerServer;
 
-  @Autowired
-  private SyncPool syncPool;
+  private PeerClient peerClient;
 
   @Autowired
-  private ChannelManager(final PeerServer peerServer) {
+  private org.tron.common.overlay.server.SyncPool syncPool;
+  @Autowired
+  private org.tron.common.overlay.server.SyncPool syncPool;
+
+  @Autowired
+  private ChannelManager(final PeerServer peerServer, final PeerClient peerClient) {
     this.peerServer = peerServer;
-
-    mainWorker.scheduleWithFixedDelay(() -> {
-      try {
-        processNewPeers();
-      } catch (Throwable t) {
-        logger.error("Error", t);
-      }
-    }, 0, 1, TimeUnit.SECONDS);
+    this.peerClient = peerClient;
 
     if (this.args.getNodeListenPort() > 0) {
       new Thread(() -> peerServer.start(args.getNodeListenPort()),
@@ -86,88 +77,85 @@ public class ChannelManager {
     }
   }
 
-  public Set<String> nodesInUse() {
-    Set<String> ids = new HashSet<>();
-    for (Channel peer : getActivePeers()) {
-      ids.add(peer.getPeerId());
+  public void processDisconnect(Channel channel, ReasonCode reason){
+    InetAddress inetAddress = channel.getInetAddress();
+    if (inetAddress == null){
+      return;
     }
-    for (Channel peer : newPeers) {
-      ids.add(peer.getPeerId());
+    switch (reason){
+      case FORKED:
+      case BAD_PROTOCOL:
+      case BAD_BLOCK:
+      case INCOMPATIBLE_CHAIN:
+      case INCOMPATIBLE_PROTOCOL:
+        badPeers.put(channel.getInetAddress(), reason);
+        break;
+      default:
+        recentlyDisconnected.put(channel.getInetAddress(), reason);
+        break;
     }
-    return ids;
-  }
-
-  private void processNewPeers() {
-
-      if (newPeers.isEmpty()) {
-          return;
-      }
-
-      newPeers.sort(Comparator.comparingLong(c -> c.getStartTime()));
-
-    //todo:
-  }
-
-  public void disconnect(Channel peer, ReasonCode reason) {
-    logger.info("Disconnecting peer with reason " + reason + ": " + peer);
-    peer.disconnect(reason);
-    recentlyDisconnected.put(peer.getInetSocketAddress().getAddress(), new Date());
   }
 
   public void notifyDisconnect(Channel channel) {
     syncPool.onDisconnect(channel);
     activePeers.values().remove(channel);
-    newPeers.remove(channel);
-  }
-
-  public boolean isRecentlyDisconnected(InetAddress peerAddr) {
-    Date disconnectTime = recentlyDisconnected.get(peerAddr);
-    if (disconnectTime != null &&
-        System.currentTimeMillis() - disconnectTime.getTime() < inboundConnectionBanTimeout) {
-      return true;
-    } else {
-      recentlyDisconnected.remove(peerAddr);
-      return false;
+    if (channel != null) {
+      if (channel.getNodeStatistics() != null) {
+        channel.getNodeStatistics().notifyDisconnect();
+      }
+      InetAddress inetAddress = channel.getInetAddress();
+      if (inetAddress != null && recentlyDisconnected.getIfPresent(inetAddress) == null){
+        recentlyDisconnected.put(channel.getInetAddress(), UNKNOWN);
+      }
     }
   }
 
-  public void add(Channel peer) {
-    newPeers.add(peer);
+  public synchronized boolean processPeer(Channel peer) {
+
+    if (recentlyDisconnected.getIfPresent(peer) != null){
+      logger.info("Peer {} recently disconnected.", peer.getInetAddress());
+      return false;
+    }
+
+    if (badPeers.getIfPresent(peer) != null) {
+      peer.disconnect(peer.getNodeStatistics().getDisconnectReason());
+      return false;
+    }
+
+    if (!peer.isActive() && activePeers.size() >= maxActivePeers) {
+      peer.disconnect(TOO_MANY_PEERS);
+      return false;
+    }
+
+    if (activePeers.containsKey(peer.getNodeIdWrapper())) {
+      Channel channel = activePeers.get(peer.getNodeIdWrapper());
+      if (channel.getStartTime() > peer.getStartTime()) {
+        logger.info("Disconnect connection established later, {}", channel.getNode());
+        channel.disconnect(DUPLICATE_PEER);
+      } else {
+        peer.disconnect(DUPLICATE_PEER);
+        return false;
+      }
+    }
+    activePeers.put(peer.getNodeIdWrapper(), peer);
+    logger.info("Add active peer {}, total active peers: {}", peer, activePeers.size());
+    return true;
   }
 
   public Collection<Channel> getActivePeers() {
-    return new ArrayList<>(activePeers.values());
+    return activePeers.values();
   }
 
-  public void processException(ChannelHandlerContext ctx, Throwable throwable){
-      if (throwable instanceof ReadTimeoutException){
-          logger.error("Read timeout, {}", ctx.channel().remoteAddress());
-      }else if (throwable.getMessage().contains("Connection reset by peer")){
-          logger.error("Connection reset by peer, {}", ctx.channel().remoteAddress());
-      }else {
-          logger.error("exception caught, {}", ctx.channel().remoteAddress(), throwable);
-      }
-      ctx.close();
+  public Cache<InetAddress, ReasonCode> getRecentlyDisconnected(){
+    return this.recentlyDisconnected;
+  }
+
+  public Cache<InetAddress, ReasonCode> getBadPeers(){
+    return this.badPeers;
   }
 
   public void close() {
-    try {
-      mainWorker.shutdownNow();
-      mainWorker.awaitTermination(5, TimeUnit.SECONDS);
-    } catch (Exception e) {
-      logger.warn("Problems shutting down", e);
-    }
     peerServer.close();
-
-    ArrayList<Channel> allPeers = new ArrayList<>(activePeers.values());
-    allPeers.addAll(newPeers);
-
-    for (Channel channel : allPeers) {
-      try {
-        //channel.dropConnection();
-      } catch (Exception e) {
-        logger.warn("Problems disconnecting channel " + channel, e);
-      }
-    }
+    peerClient.close();
   }
 }

@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import org.gsc.config.Args;
+import org.gsc.net.client.PeerClient;
 import org.gsc.net.discover.NodeHandler;
 import org.gsc.net.discover.NodeManager;
 import org.gsc.net.server.Channel;
