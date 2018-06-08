@@ -69,7 +69,7 @@ public class Channel {
     @Autowired
     private SyncManager syncManager;
 
-    private TronState tronState = TronState.INIT;
+    private GscState gscState = GscState.INIT;
 
     protected NodeStatistics nodeStatistics;
 
@@ -118,9 +118,9 @@ public class Channel {
         msgQueue.activate(ctx);
         ctx.pipeline().addLast("messageCodec", messageCodec);
         ctx.pipeline().addLast("p2p", p2pHandler);
-        ctx.pipeline().addLast("data", tronHandler);
+        ctx.pipeline().addLast("data", gscHandler);
         setStartTime(msg.getTimestamp());
-        setTronState(TronState.HANDSHAKE_FINISHED);
+        setGscState(GscState.HANDSHAKE_FINISHED);
         getNodeStatistics().p2pHandShake.add();
         logger.info("Finish handshake with {}.", ctx.channel().remoteAddress());
     }
@@ -169,7 +169,7 @@ public class Channel {
         ctx.close();
     }
 
-    public enum TronState {
+    public enum GscState {
         INIT,
         HANDSHAKE_FINISHED,
         START_TO_SYNC,
@@ -223,12 +223,12 @@ public class Channel {
         return startTime;
     }
 
-    public void setTronState(TronState tronState) {
-        this.tronState = tronState;
+    public void setGscState(GscState gscState) {
+        this.gscState = gscState;
     }
 
-    public TronState getTronState() {
-        return tronState;
+    public GscState getGscState() {
+        return gscState;
     }
 
     public boolean isActive() {
@@ -240,7 +240,7 @@ public class Channel {
     }
 
     public boolean isProtocolsInitialized() {
-        return tronState.ordinal() > TronState.INIT.ordinal();
+        return gscState.ordinal() > GscState.INIT.ordinal();
     }
 
     @Override

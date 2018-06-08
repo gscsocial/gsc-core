@@ -62,9 +62,7 @@ public class ChannelManager {
   private PeerClient peerClient;
 
   @Autowired
-  private org.tron.common.overlay.server.SyncPool syncPool;
-  @Autowired
-  private org.tron.common.overlay.server.SyncPool syncPool;
+  private SyncPool syncPool;
 
   @Autowired
   private ChannelManager(final PeerServer peerServer, final PeerClient peerClient) {

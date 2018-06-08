@@ -31,4 +31,18 @@ public interface Parameter {
     int MAX_TRANSACTION_PENDING = 2000;
   }
 
+  interface NetConstants {
+
+    long GRPC_IDLE_TIME_OUT = 60000L;
+    long ADV_TIME_OUT = 20000L;
+    long SYNC_TIME_OUT = 5000L;
+    long HEAD_NUM_MAX_DELTA = 1000L;
+    long HEAD_NUM_CHECK_TIME = 60000L;
+    int MAX_INVENTORY_SIZE_IN_MINUTES = 2;
+    long NET_MAX_TRX_PER_SECOND = 700L;
+    long MAX_TRX_PER_PEER = 200L;
+    int NET_MAX_INV_SIZE_IN_MINUTES = 2;
+    int MSG_CACHE_DURATION_IN_BLOCKS = 5;
+  }
+
 }
