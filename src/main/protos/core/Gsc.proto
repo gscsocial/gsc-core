@@ -34,6 +34,17 @@ message Block {
   BlockHeader block_header = 2;
 }
 
+// inv
+message Inventory {
+  enum InventoryType {
+    TRX = 0;
+    BLOCK = 1;
+  }
+  InventoryType type = 1;
+  repeated bytes ids = 2;
+}
+
+
 // Producer
 message Producer {
   bytes address = 1;
