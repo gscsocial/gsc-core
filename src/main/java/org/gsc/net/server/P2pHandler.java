@@ -17,8 +17,17 @@
  */
 package org.gsc.net.server;
 
+
+import static org.gsc.net.message.p2p.StaticMessages.PING_MESSAGE;
+import static org.gsc.net.message.p2p.StaticMessages.PONG_MESSAGE;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import org.gsc.net.message.p2p.DisconnectMessage;
 import org.gsc.net.message.p2p.P2pMessage;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -28,9 +37,73 @@ import org.springframework.stereotype.Component;
 @Scope("prototype")
 public class P2pHandler extends SimpleChannelInboundHandler<P2pMessage> {
 
+  private static ScheduledExecutorService pingTimer =
+      Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "P2pPingTimer"));
+
+  private MessageQueue msgQueue;
+
+  private Channel channel;
+
+  private ScheduledFuture<?> pingTask;
+
+  private volatile boolean hasPing = false;
+
+  private volatile long sendPingTime;
+
+  private ChannelHandlerContext ctx;
 
   @Override
-  protected void channelRead0(ChannelHandlerContext ctx, P2pMessage msg) throws Exception {
+  public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+    this.ctx = ctx;
+    pingTask = pingTimer.scheduleAtFixedRate(() -> {
+      if (!hasPing){
+        sendPingTime = System.currentTimeMillis();
+        hasPing = msgQueue.sendMessage(PING_MESSAGE);
+      }
+    }, 10, 10, TimeUnit.SECONDS);
+  }
 
+  @Override
+  public void channelRead0(final ChannelHandlerContext ctx, P2pMessage msg) throws InterruptedException {
+
+    msgQueue.receivedMessage(msg);
+
+    switch (msg.getType()) {
+      case P2P_PING:
+        msgQueue.sendMessage(PONG_MESSAGE);
+        break;
+      case P2P_PONG:
+        hasPing = false;
+        channel.getNodeStatistics().lastPongReplyTime.set(System.currentTimeMillis());
+        channel.getPeerStats().pong(sendPingTime);
+        break;
+      case P2P_DISCONNECT:
+        channel.getNodeStatistics()
+            .nodeDisconnectedRemote(((DisconnectMessage) msg).getReasonCode());
+        channel.close();
+        break;
+      default:
+        channel.close();
+        break;
+    }
+  }
+
+  @Override
+  public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+    channel.processException(cause);
+  }
+
+  public void setMsgQueue(MessageQueue msgQueue) {
+    this.msgQueue = msgQueue;
+  }
+
+  public void setChannel(Channel channel) {
+    this.channel = channel;
+  }
+
+  public void close() {
+    if (pingTask != null && !pingTask.isCancelled()){
+      pingTask.cancel(false);
+    }
   }
 }
