@@ -17,11 +17,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import org.gsc.config.Args;
 import org.gsc.core.sync.PeerConnection;
+import org.gsc.core.sync.SyncManager;
 import org.gsc.net.client.PeerClient;
+import org.gsc.net.discover.Node;
 import org.gsc.net.discover.NodeHandler;
 import org.gsc.net.discover.NodeManager;
-import org.gsc.net.server.Channel;
-import org.gsc.net.server.ChannelManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +50,10 @@ public class SyncPool {
 
   private ChannelManager channelManager;
 
-  private PeerConnectionDelegate peerDel;
+  private SyncManager syncManager;
 
-  private Args args = Args.getInstance();
+  @Autowired
+  private Args args;
 
   private int maxActiveNodes = args.getNodeMaxActiveNodes() > 0 ? args.getNodeMaxActiveNodes() : 30;
 
@@ -62,8 +63,8 @@ public class SyncPool {
 
   private PeerClient peerClient;
 
-  public void init(PeerConnectionDelegate peerDel) {
-    this.peerDel = peerDel;
+  public void init(SyncManager syncManager) {
+    this.syncManager = syncManager;
 
     channelManager = ctx.getBean(ChannelManager.class);
 
@@ -154,7 +155,7 @@ public class SyncPool {
       }
       activePeers.add((PeerConnection) peer);
       activePeers.sort(Comparator.comparingDouble(c -> c.getPeerStats().getAvgLatency()));
-      peerDel.onConnectPeer((PeerConnection) peer);
+      syncManager.onConnectPeer((PeerConnection) peer);
     }
   }
 
@@ -166,7 +167,7 @@ public class SyncPool {
         activePeersCount.decrementAndGet();
       }
       activePeers.remove(peer);
-      peerDel.onDisconnectPeer((PeerConnection) peer);
+      syncManager.onDisconnectPeer((PeerConnection) peer);
     }
   }
 
