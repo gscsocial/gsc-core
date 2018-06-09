@@ -20,6 +20,7 @@ package org.gsc.net.server;
 
 import static org.gsc.protos.P2p.ReasonCode.DUPLICATE_PEER;
 import static org.gsc.protos.P2p.ReasonCode.TOO_MANY_PEERS;
+import static org.gsc.protos.P2p.ReasonCode.UNKNOWN;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.gsc.config.Args;
+import org.gsc.core.wrapper.ByteArrayWrapper;
 import org.gsc.net.client.PeerClient;
 import org.gsc.protos.P2p.ReasonCode;
 import org.slf4j.Logger;

@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 import org.gsc.core.sync.SyncManager;
+import org.gsc.core.wrapper.ByteArrayWrapper;
 import org.gsc.net.discover.Node;
 import org.gsc.net.discover.NodeManager;
 import org.gsc.net.discover.NodeStatistics;
