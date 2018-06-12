@@ -34,7 +34,7 @@ public class GscMessageFactory implements MessageFactory {
     }
     switch (receivedTypes) {
       case TRANSACTION:
-        return new TransactionMessage(packed);
+        return new TransactionMessage();
       case BLOCK:
         return new BlockMessage(packed);
 //      case BLOCKS:

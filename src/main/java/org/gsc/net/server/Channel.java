@@ -6,7 +6,6 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.scalecube.transport.MessageCodec;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -20,6 +19,7 @@ import org.gsc.net.discover.NodeStatistics;
 import org.gsc.net.gsc.GscHandler;
 import org.gsc.net.message.p2p.DisconnectMessage;
 import org.gsc.net.message.p2p.HelloMessage;
+import org.gsc.net.message.p2p.MessageCodec;
 import org.gsc.net.message.p2p.StaticMessages;
 import org.gsc.protos.P2p.ReasonCode;
 import org.slf4j.Logger;
@@ -111,7 +111,7 @@ public class Channel {
 
         p2pHandler.setMsgQueue(msgQueue);
         gscHandler.setMsgQueue(msgQueue);
-        gscHandler.setPeerDel(syncManager);
+        gscHandler.setSyncManager(syncManager);
 
     }
 
