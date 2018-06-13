@@ -34,13 +34,13 @@ public class GscMessageFactory implements MessageFactory {
     }
     switch (receivedTypes) {
       case TRANSACTION:
-        return new TransactionMessage();
+        return new TransactionMessage(packed);
       case BLOCK:
         return new BlockMessage(packed);
 //      case BLOCKS:
 //        return new BlocksMessage(packed);
-//      case INVENTORY:
-//        return new InventoryMessage(packed);
+      case FETCH:
+        return new InventoryMessage(packed);
 //      case FETCH_INV_DATA:
 //        return new FetchInvDataMessage(packed);
 //      case SYNC_BLOCK_CHAIN:
