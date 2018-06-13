@@ -15,12 +15,14 @@ public abstract class InventoryMessage extends GscMessage {
   protected Inventory inv;
 
   public InventoryMessage(byte[] data) throws Exception {
+    this.type = MessageTypes.INVENTORY.asByte();
     this.data = data;
     this.inv = Protocol.Inventory.parseFrom(data);
   }
 
   public InventoryMessage(Inventory inv) {
     this.inv = inv;
+    this.type = MessageTypes.INVENTORY.asByte();
     this.data = inv.toByteArray();
   }
 
@@ -33,10 +35,9 @@ public abstract class InventoryMessage extends GscMessage {
     }
     invBuilder.setType(type);
     inv = invBuilder.build();
+    this.type = MessageTypes.INVENTORY.asByte();
     this.data = inv.toByteArray();
   }
-
-  public void setType(byte type) {this.type = type;}
 
   @Override
   public Class<?> getAnswerMessage() {
@@ -49,6 +50,7 @@ public abstract class InventoryMessage extends GscMessage {
 
   public MessageTypes getInvMessageType() {
     return getInventoryType().equals(InventoryType.BLOCK) ? MessageTypes.BLOCK : MessageTypes.TRANSACTION;
+
   }
 
   public InventoryType getInventoryType() {

@@ -27,13 +27,15 @@ public enum MessageTypes {
 
   TRANSACTION(0x11),
 
-  FETCH(0x12),
+  INVENTORY(0x12),
 
-  SYNC(0x13),
+  FETCH(0x13),
 
-  ATTENTION(0x14),
+  SYNC(0x14),
 
-  TIME(0x15),
+  ATTENTION(0x15),
+
+  TIME(0x16),
 
   LAST(0xFF);
 
