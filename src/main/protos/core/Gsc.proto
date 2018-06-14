@@ -34,6 +34,16 @@ message Block {
   BlockHeader block_header = 2;
 }
 
+message BlockId {
+  bytes hash = 1;
+  int64 number = 2;
+}
+
+// Inventory
+message BlockInventory {
+  repeated BlockId ids = 1;
+}
+
 // inv
 message Inventory {
   enum InventoryType {
