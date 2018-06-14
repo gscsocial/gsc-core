@@ -10,7 +10,7 @@ import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Inventory;
 import org.gsc.protos.Protocol.Inventory.InventoryType;
 
-public abstract class InventoryMessage extends GscMessage {
+public class InventoryMessage extends GscMessage {
 
   protected Inventory inv;
 

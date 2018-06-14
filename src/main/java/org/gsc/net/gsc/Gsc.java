@@ -1,7 +1,7 @@
 package org.gsc.net.gsc;
 
 import org.gsc.net.message.gsc.GscMessage;
-import org.gsc.net.message.p2p.ReasonCode;
+import org.gsc.protos.P2p.ReasonCode;
 
 public interface Gsc {
   void active();

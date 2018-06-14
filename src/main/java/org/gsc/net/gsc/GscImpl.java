@@ -9,7 +9,7 @@ import org.gsc.net.message.gsc.GscMessage;
 import org.gsc.net.message.gsc.SyncMessage;
 import org.gsc.net.message.gsc.TimeMessage;
 import org.gsc.net.message.gsc.TransactionMessage;
-import org.gsc.net.message.p2p.ReasonCode;
+import org.gsc.protos.P2p.ReasonCode;
 import org.gsc.service.NetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -46,12 +46,14 @@ public class GscImpl extends GscHandler{
 
   @Override
   public void active() {
-
   }
 
   @Override
   public void dropConnect() {
+  }
 
+  @Override
+  public void sendMessage(GscMessage msg) {
   }
 
   @Override
