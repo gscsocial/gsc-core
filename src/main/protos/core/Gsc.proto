@@ -39,6 +39,11 @@ message BlockId {
   int64 number = 2;
 }
 
+message ChainInventory {
+  repeated BlockId ids = 1;
+  int64 remain_num = 2;
+}
+
 // Inventory
 message BlockInventory {
   repeated BlockId ids = 1;
