@@ -45,27 +45,27 @@ public class NetService implements Service{
   }
 
   public void handleMessage(Gsc gsc, BlockMessage msg) {
-    logger.info("get block message");
+    logger.info("get block message from " + gsc.getPeer());
   }
 
   public void handleMessage(Gsc gsc, TransactionMessage msg) {
-    logger.info("get tx message");
+    logger.info("get tx message from " + gsc.getPeer());
   }
 
   public void handleMessage(Gsc gsc, FetchMessage msg) {
-    logger.info("get fetch message");
+    logger.info("get fetch message from " + gsc.getPeer());
   }
 
   public void handleMessage(Gsc gsc, SyncMessage msg) {
-    logger.info("get sync message");
+    logger.info("get sync message from " + gsc.getPeer());
   }
 
   public void handleMessage(Gsc gsc, TimeMessage msg) {
-    logger.info("get time message");
+    logger.info("get time message from " + gsc.getPeer());
   }
 
   public void handleMessage(Gsc gsc, AttentionMessage msg) {
-    logger.info("get attention message");
+    logger.info("get attention message from " + gsc.getPeer());
   }
 
 }

@@ -1,5 +1,6 @@
 package org.gsc.net.gsc;
 
+import org.gsc.core.sync.PeerConnection;
 import org.gsc.net.message.gsc.GscMessage;
 import org.gsc.protos.P2p.ReasonCode;
 
@@ -11,4 +12,6 @@ public interface Gsc {
   void sendMessage(GscMessage msg);
 
   void disconnect(ReasonCode reason);
+
+  PeerConnection getPeer();
 }

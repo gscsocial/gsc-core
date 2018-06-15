@@ -2,6 +2,7 @@ package org.gsc.net.gsc;
 
 import io.netty.channel.ChannelHandlerContext;
 import org.gsc.core.sync.ChainControllerImpl;
+import org.gsc.core.sync.PeerConnection;
 import org.gsc.net.message.gsc.AttentionMessage;
 import org.gsc.net.message.gsc.BlockMessage;
 import org.gsc.net.message.gsc.FetchMessage;
@@ -59,6 +60,11 @@ public class GscImpl extends GscHandler{
   @Override
   public void disconnect(ReasonCode reason) {
 
+  }
+
+  @Override
+  public PeerConnection getPeer() {
+    return peer;
   }
 
 }
