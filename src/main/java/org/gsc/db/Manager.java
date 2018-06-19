@@ -157,6 +157,10 @@ public class Manager {
     //return getDynamicPropertiesStore().getLatestBlockHeaderTimestamp();
   }
 
+  public BlockId getHeadBlockId() {
+    return globalPropertiesStore.getLatestBlockHeaderId();
+  }
+
   public boolean lastHeadBlockIsMaintenance() {
     return getGlobalPropertiesStore().getStateFlag() == 1;
   }

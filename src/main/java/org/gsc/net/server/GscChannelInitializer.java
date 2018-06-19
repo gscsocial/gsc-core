@@ -22,8 +22,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.sync.PeerConnection;
 import org.gsc.core.sync.SyncManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -40,13 +40,13 @@ import org.springframework.stereotype.Component;
 @Scope("prototype")
 public class GscChannelInitializer extends ChannelInitializer<NioSocketChannel> {
 
+
     @Autowired
     private ApplicationContext ctx;
 
     @Autowired
     ChannelManager channelManager;
 
-    @Setter
     private SyncManager syncManager;
 
     private String remoteId;
@@ -60,20 +60,9 @@ public class GscChannelInitializer extends ChannelInitializer<NioSocketChannel> 
     @Override
     public void initChannel(NioSocketChannel ch) throws Exception {
         try {
-            if (isInbound() && channelManager.isRecentlyDisconnected(ch.remoteAddress().getAddress())) {
-                // avoid too frequent connection attempts
-                logger.info("Drop connection - the same IP was disconnected recently, channel: {}", ch.toString());
-                ch.disconnect();
-                return;
-            }
+            final Channel channel = ctx.getBean(PeerConnection.class);
 
-            final Channel channel = ctx.getBean(Channel.class);
-
-            channel.init(ch.pipeline(), remoteId, peerDiscoveryMode, channelManager);
-
-            if(!peerDiscoveryMode) {
-                channelManager.add(channel);
-            }
+            channel.init(ch.pipeline(), remoteId, peerDiscoveryMode, channelManager, syncManager);
 
             // limit the size of receiving buffer to 1024
             ch.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(256 * 1024));
@@ -82,7 +71,7 @@ public class GscChannelInitializer extends ChannelInitializer<NioSocketChannel> 
 
             // be aware of channel closing
             ch.closeFuture().addListener((ChannelFutureListener) future -> {
-                logger.info("Close channel:" + channel.getInetSocketAddress());
+                logger.info("Close channel:" + channel);
                 if (!peerDiscoveryMode) {
                     channelManager.notifyDisconnect(channel);
                 }
@@ -101,4 +90,7 @@ public class GscChannelInitializer extends ChannelInitializer<NioSocketChannel> 
         this.peerDiscoveryMode = peerDiscoveryMode;
     }
 
+    public void setSyncManager(SyncManager syncManager) {
+        this.syncManager = syncManager;
+    }
 }

@@ -11,6 +11,7 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.ByteUtil;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.config.Args;
+import org.gsc.core.chain.BlockId;
 import org.gsc.core.wrapper.BytesWrapper;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -554,6 +555,13 @@ public class GlobalPropertiesStore extends ChainStore<BytesWrapper> {
     byte[] blockHash = Optional.ofNullable(this.dbSource.getData(LATEST_BLOCK_HEADER_HASH))
         .orElseThrow(() -> new IllegalArgumentException("not found block hash"));
     return Sha256Hash.wrap(blockHash);
+  }
+
+  public BlockId getLatestBlockHeaderId() {
+
+    byte[] blockHash = Optional.ofNullable(this.dbSource.getData(LATEST_BLOCK_HEADER_HASH))
+        .orElseThrow(() -> new IllegalArgumentException("not found block hash"));
+    return new BlockId(Sha256Hash.wrap(blockHash));
   }
 
   /**
