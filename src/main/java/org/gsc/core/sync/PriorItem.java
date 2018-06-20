@@ -6,7 +6,7 @@ import org.gsc.common.utils.Time;
 import org.gsc.protos.Protocol.Inventory.InventoryType;
 
 @Getter
-class PriorItem implements java.lang.Comparable<PriorItem> {
+public class PriorItem implements java.lang.Comparable<PriorItem> {
 
     private long count;
 
