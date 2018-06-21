@@ -52,7 +52,7 @@ public class InvToSend {
     return 0;
   }
 
-  void sendInv() {
+  public void sendInv() {
     send.forEach((peer, ids) ->
         ids.forEach((key, value) -> {
           if (key.equals(InventoryType.BLOCK)) {
@@ -62,7 +62,7 @@ public class InvToSend {
         }));
   }
 
-  void sendFetch() {
+  public void sendFetch() {
     send.forEach((peer, ids) ->
         ids.forEach((key, value) -> {
           if (key.equals(InventoryType.BLOCK)) {
