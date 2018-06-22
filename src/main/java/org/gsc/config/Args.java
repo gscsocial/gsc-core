@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import lombok.Data;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,10 @@ import org.springframework.stereotype.Component;
 @Component
 @Data
 public class Args {
+
+  public static String[] args;
+
+  public static String configFile;
 
   private int rpcPort;
 
@@ -221,9 +226,10 @@ public class Args {
   /**
    * set parameters.
    */
-  public void setParam(final String[] args, final String confFileName) {
+  @PostConstruct
+  public void init() {
     JCommander.newBuilder().addObject(this).build().parse(args);
-    Config config = Configuration.getByFileName(this.shellConfFileName, confFileName);
+    Config config = Configuration.getByFileName(this.shellConfFileName, configFile);
     if (StringUtils.isNoneBlank(this.privateKey)) {
       this.setLocalWitnesses(new LocalWitnesses(this.privateKey));
       logger.debug("Got privateKey from cmd");
