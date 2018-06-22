@@ -1,11 +1,10 @@
 package org.gsc.common.utils;
 
-import static org.gsc.config.Parameter.WalletConstant.BASE58CHECK_ADDRESS_SIZE;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.gsc.config.Parameter.WalletConstant;
+import org.gsc.core.Constant;
 
 @Slf4j
 public class AddressUtil {
@@ -15,12 +14,13 @@ public class AddressUtil {
       logger.warn("Warning: Address is empty !!");
       return false;
     }
-    if (address.length != WalletConstant.ADDRESS_SIZE / 2) {
+    if (address.length != Constant.ADDRESS_SIZE / 2) {
       logger.warn(
-          "Warning: Address length need " + WalletConstant.ADDRESS_SIZE + " but " + address.length
+          "Warning: Address length need " + Constant.ADDRESS_SIZE + " but " + address.length
               + " !!");
       return false;
     }
+    //TODO address pre fix
     if (address[0] != WalletConstant.ADD_PRE_FIX_BYTE_MAINNET) {
       logger.warn("Warning: Address need prefix with " + WalletConstant.ADD_PRE_FIX_BYTE_MAINNET + " but "
           + address[0] + " !!");
@@ -30,23 +30,13 @@ public class AddressUtil {
     return true;
   }
 
-  public static byte[] decodeFromBase58Check(String addressBase58) {
-    if (StringUtils.isEmpty(addressBase58)) {
-      logger.warn("Warning: Address is empty !!");
-      return null;
-    }
-    if (addressBase58.length() != BASE58CHECK_ADDRESS_SIZE) {
-      logger.warn(
-          "Warning: Base58 address length need " + BASE58CHECK_ADDRESS_SIZE + " but "
-              + addressBase58.length()
-              + " !!");
-      return null;
-    }
-    byte[] address = decode58Check(addressBase58);
-    if (!addressValid(address)) {
-      return null;
-    }
-    return address;
+  public static String encode58Check(byte[] input) {
+    byte[] hash0 = Sha256Hash.hash(input);
+    byte[] hash1 = Sha256Hash.hash(hash0);
+    byte[] inputCheck = new byte[input.length + 4];
+    System.arraycopy(input, 0, inputCheck, 0, input.length);
+    System.arraycopy(hash1, 0, inputCheck, input.length, 4);
+    return Base58.encode(inputCheck);
   }
 
   private static byte[] decode58Check(String input) {
@@ -56,7 +46,8 @@ public class AddressUtil {
     }
     byte[] decodeData = new byte[decodeCheck.length - 4];
     System.arraycopy(decodeCheck, 0, decodeData, 0, decodeData.length);
-    byte[] hash1 = Sha256Hash.hashTwice(decodeCheck);
+    byte[] hash0 = Sha256Hash.hash(decodeData);
+    byte[] hash1 = Sha256Hash.hash(hash0);
     if (hash1[0] == decodeCheck[decodeData.length] &&
         hash1[1] == decodeCheck[decodeData.length + 1] &&
         hash1[2] == decodeCheck[decodeData.length + 2] &&
@@ -65,5 +56,23 @@ public class AddressUtil {
     }
     return null;
   }
+
+  public static byte[] decodeFromBase58Check(String addressBase58) {
+    if (StringUtils.isEmpty(addressBase58)) {
+      logger.warn("Warning: Address is empty !!");
+      return null;
+    }
+    byte[] address = decode58Check(addressBase58);
+    if (address == null) {
+      return null;
+    }
+
+    if (!addressValid(address)) {
+      return null;
+    }
+
+    return address;
+  }
+
 
 }
