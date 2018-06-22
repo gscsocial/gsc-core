@@ -1,5 +1,6 @@
 package org.gsc.keystore;
 
+import org.gsc.common.utils.AddressUtil;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.crypto.ECKey;
 
@@ -25,7 +26,7 @@ public class Credentials {
     }
 
     public static Credentials create(ECKey ecKeyPair) {
-        String address = org.tron.core.Wallet.encode58Check(ecKeyPair.getAddress());
+        String address = AddressUtil.encode58Check(ecKeyPair.getAddress());
         return new Credentials(ecKeyPair, address);
     }
 

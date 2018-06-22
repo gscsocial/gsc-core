@@ -14,33 +14,14 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import org.gsc.common.utils.AddressUtil;
+import org.gsc.common.utils.ByteArray;
+import org.gsc.crypto.ECKey;
 import org.spongycastle.crypto.digests.SHA256Digest;
 import org.spongycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.spongycastle.crypto.generators.SCrypt;
 import org.spongycastle.crypto.params.KeyParameter;
-import org.tron.common.crypto.ECKey;
-import org.tron.common.crypto.Hash;
-import org.tron.common.utils.ByteArray;
 
-/**
- * <p>Ethereum wallet file management. For reference, refer to <a href="https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition">
- * Web3 Secret Storage Definition</a> or the <a href="https://github.com/ethereum/go-ethereum/blob/master/accounts/key_store_passphrase.go">
- * Go Ethereum client implementation</a>.</p>
- *
- * <p><strong>Note:</strong> the Bouncy Castle Scrypt implementation {@link SCrypt}, fails to comply
- * with the following Ethereum reference <a href="https://github.com/ethereum/wiki/wiki/Web3-Secret-Storage-Definition#scrypt">
- * Scrypt test vector</a>:</p>
- *
- * <pre>
- * {@code
- * // Only value of r that cost (as an int) could be exceeded for is 1
- * if (r == 1 && N_STANDARD > 65536)
- * {
- *     throw new IllegalArgumentException("Cost parameter N_STANDARD must be > 1 and < 65536.");
- * }
- * }
- * </pre>
- */
 public class Wallet {
 
   private static final int N_LIGHT = 1 << 12;
@@ -93,7 +74,7 @@ public class Wallet {
       int n, int p) {
 
     WalletFile walletFile = new WalletFile();
-    walletFile.setAddress(org.tron.core.Wallet.encode58Check(ecKeyPair.getAddress()));
+    walletFile.setAddress(AddressUtil.encode58Check(ecKeyPair.getAddress()));
 
     WalletFile.Crypto crypto = new WalletFile.Crypto();
     crypto.setCipher(CIPHER);
@@ -164,7 +145,7 @@ public class Wallet {
     System.arraycopy(derivedKey, 16, result, 0, 16);
     System.arraycopy(cipherText, 0, result, 16, cipherText.length);
 
-    return Hash.sha3(result);
+    return ECKey.sha3(result);
   }
 
   public static ECKey decrypt(String password, WalletFile walletFile)
