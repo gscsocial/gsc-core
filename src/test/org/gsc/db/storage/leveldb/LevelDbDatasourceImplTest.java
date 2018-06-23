@@ -2,10 +2,16 @@ package org.gsc.db.storage.leveldb;
 
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.FileUtil;
+import org.gsc.config.Args;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
 
 
 @Slf4j
@@ -16,10 +22,9 @@ public class LevelDbDatasourceImplTest {
 
     @Before
     public void initDb() {
-        //Args.setParam(new String[]{"--output-directory", dbPath}, "mainnet");
-        //dataSourceTest = new LevelDbDataSourceImpl(dbPath + File.separator, "test_levelDb");
-        //dataSourceTest = new LevelDbDataSourceImpl();
-        //dataSourceTest.setDBName("test_levelDb");
+        Args.configFile = "config-localtest.conf";
+        dataSourceTest = new LevelDbDataSourceImpl(dbPath + File.separator, "test_levelDb");
+        dataSourceTest.setDBName("test_levelDb");
 
     }
 
@@ -35,6 +40,13 @@ public class LevelDbDatasourceImplTest {
             logger.info("Release resources failure.");
         }
     }
+
+    @Test
+    public void test(){
+
+    }
+
+
 
 
 }
