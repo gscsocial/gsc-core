@@ -30,7 +30,7 @@ public class UdpTest {
         args = new Args();
         args.setParam(
                 new String[]{ "--output-directory", "udp_test", "--storage-db-directory", "database",
-                        "--storage-index-directory", "index"},"config.conf"
+                        "--storage-index-directory", "index"},"config-localtest.conf"
         );
         //cfgArgs.getSeedNode().setIpList(Lists.newArrayList());
         args.setNodeP2pVersion(100);

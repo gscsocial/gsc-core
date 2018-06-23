@@ -7,7 +7,6 @@ import org.gsc.config.Args;
 import org.gsc.config.DefaultConfig;
 import org.gsc.service.NetService;
 import org.gsc.service.RpcApiService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -23,7 +22,7 @@ public class Start {
 
     ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
     Args config = context.getBean(Args.class);
-    config.setParam(args, "test.conf");
+    config.setParam(args, "config-localtest.conf");
 
     Application appT = context.getBean(ApplicationImpl.class);
     shutdown(appT);
