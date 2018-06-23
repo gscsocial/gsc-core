@@ -11,17 +11,26 @@ import org.springframework.context.annotation.Import;
 @Import(CommonConfig.class)
 public class DefaultConfig {
 
-    private static Logger logger = LoggerFactory.getLogger("general");
+  private static Logger logger = LoggerFactory.getLogger("general");
 
-    @Autowired
-    ApplicationContext appCtx;
+  @Autowired
+  ApplicationContext appCtx;
 
-    @Autowired
-    CommonConfig commonConfig;
+  @Autowired
+  CommonConfig commonConfig;
 
-    public DefaultConfig() {
-        Thread.setDefaultUncaughtExceptionHandler((t, e) -> logger.error("Uncaught exception", e));
-    }
+  public DefaultConfig() {
+    Thread.setDefaultUncaughtExceptionHandler((t, e) -> logger.error("Uncaught exception", e));
+  }
 
+  //TODO index
+//  @Bean
+//  public IndexHelper indexHelper() {
+//    if (!Args.getInstance().isSolidityNode()) {
+//      return null;
+//    }
+//    return new IndexHelper();
+//  }
 
 }
+

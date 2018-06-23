@@ -20,9 +20,11 @@ public class Start {
   public static void main(String[] args) throws InterruptedException {
     logger.info("gsc node running.");
 
+    Args.args = args;
+    Args.configFile = "config.conf";
     ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
     Args config = context.getBean(Args.class);
-    config.setParam(args, "config-localtest.conf");
+
 
     Application appT = context.getBean(ApplicationImpl.class);
     shutdown(appT);
