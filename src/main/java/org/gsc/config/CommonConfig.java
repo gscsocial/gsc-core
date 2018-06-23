@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @EnableTransactionManagement
-@ComponentScan(basePackages = "org.tron")
+@ComponentScan(basePackages = "org.gsc")
 public class CommonConfig {
 
     private static final Logger logger = LoggerFactory.getLogger("general");
