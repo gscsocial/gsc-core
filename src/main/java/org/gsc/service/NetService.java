@@ -3,6 +3,8 @@ package org.gsc.service;
 import static org.gsc.config.GscConstants.ChainConstant.BLOCK_PRODUCED_INTERVAL;
 import static org.gsc.config.Parameter.NetConstants.MAX_TRX_PER_PEER;
 import static org.gsc.config.Parameter.NetConstants.MSG_CACHE_DURATION_IN_BLOCKS;
+import static org.gsc.config.Parameter.NodeConstant.MAX_BLOCKS_ALREADY_FETCHED;
+import static org.gsc.config.Parameter.NodeConstant.MAX_BLOCKS_IN_PROCESS;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -18,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -144,12 +147,6 @@ public class NetService implements Service{
 
   private Map<BlockMessage, PeerConnection> blockJustReceived = new ConcurrentHashMap<>();
 
-//  private ExecutorLoop<SyncMessage> loopSyncBlockChain;
-//
-//  private ExecutorLoop<FetchMessage> loopFetchBlocks;
-//
-//  private ExecutorLoop<Message> loopAdvertiseInv;
-
   private ExecutorService handleBackLogBlocksPool = Executors.newCachedThreadPool();
 
 
@@ -230,34 +227,6 @@ public class NetService implements Service{
 
 
   private void activeTronPump() {
-    // broadcast inv
-    //TODO
-//    loopAdvertiseInv = new ExecutorLoop<>(2, 10, b -> {
-//      //logger.info("loop advertise inv");
-//      for (PeerConnection peer : getActivePeer()) {
-//        if (!peer.isNeedSyncFromUs()) {
-//          logger.info("Advertise adverInv to " + peer);
-//          peer.sendMessage(b);
-//        }
-//      }
-//    }, throwable -> logger.error("Unhandled exception: ", throwable));
-//
-//    // fetch blocks
-//    loopFetchBlocks = new ExecutorLoop<>(2, 10, c -> {
-//      logger.info("loop fetch blocks");
-//      if (fetchMap.containsKey(c.getMessageId())) {
-//        fetchMap.get(c.getMessageId()).sendMessage(c);
-//      }
-//    }, throwable -> logger.error("Unhandled exception: ", throwable));
-//
-//    // sync block chain
-//    loopSyncBlockChain = new ExecutorLoop<>(2, 10, d -> {
-//      //logger.info("loop sync block chain");
-//      if (syncMap.containsKey(d.getMessageId())) {
-//        syncMap.get(d.getMessageId()).sendMessage(d);
-//      }
-//    }, throwable -> logger.error("Unhandled exception: ", throwable));
-
     broadPool.submit(() -> {
       while (isAdvertiseActive) {
         //TODO
@@ -374,6 +343,138 @@ public class NetService implements Service{
 
     sendPackage.sendFetch();
   }
+
+  private void consumerAdvObjToSpread() {
+    if (advObjToSpread.isEmpty()) {
+      try {
+        Thread.sleep(100);
+        return;
+      } catch (InterruptedException e) {
+        logger.debug(e.getMessage(), e);
+      }
+    }
+    InvToSend sendPackage = new InvToSend();
+    HashMap<Sha256Hash, InventoryType> spread = new HashMap<>();
+    synchronized (advObjToSpread) {
+      spread.putAll(advObjToSpread);
+      advObjToSpread.clear();
+    }
+    getActivePeer().stream()
+        .filter(peer -> !peer.isNeedSyncFromUs())
+        .forEach(peer ->
+            spread.entrySet().stream()
+                .filter(idToSpread ->
+                    !peer.getAdvObjSpreadToUs().containsKey(idToSpread.getKey())
+                        && !peer.getAdvObjWeSpread().containsKey(idToSpread.getKey()))
+                .forEach(idToSpread -> {
+                  peer.getAdvObjWeSpread().put(idToSpread.getKey(), Time.getCurrentMillis());
+                  sendPackage.add(idToSpread, peer);
+                }));
+    sendPackage.sendInv();
+  }
+
+  private synchronized void handleSyncBlock() {
+    if (((ThreadPoolExecutor) handleBackLogBlocksPool).getActiveCount() > MAX_BLOCKS_IN_PROCESS) {
+      logger.info("we're already processing too many blocks");
+      return;
+    } else if (isSuspendFetch) {
+      isSuspendFetch = false;
+    }
+
+    final boolean[] isBlockProc = {true};
+
+    while (isBlockProc[0]) {
+
+      isBlockProc[0] = false;
+
+      synchronized (blockJustReceived) {
+        blockWaitToProc.putAll(blockJustReceived);
+        blockJustReceived.clear();
+      }
+
+      blockWaitToProc.forEach((msg, peerConnection) -> {
+
+        if (peerConnection.isDisconnect()) {
+          logger.error("Peer {} is disconnect, drop block {}", peerConnection.getNode().getHost(),
+              msg.getBlockId().getString());
+          blockWaitToProc.remove(msg);
+          syncBlockIdWeRequested.invalidate(msg.getBlockId());
+          isFetchSyncActive = true;
+          return;
+        }
+
+        synchronized (freshBlockId) {
+          final boolean[] isFound = {false};
+          getActivePeer().stream()
+              .filter(
+                  peer -> !peer.getSyncBlockToFetch().isEmpty() && peer.getSyncBlockToFetch().peek()
+                      .equals(msg.getBlockId()))
+              .forEach(peer -> {
+                peer.getSyncBlockToFetch().pop();
+                peer.getBlockInProc().add(msg.getBlockId());
+                isFound[0] = true;
+              });
+          if (isFound[0]) {
+            blockWaitToProc.remove(msg);
+            isBlockProc[0] = true;
+            //TODO
+//            if (freshBlockId.contains(msg.getBlockId()) || processSyncBlock(
+//                msg.getBlockCapsule())) {
+//              finishProcessSyncBlock(msg.getBlockCapsule());
+//            }
+          }
+        }
+      });
+
+      if (((ThreadPoolExecutor) handleBackLogBlocksPool).getActiveCount() > MAX_BLOCKS_IN_PROCESS) {
+        logger.info("we're already processing too many blocks");
+        if (blockWaitToProc.size() >= MAX_BLOCKS_ALREADY_FETCHED) {
+          isSuspendFetch = true;
+        }
+        break;
+      }
+
+    }
+  }
+
+  private synchronized void logNodeStatus() {
+    StringBuilder sb = new StringBuilder("LocalNode stats:\n");
+    sb.append("============\n");
+
+    sb.append(String.format(
+        "MyHeadBlockNum: %d\n"
+            + "advObjToSpread: %d\n"
+            + "advObjToFetch: %d\n"
+            + "advObjWeRequested: %d\n"
+            + "unSyncNum: %d\n"
+            + "blockWaitToProc: %d\n"
+            + "blockJustReceived: %d\n"
+            + "syncBlockIdWeRequested: %d\n"
+            + "badAdvObj: %d\n",
+        controller.getHeadBlockId().getNum(),
+        advObjToSpread.size(),
+        advObjToFetch.size(),
+        advObjWeRequested.size(),
+        getUnSyncNum(),
+        blockWaitToProc.size(),
+        blockJustReceived.size(),
+        syncBlockIdWeRequested.size(),
+        badAdvObj.size()
+    ));
+
+    logger.info(sb.toString());
+  }
+
+  private long getUnSyncNum() {
+    if (getActivePeer().isEmpty()) {
+      return 0;
+    }
+    return getActivePeer().stream()
+        .mapToLong(peer -> peer.getUnfetchSyncNum() + peer.getSyncBlockToFetch().size())
+        .max()
+        .getAsLong();
+  }
+
 
   private Collection<PeerConnection> getActivePeer() {
     return pool.getActivePeers();
