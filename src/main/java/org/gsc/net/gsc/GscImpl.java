@@ -31,7 +31,7 @@ public class GscImpl extends GscHandler{
 
     switch (msg.getType()) {
       case BLOCK:
-        netService.handleMessage(this, (BlockMessage) msg);
+        netService.handleMessage(this.getPeer(), (BlockMessage) msg);
       case TRANSACTION:
         netService.handleMessage(this, (TransactionMessage) msg);
       case SYNC:

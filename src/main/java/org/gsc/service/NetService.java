@@ -3,6 +3,7 @@ package org.gsc.service;
 import static org.gsc.config.GscConstants.ChainConstant.BLOCK_PRODUCED_INTERVAL;
 import static org.gsc.config.Parameter.NetConstants.MAX_TRX_PER_PEER;
 import static org.gsc.config.Parameter.NetConstants.MSG_CACHE_DURATION_IN_BLOCKS;
+import static org.gsc.config.Parameter.NetConstants.NET_MAX_TRX_PER_SECOND;
 import static org.gsc.config.Parameter.NodeConstant.MAX_BLOCKS_ALREADY_FETCHED;
 import static org.gsc.config.Parameter.NodeConstant.MAX_BLOCKS_IN_PROCESS;
 
@@ -32,6 +33,7 @@ import org.gsc.config.Parameter.NetConstants;
 import org.gsc.core.chain.BlockId;
 import org.gsc.core.sync.ChainController;
 import org.gsc.core.sync.InvToSend;
+import org.gsc.core.sync.Item;
 import org.gsc.core.sync.PeerConnection;
 import org.gsc.core.sync.PriorItem;
 import org.gsc.core.sync.SlidingWindowCounter;
@@ -40,10 +42,12 @@ import org.gsc.net.message.gsc.AttentionMessage;
 import org.gsc.net.message.gsc.BlockMessage;
 import org.gsc.net.message.gsc.FetchMessage;
 import org.gsc.net.message.gsc.GscMessage;
+import org.gsc.net.message.gsc.InventoryMessage;
 import org.gsc.net.message.gsc.SyncMessage;
 import org.gsc.net.message.gsc.TimeMessage;
 import org.gsc.net.message.gsc.TransactionMessage;
 import org.gsc.net.server.SyncPool;
+import org.gsc.protos.P2p.ReasonCode;
 import org.gsc.protos.Protocol.Inventory.InventoryType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -475,6 +479,91 @@ public class NetService implements Service{
         .getAsLong();
   }
 
+  public synchronized void disconnectInactive() {
+    //logger.debug("size of activePeer: " + getActivePeer().size());
+    getActivePeer().forEach(peer -> {
+      final boolean[] isDisconnected = {false};
+      final ReasonCode[] reasonCode = {ReasonCode.USER_REASON};
+
+      peer.getAdvObjWeRequested().values().stream()
+          .filter(time -> time < Time.getCurrentMillis() - NetConstants.ADV_TIME_OUT)
+          .findFirst().ifPresent(time -> {
+        isDisconnected[0] = true;
+        reasonCode[0] = ReasonCode.FETCH_FAIL;
+      });
+
+      if (!isDisconnected[0]) {
+        peer.getSyncBlockRequested().values().stream()
+            .filter(time -> time < Time.getCurrentMillis() - NetConstants.SYNC_TIME_OUT)
+            .findFirst().ifPresent(time -> {
+          isDisconnected[0] = true;
+          reasonCode[0] = ReasonCode.SYNC_FAIL;
+        });
+      }
+
+//    TODO:optimize disconnect null connection
+
+      if (isDisconnected[0]) {
+        disconnectPeer(peer, ReasonCode.TIME_OUT);
+      }
+    });
+  }
+
+
+  private void handleMessage(PeerConnection peer, InventoryMessage msg) {
+    for (Sha256Hash id : msg.getHashList()) {
+      if (msg.getInventoryType().equals(InventoryType.TRX) && TrxCache.getIfPresent(id) != null) {
+        logger.info("{} {} from peer {} Already exist.", msg.getInventoryType(), id,
+            peer.getNode().getHost());
+        continue;
+      }
+      final boolean[] spreaded = {false};
+      final boolean[] requested = {false};
+      getActivePeer().forEach(p -> {
+        if (p.getAdvObjWeSpread().containsKey(id)) {
+          spreaded[0] = true;
+        }
+        if (p.getAdvObjWeRequested().containsKey(new Item(id, msg.getInventoryType()))) {
+          requested[0] = true;
+        }
+      });
+
+      if (!spreaded[0]
+          && !peer.isNeedSyncFromPeer()
+          && !peer.isNeedSyncFromUs()) {
+
+        //avoid TRX flood attack here.
+        if (msg.getInventoryType().equals(InventoryType.TRX)
+            && (peer.isAdvInvFull()
+            || isFlooded())) {
+          logger.warn("A peer is flooding us, stop handle inv, the peer is: " + peer);
+          return;
+        }
+
+        peer.getAdvObjSpreadToUs().put(id, System.currentTimeMillis());
+        if (!requested[0]) {
+          if (!badAdvObj.containsKey(id)) {
+            PriorItem targetPriorItem = this.advObjToFetch.get(id);
+
+            if (targetPriorItem != null) {
+              //another peer tell this trx to us, refresh its time.
+              targetPriorItem.refreshTime();
+            } else {
+              fetchWaterLine.increase();
+              this.advObjToFetch.put(id, new PriorItem(new Item(id, msg.getInventoryType()),
+                  fetchSequenceCounter.incrementAndGet()));
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private boolean isFlooded() {
+    return fetchWaterLine.totalCount()
+        > BLOCK_PRODUCED_INTERVAL * NET_MAX_TRX_PER_SECOND * MSG_CACHE_DURATION_IN_BLOCKS / 1000;
+  }
+
 
   private Collection<PeerConnection> getActivePeer() {
     return pool.getActivePeers();
@@ -502,6 +591,11 @@ public class NetService implements Service{
 
   public void handleMessage(Gsc gsc, AttentionMessage msg) {
     logger.info("get attention message from " + gsc.getPeer());
+  }
+
+  private void disconnectPeer(PeerConnection peer, ReasonCode reason) {
+    peer.setSyncFlag(false);
+    peer.disconnect(reason);
   }
 
 }
