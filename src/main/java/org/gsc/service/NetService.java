@@ -29,11 +29,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.exception.BadBlockException;
+import org.gsc.common.exception.GscException;
+import org.gsc.common.exception.UnLinkedBlockException;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Time;
 import org.gsc.config.Args;
 import org.gsc.config.Parameter.NetConstants;
-import org.gsc.config.Parameter.NodeConstant;
 import org.gsc.core.chain.BlockId;
 import org.gsc.core.sync.ChainController;
 import org.gsc.core.sync.InvToSend;
@@ -41,9 +43,12 @@ import org.gsc.core.sync.Item;
 import org.gsc.core.sync.PeerConnection;
 import org.gsc.core.sync.PriorItem;
 import org.gsc.core.sync.SlidingWindowCounter;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.net.message.MessageTypes;
 import org.gsc.net.message.gsc.BlockMessage;
 import org.gsc.net.message.gsc.GscMessage;
 import org.gsc.net.message.gsc.InventoryMessage;
+import org.gsc.net.message.gsc.SyncMessage;
 import org.gsc.net.message.gsc.TransactionMessage;
 import org.gsc.net.server.SyncPool;
 import org.gsc.protos.P2p.ReasonCode;
@@ -575,42 +580,65 @@ public class NetService implements Service{
     logger.info("wait end");
   }
 
-  private void handleMessage(PeerConnection peer, BlockMessage blkMsg) {
-    Map<Item, Long> advObjWeRequested = peer.getAdvObjWeRequested();
-    Map<BlockId, Long> syncBlockRequested = peer.getSyncBlockRequested();
-    BlockId blockId = blkMsg.getBlockId();
-    Item item = new Item(blockId, InventoryType.BLOCK);
-    boolean syncFlag = false;
-    if (syncBlockRequested.containsKey(blockId)) {
-      if (!peer.getSyncFlag()) {
-        logger.info("Received a block {} from no need sync peer {}", blockId.getNum(),
-            peer.getNode().getHost());
-        return;
-      }
-      peer.getSyncBlockRequested().remove(blockId);
-      synchronized (blockJustReceived) {
-        blockJustReceived.put(blkMsg, peer);
-      }
-      isHandleSyncBlockActive = true;
-      syncFlag = true;
-      if (!peer.isBusy()) {
-        if (peer.getUnfetchSyncNum() > 0
-            && peer.getSyncBlockToFetch().size() <= NodeConstant.SYNC_FETCH_BATCH_NUM) {
-          syncNextBatchChainIds(peer);
-        } else {
-          isFetchSyncActive = true;
-        }
-      }
-    }
+  private void updateBlockWeBothHave(PeerConnection peer, BlockWrapper block) {
+    logger.info("update peer {} block both we have {}", peer.getNode().getHost(),
+        block.getBlockId().getString());
+    peer.setHeadBlockWeBothHave(block.getBlockId());
+    peer.setHeadBlockTimeWeBothHave(block.getTimeStamp());
+  }
 
-    if (advObjWeRequested.containsKey(item)) {
-      advObjWeRequested.remove(item);
-      if (!syncFlag) {
-        processAdvBlock(peer, blkMsg.getBlockCapsule());
-        startFetchItem();
-      }
-    }
+  private void updateBlockWeBothHave(PeerConnection peer, BlockId blockId) {
+    logger.info("update peer {} block both we have, {}", peer.getNode().getHost(),
+        blockId.getString());
+    peer.setHeadBlockWeBothHave(blockId);
+    long time = ((BlockMessage) controller.getData(blockId, MessageTypes.BLOCK)).getBlockCapsule()
+        .getTimeStamp();
+    peer.setHeadBlockTimeWeBothHave(time);
+  }
 
+  private void processAdvBlock(PeerConnection peer, BlockWrapper block) {
+    //TODO: lack the complete flow.
+    if (!freshBlockId.contains(block.getBlockId())) {
+      try {
+        LinkedList<Sha256Hash> trxIds = null;
+        trxIds = controller.handleBlock(block, false);
+        freshBlockId.offer(block.getBlockId());
+
+        trxIds.forEach(trxId -> advObjToFetch.remove(trxId));
+
+        getActivePeer().stream()
+            .filter(p -> p.getAdvObjSpreadToUs().containsKey(block.getBlockId()))
+            .forEach(p -> updateBlockWeBothHave(p, block));
+
+        broadcast(new BlockMessage(block));
+
+      } catch (BadBlockException e) {
+        logger.error("We get a bad block {}, from {}, reason is {} ",
+            block.getBlockId().getString(), peer.getNode().getHost(), e.getMessage());
+        badAdvObj.put(block.getBlockId(), System.currentTimeMillis());
+        disconnectPeer(peer, ReasonCode.BAD_BLOCK);
+      } catch (UnLinkedBlockException e) {
+        logger.error("We get a unlinked block {}, from {}, head is {}",
+            block.getBlockId().getString(), peer.getNode().getHost(),
+            controller.getHeadBlockId().getString());
+        startSyncWithPeer(peer);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+
+      // logger.error("Fail to process adv block {} from {}", block.getBlockId().getString(),
+      // peer.getNode().getHost(), e);
+
+    }
+  }
+
+  private void startSyncWithPeer(PeerConnection peer) {
+    peer.setNeedSyncFromPeer(true);
+    peer.getSyncBlockToFetch().clear();
+    peer.setUnfetchSyncNum(0);
+    updateBlockWeBothHave(peer, controller.getGenesisBlock());
+    peer.setBanned(false);
+    syncNextBatchChainIds(peer);
   }
 
   private void syncNextBatchChainIds(PeerConnection peer) {
@@ -624,8 +652,8 @@ public class NetService implements Service{
               peer.getSyncBlockToFetch());
       peer.setSyncChainRequested(
           new Pair<>(chainSummary, System.currentTimeMillis()));
-      peer.sendMessage(new SyncBlockChainMessage((LinkedList<BlockId>) chainSummary));
-    } catch (TronException e) {
+      peer.sendMessage(new SyncMessage((LinkedList<BlockId>) chainSummary));
+    } catch (GscException e) {
       logger.error("Peer {} sync next batch chainIds failed, error: {}", peer.getNode().getHost(),
           e.getMessage());
       disconnectPeer(peer, ReasonCode.FORKED);
