@@ -12,7 +12,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,11 +27,13 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Time;
 import org.gsc.config.Args;
 import org.gsc.config.Parameter.NetConstants;
+import org.gsc.config.Parameter.NodeConstant;
 import org.gsc.core.chain.BlockId;
 import org.gsc.core.sync.ChainController;
 import org.gsc.core.sync.InvToSend;
@@ -559,6 +563,74 @@ public class NetService implements Service{
         > BLOCK_PRODUCED_INTERVAL * NET_MAX_TRX_PER_SECOND * MSG_CACHE_DURATION_IN_BLOCKS / 1000;
   }
 
+  public void syncFrom(Sha256Hash myHeadBlockHash) {
+    try {
+      while (getActivePeer().isEmpty()) {
+        logger.info("other peer is nil, please wait ... ");
+        Thread.sleep(10000L);
+      }
+    } catch (InterruptedException e) {
+      logger.debug(e.getMessage(), e);
+    }
+    logger.info("wait end");
+  }
+
+  private void handleMessage(PeerConnection peer, BlockMessage blkMsg) {
+    Map<Item, Long> advObjWeRequested = peer.getAdvObjWeRequested();
+    Map<BlockId, Long> syncBlockRequested = peer.getSyncBlockRequested();
+    BlockId blockId = blkMsg.getBlockId();
+    Item item = new Item(blockId, InventoryType.BLOCK);
+    boolean syncFlag = false;
+    if (syncBlockRequested.containsKey(blockId)) {
+      if (!peer.getSyncFlag()) {
+        logger.info("Received a block {} from no need sync peer {}", blockId.getNum(),
+            peer.getNode().getHost());
+        return;
+      }
+      peer.getSyncBlockRequested().remove(blockId);
+      synchronized (blockJustReceived) {
+        blockJustReceived.put(blkMsg, peer);
+      }
+      isHandleSyncBlockActive = true;
+      syncFlag = true;
+      if (!peer.isBusy()) {
+        if (peer.getUnfetchSyncNum() > 0
+            && peer.getSyncBlockToFetch().size() <= NodeConstant.SYNC_FETCH_BATCH_NUM) {
+          syncNextBatchChainIds(peer);
+        } else {
+          isFetchSyncActive = true;
+        }
+      }
+    }
+
+    if (advObjWeRequested.containsKey(item)) {
+      advObjWeRequested.remove(item);
+      if (!syncFlag) {
+        processAdvBlock(peer, blkMsg.getBlockCapsule());
+        startFetchItem();
+      }
+    }
+
+  }
+
+  private void syncNextBatchChainIds(PeerConnection peer) {
+    if (peer.getSyncChainRequested() != null) {
+      logger.info("Peer {} is in sync.", peer.getNode().getHost());
+      return;
+    }
+    try {
+      Deque<BlockId> chainSummary =
+          controller.getBlockChainSummary(peer.getHeadBlockWeBothHave(),
+              peer.getSyncBlockToFetch());
+      peer.setSyncChainRequested(
+          new Pair<>(chainSummary, System.currentTimeMillis()));
+      peer.sendMessage(new SyncBlockChainMessage((LinkedList<BlockId>) chainSummary));
+    } catch (TronException e) {
+      logger.error("Peer {} sync next batch chainIds failed, error: {}", peer.getNode().getHost(),
+          e.getMessage());
+      disconnectPeer(peer, ReasonCode.FORKED);
+    }
+  }
 
   private Collection<PeerConnection> getActivePeer() {
     return pool.getActivePeers();
