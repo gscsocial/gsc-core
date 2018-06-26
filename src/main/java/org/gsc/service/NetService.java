@@ -37,14 +37,9 @@ import org.gsc.core.sync.Item;
 import org.gsc.core.sync.PeerConnection;
 import org.gsc.core.sync.PriorItem;
 import org.gsc.core.sync.SlidingWindowCounter;
-import org.gsc.net.gsc.Gsc;
-import org.gsc.net.message.gsc.AttentionMessage;
 import org.gsc.net.message.gsc.BlockMessage;
-import org.gsc.net.message.gsc.FetchMessage;
 import org.gsc.net.message.gsc.GscMessage;
 import org.gsc.net.message.gsc.InventoryMessage;
-import org.gsc.net.message.gsc.SyncMessage;
-import org.gsc.net.message.gsc.TimeMessage;
 import org.gsc.net.message.gsc.TransactionMessage;
 import org.gsc.net.server.SyncPool;
 import org.gsc.protos.P2p.ReasonCode;
@@ -510,7 +505,7 @@ public class NetService implements Service{
   }
 
 
-  private void handleMessage(PeerConnection peer, InventoryMessage msg) {
+  public void handleMessage(PeerConnection peer, InventoryMessage msg) {
     for (Sha256Hash id : msg.getHashList()) {
       if (msg.getInventoryType().equals(InventoryType.TRX) && TrxCache.getIfPresent(id) != null) {
         logger.info("{} {} from peer {} Already exist.", msg.getInventoryType(), id,
@@ -569,29 +564,29 @@ public class NetService implements Service{
     return pool.getActivePeers();
   }
 
-  public void handleMessage(Gsc gsc, BlockMessage msg) {
-    logger.info("get block message from " + gsc.getPeer());
-  }
-
-  public void handleMessage(Gsc gsc, TransactionMessage msg) {
-    logger.info("get tx message from " + gsc.getPeer());
-  }
-
-  public void handleMessage(Gsc gsc, FetchMessage msg) {
-    logger.info("get fetch message from " + gsc.getPeer());
-  }
-
-  public void handleMessage(Gsc gsc, SyncMessage msg) {
-    logger.info("get sync message from " + gsc.getPeer());
-  }
-
-  public void handleMessage(Gsc gsc, TimeMessage msg) {
-    logger.info("get time message from " + gsc.getPeer());
-  }
-
-  public void handleMessage(Gsc gsc, AttentionMessage msg) {
-    logger.info("get attention message from " + gsc.getPeer());
-  }
+//  public void handleMessage(Gsc gsc, BlockMessage msg) {
+//    logger.info("get block message from " + gsc.getPeer());
+//  }
+//
+//  public void handleMessage(Gsc gsc, TransactionMessage msg) {
+//    logger.info("get tx message from " + gsc.getPeer());
+//  }
+//
+//  public void handleMessage(Gsc gsc, FetchMessage msg) {
+//    logger.info("get fetch message from " + gsc.getPeer());
+//  }
+//
+//  public void handleMessage(Gsc gsc, SyncMessage msg) {
+//    logger.info("get sync message from " + gsc.getPeer());
+//  }
+//
+//  public void handleMessage(Gsc gsc, TimeMessage msg) {
+//    logger.info("get time message from " + gsc.getPeer());
+//  }
+//
+//  public void handleMessage(Gsc gsc, AttentionMessage msg) {
+//    logger.info("get attention message from " + gsc.getPeer());
+//  }
 
   private void disconnectPeer(PeerConnection peer, ReasonCode reason) {
     peer.setSyncFlag(false);

@@ -3,13 +3,8 @@ package org.gsc.net.gsc;
 import io.netty.channel.ChannelHandlerContext;
 import org.gsc.core.sync.ChainControllerImpl;
 import org.gsc.core.sync.PeerConnection;
-import org.gsc.net.message.gsc.AttentionMessage;
-import org.gsc.net.message.gsc.BlockMessage;
-import org.gsc.net.message.gsc.FetchMessage;
 import org.gsc.net.message.gsc.GscMessage;
-import org.gsc.net.message.gsc.SyncMessage;
-import org.gsc.net.message.gsc.TimeMessage;
-import org.gsc.net.message.gsc.TransactionMessage;
+import org.gsc.net.message.gsc.InventoryMessage;
 import org.gsc.protos.P2p.ReasonCode;
 import org.gsc.service.NetService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,20 +23,24 @@ public class GscImpl extends GscHandler{
   public void channelRead0(ChannelHandlerContext ctx, GscMessage msg)
       throws InterruptedException {
     super.channelRead0(ctx, msg);
+    PeerConnection peer = this.getPeer();
+
 
     switch (msg.getType()) {
-      case BLOCK:
-        netService.handleMessage(this.getPeer(), (BlockMessage) msg);
-      case TRANSACTION:
-        netService.handleMessage(this, (TransactionMessage) msg);
-      case SYNC:
-        netService.handleMessage(this, (SyncMessage) msg);
-      case TIME:
-        netService.handleMessage(this, (TimeMessage) msg);
-      case FETCH:
-        netService.handleMessage(this, (FetchMessage) msg);
-      case ATTENTION:
-        netService.handleMessage(this, (AttentionMessage) msg);
+      case INVENTORY:
+        netService.handleMessage(peer, (InventoryMessage) msg);
+//      case BLOCK:
+//        netService.handleMessage(peer, (TransactionMessage) msg);
+//      case TRANSACTION:
+//        netService.handleMessage(peer, (TransactionMessage) msg);
+//      case SYNC:
+//        netService.handleMessage(peer, (SyncMessage) msg);
+//      case TIME:
+//        netService.handleMessage(peer, (TimeMessage) msg);
+//      case FETCH:
+//        netService.handleMessage(peer, (FetchMessage) msg);
+//      case ATTENTION:
+//        netService.handleMessage(peer, (AttentionMessage) msg);
     }
   }
 
