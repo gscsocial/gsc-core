@@ -34,18 +34,18 @@ public class ECKeyTest {
 
     private static final SecureRandom secureRandom = new SecureRandom();
 
-    private String privString = "c85ef7d79691fe79573b1a7064c19c1a9819ebdbd1faaab1a8ec92344438aaf4";
+    private String privString = "a4279a044bec3080645df9d3313933c01544b9cae072ea8405ade4df147b05de";
     private BigInteger privateKey = new BigInteger(privString, 16);
 
-    private String pubString = "040947751e3022ecf3016be03ec77ab0ce3c2662b4843898cb068d74f698ccc8ad75aa17564ae80a20bb044ee7a6d903e8e8df624b089c95d66a0570f051e5a05b";
-    private String compressedPubString = "030947751e3022ecf3016be03ec77ab0ce3c2662b4843898cb068d74f698ccc8ad";
+    private String pubString = "0440c7393de17fa0b19485bca832dd502a3bf8c978ea427c2391f701411067483ba5e8713bbb18537efdc88cd456343e053f38cd65bf484ab16db443a1608ec046";
+    private String compressedPubString = "0240c7393de17fa0b19485bca832dd502a3bf8c978ea427c2391f701411067483b";
     private byte[] pubKey = Hex.decode(pubString);
     private byte[] compressedPubKey = Hex.decode(compressedPubString);
-    private String address = "cd2a3d9f938e13cd947ec05abc7fe734df8dd826";
+    private String address = "41fd88e2c9ca5a1fce25354eed46548681e415e1a2";
 
     private String exampleMessage = "This is an example of a signed message.";
-    private String sigBase64 = "HNLOSI9Nop5o8iywXKwbGbdd8XChK0rRvdRTG46RFcb7dcH+UKlejM/8u1SCoeQvu91jJBMd/nXDs7f5p8ch7Ms=";
-    private String signatureHex = "d2ce488f4da29e68f22cb05cac1b19b75df170a12b4ad1bdd4531b8e9115c6fb75c1fe50a95e8ccffcbb5482a1e42fbbdd6324131dfe75c3b3b7f9a7c721eccb01";
+    private String sigBase64 = "G+cceGhe+OYi4UijWyH0i1mYzdUvI/ZUn6LK3R0unkfVUqGF37Yvnu/OHP4IeFSySW0COnc3XbLZzAz056Dq/hs=";
+    private String signatureHex = "e71c78685ef8e622e148a35b21f48b5998cdd52f23f6549fa2cadd1d2e9e47d552a185dfb62f9eefce1cfe087854b2496d023a77375db2d9cc0cf4e7a0eafe1b00";
 
     @Before
     public void init(){
@@ -74,6 +74,7 @@ public class ECKeyTest {
         assertTrue(key.isPubKeyCanonical());
         assertTrue(key.hasPrivKey());
         assertArrayEquals(pubKey, key.getPubKey());
+        assertEquals(address,Hex.toHexString(key.getAddress()));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -103,6 +104,7 @@ public class ECKeyTest {
         assertTrue(key.isPubKeyCanonical());
         assertTrue(key.isPubKeyOnly());
         assertArrayEquals(key.getPubKey(), pubKey);
+        assertEquals(address,Hex.toHexString(key.getAddress()));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -145,6 +147,7 @@ public class ECKeyTest {
     @Test
     public void testPublicKeyFromPrivateCompressed() {
         byte[] pubFromPriv = ECKey.publicKeyFromPrivate(privateKey, true);
+        System.out.println(Hex.toHexString(pubFromPriv));
         assertArrayEquals(compressedPubKey, pubFromPriv);
     }
 
