@@ -62,9 +62,11 @@ import org.gsc.db.UndoStore.Dialog;
 import org.joda.time.DateTime;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Getter
 @Slf4j
+@Component
 public class Manager {
 
   @Autowired
