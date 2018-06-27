@@ -30,8 +30,10 @@ import java.util.stream.Collectors;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.exception.BadBlockException;
+import org.gsc.common.exception.BadTransactionException;
 import org.gsc.common.exception.GscException;
 import org.gsc.common.exception.NonCommonBlockException;
+import org.gsc.common.exception.TraitorPeerException;
 import org.gsc.common.exception.UnLinkedBlockException;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Time;
@@ -757,6 +759,41 @@ public class NetService implements Service{
     });
   }
 
+  synchronized boolean isTrxExist(TransactionMessage trxMsg) {
+    if (TrxCache.getIfPresent(trxMsg.getMessageId()) != null) {
+      return true;
+    }
+    TrxCache.put(trxMsg.getMessageId(), trxMsg);
+    return false;
+  }
+
+  private void handleMessage(PeerConnection peer, TransactionMessage trxMsg) {
+    try {
+      Item item = new Item(trxMsg.getMessageId(), InventoryType.TRX);
+      if (!peer.getAdvObjWeRequested().containsKey(item)) {
+        throw new TraitorPeerException("We don't send fetch request to" + peer);
+      }
+      peer.getAdvObjWeRequested().remove(item);
+      if (isTrxExist(trxMsg)) {
+        logger.info("Trx {} from Peer {} already processed.", trxMsg.getMessageId(),
+            peer.getNode().getHost());
+        return;
+      }
+      if(controller.handleTransaction(trxMsg.getTransactionWrapper())){
+        broadcast(trxMsg);
+      }
+    } catch (TraitorPeerException e) {
+      logger.error(e.getMessage());
+      banTraitorPeer(peer, ReasonCode.BAD_PROTOCOL);
+    } catch (BadTransactionException e) {
+      badAdvObj.put(trxMsg.getMessageId(), System.currentTimeMillis());
+      banTraitorPeer(peer, ReasonCode.BAD_TX);
+    }
+  }
+
+  private void banTraitorPeer(PeerConnection peer, ReasonCode reason) {
+    disconnectPeer(peer, reason);
+  }
 
   private Collection<PeerConnection> getActivePeer() {
     return pool.getActivePeers();
