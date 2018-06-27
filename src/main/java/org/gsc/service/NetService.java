@@ -60,6 +60,7 @@ import org.gsc.net.message.gsc.GscMessage;
 import org.gsc.net.message.gsc.InventoryMessage;
 import org.gsc.net.message.gsc.SyncMessage;
 import org.gsc.net.message.gsc.TransactionMessage;
+import org.gsc.net.server.Channel.GscState;
 import org.gsc.net.server.SyncPool;
 import org.gsc.protos.P2p.ReasonCode;
 import org.gsc.protos.Protocol.Inventory.InventoryType;
@@ -655,25 +656,6 @@ public class NetService implements Service{
     syncNextBatchChainIds(peer);
   }
 
-  private void syncNextBatchChainIds(PeerConnection peer) {
-    if (peer.getSyncChainRequested() != null) {
-      logger.info("Peer {} is in sync.", peer.getNode().getHost());
-      return;
-    }
-    try {
-      Deque<BlockId> chainSummary =
-          controller.getBlockChainSummary(peer.getHeadBlockWeBothHave(),
-              peer.getSyncBlockToFetch());
-      peer.setSyncChainRequested(
-          new Pair<>(chainSummary, System.currentTimeMillis()));
-      peer.sendMessage(new SyncMessage((LinkedList<BlockId>) chainSummary));
-    } catch (GscException e) {
-      logger.error("Peer {} sync next batch chainIds failed, error: {}", peer.getNode().getHost(),
-          e.getMessage());
-      disconnectPeer(peer, ReasonCode.FORKED);
-    }
-  }
-
   private void handleMessage(PeerConnection peer, BlockMessage blkMsg) {
     Map<Item, Long> advObjWeRequested = peer.getAdvObjWeRequested();
     Map<BlockId, Long> syncBlockRequested = peer.getSyncBlockRequested();
@@ -997,6 +979,68 @@ public class NetService implements Service{
     send.clear();
   }
 
+  private void syncNextBatchChainIds(PeerConnection peer) {
+    if (peer.getSyncChainRequested() != null) {
+      logger.info("Peer {} is in sync.", peer.getNode().getHost());
+      return;
+    }
+    try {
+      Deque<BlockId> chainSummary =
+          controller.getBlockChainSummary(peer.getHeadBlockWeBothHave(),
+              peer.getSyncBlockToFetch());
+      peer.setSyncChainRequested(
+          new Pair<>(chainSummary, System.currentTimeMillis()));
+      peer.sendMessage(new SyncMessage((LinkedList<BlockId>) chainSummary));
+    } catch (GscException e) {
+      logger.error("Peer {} sync next batch chainIds failed, error: {}", peer.getNode().getHost(),
+          e.getMessage());
+      disconnectPeer(peer, ReasonCode.FORKED);
+    }
+  }
+
+  public void onConnectPeer(PeerConnection peer) {
+    //TODO
+    if (peer.getHelloMessage().getHeadBlockId().getNum() > controller.getHeadBlockId().getNum()) {
+      peer.setGscState(GscState.SYNCING);
+      startSyncWithPeer(peer);
+    } else {
+      peer.setGscState(GscState.SYNC_COMPLETED);
+    }
+  }
+
+  public void onDisconnectPeer(PeerConnection peer) {
+
+    if (!peer.getSyncBlockRequested().isEmpty()) {
+      peer.getSyncBlockRequested().keySet()
+          .forEach(blockId -> syncBlockIdWeRequested.invalidate(blockId));
+      isFetchSyncActive = true;
+    }
+
+    if (!peer.getAdvObjWeRequested().isEmpty()) {
+      peer.getAdvObjWeRequested().keySet()
+          .forEach(item -> {
+            if (getActivePeer().stream()
+                .filter(peerConnection -> !peerConnection.equals(peer))
+                .filter(peerConnection -> peerConnection.getInvToUs().contains(item.getHash()))
+                .findFirst()
+                .isPresent()) {
+              advObjToFetch.put(item.getHash(), new PriorItem(item,
+                  fetchSequenceCounter.incrementAndGet()));
+            }
+          });
+    }
+  }
+
+  public void shutDown() {
+    logExecutor.shutdown();
+    trxsHandlePool.shutdown();
+    disconnectInactiveExecutor.shutdown();
+    cleanInventoryExecutor.shutdown();
+    broadPool.shutdown();
+    handleBackLogBlocksPool.shutdown();
+    fetchSyncBlocksExecutor.shutdown();
+    handleSyncBlockExecutor.shutdown();
+  }
 
   private Collection<PeerConnection> getActivePeer() {
     return pool.getActivePeers();
