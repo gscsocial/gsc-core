@@ -36,6 +36,7 @@ import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Time;
 import org.gsc.config.Args;
 import org.gsc.config.Parameter.NetConstants;
+import org.gsc.config.Parameter.NodeConstant;
 import org.gsc.core.chain.BlockId;
 import org.gsc.core.sync.ChainController;
 import org.gsc.core.sync.InvToSend;
@@ -658,6 +659,44 @@ public class NetService implements Service{
           e.getMessage());
       disconnectPeer(peer, ReasonCode.FORKED);
     }
+  }
+
+  private void handleMessage(PeerConnection peer, BlockMessage blkMsg) {
+    Map<Item, Long> advObjWeRequested = peer.getAdvObjWeRequested();
+    Map<BlockId, Long> syncBlockRequested = peer.getSyncBlockRequested();
+    BlockId blockId = blkMsg.getBlockId();
+    Item item = new Item(blockId, InventoryType.BLOCK);
+    boolean syncFlag = false;
+    if (syncBlockRequested.containsKey(blockId)) {
+      if (!peer.getSyncFlag()) {
+        logger.info("Received a block {} from no need sync peer {}", blockId.getNum(),
+            peer.getNode().getHost());
+        return;
+      }
+      peer.getSyncBlockRequested().remove(blockId);
+      synchronized (blockJustReceived) {
+        blockJustReceived.put(blkMsg, peer);
+      }
+      isHandleSyncBlockActive = true;
+      syncFlag = true;
+      if (!peer.isBusy()) {
+        if (peer.getUnfetchSyncNum() > 0
+            && peer.getSyncBlockToFetch().size() <= NodeConstant.SYNC_FETCH_BATCH_NUM) {
+          syncNextBatchChainIds(peer);
+        } else {
+          isFetchSyncActive = true;
+        }
+      }
+    }
+
+    if (advObjWeRequested.containsKey(item)) {
+      advObjWeRequested.remove(item);
+      if (!syncFlag) {
+        processAdvBlock(peer, blkMsg.getBlockCapsule());
+        //TODO  startFetchItem()
+      }
+    }
+
   }
 
   private Collection<PeerConnection> getActivePeer() {
