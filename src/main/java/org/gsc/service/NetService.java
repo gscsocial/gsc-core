@@ -6,6 +6,7 @@ import static org.gsc.config.Parameter.NetConstants.MSG_CACHE_DURATION_IN_BLOCKS
 import static org.gsc.config.Parameter.NetConstants.NET_MAX_TRX_PER_SECOND;
 import static org.gsc.config.Parameter.NodeConstant.MAX_BLOCKS_ALREADY_FETCHED;
 import static org.gsc.config.Parameter.NodeConstant.MAX_BLOCKS_IN_PROCESS;
+import static org.gsc.config.Parameter.NodeConstant.MAX_BLOCKS_SYNC_FROM_ONE_PEER;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -14,7 +15,9 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,6 +55,7 @@ import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.net.message.MessageTypes;
 import org.gsc.net.message.gsc.AttentionMessage;
 import org.gsc.net.message.gsc.BlockMessage;
+import org.gsc.net.message.gsc.FetchMessage;
 import org.gsc.net.message.gsc.GscMessage;
 import org.gsc.net.message.gsc.InventoryMessage;
 import org.gsc.net.message.gsc.SyncMessage;
@@ -829,7 +833,7 @@ public class NetService implements Service{
           }
 
           if (controller.getHeadBlockId().getNum() > 0) {
-            long maxRemainTime = ChainConstant.CLOCK_MAX_DELAY + System.currentTimeMillis() - del
+            long maxRemainTime = ChainConstant.CLOCK_MAX_DELAY + System.currentTimeMillis() - controller
                 .getBlockTime(controller.getSolidBlockId());
             long maxFutureNum =
                 maxRemainTime / BLOCK_PRODUCED_INTERVAL + controller.getSolidBlockId()
@@ -949,6 +953,48 @@ public class NetService implements Service{
       logger.error(e.getMessage());
       banTraitorPeer(peer, ReasonCode.BAD_PROTOCOL);
     }
+  }
+
+  private synchronized void startFetchSyncBlock() {
+    //TODO: check how many block is processing and decide if fetch more
+    HashMap<PeerConnection, List<BlockId>> send = new HashMap<>();
+    HashSet<BlockId> request = new HashSet<>();
+
+    getActivePeer().stream()
+        .filter(peer -> peer.isNeedSyncFromPeer() && !peer.isBusy())
+        .forEach(peer -> {
+          if (!send.containsKey(peer)) { //TODO: Attention multi thread here
+            send.put(peer, new LinkedList<>());
+          }
+          for (BlockId blockId :
+              peer.getSyncBlockToFetch()) {
+            if (!request.contains(blockId) //TODO: clean processing block
+                && (syncBlockIdWeRequested.getIfPresent(blockId) == null)) {
+              send.get(peer).add(blockId);
+              request.add(blockId);
+              //TODO: check max block num to fetch from one peer.
+              if (send.get(peer).size()
+                  > MAX_BLOCKS_SYNC_FROM_ONE_PEER) { //Max Blocks peer get one time
+                break;
+              }
+            }
+          }
+        });
+
+    send.forEach((peer, blockIds) -> {
+      //TODO: use collector
+      blockIds.forEach(blockId -> {
+        syncBlockIdWeRequested.put(blockId, System.currentTimeMillis());
+        peer.getSyncBlockRequested().put(blockId, System.currentTimeMillis());
+      });
+      List<Sha256Hash> ids = new LinkedList<>();
+      ids.addAll(blockIds);
+      if (!ids.isEmpty()) {
+        peer.sendMessage(new FetchMessage(ids, InventoryType.BLOCK));
+      }
+    });
+
+    send.clear();
   }
 
 
