@@ -29,23 +29,16 @@ public class UdpTest {
     Args args;
     UDPListener listener;
 
-    @Before
-    public void before(){
-        Args.configFile = "config-localtest.conf";
-        context = new AnnotationConfigApplicationContext(DefaultConfig.class);
-        args = context.getBean(Args.class);
-        listener = context.getBean(UDPListener.class);
-        args = context.getBean(Args.class);
-        //cfgArgs.getSeedNode().setIpList(Lists.newArrayList());
-        args.setNodeP2pVersion(100);
-        args.setNodeListenPort(10001);
-    }
     @Test
     public void test(){}
 
 
     @Test
     public void udpTest() throws Exception {
+        Args.configFile = "config.conf";
+        Args config = context.getBean(Args.class);
+        ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+
         nodeManager = context.getBean(NodeManager.class);
 
         InetAddress server = InetAddress.getByName("127.0.0.1");
