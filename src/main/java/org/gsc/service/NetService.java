@@ -31,6 +31,7 @@ import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.exception.BadBlockException;
 import org.gsc.common.exception.GscException;
+import org.gsc.common.exception.NonCommonBlockException;
 import org.gsc.common.exception.UnLinkedBlockException;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Time;
@@ -427,10 +428,10 @@ public class NetService implements Service{
             blockWaitToProc.remove(msg);
             isBlockProc[0] = true;
             //TODO
-//            if (freshBlockId.contains(msg.getBlockId()) || processSyncBlock(
-//                msg.getBlockCapsule())) {
-//              finishProcessSyncBlock(msg.getBlockCapsule());
-//            }
+            if (freshBlockId.contains(msg.getBlockId()) || processSyncBlock(
+                msg.getBlockCapsule())) {
+              finishProcessSyncBlock(msg.getBlockCapsule());
+            }
           }
         }
       });
@@ -623,15 +624,19 @@ public class NetService implements Service{
             block.getBlockId().getString(), peer.getNode().getHost(),
             controller.getHeadBlockId().getString());
         startSyncWithPeer(peer);
+      } catch (NonCommonBlockException e) {
+        logger.error("We get a block {} that do not have the most recent common ancestor with the main chain, from {}, reason is {} ",
+            block.getBlockId().getString(), peer.getNode().getHost(), e.getMessage());
+        badAdvObj.put(block.getBlockId(), System.currentTimeMillis());
+        disconnectPeer(peer, ReasonCode.FORKED);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
       }
-
       // logger.error("Fail to process adv block {} from {}", block.getBlockId().getString(),
       // peer.getNode().getHost(), e);
-
     }
   }
+
 
   private void startSyncWithPeer(PeerConnection peer) {
     peer.setNeedSyncFromPeer(true);
@@ -696,8 +701,62 @@ public class NetService implements Service{
         //TODO  startFetchItem()
       }
     }
-
   }
+
+  private boolean processSyncBlock(BlockWrapper block) {
+    boolean isAccept = false;
+    ReasonCode reason = null;
+    try {
+      try {
+        controller.handleBlock(block, true);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+      }
+      freshBlockId.offer(block.getBlockId());
+      logger.info("Success handle block {}", block.getBlockId().getString());
+      isAccept = true;
+    } catch (BadBlockException e) {
+      logger.error("We get a bad block {}, reason is {} ", block.getBlockId().getString(),
+          e.getMessage());
+      badAdvObj.put(block.getBlockId(), System.currentTimeMillis());
+      reason = ReasonCode.BAD_BLOCK;
+    } catch (UnLinkedBlockException e) {
+      logger.error("We get a unlinked block {}, head is {}", block.getBlockId().getString(),
+          controller.getHeadBlockId().getString());
+      reason = ReasonCode.UNLINKABLE;
+    } catch (NonCommonBlockException e) {
+      logger.error("We get a block {} that do not have the most recent common ancestor with the main chain, head is {}",
+          block.getBlockId().getString(),
+          controller.getHeadBlockId().getString());
+      reason = ReasonCode.FORKED;
+    }
+
+    if (!isAccept) {
+      ReasonCode finalReason = reason;
+      getActivePeer().stream()
+          .filter(peer -> peer.getBlockInProc().contains(block.getBlockId()))
+          .forEach(peer -> disconnectPeer(peer, finalReason));
+    }
+    isHandleSyncBlockActive = true;
+    return isAccept;
+  }
+
+  private void finishProcessSyncBlock(BlockWrapper block) {
+    getActivePeer().forEach(peer -> {
+      if (peer.getSyncBlockToFetch().isEmpty()
+          && peer.getBlockInProc().isEmpty()
+          && !peer.isNeedSyncFromPeer()
+          && !peer.isNeedSyncFromUs()) {
+        startSyncWithPeer(peer);
+      } else if (peer.getBlockInProc().remove(block.getBlockId())) {
+        updateBlockWeBothHave(peer, block);
+        if (peer.getSyncBlockToFetch().isEmpty()) { //send sync to let peer know we are sync.
+          syncNextBatchChainIds(peer);
+        }
+      }
+    });
+  }
+
 
   private Collection<PeerConnection> getActivePeer() {
     return pool.getActivePeers();
