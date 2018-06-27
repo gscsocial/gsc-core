@@ -38,6 +38,7 @@ import org.gsc.common.exception.UnLinkedBlockException;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Time;
 import org.gsc.config.Args;
+import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.Parameter.NetConstants;
 import org.gsc.config.Parameter.NodeConstant;
 import org.gsc.core.chain.BlockId;
@@ -49,6 +50,7 @@ import org.gsc.core.sync.PriorItem;
 import org.gsc.core.sync.SlidingWindowCounter;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.net.message.MessageTypes;
+import org.gsc.net.message.gsc.AttentionMessage;
 import org.gsc.net.message.gsc.BlockMessage;
 import org.gsc.net.message.gsc.GscMessage;
 import org.gsc.net.message.gsc.InventoryMessage;
@@ -794,6 +796,161 @@ public class NetService implements Service{
   private void banTraitorPeer(PeerConnection peer, ReasonCode reason) {
     disconnectPeer(peer, reason);
   }
+
+  private void handleAttentionMessage(PeerConnection peer, AttentionMessage msg) {
+    //logger.info("on handle block chain inventory message");
+    try {
+      if (peer.getSyncChainRequested() != null) {
+        //List<BlockId> blockIds = msg.getBlockIds();
+        Deque<BlockId> blockIdWeGet = new LinkedList<>(msg.getBlockIds());
+
+        //check if the peer is a traitor
+        if (!blockIdWeGet.isEmpty()) {
+          long num = blockIdWeGet.peek().getNum();
+          for (BlockId id : blockIdWeGet) {
+            if (id.getNum() != num++) {
+              throw new TraitorPeerException("We get a not continuous block inv from " + peer);
+            }
+          }
+
+          if (peer.getSyncChainRequested().getKey().isEmpty()) {
+            if (blockIdWeGet.peek().getNum() != 1) {
+              throw new TraitorPeerException(
+                  "We want a block inv starting from beginning from " + peer);
+            }
+          } else {
+            if (!peer.getSyncChainRequested().getKey().contains(blockIdWeGet.peek())) {
+              throw new TraitorPeerException(String.format(
+                  "We get a unlinked block chain from " + peer
+                      + "\n Our head is " + peer.getSyncChainRequested().getKey().getLast()
+                      .getString()
+                      + "\n Peer give us is " + blockIdWeGet.peek().getString()));
+            }
+          }
+
+          if (controller.getHeadBlockId().getNum() > 0) {
+            long maxRemainTime = ChainConstant.CLOCK_MAX_DELAY + System.currentTimeMillis() - del
+                .getBlockTime(controller.getSolidBlockId());
+            long maxFutureNum =
+                maxRemainTime / BLOCK_PRODUCED_INTERVAL + controller.getSolidBlockId()
+                    .getNum();
+            if (blockIdWeGet.peekLast().getNum() + msg.getRemainNum() > maxFutureNum) {
+              throw new TraitorPeerException(
+                  "Block num " + blockIdWeGet.peekLast().getNum() + "+" + msg.getRemainNum()
+                      + " is gt future max num " + maxFutureNum + " from " + peer);
+            }
+          }
+        }
+        //check finish
+
+        //here this peer's answer is legal
+        peer.setSyncChainRequested(null);
+        if (msg.getRemainNum() == 0
+            && (blockIdWeGet.isEmpty() || (blockIdWeGet.size() == 1 && controller
+            .containBlock(blockIdWeGet.peek())))
+            && peer.getSyncBlockToFetch().isEmpty()
+            && peer.getUnfetchSyncNum() == 0) {
+          peer.setNeedSyncFromPeer(false);
+          unSyncNum = getUnSyncNum();
+          if (unSyncNum == 0) {
+            controller.syncToCli(0);
+          }
+          //TODO: check whole sync status and notify del sync status.
+          //TODO: if sync finish call del.syncToCli();
+          return;
+        }
+
+        if (!blockIdWeGet.isEmpty() && peer.getSyncBlockToFetch().isEmpty()) {
+          boolean isFound = false;
+
+          for (PeerConnection peerToCheck :
+              getActivePeer()) {
+            if (!peerToCheck.equals(peer)
+                && !peerToCheck.getSyncBlockToFetch().isEmpty()
+                && peerToCheck.getSyncBlockToFetch().peekFirst()
+                .equals(blockIdWeGet.peekFirst())) {
+              isFound = true;
+              break;
+            }
+          }
+
+          if (!isFound) {
+            while (!blockIdWeGet.isEmpty() && controller.containBlock(blockIdWeGet.peek())) {
+              updateBlockWeBothHave(peer, blockIdWeGet.peek());
+              blockIdWeGet.poll();
+            }
+          }
+        } else if (!blockIdWeGet.isEmpty()) {
+          while (!peer.getSyncBlockToFetch().isEmpty()) {
+            if (!peer.getSyncBlockToFetch().peekLast().equals(blockIdWeGet.peekFirst())) {
+              peer.getSyncBlockToFetch().pollLast();
+            } else {
+              break;
+            }
+          }
+
+          if (peer.getSyncBlockToFetch().isEmpty() && controller.containBlock(blockIdWeGet.peek())) {
+            updateBlockWeBothHave(peer, blockIdWeGet.peek());
+
+          }
+          //poll the block we both have.
+          blockIdWeGet.poll();
+        }
+
+        //sew it
+        peer.setUnfetchSyncNum(msg.getRemainNum());
+        peer.getSyncBlockToFetch().addAll(blockIdWeGet);
+        synchronized (freshBlockId) {
+          while (!peer.getSyncBlockToFetch().isEmpty() && freshBlockId
+              .contains(peer.getSyncBlockToFetch().peek())) {
+            BlockId blockId = peer.getSyncBlockToFetch().pop();
+            updateBlockWeBothHave(peer, blockId);
+            logger.info("Block {} from {} is processed", blockId.getString(),
+                peer.getNode().getHost());
+          }
+        }
+
+        if (msg.getRemainNum() == 0 && peer.getSyncBlockToFetch().size() == 0) {
+          peer.setNeedSyncFromPeer(false);
+        }
+
+        long newUnSyncNum = getUnSyncNum();
+        if (unSyncNum != newUnSyncNum) {
+          unSyncNum = newUnSyncNum;
+          controller.syncToCli(unSyncNum);
+        }
+
+        if (msg.getRemainNum() == 0) {
+          if (!peer.getSyncBlockToFetch().isEmpty()) {
+            //startFetchSyncBlock();
+            isFetchSyncActive = true;
+          } else {
+            //let peer know we are sync.
+            syncNextBatchChainIds(peer);
+          }
+        } else {
+          if (peer.getSyncBlockToFetch().size() > NodeConstant.SYNC_FETCH_BATCH_NUM) {
+            //one batch by one batch.
+            //startFetchSyncBlock();
+            isFetchSyncActive = true;
+          } else {
+            syncNextBatchChainIds(peer);
+          }
+        }
+
+        //TODO: check head block time is legal here
+        //TODO: refresh sync status to cli. call del.syncToCli() here
+
+      } else {
+        throw new TraitorPeerException("We don't send sync request to " + peer);
+      }
+
+    } catch (TraitorPeerException e) {
+      logger.error(e.getMessage());
+      banTraitorPeer(peer, ReasonCode.BAD_PROTOCOL);
+    }
+  }
+
 
   private Collection<PeerConnection> getActivePeer() {
     return pool.getActivePeers();
