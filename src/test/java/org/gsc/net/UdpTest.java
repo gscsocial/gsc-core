@@ -31,9 +31,10 @@ public class UdpTest {
 
     @Before
     public void before(){
-        Args.configFile = "config-localtest.conf";
         context = new AnnotationConfigApplicationContext(DefaultConfig.class);
         args = context.getBean(Args.class);
+        args.setShellConfFileName("config-localtest.conf");
+        args.init();
         listener = context.getBean(UDPListener.class);
         args = context.getBean(Args.class);
         //cfgArgs.getSeedNode().setIpList(Lists.newArrayList());
