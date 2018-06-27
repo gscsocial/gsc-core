@@ -36,9 +36,8 @@ public class UdpTest {
     @Test
     public void udpTest() throws Exception {
         Args.configFile = "config.conf";
-        Args config = context.getBean(Args.class);
         ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
-
+        Args config = context.getBean(Args.class);
         nodeManager = context.getBean(NodeManager.class);
 
         InetAddress server = InetAddress.getByName("127.0.0.1");
