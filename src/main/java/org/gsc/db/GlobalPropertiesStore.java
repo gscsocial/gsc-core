@@ -231,7 +231,8 @@ public class GlobalPropertiesStore extends ChainStore<BytesWrapper> {
     try {
       this.getNextMaintenanceTime();
     } catch (IllegalArgumentException e) {
-      this.saveNextMaintenanceTime(config.getGenesisBlockTimestamp());
+      this.saveNextMaintenanceTime(
+          Long.parseLong(Args.getInstance().getGenesisBlock().getTimestamp()));
     }
 
   }

@@ -7,47 +7,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.common.utils.AddressUtil;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.db.storage.Iterator.AccountIterator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class AccountStore extends ChainStore<AccountWrapper> {
 
-  private static Map<String, byte[]> assertsAddress =
-      new HashMap<String, byte[]>(); // key = name , value = address
-  private static AccountStore instance;
+  private static Map<String, byte[]> assertsAddress = new HashMap<>(); // key = name , value = address
 
   @Autowired
-  private AccountStore(@Qualifier("account") String dbName) {
+  private AccountStore(@Value("account") String dbName) {
     super(dbName);
-  }
-
-  public static void destroy() {
-    instance = null;
-  }
-
-  /**
-   * create fun.
-   *
-   * @param dbName the name of database
-   */
-  public static AccountStore create(String dbName) {
-    if (instance == null) {
-      synchronized (AccountStore.class) {
-        if (instance == null) {
-          instance = new AccountStore(dbName);
-        }
-      }
-    }
-    return instance;
   }
 
   @Override
@@ -71,20 +48,8 @@ public class AccountStore extends ChainStore<AccountWrapper> {
   public void put(byte[] key, AccountWrapper item) {
     super.put(key, item);
     if (Objects.nonNull(indexHelper)) {
-      //TODO
       //indexHelper.update(item.getInstance());
     }
-  }
-
-  /**
-   * get all accounts.
-   */
-  public List<AccountWrapper> getAllAccounts() {
-    return dbSource
-        .allValues()
-        .stream()
-        .map(bytes -> new AccountWrapper(bytes))
-        .collect(Collectors.toList());
   }
 
   /**
@@ -101,6 +66,15 @@ public class AccountStore extends ChainStore<AccountWrapper> {
    */
   public AccountWrapper getBlackhole() {
     byte[] data = dbSource.getData(assertsAddress.get("Blackhole"));
+    AccountWrapper accountCapsule = new AccountWrapper(data);
+    return accountCapsule;
+  }
+
+  /**
+   * Get foundation account info.
+   */
+  public AccountWrapper getZion() {
+    byte[] data = dbSource.getData(assertsAddress.get("Zion"));
     AccountWrapper accountCapsule = new AccountWrapper(data);
     return accountCapsule;
   }
@@ -130,8 +104,7 @@ public class AccountStore extends ChainStore<AccountWrapper> {
     if (Objects.nonNull(indexHelper)) {
       AccountWrapper item = get(key);
       if (Objects.nonNull(item)) {
-        //TODO
-        //indexHelper.remove(item.getInstance());
+       // indexHelper.remove(item.getInstance());
       }
     }
   }

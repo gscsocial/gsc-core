@@ -7,6 +7,7 @@ import org.gsc.common.app.Application;
 import org.gsc.common.app.ApplicationImpl;
 import org.gsc.config.Args;
 import org.gsc.config.DefaultConfig;
+import org.gsc.core.Constant;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -20,8 +21,14 @@ public class Start {
   public static void main(String[] args) throws InterruptedException {
     logger.info("gsc node running.");
 
-    Args.configFile = "config.conf";
-    Args.args = args;
+    logger.info("Full node running.");
+    Args.setParam(args, Constant.TESTNET_CONF);
+    Args cfgArgs = Args.getInstance();
+
+    if (cfgArgs.isHelp()) {
+      logger.info("Here is the help message.");
+      return;
+    }
 
     DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
     beanFactory.setAllowCircularReferences(false);
