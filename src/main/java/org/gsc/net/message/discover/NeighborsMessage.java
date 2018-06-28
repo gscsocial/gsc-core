@@ -1,7 +1,8 @@
 package org.gsc.net.message.discover;
 
+import static org.gsc.net.message.discover.UdpMessageTypeEnum.DISCOVER_NEIGHBORS;
+
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -17,17 +18,13 @@ public class NeighborsMessage extends Message {
 
   private Discover.Neighbours neighbours;
 
-  public NeighborsMessage(byte[] data) {
-    super(Message.GET_PEERS, data);
-    try {
-      this.neighbours = Discover.Neighbours.parseFrom(data);
-    } catch (InvalidProtocolBufferException e) {
-      logger.debug(e.getMessage(), e);
-    }
+  public NeighborsMessage(byte[] data) throws Exception{
+    super(DISCOVER_NEIGHBORS, data);
+    this.neighbours = Discover.Neighbours.parseFrom(data);
   }
 
   public NeighborsMessage(Node from, List<Node> neighbours) {
-    super(Message.GET_PEERS, null);
+    super(DISCOVER_NEIGHBORS, null);
     Builder builder = Neighbours.newBuilder()
         .setTimestamp(System.currentTimeMillis());
 

@@ -1,7 +1,8 @@
 package org.gsc.net.message.discover;
 
+import static org.gsc.net.message.discover.UdpMessageTypeEnum.DISCOVER_PING;
+
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.config.Args;
@@ -19,17 +20,13 @@ public class PingMessage extends Message {
 
   private Discover.PingMessage pingMessage;
 
-  public PingMessage(byte[] data) {
-    super(Message.PING, data);
-    try {
-      this.pingMessage = Discover.PingMessage.parseFrom(data);
-    } catch (InvalidProtocolBufferException e) {
-      logger.debug(e.getMessage(), e);
-    }
+  public PingMessage(byte[] data) throws Exception{
+    super(DISCOVER_PING, data);
+    this.pingMessage = Discover.PingMessage.parseFrom(data);
   }
 
   public PingMessage(Node from, Node to) {
-    super(Message.PING, null);
+    super(DISCOVER_PING, null);
     Endpoint fromEndpoint = Endpoint.newBuilder()
         .setNodeId(ByteString.copyFrom(from.getId()))
         .setPort(from.getPort())
@@ -40,12 +37,17 @@ public class PingMessage extends Message {
         .setPort(to.getPort())
         .setAddress(ByteString.copyFrom(ByteArray.fromString(to.getHost())))
         .build();
-    this.pingMessage = Discover.PingMessage.newBuilder().setVersion(config.getNodeP2pVersion())
+    this.pingMessage = Discover.PingMessage.newBuilder()
+        .setVersion(config.getNodeP2pVersion())
         .setFrom(fromEndpoint)
         .setTo(toEndpoint)
         .setTimestamp(System.currentTimeMillis())
         .build();
     this.data = this.pingMessage.toByteArray();
+  }
+
+  public int getVersion(){
+    return this.pingMessage.getVersion();
   }
 
   public Node getFrom() {

@@ -1,7 +1,8 @@
 package org.gsc.net.message.discover;
 
+import static org.gsc.net.message.discover.UdpMessageTypeEnum.DISCOVER_PONG;
+
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.config.Args;
@@ -9,6 +10,7 @@ import org.gsc.net.discover.Node;
 import org.gsc.protos.Discover;
 import org.gsc.protos.Discover.Endpoint;
 import org.springframework.beans.factory.annotation.Autowired;
+
 
 @Slf4j
 public class PongMessage extends Message {
@@ -18,17 +20,13 @@ public class PongMessage extends Message {
   @Autowired
   private Args config;
 
-  public PongMessage(byte[] data) {
-    super(Message.PONG, data);
-    try {
-      this.pongMessage = Discover.PongMessage.parseFrom(data);
-    } catch (InvalidProtocolBufferException e) {
-      logger.debug(e.getMessage(), e);
-    }
+  public PongMessage(byte[] data) throws Exception{
+    super(DISCOVER_PONG, data);
+    this.pongMessage = Discover.PongMessage.parseFrom(data);
   }
 
   public PongMessage(Node from) {
-    super(Message.PONG, null);
+    super(DISCOVER_PONG, null);
     Endpoint toEndpoint = Endpoint.newBuilder()
         .setAddress(ByteString.copyFrom(ByteArray.fromString(from.getHost())))
         .setPort(from.getPort())
@@ -47,6 +45,10 @@ public class PongMessage extends Message {
     Node node = new Node(from.getNodeId().toByteArray(),
         ByteArray.toStr(from.getAddress().toByteArray()), from.getPort());
     return node;
+  }
+
+  public int getVersion() {
+    return this.pongMessage.getEcho();
   }
 
   @Override

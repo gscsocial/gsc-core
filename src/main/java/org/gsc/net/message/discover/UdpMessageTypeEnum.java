@@ -1,9 +1,9 @@
-package org.tron.common.net.udp.message;
+package org.gsc.net.message.discover;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public enum  UdpMessageTypeEnum {
+public enum UdpMessageTypeEnum {
 
   DISCOVER_PING((byte) 0x01),
 

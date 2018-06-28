@@ -1,7 +1,9 @@
 package org.gsc.net.message.discover;
 
+
+import static org.gsc.net.message.discover.UdpMessageTypeEnum.DISCOVER_FIND_NODE;
+
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.net.discover.Node;
@@ -15,17 +17,13 @@ public class FindNodeMessage extends Message {
 
   private Discover.FindNeighbours findNeighbours;
 
-  public FindNodeMessage(byte[] data) {
-    super(Message.FINE_PEERS, data);
-    try {
-      this.findNeighbours = Discover.FindNeighbours.parseFrom(data);
-    } catch (InvalidProtocolBufferException e) {
-      logger.debug(e.getMessage(), e);
-    }
+  public FindNodeMessage(byte[] data) throws Exception{
+    super(DISCOVER_FIND_NODE, data);
+    this.findNeighbours = Discover.FindNeighbours.parseFrom(data);
   }
 
   public FindNodeMessage(Node from, byte[] targetId) {
-    super(Message.FINE_PEERS, null);
+    super(DISCOVER_FIND_NODE, null);
     Endpoint fromEndpoint = Endpoint.newBuilder()
         .setAddress(ByteString.copyFrom(ByteArray.fromString(from.getHost())))
         .setPort(from.getPort())
