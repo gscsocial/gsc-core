@@ -64,8 +64,8 @@ public class ECKeyTest {
         assertTrue(key.isPubKeyCanonical());
         assertNotNull(key.getPubKey());
         assertNotNull(key.getPrivKeyBytes());
-        logger.debug(Hex.toHexString(key.getPrivKeyBytes()) + " :Generated privkey");
-        logger.debug(Hex.toHexString(key.getPubKey()) + " :Generated pubkey");
+        logger.info(Hex.toHexString(key.getPrivKeyBytes()) + " :Generated privkey");
+        logger.info(Hex.toHexString(key.getPubKey()) + " :Generated pubkey");
     }
 
     @Test
