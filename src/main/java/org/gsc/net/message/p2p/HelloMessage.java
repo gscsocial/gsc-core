@@ -4,6 +4,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.config.Args;
+import org.gsc.core.chain.BlockId;
 import org.gsc.net.discover.Node;
 import org.gsc.net.message.MessageTypes;
 import org.gsc.protos.Discover.Endpoint;
@@ -100,6 +101,11 @@ public class HelloMessage extends P2pMessage {
     P2p.HelloMessage.Builder builder = this.helloMessage.toBuilder();
     builder.setVersion(version);
     this.helloMessage = builder.build();
+  }
+
+  //TODO
+  public BlockId getHeadBlockId() {
+    return null;
   }
 
   /**
