@@ -16,6 +16,7 @@
 package org.gsc.common.app;
 
 import org.gsc.config.Args;
+import org.gsc.db.Manager;
 import org.gsc.service.Service;
 
 public interface Application {
@@ -35,4 +36,6 @@ public interface Application {
   void shutdownServices();
 
   void addService(Service service);
+
+  Manager getDbManager();
 }
