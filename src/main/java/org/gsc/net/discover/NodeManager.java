@@ -40,12 +40,14 @@ import org.gsc.net.message.discover.Message;
 import org.gsc.net.message.discover.NeighborsMessage;
 import org.gsc.net.message.discover.PingMessage;
 import org.gsc.net.message.discover.PongMessage;
+import org.gsc.net.udp.handler.EventHandler;
+import org.gsc.net.udp.handler.UdpEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class NodeManager implements Consumer<DiscoveryEvent> {
+public class NodeManager implements EventHandler {
 
   @Autowired
   private Args args;
@@ -111,15 +113,10 @@ public class NodeManager implements Consumer<DiscoveryEvent> {
     return pongTimer;
   }
 
-  void channelActivated() {
-    // channel activated now can send messages
+  @Override
+  public void channelActivated() {
     if (!inited) {
-      // no another init on a new channel activation
       inited = true;
-
-      // this task is done asynchronously with some fixed rate
-      // to avoid any overhead in the NodeStatistics classes keeping them lightweight
-      // (which might be critical since they might be invoked from time critical sections)
       nodeManagerTasksTimer.scheduleAtFixedRate(new TimerTask() {
         @Override
         public void run() {
@@ -127,29 +124,61 @@ public class NodeManager implements Consumer<DiscoveryEvent> {
         }
       }, LISTENER_REFRESH_RATE, LISTENER_REFRESH_RATE);
 
-
-      //TODO: get neighbours from nodes data persistence
-//      if (args.isNodeDiscoveryPersist()) {
-//        dbRead();
-//        nodeManagerTasksTimer.scheduleAtFixedRate(new TimerTask() {
-//          @Override
-//          public void run() {
-//            dbWrite();
-//          }
-//        }, DB_COMMIT_RATE, DB_COMMIT_RATE);
-//      }
+      if (args.isNodeDiscoveryPersist()) {
+        dbRead();
+        nodeManagerTasksTimer.scheduleAtFixedRate(new TimerTask() {
+          @Override
+          public void run() {
+            dbWrite();
+          }
+        }, DB_COMMIT_RATE, DB_COMMIT_RATE);
+      }
 
       for (Node node : bootNodes) {
         getNodeHandler(node);
       }
-
-      //TODO: init active nodes
-
-//      for (Node node : args.getNodeActive()) {
-//        getNodeHandler(node).getNodeStatistics().setPredefined(true);
-//      }
     }
   }
+
+//  void channelActivated() {
+//    // channel activated now can send messages
+//    if (!inited) {
+//      // no another init on a new channel activation
+//      inited = true;
+//
+//      // this task is done asynchronously with some fixed rate
+//      // to avoid any overhead in the NodeStatistics classes keeping them lightweight
+//      // (which might be critical since they might be invoked from time critical sections)
+//      nodeManagerTasksTimer.scheduleAtFixedRate(new TimerTask() {
+//        @Override
+//        public void run() {
+//          processListeners();
+//        }
+//      }, LISTENER_REFRESH_RATE, LISTENER_REFRESH_RATE);
+//
+//
+//      //TODO: get neighbours from nodes data persistence
+////      if (args.isNodeDiscoveryPersist()) {
+////        dbRead();
+////        nodeManagerTasksTimer.scheduleAtFixedRate(new TimerTask() {
+////          @Override
+////          public void run() {
+////            dbWrite();
+////          }
+////        }, DB_COMMIT_RATE, DB_COMMIT_RATE);
+////      }
+//
+//      for (Node node : bootNodes) {
+//        getNodeHandler(node);
+//      }
+//
+//      //TODO: init active nodes
+//
+////      for (Node node : args.getNodeActive()) {
+////        getNodeHandler(node).getNodeStatistics().setPredefined(true);
+////      }
+//    }
+//  }
 
   public boolean isNodeAlive(NodeHandler nodeHandler) {
     return nodeHandler.state.equals(State.Alive) ||
@@ -238,40 +267,36 @@ public class NodeManager implements Consumer<DiscoveryEvent> {
     return getNodeHandler(n).getNodeStatistics();
   }
 
-  @Override
-  public void accept(DiscoveryEvent discoveryEvent) {
-    handleInbound(discoveryEvent);
-  }
 
-  public void handleInbound(DiscoveryEvent discoveryEvent) {
-    Message m = discoveryEvent.getMessage();
-    InetSocketAddress sender = discoveryEvent.getAddress();
+  @Override
+  public void handleEvent(UdpEvent udpEvent) {
+    Message m = udpEvent.getMessage();
+    InetSocketAddress sender = udpEvent.getAddress();
 
     Node n = new Node(m.getNodeId(), sender.getHostString(), sender.getPort());
 
     if (inboundOnlyFromKnownNodes && !hasNodeHandler(n)) {
-      logger.debug(
-          "=/=> (" + sender + "): inbound packet from unknown peer rejected due to config option.");
+      logger.debug("Inbound packet from unknown peer {}.", sender.getAddress());
       return;
     }
     NodeHandler nodeHandler = getNodeHandler(n);
 
-    byte type = m.getType();
-    switch (type) {
-      case 1:
+    switch (m.getType()) {
+      case DISCOVER_PING:
         nodeHandler.handlePing((PingMessage) m);
         break;
-      case 2:
+      case DISCOVER_PONG:
         nodeHandler.handlePong((PongMessage) m);
         break;
-      case 3:
+      case DISCOVER_FIND_NODE:
         nodeHandler.handleFindNode((FindNodeMessage) m);
         break;
-      case 4:
+      case DISCOVER_NEIGHBORS:
         nodeHandler.handleNeighbours((NeighborsMessage) m);
         break;
     }
   }
+
 
   public void sendOutbound(DiscoveryEvent discoveryEvent) {
     if (discoveryEnabled && messageSender != null) {
