@@ -21,9 +21,6 @@ import org.gsc.config.Args;
 import org.gsc.config.GscConstants.ChainConstant;
 import org.gsc.consensus.BlockProductionCondition;
 import org.gsc.consensus.ProducerController;
-import org.gsc.consensus.backup.BackupManager;
-import org.gsc.consensus.backup.BackupManager.BackupStatusEnum;
-import org.gsc.consensus.backup.BackupServer;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.ProducerWrapper;
 import org.gsc.crypto.ECKey;
@@ -32,9 +29,7 @@ import org.gsc.net.message.gsc.BlockMessage;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.stereotype.Component;
 
-@Component
 @Slf4j
 public class ProducerService implements Service {
 
@@ -63,9 +58,10 @@ public class ProducerService implements Service {
 
   private AnnotationConfigApplicationContext context;
 
-  private BackupManager backupManager;
-
-  private BackupServer backupServer;
+  //TODO backup
+//  private BackupManager backupManager;
+//
+//  private BackupServer backupServer;
 
   /**
    * Construction method.
@@ -73,8 +69,8 @@ public class ProducerService implements Service {
   public ProducerService(Application app, AnnotationConfigApplicationContext context) {
     this.app = app;
     this.context = context;
-    backupManager = context.getBean(BackupManager.class);
-    backupServer = context.getBean(BackupServer.class);
+//    backupManager = context.getBean(BackupManager.class);
+//    backupServer = context.getBean(BackupServer.class);
     generateThread = new Thread(scheduleProductionLoop);
     controller = app.getDbManager().getProdController();
     new Thread(()->{
@@ -83,7 +79,8 @@ public class ProducerService implements Service {
           Thread.sleep(100);
         }catch (Exception e){}
       }
-      backupServer.initServer();
+      //TODO bakcup
+      //backupServer.initServer();
     }).start();
   }
 
@@ -148,9 +145,10 @@ public class ProducerService implements Service {
    */
   private BlockProductionCondition tryProduceBlock() throws InterruptedException {
     logger.info("Try Produce Block");
-    if (!backupManager.getStatus().equals(BackupStatusEnum.MASTER)){
-      return BlockProductionCondition.BACKUP_STATUS_IS_NOT_MASTER;
-    }
+    //TODO back up
+//    if (!backupManager.getStatus().equals(BackupStatusEnum.MASTER)){
+//      return BlockProductionCondition.BACKUP_STATUS_IS_NOT_MASTER;
+//    }
     long now = DateTime.now().getMillis() + 50L;
     if (this.needSyncCheck) {
       long nexSlotTime = controller.getSlotTime(1);

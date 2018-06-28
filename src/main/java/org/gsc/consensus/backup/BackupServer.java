@@ -14,9 +14,8 @@ import org.gsc.net.server.WireTrafficStats;
 import org.gsc.net.udp.handler.MessageHandler;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
+
 public class BackupServer {
 
   private static final org.slf4j.Logger logger = LoggerFactory.getLogger("BackupServer");
@@ -26,6 +25,7 @@ public class BackupServer {
 
   private int port = config.getBackupPort();
 
+  @Autowired
   private BackupManager backupManager;
 
   private Channel channel;

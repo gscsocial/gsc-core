@@ -26,13 +26,11 @@ import org.gsc.db.ProducerStore;
 import org.gsc.db.VotesStore;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 @Slf4j
 public class ProducerController {
 
-  @Autowired
+  @Setter
   private Manager manager;
 
   @Autowired

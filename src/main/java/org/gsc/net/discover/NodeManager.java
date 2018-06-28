@@ -33,6 +33,7 @@ import java.util.function.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.CollectionUtils;
 import org.gsc.config.Args;
+import org.gsc.db.Manager;
 import org.gsc.net.discover.NodeHandler.State;
 import org.gsc.net.discover.table.NodeTable;
 import org.gsc.net.message.discover.FindNodeMessage;
@@ -52,8 +53,7 @@ public class NodeManager implements EventHandler {
   @Autowired
   private Args args;
 
-  @Autowired
-  //private Manager dbManager;
+  private Manager dbManager;
 
   private static final long LISTENER_REFRESH_RATE = 1000;
   private static final long DB_COMMIT_RATE = 1 * 60 * 1000;
@@ -80,19 +80,16 @@ public class NodeManager implements EventHandler {
   private ScheduledExecutorService pongTimer;
 
   @Autowired
-  public NodeManager() {
+  public NodeManager(Manager dbManager) {
+    this.dbManager = dbManager;
     discoveryEnabled = args.isNodeDiscoveryEnable();
 
-    //TODO: inital home node and boot nodes
+    homeNode = new Node(args.getMyKey().getNodeId(), args.getNodeExternalIp(),
+        args.getNodeListenPort());
 
-//    homeNode = new Node(Args.getMyKey().getNodeId(), args.getNodeExternalIp(),
-//        args.getNodeListenPort());
-
-//    for (String boot : args.getSeedNode().getIpList()) {
-//      bootNodes.add(Node.instanceOf(boot));
-//    }
-
-    homeNode = new Node("");
+    for (String boot : args.getSeedNode().getIpList()) {
+      bootNodes.add(Node.instanceOf(boot));
+    }
 
     logger.info("homeNode : {}", homeNode);
     logger.info("bootNodes : size= {}", bootNodes.size());
@@ -104,7 +101,7 @@ public class NodeManager implements EventHandler {
       public void run() {
         logger.trace("Statistics:\n {}", dumpAllStatistics());
       }
-    }, 1 * 1000, 60 * 1000);
+    }, 1 * 1000L, 60 * 1000L);
 
     this.pongTimer = Executors.newSingleThreadScheduledExecutor();
   }
