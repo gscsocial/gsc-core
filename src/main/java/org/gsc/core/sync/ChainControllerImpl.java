@@ -7,6 +7,7 @@ import org.gsc.common.exception.BadBlockException;
 import org.gsc.common.exception.BadTransactionException;
 import org.gsc.common.exception.GscException;
 import org.gsc.common.exception.HeaderNotFound;
+import org.gsc.common.exception.NonCommonBlockException;
 import org.gsc.common.exception.StoreException;
 import org.gsc.common.exception.UnLinkedBlockException;
 import org.gsc.common.utils.Sha256Hash;
@@ -22,7 +23,7 @@ public class ChainControllerImpl implements ChainController {
 
   @Override
   public LinkedList<Sha256Hash> handleBlock(BlockWrapper block, boolean syncMode)
-      throws BadBlockException, UnLinkedBlockException, InterruptedException {
+      throws BadBlockException, UnLinkedBlockException, InterruptedException, NonCommonBlockException {
     return null;
   }
 
