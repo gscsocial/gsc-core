@@ -1,46 +1,33 @@
-package org.tron.common.backup;
+package org.gsc.consensus.backup;
 
-import static org.tron.common.backup.BackupManager.BackupStatusEnum.INIT;
-import static org.tron.common.backup.BackupManager.BackupStatusEnum.MASTER;
-import static org.tron.common.backup.BackupManager.BackupStatusEnum.SLAVER;
-import static org.tron.common.net.udp.message.UdpMessageTypeEnum.BACKUP_KEEP_ALIVE;
+import static org.gsc.consensus.backup.BackupManager.BackupStatusEnum.INIT;
+import static org.gsc.consensus.backup.BackupManager.BackupStatusEnum.MASTER;
+import static org.gsc.consensus.backup.BackupManager.BackupStatusEnum.SLAVER;
+import static org.gsc.net.message.discover.UdpMessageTypeEnum.BACKUP_KEEP_ALIVE;
 
 import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+import org.gsc.config.Args;
+import org.gsc.net.message.backup.KeepAliveMessage;
+import org.gsc.net.message.discover.Message;
+import org.gsc.net.udp.handler.EventHandler;
+import org.gsc.net.udp.handler.MessageHandler;
+import org.gsc.net.udp.handler.UdpEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.tron.common.net.udp.handler.EventHandler;
-import org.tron.common.net.udp.handler.MessageHandler;
-import org.tron.common.net.udp.handler.UdpEvent;
-import org.tron.common.net.udp.message.Message;
-import org.tron.common.net.udp.message.backup.KeepAliveMessage;
-import org.tron.common.net.udp.message.discover.FindNodeMessage;
-import org.tron.common.net.udp.message.discover.NeighborsMessage;
-import org.tron.common.net.udp.message.discover.PingMessage;
-import org.tron.common.net.udp.message.discover.PongMessage;
-import org.tron.common.overlay.discover.node.Node;
-import org.tron.common.overlay.discover.node.NodeHandler;
-import org.tron.core.config.args.Args;
-
 @Component
-public class BackupManager implements EventHandler{
+public class BackupManager implements EventHandler {
 
   private static final Logger logger = LoggerFactory.getLogger("BackupManager");
 
-  private Args args = Args.getInstance();
+  @Autowired
+  private Args args;
 
   private int priority = args.getBackupPriority();
 
