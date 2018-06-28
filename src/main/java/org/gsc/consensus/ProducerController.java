@@ -3,6 +3,7 @@ package org.gsc.consensus;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -326,6 +327,29 @@ public class ProducerController {
 
   public int calculateParticipationRate() {
     return globalStore.calculateFilledSlotsCount();
+  }
+
+  public List<ByteString> getActiveProducers() {
+    return this.manager.getProdScheduleStore().getActiveProducers();
+  }
+
+  public void dumpParticipationLog() {
+    StringBuilder builder = new StringBuilder();
+    int[] blockFilledSlots = manager.getGlobalPropertiesStore().getBlockFilledSlots();
+    builder.append("dump participation log \n ").append("blockFilledSlots:")
+        .append(Arrays.toString(blockFilledSlots)).append(",");
+    long headSlot = getHeadSlot();
+    builder.append("\n").append(" headSlot:").append(headSlot).append(",");
+
+    List<ByteString> activeWitnesses = getActiveProducers();
+    activeWitnesses.forEach(a -> {
+      ProducerWrapper witnessCapsule = manager.getProdStore().get(a.toByteArray());
+      builder.append("\n").append(" witness:").append(witnessCapsule.createReadableString())
+          .append(",").
+          append("latestBlockNum:").append(witnessCapsule.getLatestBlockNum()).append(",").
+          append("LatestSlotNum:").append(witnessCapsule.getLatestSlotNum()).append(".");
+    });
+    logger.debug(builder.toString());
   }
 
   private void payStandbyWitness(List<ByteString> list) {

@@ -27,6 +27,7 @@ import org.gsc.consensus.backup.BackupServer;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.ProducerWrapper;
 import org.gsc.crypto.ECKey;
+import org.gsc.db.Manager;
 import org.gsc.net.message.gsc.BlockMessage;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,12 @@ public class ProducerService implements Service {
 
   @Autowired
   private static Args config;
+
+  @Autowired
+  private static Manager manger;
+
+  @Autowired
+  private NetService netService;
 
   private static final int MIN_PARTICIPATION_RATE = config
       .getMinParticipationRate(); // MIN_PARTICIPATION_RATE * 1%
@@ -189,7 +196,7 @@ public class ProducerService implements Service {
       return BlockProductionCondition.NOT_TIME_YET;
     }
 
-    if (now < controller.getManager().getDynamicPropertiesStore().getLatestBlockHeaderTimestamp()) {
+    if (now < manger.getGlobalPropertiesStore().getLatestBlockHeaderTimestamp()) {
       logger.warn("have a timestamp:{} less than or equal to the previous block:{}",
           new DateTime(now), new DateTime(
               this.app.getDbManager().getGlobalPropertiesStore()
@@ -199,7 +206,7 @@ public class ProducerService implements Service {
 
     if (!controller.activeWitnessesContain(this.getLocalWitnessStateMap().keySet())) {
       logger.info("Unelected. Elected Witnesses: {}",
-          StringUtil.getAddressStringList(controller.getActiveWitnesses()));
+          StringUtil.getAddressStringList(controller.getActiveProducers()));
       return BlockProductionCondition.UNELECTED;
     }
 
@@ -258,7 +265,7 @@ public class ProducerService implements Service {
 
   private void broadcastBlock(BlockWrapper block) {
     try {
-      app.getP2pNode().broadcast(new BlockMessage(block.getData()));
+      netService.broadcast(new BlockMessage(block.getData()));
     } catch (Exception ex) {
       throw new RuntimeException("BroadcastBlock error");
     }
