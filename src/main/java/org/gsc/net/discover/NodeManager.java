@@ -60,7 +60,7 @@ public class NodeManager implements EventHandler {
   static final int MAX_NODES = 2000;
   static final int NODES_TRIM_THRESHOLD = 3000;
 
-  Consumer<DiscoveryEvent> messageSender;
+  Consumer<UdpEvent> messageSender;
 
   NodeTable table;
   private Map<String, NodeHandler> nodeHandlerMap = new ConcurrentHashMap<>();
@@ -210,7 +210,7 @@ public class NodeManager implements EventHandler {
 //    dbManager.clearAndWriteNeighbours(batch);
   }
 
-  public void setMessageSender(Consumer<DiscoveryEvent> messageSender) {
+  public void setMessageSender(Consumer<UdpEvent> messageSender) {
     this.messageSender = messageSender;
   }
 
@@ -298,7 +298,7 @@ public class NodeManager implements EventHandler {
   }
 
 
-  public void sendOutbound(DiscoveryEvent discoveryEvent) {
+  public void sendOutbound(UdpEvent discoveryEvent) {
     if (discoveryEnabled && messageSender != null) {
       messageSender.accept(discoveryEvent);
     }
