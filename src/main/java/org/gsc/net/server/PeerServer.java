@@ -38,7 +38,7 @@ public class PeerServer {
     private static final Logger logger = LoggerFactory.getLogger("PeerServer");
 
     @Autowired
-    private Args args;
+    private Args args = Args.getInstance();
 
     private ApplicationContext ctx;
 

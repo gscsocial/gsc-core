@@ -55,7 +55,7 @@ public class ChannelManager {
       .expireAfterWrite(30, TimeUnit.SECONDS).recordStats().build();
 
   @Autowired
-  private Args args;
+  private Args args = Args.getInstance();
 
   private int maxActivePeers = args.getNodeMaxActiveNodes() > 0 ? args.getNodeMaxActiveNodes() : 30;
 

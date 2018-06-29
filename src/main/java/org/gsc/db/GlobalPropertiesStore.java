@@ -74,7 +74,7 @@ public class GlobalPropertiesStore extends ChainStore<BytesWrapper> {
   private static final byte[] OPERATING_TIME_INTERVAL = "OPERATING_TIME_INTERVAL".getBytes();
 
   @Autowired
-  private Args config;
+  private Args config = Args.getInstance();
 
   @Autowired
   private GlobalPropertiesStore(@Qualifier("properties") String dbName) {
