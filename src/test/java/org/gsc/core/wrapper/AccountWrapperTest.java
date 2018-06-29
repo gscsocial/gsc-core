@@ -24,7 +24,6 @@ public class AccountWrapperTest {
 
     @BeforeClass
     public static void init() {
-        Args.args = new String[]{"-d", dbPath};
         ByteString accountName = ByteString.copyFrom(AccountWrapperTest.randomBytes(16));
         ByteString address = ByteString.copyFrom(AccountWrapperTest.randomBytes(32));
         Protocol.AccountType accountType = Protocol.AccountType.forNumber(1);

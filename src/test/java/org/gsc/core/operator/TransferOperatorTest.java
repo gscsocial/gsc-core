@@ -30,7 +30,6 @@ public class TransferOperatorTest {
     private static final String To_ACCOUNT_INVALIDATE;
 
     static {
-        Args.args = new String[]{"--output-directory", dbPath};
         context = new AnnotationConfigApplicationContext(DefaultConfig.class);
         OWNER_ADDRESS = Constant.ADD_PRE_FIX_STRING_MAINNET + "548794500882809695a8a687866e76d4271a1abc";
         TO_ADDRESS = Constant.ADD_PRE_FIX_STRING_MAINNET + "abd4b9367799eaa3197fecb144eb71de1e049abc";
