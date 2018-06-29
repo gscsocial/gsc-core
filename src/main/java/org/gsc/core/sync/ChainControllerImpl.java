@@ -282,7 +282,6 @@ public class ChainControllerImpl implements ChainController {
     if (unSyncNum == 0) {
       logger.info("Sync Block Completed !!!");
     }
-    //TODO: notify cli know how many block we need to sync
   }
 
   @Override
@@ -297,87 +296,47 @@ public class ChainControllerImpl implements ChainController {
   }
 
   @Override
-  public BlockId getSolidBlockId() {
-    return null;
-  }
-
-  @Override
-  public boolean contain(Sha256Hash hash, MessageTypes type) {
-    return false;
-  }
-
-  @Override
-  public boolean containBlockInMainChain(BlockId id) {
-    return false;
-  }
-
-  @Override
-  public boolean canChainRevoke(long num) {
-    return false;
-  }
-
-  @Override
-  public BlockWrapper getHead() throws HeaderNotFound {
-    return null;
-  }
-
-  @Override
   public BlockId getHeadBlockId() {
-    return null;
+    return dbManager.getHeadBlockId();
+  }
+
+  @Override
+  public BlockId getSolidBlockId() {
+    return dbManager.getSolidBlockId();
   }
 
   @Override
   public long getHeadBlockTimeStamp() {
-    return 0;
-  }
-
-  @Override
-  public BlockId getGenesisBlockId() {
-    return null;
-  }
-
-  @Override
-  public BlockWrapper getGenesisBlock() {
-    return null;
-  }
-
-  @Override
-  public void initGenesis() {
-
-  }
-
-  @Override
-  public void initAccount() {
-
-  }
-
-  @Override
-  public void initWitness() {
-
-  }
-
-  @Override
-  public boolean pushTransactions(TransactionWrapper tx) {
-    return false;
-  }
-
-  @Override
-  public boolean pushBlock(BlockWrapper block) {
-    return false;
+    return dbManager.getHeadBlockTimeStamp();
   }
 
   @Override
   public boolean containBlock(BlockId id) {
+    return dbManager.containBlock(id);
+  }
+
+  @Override
+  public boolean containBlockInMainChain(BlockId id) {
+    return dbManager.containBlockInMainChain(id);
+  }
+
+  @Override
+  public boolean contain(Sha256Hash hash, MessageTypes type) {
+    if (type.equals(MessageTypes.BLOCK)) {
+      return dbManager.containBlock(hash);
+    } else if (type.equals(MessageTypes.TRANSACTION)) {
+      return dbManager.getTransactionStore().has(hash.getBytes());
+    }
     return false;
   }
 
   @Override
-  public BlockWrapper getBlockById(BlockId id) {
-    return null;
+  public BlockWrapper getGenesisBlock() {
+    return dbManager.getGenesisBlock();
   }
 
   @Override
-  public TransactionWrapper getTransactionById(Sha256Hash id) {
-    return null;
+  public boolean canChainRevoke(long num) {
+    return num >= dbManager.getSyncBeginNumber();
   }
 }
