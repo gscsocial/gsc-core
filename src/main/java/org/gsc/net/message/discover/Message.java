@@ -1,24 +1,21 @@
 package org.gsc.net.message.discover;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.gsc.common.exception.P2pException;
 import org.gsc.common.utils.Sha256Hash;
+import org.gsc.net.message.backup.KeepAliveMessage;
 
 public abstract class Message {
 
-  public static byte PING = 1;
-  public static byte PONG = 2;
-  public static byte FINE_PEERS = 3;
-  public static byte GET_PEERS = 4;
-
-  protected byte type;
+  protected UdpMessageTypeEnum type;
   protected byte[] data;
 
-  public Message(byte type, byte[] data) {
+  public Message(UdpMessageTypeEnum type, byte[] data) {
     this.type = type;
     this.data = data;
   }
 
-  public byte getType() {
+  public UdpMessageTypeEnum getType() {
     return this.type;
   }
 
@@ -27,7 +24,7 @@ public abstract class Message {
   }
 
   public byte[] getSendData() {
-    return ArrayUtils.add(this.data, 0, type);
+    return ArrayUtils.add(this.data, 0, type.getType());
   }
 
   public Sha256Hash getMessageId() {
@@ -42,24 +39,31 @@ public abstract class Message {
   }
 
   @Override
+  public boolean equals(Object obj) {
+    return super.equals(obj);
+  }
+
+  @Override
   public int hashCode() {
     return getMessageId().hashCode();
   }
 
-  public static Message parse(byte[] encode) {
+  public static Message parse(byte[] encode) throws Exception {
     byte type = encode[0];
     byte[] data = ArrayUtils.subarray(encode, 1, encode.length);
-    switch (type) {
-      case 1:
+    switch (UdpMessageTypeEnum.fromByte(type)) {
+      case DISCOVER_PING:
         return new PingMessage(data);
-      case 2:
+      case DISCOVER_PONG:
         return new PongMessage(data);
-      case 3:
+      case DISCOVER_FIND_NODE:
         return new FindNodeMessage(data);
-      case 4:
+      case DISCOVER_NEIGHBORS:
         return new NeighborsMessage(data);
+      case BACKUP_KEEP_ALIVE:
+        return new KeepAliveMessage(data);
       default:
-        throw new IllegalArgumentException("No such message");
+        throw new P2pException(P2pException.TypeEnum.NO_SUCH_MESSAGE, "type=" + type);
     }
   }
 }

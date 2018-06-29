@@ -1,17 +1,15 @@
 package org.gsc.core.wrapper;
 
 import com.google.protobuf.ByteString;
+import java.io.File;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.config.Args;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
 
 @Slf4j
 public class BlockWrapperTest {
@@ -27,7 +25,7 @@ public class BlockWrapperTest {
 
     @Before
     public void init(){
-        Args.args = new String[]{"-d", dbPath};
+        //Args.args = new String[]{"-d", dbPath};
     }
 
     @AfterClass

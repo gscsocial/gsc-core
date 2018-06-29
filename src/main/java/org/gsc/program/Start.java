@@ -1,13 +1,14 @@
 package org.gsc.program;
 
+import static java.lang.Thread.sleep;
+
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.app.Application;
 import org.gsc.common.app.ApplicationImpl;
 import org.gsc.config.Args;
 import org.gsc.config.DefaultConfig;
-import org.gsc.service.NetService;
-import org.gsc.service.RpcApiService;
-import org.springframework.context.ApplicationContext;
+import org.gsc.core.Constant;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 
@@ -20,26 +21,44 @@ public class Start {
   public static void main(String[] args) throws InterruptedException {
     logger.info("gsc node running.");
 
-    Args.args = args;
-    Args.configFile = "config.conf";
-    ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
-    Args config = context.getBean(Args.class);
+    logger.info("Full node running.");
+    Args.setParam(args, Constant.TESTNET_CONF);
+    Args cfgArgs = Args.getInstance();
 
+    if (cfgArgs.isHelp()) {
+      logger.info("Here is the help message.");
+      return;
+    }
 
+    DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+    beanFactory.setAllowCircularReferences(false);
+    AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(beanFactory);
+    context.register(DefaultConfig.class);
+    context.refresh();
     Application appT = context.getBean(ApplicationImpl.class);
+    Args config =  context.getBean(Args.class);
+
     shutdown(appT);
 
-    RpcApiService rpcApiService = context.getBean(RpcApiService.class);
-    NetService netService = context.getBean(NetService.class);
-    appT.addService(rpcApiService);
-    appT.addService(netService);
-    //TODO: add producer code
+    while(true) {
+      sleep(1000);
+      System.out.println("it is running");
+    }
 
-    appT.initServices(config);
-    appT.startServices();
-    appT.startup();
-    rpcApiService.blockUntilShutdown();
+
+//    RpcApiService rpcApiService = context.getBean(RpcApiService.class);
+//    appT.addService(rpcApiService);
+//    if (config.isWitness()) {
+//      appT.addService(new ProducerService(appT, context));
+//    }
+//    appT.initServices(config);
+//    appT.startServices();
+//    appT.startup();
+//    rpcApiService.blockUntilShutdown();
+
   }
+
+
 
   private static void shutdown(final Application app) {
   }

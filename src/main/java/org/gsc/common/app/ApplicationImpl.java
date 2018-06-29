@@ -1,6 +1,7 @@
 package org.gsc.common.app;
 
 import org.gsc.config.Args;
+import org.gsc.db.Manager;
 import org.gsc.service.Service;
 import org.springframework.stereotype.Component;
 
@@ -45,5 +46,10 @@ public class ApplicationImpl implements  Application{
   @Override
   public void addService(Service service) {
 
+  }
+
+  @Override
+  public Manager getDbManager() {
+    return null;
   }
 }

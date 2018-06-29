@@ -170,6 +170,7 @@ public class Manager {
   @PostConstruct
   public void init() {
     undoStore.disable();
+    this.prodController.setManager(this);
     this.pendingTransactions = Collections.synchronizedList(Lists.newArrayList());
     this.initGenesis();
     try {
@@ -898,9 +899,9 @@ public class Manager {
 
     prodStore.put(witnessCapsule.getAddress().toByteArray(), witnessCapsule);
 
-    AccountWrapper sun = accountStore.getPhoton();
+    AccountWrapper photon = accountStore.getPhoton();
     try {
-      adjustBalance(sun.getAddress().toByteArray(), - WITNESS_PAY_PER_BLOCK);
+      adjustBalance(photon.getAddress().toByteArray(), - WITNESS_PAY_PER_BLOCK);
     } catch (BalanceInsufficientException e) {
       logger.debug(e.getMessage(), e);
     }

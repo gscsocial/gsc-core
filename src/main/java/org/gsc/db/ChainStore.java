@@ -15,6 +15,7 @@ public abstract class ChainStore<T extends StoreWrapper> extends Store<T> {
   protected Object indexHelper;
 
   protected ChainStore(String dbName) {
+    super(dbName);
   }
 
   @Override

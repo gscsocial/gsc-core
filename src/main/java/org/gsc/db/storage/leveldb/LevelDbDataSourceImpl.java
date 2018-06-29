@@ -59,16 +59,17 @@ public class LevelDbDataSourceImpl implements DbSourceInter<byte[]>,
   private ReadWriteLock resetDbLock = new ReentrantReadWriteLock();
 
   @Autowired
-  private Args config;
+  private Args config = Args.getInstance();
 
   /**
    * constructor.
    */
   public LevelDbDataSourceImpl(String parentName, String name) {
-    //TODO: set db path
-    parentName += config.getStorageDir();
-    this.parentName = parentName;
     this.dataBaseName = name;
+    this.parentName = Paths.get(
+        parentName,
+        "test"
+    ).toString();
   }
 
   @Override

@@ -20,16 +20,19 @@ public abstract class Store<T> implements Iterable<Map.Entry<byte[], T>> {
 //  protected IndexHelper indexHelper;
 
   @Autowired
-  protected Args config;
+  protected Args config = Args.getInstance();
 
   protected Store(String dbName) {
+    if (config == null) {
+      System.out.println( "dfdfdf ");
+    }
     dbSource = new LevelDbDataSourceImpl(config.getOutputDirectory(), dbName);
     dbSource.initDB();
   }
 
-  protected Store() {
-    throw new IllegalStateException("This constructor is not allowed");
-  }
+//  protected Store() {
+//    throw new IllegalStateException("This constructor is not allowed");
+//  }
 
   public LevelDbDataSourceImpl getDbSource() {
     return dbSource;

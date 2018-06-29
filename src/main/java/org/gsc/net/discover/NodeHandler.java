@@ -25,6 +25,7 @@ import org.gsc.net.message.discover.Message;
 import org.gsc.net.message.discover.NeighborsMessage;
 import org.gsc.net.message.discover.PingMessage;
 import org.gsc.net.message.discover.PongMessage;
+import org.gsc.net.udp.handler.UdpEvent;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.util.encoders.Hex;
 
@@ -262,7 +263,7 @@ public class NodeHandler {
     }
 
     private void sendMessage(Message msg) {
-        nodeManager.sendOutbound(new DiscoveryEvent(msg, getInetSocketAddress()));
+        nodeManager.sendOutbound(new UdpEvent(msg, getInetSocketAddress()));
     }
 
     @Override
