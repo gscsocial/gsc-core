@@ -7,6 +7,7 @@ import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.exception.AccountResourceInsufficientException;
 import org.gsc.common.exception.BadBlockException;
 import org.gsc.common.exception.BadNumberBlockException;
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class ChainControllerImpl implements ChainController {
 
   @Autowired
@@ -92,7 +94,41 @@ public class ChainControllerImpl implements ChainController {
 
   @Override
   public boolean handleTransaction(TransactionWrapper trx) throws BadTransactionException {
-    return false;
+    logger.debug("handle transaction");
+    if (dbManager.getTransactionIdCache().getIfPresent(trx.getTransactionId()) != null) {
+      logger.warn("This transaction has been processed");
+      return false;
+    } else {
+      dbManager.getTransactionIdCache().put(trx.getTransactionId(), true);
+    }
+    try {
+      dbManager.pushTransactions(trx);
+    } catch (ContractValidateException e) {
+      logger.info("Contract validate failed" + e.getMessage());
+      return false;
+    } catch (ContractExeException e) {
+      logger.info("Contract execute failed" + e.getMessage());
+      return false;
+    } catch (ValidateSignatureException e) {
+      logger.info("ValidateSignatureException" + e.getMessage());
+      throw new BadTransactionException();
+    } catch (AccountResourceInsufficientException e) {
+      logger.info("AccountResourceInsufficientException" + e.getMessage());
+      return false;
+    } catch (DupTransactionException e) {
+      logger.info("dup trans" + e.getMessage());
+      return false;
+    } catch (TaposException e) {
+      logger.info("tapos error" + e.getMessage());
+      return false;
+    } catch (TooBigTransactionException e) {
+      logger.info("too big transaction" + e.getMessage());
+      return false;
+    } catch (TransactionExpirationException e) {
+      logger.info("expiration transaction" + e.getMessage());
+      return false;
+    }
+    return true;
   }
 
   @Override
