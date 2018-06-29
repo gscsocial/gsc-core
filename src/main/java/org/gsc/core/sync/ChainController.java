@@ -26,7 +26,7 @@ public interface ChainController {
 
   LinkedList<BlockId> getLostBlockIds(List<BlockId> blockChainSummary) throws StoreException;
 
-  Deque<BlockId> getBlockChainSummary(BlockId beginBLockId, Deque<BlockId> blockIds)
+  Deque<BlockId> getBlockChainSummary(BlockId beginBlockId, Deque<BlockId> blockIds)
       throws GscException;
 
   GscMessage getData(Sha256Hash msgId, MessageTypes type);

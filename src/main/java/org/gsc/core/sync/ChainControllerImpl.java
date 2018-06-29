@@ -4,6 +4,7 @@ import static org.gsc.config.GscConstants.ChainConstant.BLOCK_PRODUCED_INTERVAL;
 import static org.gsc.config.GscConstants.ChainConstant.BLOCK_SIZE;
 
 import com.google.common.primitives.Longs;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
@@ -174,9 +175,73 @@ public class ChainControllerImpl implements ChainController {
   }
 
   @Override
-  public Deque<BlockId> getBlockChainSummary(BlockId beginBLockId, Deque<BlockId> blockIds)
+  public Deque<BlockId> getBlockChainSummary(BlockId beginBlockId, Deque<BlockId> blockIdsToFetch)
       throws GscException {
-    return null;
+    Deque<BlockId> retSummary = new LinkedList<>();
+    List<BlockId> blockIds = new ArrayList<>(blockIdsToFetch);
+    long highBlkNum;
+    long highNoForkBlkNum;
+    long syncBeginNumber = dbManager.getSyncBeginNumber();
+    long lowBlkNum = syncBeginNumber < 0 ? 0 : syncBeginNumber;
+
+    LinkedList<BlockId> forkList = new LinkedList<>();
+
+    if (!beginBlockId.equals(getGenesisBlock().getBlockId())) {
+      if (containBlockInMainChain(beginBlockId)) {
+        highBlkNum = beginBlockId.getNum();
+        if (highBlkNum == 0) {
+          throw new GscException(
+              "This block don't equal my genesis block hash, but it is in my DB, the block id is :"
+                  + beginBlockId.getString());
+        }
+        highNoForkBlkNum = highBlkNum;
+        if (beginBlockId.getNum() < lowBlkNum) {
+          lowBlkNum = beginBlockId.getNum();
+        }
+      } else {
+        forkList = dbManager.getBlockChainHashesOnFork(beginBlockId);
+        if (forkList.isEmpty()) {
+          throw new UnLinkedBlockException(
+              "We want to find forkList of this block: " + beginBlockId.getString()
+                  + " ,but in KhasoDB we can not find it, It maybe a very old beginBlockId, we are sync once,"
+                  + " we switch and pop it after that time. ");
+        }
+        highNoForkBlkNum = forkList.peekLast().getNum();
+        forkList.pollLast();
+        Collections.reverse(forkList);
+        highBlkNum = highNoForkBlkNum + forkList.size();
+        if (highNoForkBlkNum < lowBlkNum) {
+          throw new UnLinkedBlockException(
+              "It is a too old block that we take it as a forked block long long ago"
+                  + "\n lowBlkNum:" + lowBlkNum
+                  + "\n highNoForkBlkNum" + highNoForkBlkNum);
+        }
+      }
+    } else {
+      highBlkNum = dbManager.getHeadBlockId().getNum();
+      highNoForkBlkNum = highBlkNum;
+
+    }
+
+    if (!blockIds.isEmpty() && highBlkNum != blockIds.get(0).getNum() - 1) {
+      logger.error("Check ERROR: highBlkNum:" + highBlkNum + ",blockIdToSyncFirstNum is "
+          + blockIds.get(0).getNum() + ",blockIdToSyncEnd is " + blockIds.get(blockIds.size() - 1)
+          .getNum());
+    }
+
+    long realHighBlkNum = highBlkNum + blockIds.size();
+    do {
+      if (lowBlkNum <= highNoForkBlkNum) {
+        retSummary.offer(dbManager.getBlockIdByNum(lowBlkNum));
+      } else if (lowBlkNum <= highBlkNum) {
+        retSummary.offer(forkList.get((int) (lowBlkNum - highNoForkBlkNum - 1)));
+      } else {
+        retSummary.offer(blockIds.get((int) (lowBlkNum - highBlkNum - 1)));
+      }
+      lowBlkNum += (realHighBlkNum - lowBlkNum + 2) / 2;
+    } while (lowBlkNum <= realHighBlkNum);
+
+    return retSummary;
   }
 
   @Override
