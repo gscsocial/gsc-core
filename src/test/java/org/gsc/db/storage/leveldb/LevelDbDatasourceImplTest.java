@@ -28,7 +28,6 @@ public class LevelDbDatasourceImplTest {
 
     @Before
     public void initDb() {
-        Args.configFile = "config-localtest.conf";
         ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
         dataSourceTest = context.getBean(LevelDbDataSourceImpl.class);
     }

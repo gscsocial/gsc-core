@@ -3,6 +3,7 @@ package org.gsc.net;
 
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.utils.FileUtil;
 import org.gsc.config.Args;
 import org.gsc.config.DefaultConfig;
 import org.gsc.net.discover.Node;
@@ -10,12 +11,14 @@ import org.gsc.net.discover.NodeManager;
 import org.gsc.net.discover.RefreshTask;
 import org.gsc.net.discover.UDPListener;
 import org.gsc.net.message.discover.*;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import java.io.File;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -29,13 +32,30 @@ public class UdpTest {
     Args args;
     UDPListener listener;
 
-    @Test
-    public void test(){}
+    @Before
+    public void init(){
+        new Thread(() -> {
+            Args.setParam(
+                    new String[]{ "--output-directory", "udp_test", "--storage-db-directory", "database",
+                            "--storage-index-directory", "index"},"config.conf"
+            );
+            Args cfgArgs = Args.getInstance();
+            cfgArgs.getSeedNode().setIpList(Lists.newArrayList());
+            cfgArgs.setNodeP2pVersion(100);
+            cfgArgs.setNodeListenPort(10001);
+            context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+        }).start();
+    }
+
+    @After
+    public void after() {
+        FileUtil.deleteDir(new File("udp_test"));
+    }
+
 
 
     @Test
     public void udpTest() throws Exception {
-        Args.configFile = "config-localtest.conf";
         ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
         Args config = context.getBean(Args.class);
         nodeManager = context.getBean(NodeManager.class);
