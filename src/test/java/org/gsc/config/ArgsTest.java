@@ -11,7 +11,6 @@ public class ArgsTest {
 
     @Test
     public void test(){
-        Args.configFile = "config-localtest.conf";
         ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
         Args config = context.getBean(Args.class);
         Assert.assertEquals("database", config.getStorage().getDbDirectory());

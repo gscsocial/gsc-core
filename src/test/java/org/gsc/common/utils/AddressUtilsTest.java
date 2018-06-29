@@ -23,6 +23,7 @@ public class AddressUtilsTest {
 
         address = ByteArray.fromHexString("b0422F9bbF7a8d39C263938005c4Da690fb80e6685");
         assertEquals(true,AddressUtil.addressValid(address));
+        System.out.println(Base58.encode(ByteArray.fromString("b0422F9bbF7a8d39C263938005c4Da690fb80e6685")));
     }
 
 }
