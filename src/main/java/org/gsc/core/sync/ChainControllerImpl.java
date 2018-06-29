@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.exception.AccountResourceInsufficientException;
 import org.gsc.common.exception.BadBlockException;
+import org.gsc.common.exception.BadItemException;
 import org.gsc.common.exception.BadNumberBlockException;
 import org.gsc.common.exception.BadTransactionException;
 import org.gsc.common.exception.ContractExeException;
@@ -21,6 +22,7 @@ import org.gsc.common.exception.ContractValidateException;
 import org.gsc.common.exception.DupTransactionException;
 import org.gsc.common.exception.GscException;
 import org.gsc.common.exception.HeaderNotFound;
+import org.gsc.common.exception.ItemNotFoundException;
 import org.gsc.common.exception.NonCommonBlockException;
 import org.gsc.common.exception.StoreException;
 import org.gsc.common.exception.TaposException;
@@ -36,7 +38,9 @@ import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.db.Manager;
 import org.gsc.net.message.MessageTypes;
+import org.gsc.net.message.gsc.BlockMessage;
 import org.gsc.net.message.gsc.GscMessage;
+import org.gsc.net.message.gsc.TransactionMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -245,18 +249,51 @@ public class ChainControllerImpl implements ChainController {
   }
 
   @Override
-  public GscMessage getData(Sha256Hash msgId, MessageTypes type) {
-    return null;
+  public GscMessage getData(Sha256Hash msgId, MessageTypes type)  {
+    switch (type) {
+    case BLOCK:
+      try {
+        return new BlockMessage(dbManager.getBlockById(msgId));
+      } catch (BadItemException e) {
+        logger.debug(e.getMessage());
+      } catch (ItemNotFoundException e) {
+        logger.debug(e.getMessage());
+      } catch (Exception e) {
+        logger.error("new BlockMessage fail", e);
+      }
+      return null;
+    case TRANSACTION:
+      try {
+        return new TransactionMessage(
+            dbManager.getTransactionStore().get(msgId.getBytes()).getData());
+      } catch (Exception e) {
+        logger.error("new TransactionMessage fail", e);
+      }
+      return null;
+    default:
+      logger.info("message type not block or trx.");
+      return null;
   }
+}
 
   @Override
   public void syncToCli(long unSyncNum) {
-
+    logger.info("There are " + unSyncNum + " blocks we need to sync.");
+    if (unSyncNum == 0) {
+      logger.info("Sync Block Completed !!!");
+    }
+    //TODO: notify cli know how many block we need to sync
   }
 
   @Override
   public long getBlockTime(BlockId id) {
-    return 0;
+    try {
+      return dbManager.getBlockById(id).getTimeStamp();
+    } catch (BadItemException e) {
+      return dbManager.getGenesisBlock().getTimeStamp();
+    } catch (ItemNotFoundException e) {
+      return dbManager.getGenesisBlock().getTimeStamp();
+    }
   }
 
   @Override
