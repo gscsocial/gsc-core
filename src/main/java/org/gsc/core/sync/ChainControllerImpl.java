@@ -3,6 +3,9 @@ package org.gsc.core.sync;
 import static org.gsc.config.GscConstants.ChainConstant.BLOCK_PRODUCED_INTERVAL;
 import static org.gsc.config.GscConstants.ChainConstant.BLOCK_SIZE;
 
+import com.google.common.primitives.Longs;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
@@ -26,6 +29,7 @@ import org.gsc.common.exception.UnLinkedBlockException;
 import org.gsc.common.exception.ValidateScheduleException;
 import org.gsc.common.exception.ValidateSignatureException;
 import org.gsc.common.utils.Sha256Hash;
+import org.gsc.config.Parameter.NodeConstant;
 import org.gsc.core.chain.BlockId;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
@@ -134,7 +138,39 @@ public class ChainControllerImpl implements ChainController {
   @Override
   public LinkedList<BlockId> getLostBlockIds(List<BlockId> blockChainSummary)
       throws StoreException {
-    return null;
+    if (dbManager.getHeadBlockId().getNum() == 0) {
+      return new LinkedList<>();
+    }
+
+    BlockId unForkedBlockId;
+
+    if (blockChainSummary.isEmpty() ||
+        (blockChainSummary.size() == 1
+            && blockChainSummary.get(0).equals(dbManager.getGenesisBlockId()))) {
+      unForkedBlockId = dbManager.getGenesisBlockId();
+    } else if (blockChainSummary.size() == 1
+        && blockChainSummary.get(0).getNum() == 0) {
+      return new LinkedList(Arrays.asList(dbManager.getGenesisBlockId()));
+    } else {
+      Collections.reverse(blockChainSummary);
+      unForkedBlockId = blockChainSummary.stream()
+          .filter(blockId -> containBlockInMainChain(blockId))
+          .findFirst().orElse(null);
+      if (unForkedBlockId == null) {
+        return new LinkedList<>();
+      }
+    }
+
+    long unForkedBlockIdNum = unForkedBlockId.getNum();
+    long len = Longs
+        .min(dbManager.getHeadBlockId().getNum(), unForkedBlockIdNum + NodeConstant.SYNC_FETCH_BATCH_NUM);
+
+    LinkedList<BlockId> blockIds = new LinkedList<>();
+    for (long i = unForkedBlockIdNum; i <= len; i++) {
+      BlockId id = dbManager.getBlockIdByNum(i);
+      blockIds.add(id);
+    }
+    return blockIds;
   }
 
   @Override
