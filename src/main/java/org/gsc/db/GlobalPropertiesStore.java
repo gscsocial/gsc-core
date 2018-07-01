@@ -15,7 +15,7 @@ import org.gsc.core.chain.BlockId;
 import org.gsc.core.wrapper.BytesWrapper;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -77,7 +77,7 @@ public class GlobalPropertiesStore extends ChainStore<BytesWrapper> {
   private Args config = Args.getInstance();
 
   @Autowired
-  private GlobalPropertiesStore(@Qualifier("properties") String dbName) {
+  private GlobalPropertiesStore(@Value("properties") String dbName) {
     super(dbName);
 
     try {

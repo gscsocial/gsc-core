@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.core.wrapper.BytesWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -21,7 +21,7 @@ public class ProducerScheduleStore extends ChainStore<BytesWrapper> {
   private static final int ADDRESS_BYTE_ARRAY_LENGTH = 21;
 
   @Autowired
-  private ProducerScheduleStore(@Qualifier("witness_schedule") String dbName) {
+  private ProducerScheduleStore(@Value("witness_schedule") String dbName) {
     super(dbName);
   }
 

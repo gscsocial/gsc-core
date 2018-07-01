@@ -18,6 +18,8 @@ import org.gsc.common.exception.RevokingStoreIllegalStateException;
 import org.gsc.db.storage.SourceInter;
 import org.gsc.net.discover.dht.Utils;
 import org.iq80.leveldb.WriteOptions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -25,11 +27,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class UndoStore implements IUndoStore {
 
-  private static final int DEFAULT_STACK_MAX_SIZE = 256;
+  private static int DEFAULT_STACK_MAX_SIZE = 256;
 
   private Deque<UndoState> stack = new LinkedList<>();
   private boolean disabled = true;
   private int activeDialog = 0;
+
+  @Autowired
+  public UndoStore(ApplicationContext ctx) {
+  }
+
   private AtomicInteger maxSize = new AtomicInteger(DEFAULT_STACK_MAX_SIZE);
   private WriteOptions writeOptions = new WriteOptions().sync(true);
 

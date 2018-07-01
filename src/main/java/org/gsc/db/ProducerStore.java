@@ -10,7 +10,7 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.core.wrapper.ProducerWrapper;
 import org.gsc.db.storage.Iterator.ProducerIterator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class ProducerStore extends ChainStore<ProducerWrapper> {
 
   @Autowired
-  protected ProducerStore(@Qualifier("witness") String dbName) {
+  protected ProducerStore(@Value("witness") String dbName) {
     super(dbName);
   }
 
