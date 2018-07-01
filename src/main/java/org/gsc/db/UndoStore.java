@@ -18,10 +18,12 @@ import org.gsc.common.exception.RevokingStoreIllegalStateException;
 import org.gsc.db.storage.SourceInter;
 import org.gsc.net.discover.dht.Utils;
 import org.iq80.leveldb.WriteOptions;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Getter // only for unit test
-public abstract class UndoStore implements IUndoStore {
+@Component
+public class UndoStore implements IUndoStore {
 
   private static final int DEFAULT_STACK_MAX_SIZE = 256;
 

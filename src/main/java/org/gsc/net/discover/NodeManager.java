@@ -50,7 +50,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class NodeManager implements EventHandler {
 
-  @Autowired
   private Args args = Args.getInstance();
 
   private Manager dbManager;

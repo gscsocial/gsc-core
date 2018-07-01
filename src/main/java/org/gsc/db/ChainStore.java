@@ -11,7 +11,8 @@ public abstract class ChainStore<T extends StoreWrapper> extends Store<T> {
   @Autowired
   private UndoStore undoStore;
 
-  @Autowired(required = false)
+  //TODO
+  //@Autowired(required = false)
   protected Object indexHelper;
 
   protected ChainStore(String dbName) {
