@@ -168,7 +168,7 @@ public class Manager {
   @PostConstruct
   public void init() {
     undoStore.disable();
-    this.prodController.setManager(this);
+    //this.prodController.setManager(this);
     this.pendingTransactions = Collections.synchronizedList(Lists.newArrayList());
     this.initGenesis();
     try {

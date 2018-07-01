@@ -27,11 +27,13 @@ import org.gsc.db.VotesStore;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class ProducerController {
 
-  @Setter
+  @Autowired
   private Manager manager;
 
   @Autowired
@@ -49,10 +51,6 @@ public class ProducerController {
   @Autowired
   private AccountStore accountStore;
 
-  @Autowired
-  public ProducerController(ApplicationContext ctx) {
-  }
-
   @Setter
   @Getter
 
@@ -60,7 +58,7 @@ public class ProducerController {
 
 
   @Autowired
-  public void initProds() {
+  public void initProds(ApplicationContext ctx) {
     List<ByteString> prodAddresses = new ArrayList<>();
     manager.getProdStore().getAllProducers().forEach(witnessCapsule -> {
       if (witnessCapsule.getIsJobs()) {
