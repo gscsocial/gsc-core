@@ -21,7 +21,7 @@ public class BackupServer {
   private static final org.slf4j.Logger logger = LoggerFactory.getLogger("BackupServer");
 
   @Autowired
-  private Args config;
+  private Args config = Args.getInstance();
 
   private int port = config.getBackupPort();
 

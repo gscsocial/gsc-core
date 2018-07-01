@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RpcApiService implements Service{
 
-  private Args args;
+  private Args args = Args.getInstance();
 
   private io.grpc.Server apiServer;
 

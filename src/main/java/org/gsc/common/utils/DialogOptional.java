@@ -1,10 +1,11 @@
 package org.gsc.common.utils;
 
 import java.util.Optional;
-import org.gsc.db.UndoStore.Dialog;
+import org.gsc.db.AbstractUndoStore.Dialog;
 
 public final class DialogOptional {
 
+  private static final DialogOptional INSTANCE = OptionalEnum.INSTANCE.getInstance();
 
   private Optional<Dialog> value;
 
@@ -26,6 +27,24 @@ public final class DialogOptional {
   public synchronized void reset() {
     value.ifPresent(Dialog::destroy);
     value = Optional.empty();
+  }
+
+  public static DialogOptional instance() {
+    return INSTANCE;
+  }
+
+  private enum OptionalEnum {
+    INSTANCE;
+
+    private DialogOptional instance;
+
+    OptionalEnum() {
+      instance = new DialogOptional();
+    }
+
+    private DialogOptional getInstance() {
+      return instance;
+    }
   }
 
 }

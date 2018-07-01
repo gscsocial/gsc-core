@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class PingMessage extends Message {
 
   @Autowired
-  private Args config;
+  private Args config = Args.getInstance();
 
   private Discover.PingMessage pingMessage;
 

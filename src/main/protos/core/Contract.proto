@@ -8,9 +8,9 @@ option java_outer_classname = "Contract"; //Specify the class name of the genera
 import "core/Gsc.proto";
 
 message AccountCreateContract {
-  AccountType type = 1;
-  bytes account_name = 2;
-  bytes owner_address = 3;
+  bytes owner_address = 1;
+  bytes account_address = 2;
+  AccountType type = 3;
 }
 
 message AccountUpdateContract {

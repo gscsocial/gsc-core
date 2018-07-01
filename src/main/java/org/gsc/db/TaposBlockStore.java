@@ -1,17 +1,17 @@
 package org.gsc.db;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.common.exception.ItemNotFoundException;
 import org.gsc.core.wrapper.BytesWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TaposBlockStore extends ChainStore<BytesWrapper> {
 
   @Autowired
-  private TaposBlockStore(@Qualifier("recent-block") String dbName) {
+  private TaposBlockStore(@Value("recent-block") String dbName) {
     super(dbName);
   }
 

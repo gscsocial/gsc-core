@@ -36,7 +36,7 @@ public class PeerClient {
     private SyncManager syncManager;
 
     @Autowired
-    private Args config;
+    private Args config = Args.getInstance();
 
     private EventLoopGroup workerGroup;
 

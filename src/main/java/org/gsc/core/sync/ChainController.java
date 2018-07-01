@@ -26,7 +26,7 @@ public interface ChainController {
 
   LinkedList<BlockId> getLostBlockIds(List<BlockId> blockChainSummary) throws StoreException;
 
-  Deque<BlockId> getBlockChainSummary(BlockId beginBLockId, Deque<BlockId> blockIds)
+  Deque<BlockId> getBlockChainSummary(BlockId beginBlockId, Deque<BlockId> blockIds)
       throws GscException;
 
   GscMessage getData(Sha256Hash msgId, MessageTypes type);
@@ -54,15 +54,6 @@ public interface ChainController {
 
   BlockWrapper getGenesisBlock();
 
-  void initGenesis();
-
-  void initAccount();
-
-  void initWitness();
-
-  boolean pushTransactions(TransactionWrapper tx);
-
-  boolean pushBlock(final BlockWrapper block);
 
   boolean containBlock(BlockId id);
 

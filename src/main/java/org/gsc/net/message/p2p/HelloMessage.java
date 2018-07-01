@@ -16,7 +16,7 @@ public class HelloMessage extends P2pMessage {
   private P2p.HelloMessage helloMessage;
 
   @Autowired
-  private Args args;
+  private Args args = Args.getInstance();
 
   public HelloMessage(byte[] rawData) {
     super(rawData);

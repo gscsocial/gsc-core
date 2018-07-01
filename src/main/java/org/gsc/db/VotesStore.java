@@ -1,41 +1,18 @@
 package org.gsc.db;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.consensus.VotesWrapper;
+import org.gsc.db.iterator.DBIterator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class VotesStore extends ChainStore<VotesWrapper> {
 
   @Autowired
-  public VotesStore(@Qualifier("votes") String dbName) {
+  public VotesStore(@Value("votes") String dbName) {
     super(dbName);
-  }
-
-  private static VotesStore instance;
-
-  public static void destroy() {
-    instance = null;
-  }
-
-  /**
-   * create fun.
-   *
-   * @param dbName the name of database
-   */
-  public static VotesStore create(String dbName) {
-    if (instance == null) {
-      synchronized (VotesStore.class) {
-        if (instance == null) {
-          instance = new VotesStore(dbName);
-        }
-      }
-    }
-    return instance;
   }
 
   @Override
@@ -60,14 +37,7 @@ public class VotesStore extends ChainStore<VotesWrapper> {
     super.put(key, item);
   }
 
-  /**
-   * get all votes.
-   */
-  public List<VotesWrapper> getAllVotes() {
-    return dbSource
-        .allValues()
-        .stream()
-        .map(bytes -> new VotesWrapper(bytes))
-        .collect(Collectors.toList());
+  public DBIterator getIterator() {
+    return dbSource.iterator();
   }
 }

@@ -53,7 +53,7 @@ public class SyncPool {
   private SyncManager syncManager;
 
   @Autowired
-  private Args args;
+  private Args args = Args.getInstance();
 
   private int maxActiveNodes = args.getNodeMaxActiveNodes() > 0 ? args.getNodeMaxActiveNodes() : 30;
 
