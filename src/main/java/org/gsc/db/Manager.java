@@ -111,8 +111,7 @@ public class Manager {
 
   private UndoStore undoStore = UndoStore.getInstance();
 
-  @Autowired
-  private DialogOptional dialog;
+  private DialogOptional dialog = DialogOptional.instance();
 
   @Autowired
   private ProducerController prodController;

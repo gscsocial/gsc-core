@@ -26,6 +26,7 @@ import org.gsc.db.ProducerStore;
 import org.gsc.db.VotesStore;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 @Slf4j
 public class ProducerController {
@@ -48,8 +49,13 @@ public class ProducerController {
   @Autowired
   private AccountStore accountStore;
 
+  @Autowired
+  public ProducerController(ApplicationContext ctx) {
+  }
+
   @Setter
   @Getter
+
   private boolean isGeneratingBlock;
 
 
