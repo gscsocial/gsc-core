@@ -19,17 +19,22 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Arrays;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.exception.ContractExeException;
 import org.gsc.common.exception.ContractValidateException;
 import org.gsc.common.utils.AddressUtil;
+import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.TransactionUtil;
 import org.gsc.core.chain.TransactionResultWrapper;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.db.AccountStore;
 import org.gsc.protos.Contract.TransferAssetContract;
+import org.gsc.protos.Protocol.AccountType;
 import org.gsc.protos.Protocol.Transaction.Result.code;
 
 
+@Slf4j
 public class TransferTokenOperator extends AbstractOperator {
 
   TransferTokenOperator(Any contract) { super(contract); }
@@ -41,20 +46,25 @@ public class TransferTokenOperator extends AbstractOperator {
       TransferAssetContract transferAssetContract = this.contract
           .unpack(TransferAssetContract.class);
       AccountStore accountStore = this.dbManager.getAccountStore();
-      byte[] ownerKey = transferAssetContract.getOwnerAddress().toByteArray();
-      byte[] toKey = transferAssetContract.getToAddress().toByteArray();
+      byte[] ownerAddress = transferAssetContract.getOwnerAddress().toByteArray();
+      byte[] toAddress = transferAssetContract.getToAddress().toByteArray();
+      AccountWrapper toAccountWrapper = accountStore.get(toAddress);
+      if (toAccountWrapper == null) {
+        toAccountWrapper = new AccountWrapper(ByteString.copyFrom(toAddress), AccountType.Normal,
+            dbManager.getHeadBlockTimeStamp());
+        dbManager.getAccountStore().put(toAddress, toAccountWrapper);
+      }
       ByteString assetName = transferAssetContract.getAssetName();
       long amount = transferAssetContract.getAmount();
 
-      AccountWrapper ownerAccount = accountStore.get(ownerKey);
-      if (!ownerAccount.reduceTokenAmount(assetName, amount)) {
+      AccountWrapper ownerAccountWrapper = accountStore.get(ownerAddress);
+      if (!ownerAccountWrapper.reduceAssetAmount(assetName, amount)) {
         throw new ContractExeException("reduceAssetAmount failed !");
       }
-      accountStore.put(ownerKey, ownerAccount);
+      accountStore.put(ownerAddress, ownerAccountWrapper);
 
-      AccountWrapper toAccountCapsule = accountStore.get(toKey);
-      toAccountCapsule.addTokenAmount(assetName, amount);
-      accountStore.put(toKey, toAccountCapsule);
+      toAccountWrapper.addAssetAmount(assetName, amount);
+      accountStore.put(toAddress, toAccountWrapper);
 
       ret.setStatus(fee, code.SUCCESS);
     } catch (InvalidProtocolBufferException e) {
@@ -68,76 +78,83 @@ public class TransferTokenOperator extends AbstractOperator {
     return true;
   }
 
+
   @Override
   public boolean validate() throws ContractValidateException {
+    if (this.contract == null) {
+      throw new ContractValidateException("No contract!");
+    }
+    if (this.dbManager == null) {
+      throw new ContractValidateException("No dbManager!");
+    }
+    if (!this.contract.is(TransferAssetContract.class)) {
+      throw new ContractValidateException(
+          "contract type error,expected type [TransferAssetContract],real type[" + contract
+              .getClass() + "]");
+    }
+    final TransferAssetContract transferAssetContract;
     try {
-      if (!this.contract.is(TransferAssetContract.class)) {
-        throw new ContractValidateException();
-      }
-      if (this.dbManager == null) {
-        throw new ContractValidateException();
-      }
-      TransferAssetContract transferAssetContract = this.contract
-          .unpack(TransferAssetContract.class);
-
-      byte[] ownerAddress = transferAssetContract.getOwnerAddress().toByteArray();
-      byte[] toAddress = transferAssetContract.getToAddress().toByteArray();
-      byte[] assetName = transferAssetContract.getAssetName().toByteArray();
-      long amount = transferAssetContract.getAmount();
-
-      if (!AddressUtil.addressValid(ownerAddress)) {
-        throw new ContractValidateException("Invalidate ownerAddress");
-      }
-      if (!AddressUtil.addressValid(toAddress)) {
-        throw new ContractValidateException("Invalidate toAddress");
-      }
-      if (!TransactionUtil.validAssetName(assetName)) {
-        throw new ContractValidateException("Invalidate assetName");
-      }
-      if (amount <= 0) {
-        throw new ContractValidateException("Amount must greater than 0.");
-      }
-
-      if (Arrays.equals(ownerAddress, toAddress)) {
-        throw new ContractValidateException("Cannot transfer asset to yourself.");
-      }
-
-      AccountWrapper ownerAccount = this.dbManager.getAccountStore().get(ownerAddress);
-      if (ownerAccount == null) {
-        throw new ContractValidateException("No owner account!");
-      }
-
-      //TODO
-//      if (!this.dbManager.getAssetIssueStore().has(assetName)) {
-//        throw new ContractValidateException("No asset !");
-//      }
-
-//      Map<String, Long> asset = ownerAccount.getAssetMap();
-//      if (asset.isEmpty()) {
-//        throw new ContractValidateException("Owner no asset!");
-//      }
-
-//      Long assetBalance = asset.get(ByteArray.toStr(assetName));
-//      if (null == assetBalance || assetBalance <= 0) {
-//        throw new ContractValidateException("assetBalance must greater than 0.");
-//      }
-//      if (amount > assetBalance) {
-//        throw new ContractValidateException("assetBalance is not sufficient.");
-//      }
-//
-//      AccountWrapper toAccount = this.dbManager.getAccountStore().get(toAddress);
-//      if (toAccount == null) {
-//        throw new ContractValidateException("To account is not exit!");
-//      }
-//
-//      assetBalance = toAccount.getAssetMap().get(ByteArray.toStr(assetName));
-//      if (assetBalance != null) {
-//        assetBalance = Math.addExact(assetBalance, amount); //check if overflow
-//      }
+      transferAssetContract = this.contract.unpack(TransferAssetContract.class);
     } catch (InvalidProtocolBufferException e) {
+      logger.debug(e.getMessage(), e);
       throw new ContractValidateException(e.getMessage());
-    } catch (ArithmeticException e) {
-      throw new ContractValidateException(e.getMessage());
+    }
+
+    byte[] ownerAddress = transferAssetContract.getOwnerAddress().toByteArray();
+    byte[] toAddress = transferAssetContract.getToAddress().toByteArray();
+    byte[] assetName = transferAssetContract.getAssetName().toByteArray();
+    long amount = transferAssetContract.getAmount();
+
+    if (!AddressUtil.addressValid(ownerAddress)) {
+      throw new ContractValidateException("Invalid ownerAddress");
+    }
+    if (!AddressUtil.addressValid(toAddress)) {
+      throw new ContractValidateException("Invalid toAddress");
+    }
+    if (!TransactionUtil.validAssetName(assetName)) {
+      throw new ContractValidateException("Invalid assetName");
+    }
+    if (amount <= 0) {
+      throw new ContractValidateException("Amount must greater than 0.");
+    }
+
+    if (Arrays.equals(ownerAddress, toAddress)) {
+      throw new ContractValidateException("Cannot transfer asset to yourself.");
+    }
+
+    AccountWrapper ownerAccount = this.dbManager.getAccountStore().get(ownerAddress);
+    if (ownerAccount == null) {
+      throw new ContractValidateException("No owner account!");
+    }
+
+    if (!this.dbManager.getAssetIssueStore().has(assetName)) {
+      throw new ContractValidateException("No asset !");
+    }
+
+    Map<String, Long> asset = ownerAccount.getAssetMap();
+    if (asset.isEmpty()) {
+      throw new ContractValidateException("Owner no asset!");
+    }
+
+    Long assetBalance = asset.get(ByteArray.toStr(assetName));
+    if (null == assetBalance || assetBalance <= 0) {
+      throw new ContractValidateException("assetBalance must greater than 0.");
+    }
+    if (amount > assetBalance) {
+      throw new ContractValidateException("assetBalance is not sufficient.");
+    }
+
+    AccountWrapper toAccount = this.dbManager.getAccountStore().get(toAddress);
+    if (toAccount != null) {
+      assetBalance = toAccount.getAssetMap().get(ByteArray.toStr(assetName));
+      if (assetBalance != null) {
+        try {
+          assetBalance = Math.addExact(assetBalance, amount); //check if overflow
+        } catch (Exception e) {
+          logger.debug(e.getMessage(), e);
+          throw new ContractValidateException(e.getMessage());
+        }
+      }
     }
 
     return true;
