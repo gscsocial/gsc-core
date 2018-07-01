@@ -11,7 +11,9 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.protos.Contract.AccountCreateContract;
 import org.gsc.protos.Contract.AccountUpdateContract;
 import org.gsc.protos.Protocol.Account;
+import org.gsc.protos.Protocol.Account.Frozen;
 import org.gsc.protos.Protocol.AccountType;
+import org.gsc.protos.Protocol.Vote;
 
 
 @Slf4j

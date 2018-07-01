@@ -255,10 +255,10 @@ public class Manager {
               accountCapsule.setIsWitness(true);
               this.accountStore.put(keyAddress, accountCapsule);
 
-              final WitnessCapsule witnessCapsule =
-                  new WitnessCapsule(address, key.getVoteCount(), key.getUrl());
+              final ProducerWrapper witnessCapsule =
+                  new ProducerWrapper(address, key.getVoteCount(), key.getUrl());
               witnessCapsule.setIsJobs(true);
-              this.witnessStore.put(keyAddress, witnessCapsule);
+              this.prodStore.put(keyAddress, witnessCapsule);
             });
   }
 
