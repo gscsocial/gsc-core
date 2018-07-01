@@ -117,7 +117,6 @@ public class Manager {
 
   private DialogOptional dialog = DialogOptional.instance();
 
-  @Autowired
   private ProducerController prodController;
 
   @Autowired
@@ -172,7 +171,7 @@ public class Manager {
   @PostConstruct
   public void init() {
     undoStore.disable();
-    //this.prodController.setManager(this);
+    prodController = ProducerController.createInstance(this);
     this.pendingTransactions = Collections.synchronizedList(Lists.newArrayList());
     this.initGenesis();
     try {
@@ -196,8 +195,13 @@ public class Manager {
     }
     undoStore.enable();
 
-    validateSignService = Executors
-        .newFixedThreadPool(config.getValidateSignThreadNum());
+    if (config.getValidateSignThreadNum() == 0) {
+      validateSignService = Executors
+          .newFixedThreadPool(1);
+    } else {
+      validateSignService = Executors
+          .newFixedThreadPool(config.getValidateSignThreadNum());
+    }
   }
 
   /**

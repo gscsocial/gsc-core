@@ -218,8 +218,6 @@ public class Args {
   @Setter
   private int maxHeaderListSize;
 
-  @Getter
-  @Setter
   @Parameter(names = {"--validate-sign-thread"}, description = "Num of validate thread")
   private int validateSignThreadNum;
 
@@ -255,6 +253,13 @@ public class Args {
   @Getter
   @Setter
   private List<String> backupMembers;
+
+  public int getValidateSignThreadNum() {
+    if (validateSignThreadNum == 0) {
+      return 1;
+    }
+    return validateSignThreadNum;
+  }
 
   public static void clearParam() {
     INSTANCE.outputDirectory = "output-directory";

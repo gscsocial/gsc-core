@@ -27,14 +27,11 @@ import org.gsc.db.VotesStore;
 import org.gsc.db.iterator.DBIterator;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 @Slf4j
-@Component
 public class ProducerController {
 
-  @Autowired
+  @Setter
   private Manager manager;
 
   @Autowired
@@ -57,9 +54,10 @@ public class ProducerController {
 
   private boolean isGeneratingBlock;
 
-
-  @Autowired
-  public ProducerController(ApplicationContext ctx) {
+  public static ProducerController createInstance(Manager manager) {
+    ProducerController instance = new ProducerController();
+    instance.setManager(manager);
+    return instance;
   }
 
   public void initProds() {
@@ -70,7 +68,7 @@ public class ProducerController {
       }
     });
     sortProds(prodAddresses);
-    prodScheduleStore.saveActiveProducers(prodAddresses);
+    this.manager.getProdScheduleStore().saveActiveProducers(prodAddresses);
     prodAddresses.forEach(address -> {
       logger.info("initProds shuffled addresses:" + ByteArray.toHexString(address.toByteArray()));
     });

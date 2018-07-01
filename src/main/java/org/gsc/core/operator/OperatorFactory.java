@@ -9,6 +9,7 @@ import org.gsc.db.Manager;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Transaction.Contract;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -16,7 +17,7 @@ import org.springframework.stereotype.Component;
 public class OperatorFactory {
 
   @Autowired
-  public OperatorFactory() {}
+  public OperatorFactory(ApplicationContext ctx) {}
 
   /**
    * create actuator.
@@ -34,6 +35,7 @@ public class OperatorFactory {
     return getActuatorByContract(rawData.getContract(), manager);
   }
 
+  //TODO implemetion op
   private static Operator getActuatorByContract(Contract contract, Manager manager) {
     return null;
   }

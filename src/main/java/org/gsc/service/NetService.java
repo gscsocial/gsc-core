@@ -75,7 +75,7 @@ public class NetService implements Service{
   private SyncPool pool;
 
   @Autowired
-  private Args conifg;
+  private Args conifg = Args.getInstance();
 
   @Autowired
   private ChainController controller;
