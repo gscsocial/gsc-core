@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Map.Entry;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,6 +24,7 @@ import org.gsc.db.Manager;
 import org.gsc.db.ProducerScheduleStore;
 import org.gsc.db.ProducerStore;
 import org.gsc.db.VotesStore;
+import org.gsc.db.iterator.DBIterator;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -58,7 +59,10 @@ public class ProducerController {
 
 
   @Autowired
-  public void initProds(ApplicationContext ctx) {
+  public ProducerController(ApplicationContext ctx) {
+  }
+
+  public void initProds() {
     List<ByteString> prodAddresses = new ArrayList<>();
     manager.getProdStore().getAllProducers().forEach(witnessCapsule -> {
       if (witnessCapsule.getIsJobs()) {
@@ -211,53 +215,49 @@ public class ProducerController {
 
   private Map<ByteString, Long> countVote(VotesStore votesStore) {
     final Map<ByteString, Long> countWitness = Maps.newHashMap();
-    final List<VotesWrapper> votesList = votesStore.getAllVotes();
-    AccountStore accountStore = this.manager.getAccountStore();
-    logger.info("there is {} new votes in this epoch", votesList.size());
-    votesList.forEach(votes -> {
+   DBIterator dbIterator = votesStore.getIterator();
+
+    long sizeCount = 0;
+    while (dbIterator.hasNext()) {
+      Entry<byte[], byte[]> next = dbIterator.next();
+      VotesWrapper votes = new VotesWrapper(next.getValue());
+
 //      logger.info("there is account ,account address is {}",
 //          account.createReadableString());
 
-      Optional<Long> sum = votes.getNewVotes().stream().map(vote -> vote.getVoteCount())
-          .reduce((a, b) -> a + b);
-      if (sum.isPresent()) {
-        AccountWrapper account = accountStore.get(votes.createDbKey());
-        if (sum.get() <= account.getPower()) {
-          // TODO add vote reward
-          // long reward = Math.round(sum.get() * this.manager.getDynamicPropertiesStore()
-          //    .getVoteRewardRate());
-          //account.setBalance(account.getBalance() + reward);
-          //accountStore.put(account.createDbKey(), account);
-          votes.getOldVotes().forEach(vote -> {
-            //TODO validate witness //active_witness
-            ByteString voteAddress = vote.getVoteAddress();
-            long voteCount = vote.getVoteCount();
-            if (countWitness.containsKey(voteAddress)) {
-              countWitness.put(voteAddress, countWitness.get(voteAddress) - voteCount);
-            } else {
-              countWitness.put(voteAddress, -voteCount);
-            }
-          });
-          votes.getNewVotes().forEach(vote -> {
-            //TODO validate witness //active_witness
-            ByteString voteAddress = vote.getVoteAddress();
-            long voteCount = vote.getVoteCount();
-            if (countWitness.containsKey(voteAddress)) {
-              countWitness.put(voteAddress, countWitness.get(voteAddress) + voteCount);
-            } else {
-              countWitness.put(voteAddress, voteCount);
-            }
-          });
+      // TODO add vote reward
+      // long reward = Math.round(sum.get() * this.manager.getDynamicPropertiesStore()
+      //    .getVoteRewardRate());
+      //account.setBalance(account.getBalance() + reward);
+      //accountStore.put(account.createDbKey(), account);
+
+      votes.getOldVotes().forEach(vote -> {
+        //TODO validate witness //active_witness
+        ByteString voteAddress = vote.getVoteAddress();
+        long voteCount = vote.getVoteCount();
+        if (countWitness.containsKey(voteAddress)) {
+          countWitness.put(voteAddress, countWitness.get(voteAddress) - voteCount);
         } else {
-          logger.info(
-              "account" + ByteArray.toHexString(account.getAddress().toByteArray())
-                  + ",Power[" + account.getPower()
-                  + "] < voteSum["
-                  + sum.get() + "]");
+          countWitness.put(voteAddress, -voteCount);
         }
-      }
-    });
-    votesStore.reset();
+      });
+      votes.getNewVotes().forEach(vote -> {
+        //TODO validate witness //active_witness
+        ByteString voteAddress = vote.getVoteAddress();
+        long voteCount = vote.getVoteCount();
+        if (countWitness.containsKey(voteAddress)) {
+          countWitness.put(voteAddress, countWitness.get(voteAddress) + voteCount);
+        } else {
+          countWitness.put(voteAddress, voteCount);
+        }
+      });
+
+
+      sizeCount++;
+      votesStore.delete(next.getKey());
+    }
+    logger.info("there is {} new votes in this epoch", sizeCount);
+
     return countWitness;
   }
 

@@ -229,7 +229,7 @@ public class Manager {
             this.genesisBlock.getTimeStamp());
         this.initAccount();
         this.initWitness();
-        this.witnessController.initWits();
+        this.prodController.initProds();
         forkDB.start(genesisBlock);
         this.updateRecentBlock(genesisBlock);
       }
