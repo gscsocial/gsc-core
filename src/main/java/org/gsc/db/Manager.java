@@ -52,6 +52,7 @@ import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.args.GenesisBlock;
 import org.gsc.consensus.ProducerController;
 import org.gsc.core.chain.BlockId;
+import org.gsc.core.chain.Genesis;
 import org.gsc.core.chain.TransactionResultWrapper;
 import org.gsc.core.operator.Operator;
 import org.gsc.core.operator.OperatorFactory;
@@ -203,7 +204,7 @@ public class Manager {
    * init genesis block.
    */
   public void initGenesis() {
-    this.genesisBlock = BlockUtil.newGenesisBlockCapsule();
+    this.genesisBlock = Genesis.newGenesisBlock();
     if (this.containBlock(this.genesisBlock.getBlockId())) {
       config.setChainId(this.genesisBlock.getBlockId().toString());
     } else {
@@ -233,6 +234,29 @@ public class Manager {
         this.updateRecentBlock(genesisBlock);
       }
     }
+  }
+
+  /**
+   * save account into database.
+   */
+  public void initAccount() {
+    final Args args = Args.getInstance();
+    final GenesisBlock genesisBlockArg = args.getGenesisBlock();
+    genesisBlockArg
+        .getAssets()
+        .forEach(
+            account -> {
+              account.setAccountType("Normal"); // to be set in conf
+              final AccountWrapper accountCapsule =
+                  new AccountWrapper(
+                      account.getAccountName(),
+                      ByteString.copyFrom(account.getAddress()),
+                      account.getAccountType(),
+                      account.getBalance());
+              this.accountStore.put(account.getAddress(), accountCapsule);
+              //TODO
+              //this.accountIndexStore.put(accountCapsule);
+            });
   }
 
   private void initWitness() {
