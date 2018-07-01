@@ -18,7 +18,7 @@ public class PongMessage extends Message {
   private Discover.PongMessage pongMessage;
 
   @Autowired
-  private Args config;
+  private Args config = Args.getInstance();
 
   public PongMessage(byte[] data) throws Exception{
     super(DISCOVER_PONG, data);

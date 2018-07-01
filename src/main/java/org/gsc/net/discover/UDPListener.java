@@ -43,7 +43,7 @@ public class UDPListener {
   private NodeManager nodeManager;
 
   @Autowired
-  private Args args;
+  private Args args = Args.getInstance();
 
   private Channel channel;
   private volatile boolean shutdown = false;

@@ -15,7 +15,7 @@ import org.gsc.core.chain.BlockId;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.db.storage.Iterator.BlockIterator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -24,7 +24,7 @@ public class BlockStore extends ChainStore<BlockWrapper> {
 
 
   @Autowired
-  private BlockStore(@Qualifier("block") String dbName) {
+  private BlockStore(@Value("block") String dbName) {
     super(dbName);
   }
 

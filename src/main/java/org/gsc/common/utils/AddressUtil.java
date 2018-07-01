@@ -3,7 +3,6 @@ package org.gsc.common.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.config.Parameter.WalletConstant;
 import org.gsc.core.Constant;
 
 @Slf4j
@@ -21,11 +20,11 @@ public class AddressUtil {
       return false;
     }
     //TODO address pre fix
-    if (address[0] != WalletConstant.ADD_PRE_FIX_BYTE_MAINNET) {
-      logger.warn("Warning: Address need prefix with " + WalletConstant.ADD_PRE_FIX_BYTE_MAINNET + " but "
-          + address[0] + " !!");
-      return false;
-    }
+//    if (address[0] != WalletConstant.ADD_PRE_FIX_BYTE_MAINNET) {
+//      logger.warn("Warning: Address need prefix with " + WalletConstant.ADD_PRE_FIX_BYTE_MAINNET + " but "
+//          + address[0] + " !!");
+//      return false;
+//    }
     //Other rule;
     return true;
   }

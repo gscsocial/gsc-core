@@ -26,7 +26,7 @@ public class BackupManager implements EventHandler {
   private static final Logger logger = LoggerFactory.getLogger("BackupManager");
 
   @Autowired
-  private Args args;
+  private Args args = Args.getInstance();
 
   private int priority = args.getBackupPriority();
 

@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.core.wrapper.AssetIssueWrapper;
 import org.gsc.db.storage.Iterator.AssetIssueIterator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 
@@ -21,7 +21,7 @@ public class AssetIssueStore extends ChainStore<AssetIssueWrapper> {
   private static AssetIssueStore instance;
 
   @Autowired
-  private AssetIssueStore(@Qualifier("asset-issue") String dbName) {
+  private AssetIssueStore(@Value("asset-issue") String dbName) {
     super(dbName);
   }
 

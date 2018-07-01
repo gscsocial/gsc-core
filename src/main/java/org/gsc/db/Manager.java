@@ -9,6 +9,7 @@ import static org.gsc.config.Parameter.ChainConstant.WITNESS_PAY_PER_BLOCK;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import com.google.protobuf.ByteString;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,8 +49,10 @@ import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.config.Args;
 import org.gsc.config.Parameter.ChainConstant;
+import org.gsc.config.args.GenesisBlock;
 import org.gsc.consensus.ProducerController;
 import org.gsc.core.chain.BlockId;
+import org.gsc.core.chain.Genesis;
 import org.gsc.core.chain.TransactionResultWrapper;
 import org.gsc.core.operator.Operator;
 import org.gsc.core.operator.OperatorFactory;
@@ -58,7 +61,8 @@ import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.BytesWrapper;
 import org.gsc.core.wrapper.ProducerWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
-import org.gsc.db.UndoStore.Dialog;
+import org.gsc.db.AbstractUndoStore.Dialog;
+import org.gsc.protos.Protocol.AccountType;
 import org.joda.time.DateTime;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,13 +113,10 @@ public class Manager {
   @Getter
   private BlockWrapper genesisBlock;
 
-  @Autowired
-  private UndoStore undoStore;
+  private UndoStore undoStore = UndoStore.getInstance();
 
-  @Autowired
-  private DialogOptional dialog;
+  private DialogOptional dialog = DialogOptional.instance();
 
-  @Autowired
   private ProducerController prodController;
 
   @Autowired
@@ -170,7 +171,7 @@ public class Manager {
   @PostConstruct
   public void init() {
     undoStore.disable();
-    this.prodController.setManager(this);
+    prodController = ProducerController.createInstance(this);
     this.pendingTransactions = Collections.synchronizedList(Lists.newArrayList());
     this.initGenesis();
     try {
@@ -194,46 +195,99 @@ public class Manager {
     }
     undoStore.enable();
 
-    validateSignService = Executors
-        .newFixedThreadPool(config.getValidateSignThreadNum());
+    if (config.getValidateSignThreadNum() == 0) {
+      validateSignService = Executors
+          .newFixedThreadPool(1);
+    } else {
+      validateSignService = Executors
+          .newFixedThreadPool(config.getValidateSignThreadNum());
+    }
   }
 
   /**
    * init genesis block.
    */
   public void initGenesis() {
+    this.genesisBlock = Genesis.newGenesisBlock();
+    if (this.containBlock(this.genesisBlock.getBlockId())) {
+      config.setChainId(this.genesisBlock.getBlockId().toString());
+    } else {
+      if (this.hasBlocks()) {
+        logger.error(
+            "genesis block modify, please delete database directory({}) and restart",
+            config.getOutputDirectory());
+        System.exit(1);
+      } else {
+        logger.info("create genesis block");
+        config.setChainId(this.genesisBlock.getBlockId().toString());
+        // this.pushBlock(this.genesisBlock);
+        blockStore.put(this.genesisBlock.getBlockId().getBytes(), this.genesisBlock);
+        this.blockIndexStore.put(this.genesisBlock.getBlockId());
 
-    //TODO
-//    this.genesisBlock = BlockUtil.newGenesisBlockCapsule();
-//    if (this.containBlock(this.genesisBlock.getBlockId())) {
-//      config.setChainId(this.genesisBlock.getBlockId().toString());
-//    } else {
-//      if (this.hasBlocks()) {
-//        logger.error(
-//            "genesis block modify, please delete database directory({}) and restart",
-//            config.getOutputDirectory());
-//        System.exit(1);
-//      } else {
-//        logger.info("create genesis block");
-//        config.setChainId(this.genesisBlock.getBlockId().toString());
-//        // this.pushBlock(this.genesisBlock);
-//        blockStore.put(this.genesisBlock.getBlockId().getBytes(), this.genesisBlock);
-//        this.blockIndexStore.put(this.genesisBlock.getBlockId());
-//
-//        logger.info("save block: " + this.genesisBlock);
-//        // init DynamicPropertiesStore
-//        globalPropertiesStore.saveLatestBlockHeaderNumber(0);
-//        globalPropertiesStore.saveLatestBlockHeaderHash(
-//            this.genesisBlock.getBlockId().getByteString());
-//        globalPropertiesStore.saveLatestBlockHeaderTimestamp(
-//            this.genesisBlock.getTimeStamp());
-//        this.initAccount();
-//        this.initWitness();
-//        this.witnessController.initWits();
-//        forkDB.start(genesisBlock);
-//        this.updateRecentBlock(genesisBlock);
-//      }
-//    }
+        logger.info("save block: " + this.genesisBlock);
+        // init DynamicPropertiesStore
+        globalPropertiesStore.saveLatestBlockHeaderNumber(0);
+        globalPropertiesStore.saveLatestBlockHeaderHash(
+            this.genesisBlock.getBlockId().getByteString());
+        globalPropertiesStore.saveLatestBlockHeaderTimestamp(
+            this.genesisBlock.getTimeStamp());
+        this.initAccount();
+        this.initWitness();
+        this.prodController.initProds();
+        forkDB.start(genesisBlock);
+        this.updateRecentBlock(genesisBlock);
+      }
+    }
+  }
+
+  /**
+   * save account into database.
+   */
+  public void initAccount() {
+    final Args args = Args.getInstance();
+    final GenesisBlock genesisBlockArg = args.getGenesisBlock();
+    genesisBlockArg
+        .getAssets()
+        .forEach(
+            account -> {
+              account.setAccountType("Normal"); // to be set in conf
+              final AccountWrapper accountCapsule =
+                  new AccountWrapper(
+                      account.getAccountName(),
+                      ByteString.copyFrom(account.getAddress()),
+                      account.getAccountType(),
+                      account.getBalance());
+              this.accountStore.put(account.getAddress(), accountCapsule);
+              //TODO
+              //this.accountIndexStore.put(accountCapsule);
+            });
+  }
+
+  private void initWitness() {
+    final Args args = Args.getInstance();
+    final GenesisBlock genesisBlockArg = args.getGenesisBlock();
+    genesisBlockArg
+        .getWitnesses()
+        .forEach(
+            key -> {
+              byte[] keyAddress = key.getAddress();
+              ByteString address = ByteString.copyFrom(keyAddress);
+
+              final AccountWrapper accountCapsule;
+              if (!this.accountStore.has(keyAddress)) {
+                accountCapsule = new AccountWrapper(ByteString.EMPTY,
+                    address, AccountType.AssetIssue, 0L);
+              } else {
+                accountCapsule = this.accountStore.get(keyAddress);
+              }
+              accountCapsule.setIsWitness(true);
+              this.accountStore.put(keyAddress, accountCapsule);
+
+              final ProducerWrapper witnessCapsule =
+                  new ProducerWrapper(address, key.getVoteCount(), key.getUrl());
+              witnessCapsule.setIsJobs(true);
+              this.prodStore.put(keyAddress, witnessCapsule);
+            });
   }
 
   public void adjustAllowance(byte[] accountAddress, long amount)

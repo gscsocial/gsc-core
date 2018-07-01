@@ -7,7 +7,7 @@ import org.gsc.common.utils.Sha256Hash;
 import org.gsc.core.chain.BlockId;
 import org.gsc.core.wrapper.BytesWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -15,7 +15,7 @@ public class BlockIndexStore extends ChainStore<BytesWrapper> {
 
 
   @Autowired
-  public BlockIndexStore(@Qualifier("block-index") String dbName) {
+  public BlockIndexStore(@Value("block-index") String dbName) {
     super(dbName);
 
   }

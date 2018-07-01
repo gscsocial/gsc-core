@@ -17,7 +17,10 @@ import org.gsc.common.utils.Sha256Hash;
 import org.gsc.core.chain.BlockId;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ForkDatabase {
   private class ForkBlock {
 
@@ -131,7 +134,7 @@ public class ForkDatabase {
   //private ForkStore miniUnlinkedStore = new ForkStore();
 
   @Autowired
-  protected ForkDatabase() {
+  protected ForkDatabase(ApplicationContext ctx) {
   }
 
   void start(BlockWrapper blk) {

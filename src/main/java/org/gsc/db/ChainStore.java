@@ -3,15 +3,19 @@ package org.gsc.db;
 import java.util.Objects;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.core.wrapper.StoreWrapper;
-import org.gsc.db.UndoStore.UndoTuple;
+import org.gsc.db.AbstractUndoStore.UndoTuple;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 public abstract class ChainStore<T extends StoreWrapper> extends Store<T> {
 
-  @Autowired
-  private UndoStore undoStore;
+  private UndoStore undoStore = UndoStore.getInstance();
 
-  @Autowired(required = false)
+  @Autowired
+  private ApplicationContext ctx;
+
+  //TODO
+  //@Autowired(required = false)
   protected Object indexHelper;
 
   protected ChainStore(String dbName) {
