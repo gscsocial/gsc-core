@@ -54,15 +54,6 @@ public interface ChainController {
 
   BlockWrapper getGenesisBlock();
 
-  void initGenesis();
-
-  void initAccount();
-
-  void initWitness();
-
-  boolean pushTransactions(TransactionWrapper tx);
-
-  boolean pushBlock(final BlockWrapper block);
 
   boolean containBlock(BlockId id);
 

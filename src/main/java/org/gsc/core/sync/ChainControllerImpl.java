@@ -311,8 +311,23 @@ public class ChainControllerImpl implements ChainController {
   }
 
   @Override
+  public BlockId getGenesisBlockId() {
+    return null;
+  }
+
+  @Override
   public boolean containBlock(BlockId id) {
     return dbManager.containBlock(id);
+  }
+
+  @Override
+  public BlockWrapper getBlockById(BlockId id) {
+    return null;
+  }
+
+  @Override
+  public TransactionWrapper getTransactionById(Sha256Hash id) {
+    return null;
   }
 
   @Override
@@ -338,5 +353,10 @@ public class ChainControllerImpl implements ChainController {
   @Override
   public boolean canChainRevoke(long num) {
     return num >= dbManager.getSyncBeginNumber();
+  }
+
+  @Override
+  public BlockWrapper getHead() throws HeaderNotFound {
+    return null;
   }
 }

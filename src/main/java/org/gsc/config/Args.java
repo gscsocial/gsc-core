@@ -397,7 +397,7 @@ public class Args {
 
       if (config.hasPath("genesis.block.assets")) {
         //TODO
-        //INSTANCE.genesisBlock.setAssets(getAccountsFromConfig(config));
+        INSTANCE.genesisBlock.setAssets(getAccountsFromConfig(config));
         AccountStore.setAccount(config);
       }
       if (config.hasPath("genesis.block.witnesses")) {
