@@ -1,9 +1,9 @@
 package org.gsc.db;
 
 import org.gsc.common.exception.RevokingStoreIllegalStateException;
-import org.gsc.db.UndoStore.Dialog;
-import org.gsc.db.UndoStore.UndoState;
-import org.gsc.db.UndoStore.UndoTuple;
+import org.gsc.db.AbstractUndoStore.Dialog;
+import org.gsc.db.AbstractUndoStore.UndoState;
+import org.gsc.db.AbstractUndoStore.UndoTuple;
 
 public interface IUndoStore {
 

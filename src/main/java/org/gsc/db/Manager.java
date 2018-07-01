@@ -58,7 +58,7 @@ import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.BytesWrapper;
 import org.gsc.core.wrapper.ProducerWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
-import org.gsc.db.UndoStore.Dialog;
+import org.gsc.db.AbstractUndoStore.Dialog;
 import org.joda.time.DateTime;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,8 +109,7 @@ public class Manager {
   @Getter
   private BlockWrapper genesisBlock;
 
-  @Autowired
-  private UndoStore undoStore;
+  private UndoStore undoStore = UndoStore.getInstance();
 
   @Autowired
   private DialogOptional dialog;

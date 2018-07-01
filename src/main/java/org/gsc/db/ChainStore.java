@@ -3,14 +3,13 @@ package org.gsc.db;
 import java.util.Objects;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.core.wrapper.StoreWrapper;
-import org.gsc.db.UndoStore.UndoTuple;
+import org.gsc.db.AbstractUndoStore.UndoTuple;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 public abstract class ChainStore<T extends StoreWrapper> extends Store<T> {
 
-  @Autowired
-  private UndoStore undoStore;
+  private UndoStore undoStore = UndoStore.getInstance();
 
   @Autowired
   private ApplicationContext ctx;
@@ -51,7 +50,6 @@ public abstract class ChainStore<T extends StoreWrapper> extends Store<T> {
    * This should be called just after an object is created
    */
   private void onCreate(byte[] key) {
-    undoStore = ctx.getBean(UndoStore.class);
     undoStore.onCreate(new UndoTuple(dbSource, key), null);
   }
 
