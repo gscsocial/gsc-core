@@ -65,6 +65,7 @@ import org.gsc.net.server.SyncPool;
 import org.gsc.protos.P2p.ReasonCode;
 import org.gsc.protos.Protocol.Inventory.InventoryType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -186,15 +187,24 @@ public class NetService implements Service{
 
   private volatile boolean isFetchSyncActive = false;
 
+  private ApplicationContext ctx;
+
+
+  public void init(ApplicationContext ctx) {
+    this.ctx = ctx;
+  }
+
   @Override
   public void init() {
-
   }
 
   @Override
   public void init(Args args) {
-    //TODO need refatore
-    //pool.init(this);
+
+  }
+
+  public void listen() {
+    pool.init(this);
     isAdvertiseActive = true;
     isFetchActive = true;
     activeTronPump();
@@ -244,12 +254,14 @@ public class NetService implements Service{
     }
   }
 
+  public void close() {
+    getActivePeer().forEach(peer -> disconnectPeer(peer, ReasonCode.REQUESTED));
+  }
 
   private void activeTronPump() {
     broadPool.submit(() -> {
       while (isAdvertiseActive) {
-        //TODO
-        //consumerAdvObjToSpread();
+        consumerAdvObjToSpread();
       }
     });
 
@@ -266,9 +278,8 @@ public class NetService implements Service{
       try {
         if (isHandleSyncBlockActive) {
           isHandleSyncBlockActive = false;
-          //Thread handleSyncBlockThread = new Thread(() -> handleSyncBlock());
-          //TODO
-          //handleSyncBlock();
+          Thread handleSyncBlockThread = new Thread(() -> handleSyncBlock());
+          handleSyncBlock();
         }
       } catch (Throwable t) {
         logger.error("Unhandled exception", t);
@@ -278,8 +289,7 @@ public class NetService implements Service{
     //terminate inactive loop
     disconnectInactiveExecutor.scheduleWithFixedDelay(() -> {
       try {
-        //TODO
-        //disconnectInactive();
+        disconnectInactive();
       } catch (Throwable t) {
         logger.error("Unhandled exception", t);
       }
@@ -287,8 +297,7 @@ public class NetService implements Service{
 
     logExecutor.scheduleWithFixedDelay(() -> {
       try {
-        //TODO
-        //logNodeStatus();
+        logNodeStatus();
       } catch (Throwable t) {
         logger.error("Exception in log worker", t);
       }
@@ -306,8 +315,7 @@ public class NetService implements Service{
       try {
         if (isFetchSyncActive) {
           if (!isSuspendFetch) {
-            //TODO
-       //     startFetchSyncBlock();
+            startFetchSyncBlock();
           } else {
             logger.debug("suspend");
           }
