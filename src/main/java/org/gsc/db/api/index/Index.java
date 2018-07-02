@@ -1,9 +1,9 @@
-package org.tron.core.db.api.index;
+package org.gsc.db.api.index;
 
 import com.googlecode.cqengine.query.Query;
 import com.googlecode.cqengine.query.option.QueryOptions;
 import com.googlecode.cqengine.resultset.ResultSet;
-import org.tron.core.db.common.WrappedByteArray;
+import org.gsc.db.WrappedByteArray;
 
 public class Index {
 

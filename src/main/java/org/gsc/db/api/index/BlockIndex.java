@@ -1,32 +1,29 @@
-package org.tron.core.db.api.index;
+package org.gsc.db.api.index;
+
+import static com.googlecode.cqengine.query.QueryFactory.attribute;
 
 import com.googlecode.cqengine.attribute.Attribute;
 import com.googlecode.cqengine.attribute.SimpleAttribute;
 import com.googlecode.cqengine.index.disk.DiskIndex;
 import com.googlecode.cqengine.persistence.disk.DiskPersistence;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.tron.common.utils.ByteArray;
-import org.tron.common.utils.Sha256Hash;
-import org.tron.core.capsule.BlockCapsule;
-import org.tron.core.capsule.TransactionCapsule;
-import org.tron.core.db.TronDatabase;
-import org.tron.core.db.common.WrappedByteArray;
-import org.tron.protos.Protocol.Block;
-
-import javax.annotation.PostConstruct;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static com.googlecode.cqengine.query.QueryFactory.attribute;
+import javax.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.utils.ByteArray;
+import org.gsc.common.utils.Sha256Hash;
+import org.gsc.core.chain.ProtoUtil;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.db.Store;
+import org.gsc.db.WrappedByteArray;
+import org.gsc.protos.Protocol.Block;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class BlockIndex extends AbstractIndex<BlockCapsule, Block> {
+public class BlockIndex extends AbstractIndex<BlockWrapper, Block> {
 
   public static SimpleAttribute<WrappedByteArray, String> Block_ID;
   public static Attribute<WrappedByteArray, Long> Block_NUMBER;
@@ -38,7 +35,7 @@ public class BlockIndex extends AbstractIndex<BlockCapsule, Block> {
 
   @Autowired
   public BlockIndex(
-      @Qualifier("blockStore") final TronDatabase<BlockCapsule> database) {
+      @Qualifier("blockStore") final Store<BlockWrapper> database) {
     super(database);
   }
 
@@ -60,7 +57,7 @@ public class BlockIndex extends AbstractIndex<BlockCapsule, Block> {
         attribute("block id",
             bytes -> {
               Block block = getObject(bytes);
-              return new BlockCapsule(block).getBlockId().toString();
+              return new BlockWrapper(block).getBlockId().toString();
             });
     Block_NUMBER =
         attribute("block number",
@@ -80,14 +77,14 @@ public class BlockIndex extends AbstractIndex<BlockCapsule, Block> {
         attribute("witness id",
             bytes -> {
               Block block = getObject(bytes);
-              return block.getBlockHeader().getRawData().getWitnessId();
+              return block.getBlockHeader().getRawData().getProducerId();
             });
     WITNESS_ADDRESS =
         attribute("witness address",
             bytes -> {
               Block block = getObject(bytes);
               return ByteArray.toHexString(
-                  block.getBlockHeader().getRawData().getWitnessAddress().toByteArray());
+                  block.getBlockHeader().getRawData().getProducerAddress().toByteArray());
             });
 
     OWNERS =
@@ -95,9 +92,8 @@ public class BlockIndex extends AbstractIndex<BlockCapsule, Block> {
             bytes -> {
               Block block = getObject(bytes);
               return block.getTransactionsList().stream()
-                  .map(transaction -> transaction.getRawData().getContractList())
-                  .flatMap(List::stream)
-                  .map(TransactionCapsule::getOwner)
+                  .map(transaction -> transaction.getRawData().getContract())
+                  .map(ProtoUtil::getOwner)
                   .filter(Objects::nonNull)
                   .distinct()
                   .map(ByteArray::toHexString)
@@ -108,9 +104,8 @@ public class BlockIndex extends AbstractIndex<BlockCapsule, Block> {
             bytes -> {
               Block block = getObject(bytes);
               return block.getTransactionsList().stream()
-                  .map(transaction -> transaction.getRawData().getContractList())
-                  .flatMap(List::stream)
-                  .map(TransactionCapsule::getToAddress)
+                  .map(transaction -> transaction.getRawData().getContract())
+                  .map(ProtoUtil::getOwner)
                   .filter(Objects::nonNull)
                   .distinct()
                   .map(ByteArray::toHexString)

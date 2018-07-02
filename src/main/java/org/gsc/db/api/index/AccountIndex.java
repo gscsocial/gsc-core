@@ -1,30 +1,28 @@
-package org.tron.core.db.api.index;
-
-import com.googlecode.cqengine.attribute.SimpleAttribute;
-import com.googlecode.cqengine.persistence.disk.DiskPersistence;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.tron.common.utils.ByteArray;
-import org.tron.core.capsule.AccountCapsule;
-import org.tron.core.db.TronDatabase;
-import org.tron.core.db.common.WrappedByteArray;
-import org.tron.protos.Protocol.Account;
-
-import javax.annotation.PostConstruct;
+package org.gsc.db.api.index;
 
 import static com.googlecode.cqengine.query.QueryFactory.attribute;
 
+import com.googlecode.cqengine.attribute.SimpleAttribute;
+import com.googlecode.cqengine.persistence.disk.DiskPersistence;
+import javax.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.utils.ByteArray;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.db.Store;
+import org.gsc.db.WrappedByteArray;
+import org.gsc.protos.Protocol.Account;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
 @Component
 @Slf4j
-public class AccountIndex extends AbstractIndex<AccountCapsule, Account> {
+public class AccountIndex extends AbstractIndex<AccountWrapper, Account> {
 
   public static SimpleAttribute<WrappedByteArray, String> Account_ADDRESS;
 
   @Autowired
-  public AccountIndex(@Qualifier("accountStore") final TronDatabase<AccountCapsule> database) {
+  public AccountIndex(@Qualifier("accountStore") final Store<AccountWrapper> database) {
     super(database);
   }
 

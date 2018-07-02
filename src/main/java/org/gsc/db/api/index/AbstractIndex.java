@@ -1,4 +1,4 @@
-package org.tron.core.db.api.index;
+package org.gsc.db.api.index;
 
 import com.google.common.collect.Iterables;
 import com.googlecode.cqengine.ConcurrentIndexedCollection;
@@ -10,20 +10,16 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Objects;
-import org.tron.core.capsule.ProtoCapsule;
-import org.tron.core.config.args.Args;
-import org.tron.core.db.TronDatabase;
-import org.tron.core.db.api.index.Index.Iface;
-import org.tron.core.db.common.WrappedByteArray;
-import org.tron.core.db.common.WrappedResultSet;
+import org.gsc.config.Args;
+import org.gsc.core.wrapper.StoreWrapper;
+import org.gsc.db.Store;
+import org.gsc.db.WrappedByteArray;
+import org.gsc.db.WrappedResultSet;
+import org.gsc.db.api.index.Index.Iface;
 
-import java.io.File;
-import java.util.Iterator;
-import java.util.Objects;
+public abstract class AbstractIndex<E extends StoreWrapper<T>, T> implements Iface<T> {
 
-public abstract class AbstractIndex<E extends ProtoCapsule<T>, T> implements Iface<T> {
-
-  protected TronDatabase<E> database;
+  protected Store<E> database;
   protected ConcurrentIndexedCollection<WrappedByteArray> index;
   private File parent = new File(Args.getInstance().getOutputDirectory() + "index");
   protected File indexPath;
@@ -36,7 +32,7 @@ public abstract class AbstractIndex<E extends ProtoCapsule<T>, T> implements Ifa
     setAttribute();
   }
 
-  public AbstractIndex(TronDatabase<E> database) {
+  public AbstractIndex(Store<E> database) {
     this.database = database;
     String dbName = database.getDbSource().getDBName();
     File parentDir = Paths.get(
