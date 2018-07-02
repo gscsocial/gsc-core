@@ -44,7 +44,7 @@ public class ArgsTest {
         Assert.assertTrue(args.isNodeDiscoveryEnable());
         Assert.assertTrue(args.isNodeDiscoveryPersist());
         Assert.assertEquals("127.0.0.1", args.getNodeDiscoveryBindIp());
-        Assert.assertEquals("46.168.1.1", args.getNodeExternalIp());
+        Assert.assertEquals("46.92.1.1", args.getNodeExternalIp());
         Assert.assertEquals(18888, args.getNodeListenPort());
         Assert.assertEquals(2000, args.getNodeConnectionTimeout());
         Assert.assertEquals(0, args.getNodeMaxActiveNodes());
