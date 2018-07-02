@@ -6,5 +6,4 @@ import java.util.Map.Entry;
 
 public interface DBIterator extends Iterator<Entry<byte[], byte[]>>, Closeable {
 
-  void seekToFirst();
 }
