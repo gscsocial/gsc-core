@@ -8,9 +8,9 @@
 
 GSC(global social chain) is a project dedicated to building the infrastructure for a truly decentralized Internet.
 
-The GSC Protocol, one of the largest blockchain based operating systems in the world, offers scalable, high-availability and high-throughput support that underlies all the decentralized applications in the TRON ecosystem. 
+The GSC Protocol, one of the largest blockchain based operating systems in the world, offers scalable, high-availability and high-throughput support that underlies all the decentralized applications in the GSC ecosystem. 
 
-GSC enables large-scale development and engagement. With over 2000 transactions per second (TPS), high concurrency, low latency and massive data transmission, TRON is ideal for building decentralized entertainment applications. Free features and incentive systems allow developers to create premium app experiences for users.
+GSC enables large-scale development and engagement. With over 2000 transactions per second (TPS), high concurrency, low latency and massive data transmission, GSC is ideal for building decentralized entertainment applications. Free features and incentive systems allow developers to create premium app experiences for users.
 
 GSC Protocol and the GSC Virtual Machine (TVM) allow anyone to develop decentralized applications (DAPPs) for themselves or their communities with smart contracts thereby making decentralized crowdfunding and token issuance easier than ever.
 
@@ -53,7 +53,7 @@ cd gsc-core
 
 * Build in [IntelliJ IDEA](https://www.jetbrains.com/idea/) (community version is enough):
 
-  1. Start IntelliJ. Select `File` -> `Open`, then locate to the java-tron folder which you have git cloned to your local drive. Then click `Open` button on the right bottom.
+  1. Start IntelliJ. Select `File` -> `Open`, then locate to the gsc-core folder which you have git cloned to your local drive. Then click `Open` button on the right bottom.
   2. Check on `Use auto-import` on the `Import Project from Gradle` dialog. Select JDK 1.8 in the `Gradle JVM` option. Then click `OK`.
   3. IntelliJ will open the project and start gradle syncing, which will take several minutes, depending on your network connection and your IntelliJ configuration
   4. After the syncing finished, select `Gradle` -> `Tasks` -> `build`, and then double click `build` option.
