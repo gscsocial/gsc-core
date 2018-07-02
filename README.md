@@ -10,7 +10,7 @@ GSC(global social chain) is a project dedicated to building the infrastructure f
 
 The GSC Protocol, one of the largest blockchain based operating systems in the world, offers scalable, high-availability and high-throughput support that underlies all the decentralized applications in the GSC ecosystem. 
 
-GSC enables large-scale development and engagement. With over 2000 transactions per second (TPS), high concurrency, low latency and massive data transmission, GSC is ideal for building decentralized entertainment applications. Free features and incentive systems allow developers to create premium app experiences for users.
+GSC enables large-scale development and engagement. With high TPS, high concurrency, low latency and massive data transmission, GSC is ideal for building decentralized entertainment applications. Free features and incentive systems allow developers to create premium app experiences for users.
 
 GSC Protocol and the GSC Virtual Machine (TVM) allow anyone to develop decentralized applications (DAPPs) for themselves or their communities with smart contracts thereby making decentralized crowdfunding and token issuance easier than ever.
 
