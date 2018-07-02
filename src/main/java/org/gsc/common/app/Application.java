@@ -18,12 +18,13 @@ package org.gsc.common.app;
 import org.gsc.config.Args;
 import org.gsc.db.Manager;
 import org.gsc.service.Service;
+import org.springframework.context.ApplicationContext;
 
 public interface Application {
 
   void setOptions(Args args);
 
-  void init(Args args);
+  void init(Args args, ApplicationContext ctx);
 
   void initServices(Args args);
 
