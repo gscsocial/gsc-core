@@ -2,8 +2,6 @@
   <br>
   <img width=20% src="https://i.loli.net/2018/05/03/5aeb2ffe1bc95.png">
   <br>
-  GSC
-  <br>
 </h1>
 
 ## What's GSC
