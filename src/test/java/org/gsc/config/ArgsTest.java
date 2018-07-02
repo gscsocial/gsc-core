@@ -38,7 +38,7 @@ public class ArgsTest {
                 genesisBlock.getParentHash());
 
         Assert.assertEquals(
-                Lists.newArrayList("f33db34bfbd1a2e219beddca0a0fa37632eded9ac666a05d3bd925f01dde1f62"),
+                Lists.newArrayList("f33db34bfbd1a2e219beddca0a0fa37632eded9ac666a05d3bd925f01dde1f63"),
                 args.getLocalWitnesses().getPrivateKeys());
 
         Assert.assertTrue(args.isNodeDiscoveryEnable());
