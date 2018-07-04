@@ -62,9 +62,9 @@ public class ProducerController {
 
   public void initProds() {
     List<ByteString> prodAddresses = new ArrayList<>();
-    manager.getProdStore().getAllProducers().forEach(witnessCapsule -> {
-      if (witnessCapsule.getIsJobs()) {
-        prodAddresses.add(witnessCapsule.getAddress());
+    manager.getProdStore().getAllProducers().forEach(witnessWrapper -> {
+      if (witnessWrapper.getIsJobs()) {
+        prodAddresses.add(witnessWrapper.getAddress());
       }
     });
     sortProds(prodAddresses);
@@ -271,15 +271,15 @@ public class ProducerController {
     } else {
       List<ByteString> currentWits = prodScheduleStore.getActiveProducers();
       List<ByteString> newWitnessAddressList = new ArrayList<>();
-      prodStore.getAllProducers().forEach(witnessCapsule -> {
-        newWitnessAddressList.add(witnessCapsule.getAddress());
+      prodStore.getAllProducers().forEach(witnessWrapper -> {
+        newWitnessAddressList.add(witnessWrapper.getAddress());
       });
 
       countWitness.forEach((address, voteCount) -> {
-        final ProducerWrapper witnessCapsule = prodStore
+        final ProducerWrapper witnessWrapper = prodStore
             .get(StringUtil.createDbKey(address));
-        if (null == witnessCapsule) {
-          logger.warn("witnessCapsule is null.address is {}",
+        if (null == witnessWrapper) {
+          logger.warn("witnessWrapper is null.address is {}",
               StringUtil.createReadableString(address));
           return;
         }
@@ -290,11 +290,11 @@ public class ProducerController {
           logger.warn(
               "witnessAccount[" + StringUtil.createReadableString(address) + "] not exists");
         } else {
-          witnessCapsule.setVoteCount(witnessCapsule.getVoteCount() + voteCount);
-          witnessCapsule.setIsJobs(false);
-          prodStore.put(witnessCapsule.createDbKey(), witnessCapsule);
-          logger.info("address is {}  ,countVote is {}", witnessCapsule.createReadableString(),
-              witnessCapsule.getVoteCount());
+          witnessWrapper.setVoteCount(witnessWrapper.getVoteCount() + voteCount);
+          witnessWrapper.setIsJobs(false);
+          prodStore.put(witnessWrapper.createDbKey(), witnessWrapper);
+          logger.info("address is {}  ,countVote is {}", witnessWrapper.createReadableString(),
+              witnessWrapper.getVoteCount());
 
         }
       });
@@ -343,11 +343,11 @@ public class ProducerController {
 
     List<ByteString> activeWitnesses = getActiveProducers();
     activeWitnesses.forEach(a -> {
-      ProducerWrapper witnessCapsule = manager.getProdStore().get(a.toByteArray());
-      builder.append("\n").append(" witness:").append(witnessCapsule.createReadableString())
+      ProducerWrapper witnessWrapper = manager.getProdStore().get(a.toByteArray());
+      builder.append("\n").append(" witness:").append(witnessWrapper.createReadableString())
           .append(",").
-          append("latestBlockNum:").append(witnessCapsule.getLatestBlockNum()).append(",").
-          append("LatestSlotNum:").append(witnessCapsule.getLatestSlotNum()).append(".");
+          append("latestBlockNum:").append(witnessWrapper.getLatestBlockNum()).append(",").
+          append("LatestSlotNum:").append(witnessWrapper.getLatestSlotNum()).append(".");
     });
     logger.debug(builder.toString());
   }
@@ -361,9 +361,9 @@ public class ProducerController {
     if (voteSum > 0) {
       for (ByteString b : list) {
         long pay = getProdByAddress(b).getVoteCount() * totalPay / voteSum;
-        AccountWrapper accountCapsule = manager.getAccountStore().get(b.toByteArray());
-        accountCapsule.setAllowance(accountCapsule.getAllowance() + pay);
-        manager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+        AccountWrapper accountWrapper = manager.getAccountStore().get(b.toByteArray());
+        accountWrapper.setAllowance(accountWrapper.getAllowance() + pay);
+        manager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
       }
     }
   }

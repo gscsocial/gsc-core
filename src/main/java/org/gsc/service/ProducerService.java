@@ -48,7 +48,7 @@ public class ProducerService implements Service {
   private Application app;
   @Getter
   protected Map<ByteString, ProducerWrapper> localWitnessStateMap = Maps
-      .newHashMap(); //  <address,WitnessCapsule>
+      .newHashMap(); //  <address,WitnessWrapper>
   private Thread generateThread;
   private volatile boolean isRunning = false;
   private Map<ByteString, byte[]> privateKeyMap = Maps.newHashMap();
@@ -284,16 +284,16 @@ public class ProducerService implements Service {
       byte[] privateKey = ByteArray.fromHexString(key);
       final ECKey ecKey = ECKey.fromPrivate(privateKey);
       byte[] address = ecKey.getAddress();
-      ProducerWrapper witnessCapsule = this.app.getDbManager().getProdStore()
+      ProducerWrapper witnessWrapper = this.app.getDbManager().getProdStore()
           .get(address);
       // need handle init witness
-      if (null == witnessCapsule) {
-        logger.warn("WitnessCapsule[" + address + "] is not in witnessStore");
-        witnessCapsule = new ProducerWrapper(ByteString.copyFrom(address));
+      if (null == witnessWrapper) {
+        logger.warn("WitnessWrapper[" + address + "] is not in witnessStore");
+        witnessWrapper = new ProducerWrapper(ByteString.copyFrom(address));
       }
 
-      this.privateKeyMap.put(witnessCapsule.getAddress(), privateKey);
-      this.localWitnessStateMap.put(witnessCapsule.getAddress(), witnessCapsule);
+      this.privateKeyMap.put(witnessWrapper.getAddress(), privateKey);
+      this.localWitnessStateMap.put(witnessWrapper.getAddress(), witnessWrapper);
     });
 
   }

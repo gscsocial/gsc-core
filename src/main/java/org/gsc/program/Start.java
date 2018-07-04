@@ -1,13 +1,13 @@
 package org.gsc.program;
 
-import static java.lang.Thread.sleep;
-
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.app.Application;
 import org.gsc.common.app.ApplicationImpl;
 import org.gsc.config.Args;
 import org.gsc.config.DefaultConfig;
 import org.gsc.core.Constant;
+import org.gsc.service.ProducerService;
+import org.gsc.service.RpcApiService;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -40,21 +40,15 @@ public class Start {
 
     shutdown(appT);
 
-    while(true) {
-      sleep(1000);
-      System.out.println("it is running");
+    RpcApiService rpcApiService = context.getBean(RpcApiService.class);
+    appT.addService(rpcApiService);
+    if (config.isProd()) {
+      appT.addService(new ProducerService(appT, context));
     }
-
-
-//    RpcApiService rpcApiService = context.getBean(RpcApiService.class);
-//    appT.addService(rpcApiService);
-//    if (config.isWitness()) {
-//      appT.addService(new ProducerService(appT, context));
-//    }
-//    appT.initServices(config);
-//    appT.startServices();
-//    appT.startup();
-//    rpcApiService.blockUntilShutdown();
+    appT.initServices(config);
+    appT.startServices();
+    appT.startup();
+    rpcApiService.blockUntilShutdown();
 
   }
 

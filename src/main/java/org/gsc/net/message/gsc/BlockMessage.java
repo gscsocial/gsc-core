@@ -22,10 +22,10 @@ public class BlockMessage extends GscMessage{
   }
 
   public BlockId getBlockId() {
-    return getBlockCapsule().getBlockId();
+    return getBlockWrapper().getBlockId();
   }
 
-  public BlockWrapper getBlockCapsule() {
+  public BlockWrapper getBlockWrapper() {
     return block;
   }
 
@@ -36,7 +36,7 @@ public class BlockMessage extends GscMessage{
 
   @Override
   public Sha256Hash getMessageId() {
-    return getBlockCapsule().getBlockId();
+    return getBlockWrapper().getBlockId();
   }
 
   @Override

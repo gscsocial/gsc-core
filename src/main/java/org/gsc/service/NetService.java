@@ -446,8 +446,8 @@ public class NetService implements Service{
             isBlockProc[0] = true;
             //TODO
             if (freshBlockId.contains(msg.getBlockId()) || processSyncBlock(
-                msg.getBlockCapsule())) {
-              finishProcessSyncBlock(msg.getBlockCapsule());
+                msg.getBlockWrapper())) {
+              finishProcessSyncBlock(msg.getBlockWrapper());
             }
           }
         }
@@ -610,7 +610,7 @@ public class NetService implements Service{
     logger.info("update peer {} block both we have, {}", peer.getNode().getHost(),
         blockId.getString());
     peer.setHeadBlockWeBothHave(blockId);
-    long time = ((BlockMessage) controller.getData(blockId, MessageTypes.BLOCK)).getBlockCapsule()
+    long time = ((BlockMessage) controller.getData(blockId, MessageTypes.BLOCK)).getBlockWrapper()
         .getTimeStamp();
     peer.setHeadBlockTimeWeBothHave(time);
   }
@@ -695,7 +695,7 @@ public class NetService implements Service{
     if (advObjWeRequested.containsKey(item)) {
       advObjWeRequested.remove(item);
       if (!syncFlag) {
-        processAdvBlock(peer, blkMsg.getBlockCapsule());
+        processAdvBlock(peer, blkMsg.getBlockWrapper());
         //TODO  startFetchItem()
       }
     }

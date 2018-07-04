@@ -1,20 +1,16 @@
-package org.tron.core;
+package org.gsc.api;
 
 import com.google.protobuf.ByteString;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.exception.BadItemException;
+import org.gsc.common.utils.ByteArray;
+import org.gsc.db.Manager;
+import org.gsc.db.api.StoreAPI;
+import org.gsc.protos.Protocol.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.tron.api.GrpcAPI.TransactionList;
-import org.tron.common.utils.ByteArray;
-import org.tron.core.capsule.TransactionInfoCapsule;
-import org.tron.core.db.Manager;
-import org.tron.core.db.api.StoreAPI;
-import org.tron.core.exception.BadItemException;
-import org.tron.core.exception.NonUniqueObjectException;
-import org.tron.protos.Protocol.Transaction;
-import org.tron.protos.Protocol.TransactionInfo;
 
 @Slf4j
 @Component
@@ -40,14 +36,14 @@ public class WalletSolidity {
     if (Objects.isNull(id)) {
       return null;
     }
-    TransactionInfoCapsule transactionInfoCapsule = null;
+    TransactionInfoWrapper transactionInfoWrapper = null;
     try {
-      transactionInfoCapsule = dbManager.getTransactionHistoryStore()
+      transactionInfoWrapper = dbManager.getTransactionHistoryStore()
           .get(id.toByteArray());
     } catch (BadItemException e) {
     }
-    if (transactionInfoCapsule != null) {
-      return transactionInfoCapsule.getInstance();
+    if (transactionInfoWrapper != null) {
+      return transactionInfoWrapper.getInstance();
     }
     return null;
   }

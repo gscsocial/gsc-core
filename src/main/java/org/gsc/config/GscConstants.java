@@ -30,5 +30,11 @@ public interface GscConstants {
   interface NetConstants {
   }
 
+  interface DatabaseConstants {
+
+    int TRANSACTIONS_COUNT_LIMIT_MAX = 1000;
+    int ASSET_ISSUE_COUNT_LIMIT_MAX = 1000;
+  }
+
 
 }
