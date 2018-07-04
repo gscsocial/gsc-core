@@ -82,8 +82,8 @@
   <logger name="Args" level="INFO"/>
   <logger name="WitnessCteateActuator" level="INFO"/>
   <logger name="AssetIssueActuator" level="INFO"/>
-  <logger name="AccountCapsule" level="INFO"/>
-  <logger name="AssetIssueCapsule" level="INFO"/>
+  <logger name="AccountWrapper" level="INFO"/>
+  <logger name="AssetIssueWrapper" level="INFO"/>
   <logger name="Manager" level="INFO"/>
   <logger name="Net" level="INFO"/>
 

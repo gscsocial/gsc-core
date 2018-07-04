@@ -37,10 +37,10 @@ public class BlockWrapperTest {
     public void testGetData() {
         blockWrapper1.getData();
         byte[] b = blockWrapper1.getData();
-        BlockWrapper blockCapsule1 = null;
+        BlockWrapper blockWrapper1 = null;
         try {
-            blockCapsule1 = new BlockWrapper(b);
-            Assert.assertEquals(blockWrapper1.getBlockId(), blockCapsule1.getBlockId());
+            blockWrapper1 = new BlockWrapper(b);
+            Assert.assertEquals(blockWrapper1.getBlockId(), blockWrapper1.getBlockId());
         } catch (Exception e) {
             e.printStackTrace();
         }

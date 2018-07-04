@@ -58,7 +58,7 @@ public class TransferTokenOperatorTest {
     }
 
     @Before
-    public void createCapsule() {
+    public void createWrapper() {
         AccountWrapper ownerWrapper =
                 new AccountWrapper(
                         ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)),
@@ -108,10 +108,10 @@ public class TransferTokenOperatorTest {
                         .setDescription(ByteString.copyFrom(ByteArray.fromString(DESCRIPTION)))
                         .setUrl(ByteString.copyFrom(ByteArray.fromString(URL)))
                         .build();
-        AssetIssueWrapper assetIssueCapsule = new AssetIssueWrapper(assetIssueContract);
+        AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
         dbManager.getAccountStore().put(ownerWrapper.getAddress().toByteArray(), ownerWrapper);
         dbManager.getAssetIssueStore()
-                .put(assetIssueCapsule.getName().toByteArray(), assetIssueCapsule);
+                .put(assetIssueWrapper.getName().toByteArray(), assetIssueWrapper);
     }
 
     private Any getContract(long sendCoin) {
