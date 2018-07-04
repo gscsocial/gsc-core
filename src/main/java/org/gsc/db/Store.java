@@ -30,9 +30,9 @@ public abstract class Store<T> implements Iterable<Map.Entry<byte[], T>> {
     dbSource.initDB();
   }
 
-//  protected Store() {
-//    throw new IllegalStateException("This constructor is not allowed");
-//  }
+  protected Store() {
+    throw new IllegalStateException("This constructor is not allowed");
+  }
 
   public LevelDbDataSourceImpl getDbSource() {
     return dbSource;

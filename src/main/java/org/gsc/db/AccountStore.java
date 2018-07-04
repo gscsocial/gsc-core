@@ -57,8 +57,8 @@ public class AccountStore extends ChainStore<AccountWrapper> {
    */
   public AccountWrapper getPhoton() {
     byte[] data = dbSource.getData(assertsAddress.get("Photon"));
-    AccountWrapper accountCapsule = new AccountWrapper(data);
-    return accountCapsule;
+    AccountWrapper accountWrapper = new AccountWrapper(data);
+    return accountWrapper;
   }
 
   /**
@@ -66,8 +66,8 @@ public class AccountStore extends ChainStore<AccountWrapper> {
    */
   public AccountWrapper getBlackhole() {
     byte[] data = dbSource.getData(assertsAddress.get("Blackhole"));
-    AccountWrapper accountCapsule = new AccountWrapper(data);
-    return accountCapsule;
+    AccountWrapper accountWrapper = new AccountWrapper(data);
+    return accountWrapper;
   }
 
   /**
@@ -75,8 +75,8 @@ public class AccountStore extends ChainStore<AccountWrapper> {
    */
   public AccountWrapper getZion() {
     byte[] data = dbSource.getData(assertsAddress.get("Zion"));
-    AccountWrapper accountCapsule = new AccountWrapper(data);
-    return accountCapsule;
+    AccountWrapper accountWrapper = new AccountWrapper(data);
+    return accountWrapper;
   }
 
   public static void setAccount(com.typesafe.config.Config config) {

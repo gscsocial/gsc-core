@@ -251,15 +251,15 @@ public class Manager {
         .forEach(
             account -> {
               account.setAccountType("Normal"); // to be set in conf
-              final AccountWrapper accountCapsule =
+              final AccountWrapper accountWrapper =
                   new AccountWrapper(
                       account.getAccountName(),
                       ByteString.copyFrom(account.getAddress()),
                       account.getAccountType(),
                       account.getBalance());
-              this.accountStore.put(account.getAddress(), accountCapsule);
+              this.accountStore.put(account.getAddress(), accountWrapper);
               //TODO
-              //this.accountIndexStore.put(accountCapsule);
+              //this.accountIndexStore.put(accountWrapper);
             });
   }
 
@@ -273,20 +273,20 @@ public class Manager {
               byte[] keyAddress = key.getAddress();
               ByteString address = ByteString.copyFrom(keyAddress);
 
-              final AccountWrapper accountCapsule;
+              final AccountWrapper accountWrapper;
               if (!this.accountStore.has(keyAddress)) {
-                accountCapsule = new AccountWrapper(ByteString.EMPTY,
+                accountWrapper = new AccountWrapper(ByteString.EMPTY,
                     address, AccountType.AssetIssue, 0L);
               } else {
-                accountCapsule = this.accountStore.get(keyAddress);
+                accountWrapper = this.accountStore.get(keyAddress);
               }
-              accountCapsule.setIsWitness(true);
-              this.accountStore.put(keyAddress, accountCapsule);
+              accountWrapper.setIsWitness(true);
+              this.accountStore.put(keyAddress, accountWrapper);
 
-              final ProducerWrapper witnessCapsule =
+              final ProducerWrapper witnessWrapper =
                   new ProducerWrapper(address, key.getVoteCount(), key.getUrl());
-              witnessCapsule.setIsJobs(true);
-              this.prodStore.put(keyAddress, witnessCapsule);
+              witnessWrapper.setIsJobs(true);
+              this.prodStore.put(keyAddress, witnessWrapper);
             });
   }
 
@@ -305,10 +305,10 @@ public class Manager {
     this.getAccountStore().put(account.createDbKey(), account);
   }
 
-  void validateTapos(TransactionWrapper transactionCapsule) throws TaposException {
-    byte[] refBlockHash = transactionCapsule.getInstance()
+  void validateTapos(TransactionWrapper transactionWrapper) throws TaposException {
+    byte[] refBlockHash = transactionWrapper.getInstance()
         .getRawData().getRefBlockHash().toByteArray();
-    byte[] refBlockNumBytes = transactionCapsule.getInstance()
+    byte[] refBlockNumBytes = transactionWrapper.getInstance()
         .getRawData().getRefBlockBytes().toByteArray();
     try {
       byte[] blockHash = this.taposStore.get(refBlockNumBytes).getData();
@@ -350,13 +350,13 @@ public class Manager {
   }
 
 
-  void validateCommon(TransactionWrapper transactionCapsule)
+  void validateCommon(TransactionWrapper transactionWrapper)
       throws TransactionExpirationException, TooBigTransactionException {
-    if (transactionCapsule.getData().length > TRANSACTION_MAX_BYTE_SIZE) {
+    if (transactionWrapper.getData().length > TRANSACTION_MAX_BYTE_SIZE) {
       throw new TooBigTransactionException(
-          "too big transaction, the size is " + transactionCapsule.getData().length + " bytes");
+          "too big transaction, the size is " + transactionWrapper.getData().length + " bytes");
     }
-    long transactionExpiration = transactionCapsule.getExpiration();
+    long transactionExpiration = transactionWrapper.getExpiration();
     long headBlockTime = getHeadBlockTimeStamp();
     if (transactionExpiration <= headBlockTime ||
         transactionExpiration > headBlockTime + MAXIMUM_TIME_UNTIL_EXPIRATION) {
@@ -366,14 +366,14 @@ public class Manager {
     }
   }
 
-  void validateDup(TransactionWrapper transactionCapsule) throws DupTransactionException {
+  void validateDup(TransactionWrapper transactionWrapper) throws DupTransactionException {
     try {
-      if (getTransactionStore().get(transactionCapsule.getTransactionId().getBytes()) != null) {
-        logger.debug(ByteArray.toHexString(transactionCapsule.getTransactionId().getBytes()));
+      if (getTransactionStore().get(transactionWrapper.getTransactionId().getBytes()) != null) {
+        logger.debug(ByteArray.toHexString(transactionWrapper.getTransactionId().getBytes()));
         throw new DupTransactionException("dup trans");
       }
     } catch (BadItemException e) {
-      logger.debug(ByteArray.toHexString(transactionCapsule.getTransactionId().getBytes()));
+      logger.debug(ByteArray.toHexString(transactionWrapper.getTransactionId().getBytes()));
       throw new DupTransactionException("dup trans");
     }
   }
@@ -614,18 +614,18 @@ public class Manager {
         this.forkDB.getBranch(
             globalPropertiesStore.getLatestBlockHeaderHash(), forkBlockHash);
 
-    LinkedList<BlockWrapper> blockCapsules = branch.getValue();
+    LinkedList<BlockWrapper> blockWrappers = branch.getValue();
 
-    if (blockCapsules.isEmpty()) {
+    if (blockWrappers.isEmpty()) {
       logger.info("empty branch {}", forkBlockHash);
       return Lists.newLinkedList();
     }
 
-    LinkedList<BlockId> result = blockCapsules.stream()
-        .map(blockCapsule -> blockCapsule.getBlockId())
+    LinkedList<BlockId> result = blockWrappers.stream()
+        .map(blockWrapper -> blockWrapper.getBlockId())
         .collect(Collectors.toCollection(LinkedList::new));
 
-    result.add(blockCapsules.peekLast().getParentBlockId());
+    result.add(blockWrappers.peekLast().getParentBlockId());
 
     return result;
   }
@@ -732,7 +732,7 @@ public class Manager {
    * Generate a block.
    */
   public synchronized BlockWrapper generateBlock(
-      final ProducerWrapper witnessCapsule, final long when, final byte[] privateKey)
+      final ProducerWrapper witnessWrapper, final long when, final byte[] privateKey)
       throws ValidateSignatureException, ContractValidateException, ContractExeException,
       UnLinkedBlockException, ValidateScheduleException, AccountResourceInsufficientException {
 
@@ -747,8 +747,8 @@ public class Manager {
 
     long postponedTrxCount = 0;
 
-    final BlockWrapper blockCapsule =
-        new BlockWrapper(number + 1, preHash, when, witnessCapsule.getAddress());
+    final BlockWrapper blockWrapper =
+        new BlockWrapper(number + 1, preHash, when, witnessWrapper.getAddress());
     dialog.reset();
     dialog.setValue(undoStore.buildDialog());
     Iterator iterator = pendingTransactions.iterator();
@@ -760,7 +760,7 @@ public class Manager {
         break;
       }
       // check the block size
-      if ((blockCapsule.getInstance().getSerializedSize() + trx.getSerializedSize() + 3) > ChainConstant.BLOCK_SIZE) {
+      if ((blockWrapper.getInstance().getSerializedSize() + trx.getSerializedSize() + 3) > ChainConstant.BLOCK_SIZE) {
         postponedTrxCount++;
         continue;
       }
@@ -769,7 +769,7 @@ public class Manager {
         processTransaction(trx);
         tmpDialog.merge();
         // push into block
-        blockCapsule.addTransaction(trx);
+        blockWrapper.addTransaction(trx);
         iterator.remove();
       } catch (ContractExeException e) {
         logger.info("contract not processed during execute");
@@ -804,12 +804,12 @@ public class Manager {
     logger.info(
         "postponedTrxCount[" + postponedTrxCount + "],TrxLeft[" + pendingTransactions.size()
             + "]");
-    blockCapsule.setMerkleRoot();
-    blockCapsule.sign(privateKey);
-    blockCapsule.generatedByMyself = true;
+    blockWrapper.setMerkleRoot();
+    blockWrapper.sign(privateKey);
+    blockWrapper.generatedByMyself = true;
     try {
-      this.pushBlock(blockCapsule);
-      return blockCapsule;
+      this.pushBlock(blockWrapper);
+      return blockWrapper;
     } catch (TaposException e) {
       logger.info("contract not processed during TaposException");
     } catch (TooBigTransactionException e) {
@@ -839,11 +839,11 @@ public class Manager {
       throw new ValidateScheduleException("validateWitnessSchedule error");
     }
 
-    for (TransactionWrapper transactionCapsule : block.getTransactions()) {
+    for (TransactionWrapper transactionWrapper : block.getTransactions()) {
       if (block.generatedByMyself) {
-        transactionCapsule.setVerified(true);
+        transactionWrapper.setVerified(true);
       }
-      processTransaction(transactionCapsule);
+      processTransaction(transactionWrapper);
     }
 
     boolean needMaint = needMaintenance(block.getTimeStamp());
@@ -864,8 +864,8 @@ public class Manager {
   }
 
   private void updateTransHashCache(BlockWrapper block) {
-    for (TransactionWrapper transactionCapsule : block.getTransactions()) {
-      this.transactionIdCache.put(transactionCapsule.getTransactionId(), true);
+    for (TransactionWrapper transactionWrapper : block.getTransactions()) {
+      this.transactionIdCache.put(transactionWrapper.getTransactionId(), true);
     }
   }
 
@@ -936,22 +936,22 @@ public class Manager {
    */
   public void updateSignedWitness(BlockWrapper block) {
     // TODO: add verification
-    ProducerWrapper witnessCapsule =
+    ProducerWrapper witnessWrapper =
         prodStore.get(
             block.getInstance().getBlockHeader().getRawData().getProducerAddress().toByteArray());
-    witnessCapsule.setTotalProduced(witnessCapsule.getTotalProduced() + 1);
-    witnessCapsule.setLatestBlockNum(block.getNum());
-    witnessCapsule.setLatestSlotNum(prodController.getAbSlotAtTime(block.getTimeStamp()));
+    witnessWrapper.setTotalProduced(witnessWrapper.getTotalProduced() + 1);
+    witnessWrapper.setLatestBlockNum(block.getNum());
+    witnessWrapper.setLatestSlotNum(prodController.getAbSlotAtTime(block.getTimeStamp()));
 
     // Update memory witness status
     ProducerWrapper wit = prodController.getProdByAddress(block.getProducerAddress());
     if (wit != null) {
-      wit.setTotalProduced(witnessCapsule.getTotalProduced() + 1);
+      wit.setTotalProduced(witnessWrapper.getTotalProduced() + 1);
       wit.setLatestBlockNum(block.getNum());
       wit.setLatestSlotNum(prodController.getAbSlotAtTime(block.getTimeStamp()));
     }
 
-    prodStore.put(witnessCapsule.getAddress().toByteArray(), witnessCapsule);
+    prodStore.put(witnessWrapper.getAddress().toByteArray(), witnessWrapper);
 
     AccountWrapper photon = accountStore.getPhoton();
     try {
@@ -960,16 +960,16 @@ public class Manager {
       logger.debug(e.getMessage(), e);
     }
     try {
-      adjustAllowance(witnessCapsule.getAddress().toByteArray(), WITNESS_PAY_PER_BLOCK);
+      adjustAllowance(witnessWrapper.getAddress().toByteArray(), WITNESS_PAY_PER_BLOCK);
     } catch (BalanceInsufficientException e) {
       logger.debug(e.getMessage(), e);
     }
 
     logger.debug(
         "updateSignedWitness. witness address:{}, blockNum:{}, totalProduced:{}",
-        witnessCapsule.createReadableString(),
+        witnessWrapper.createReadableString(),
         block.getNum(),
-        witnessCapsule.getTotalProduced());
+        witnessWrapper.getTotalProduced());
   }
 
   public void updateMaintenanceState(boolean needMaint) {
