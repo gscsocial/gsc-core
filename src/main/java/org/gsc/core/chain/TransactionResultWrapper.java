@@ -11,7 +11,7 @@ public class TransactionResultWrapper implements StoreWrapper<Result> {
   private Transaction.Result transactionResult;
 
   /**
-   * constructor TransactionCapsule.
+   * constructor TransactionWrapper.
    */
   public TransactionResultWrapper(Transaction.Result trxRet) {
     this.transactionResult = trxRet;

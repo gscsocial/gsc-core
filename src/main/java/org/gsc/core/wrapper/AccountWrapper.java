@@ -39,7 +39,7 @@ public class AccountWrapper implements StoreWrapper<Account>, Comparable<Account
   }
 
   /**
-   * initial account capsule.
+   * initial account Wrapper.
    */
   public AccountWrapper(ByteString accountName, ByteString address, AccountType accountType,
       long balance) {

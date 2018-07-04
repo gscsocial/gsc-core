@@ -18,7 +18,7 @@ public class ProducerWrapper implements StoreWrapper<Producer>, Comparable<Produ
   }
 
   /**
-   * ProducerCapsule constructor with pubKey and url.
+   * ProducerWrapper constructor with pubKey and url.
    */
   public ProducerWrapper(final ByteString pubKey, final String url) {
     final Producer.Builder producerBuilder = Producer.newBuilder();
@@ -33,14 +33,14 @@ public class ProducerWrapper implements StoreWrapper<Producer>, Comparable<Produ
   }
 
   /**
-   * ProducerCapsule constructor with address.
+   * ProducerWrapper constructor with address.
    */
   public ProducerWrapper(final ByteString address) {
     this.producer = Producer.newBuilder().setAddress(address).build();
   }
 
   /**
-   * ProducerCapsule constructor with address and voteCount.
+   * ProducerWrapper constructor with address and voteCount.
    */
   public ProducerWrapper(final ByteString address, final long voteCount, final String url) {
     final Producer.Builder producerBuilder = Producer.newBuilder();

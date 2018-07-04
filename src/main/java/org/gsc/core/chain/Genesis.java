@@ -28,12 +28,12 @@ public class Genesis {
     Sha256Hash parentHash = Sha256Hash.wrap(genesisBlockArg.getParentHash().getBytes());
     long number = Long.parseLong(genesisBlockArg.getNumber());
 
-    BlockWrapper blockCapsule = new BlockWrapper(timestamp, parentHash, number,
+    BlockWrapper blockWrapper = new BlockWrapper(timestamp, parentHash, number,
         ByteString.copyFromUtf8("0x00"), transactionList);
 
-    blockCapsule.setMerkleRoot();
-    blockCapsule.generatedByMyself = true;
+    blockWrapper.setMerkleRoot();
+    blockWrapper.generatedByMyself = true;
 
-    return blockCapsule;
+    return blockWrapper;
   }
 }
