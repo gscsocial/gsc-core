@@ -1,8 +1,7 @@
-package org.tron.core.db.api.pojo;
-
-import lombok.Data;
+package org.gsc.db.api.pojo;
 
 import java.util.List;
+import lombok.Data;
 
 @Data(staticConstructor = "of")
 public class Block {

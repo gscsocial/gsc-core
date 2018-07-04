@@ -1,4 +1,4 @@
-package org.tron.core.db.api.pojo;
+package org.gsc.db.api.pojo;
 
 import lombok.Data;
 
