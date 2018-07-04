@@ -1,8 +1,7 @@
 package org.gsc.keystore;
 
-import org.gsc.common.utils.AddressUtil;
+import org.gsc.common.crypto.ECKey;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.crypto.ECKey;
 
 /**
  * Credentials wrapper.
@@ -26,7 +25,7 @@ public class Credentials {
     }
 
     public static Credentials create(ECKey ecKeyPair) {
-        String address = AddressUtil.encode58Check(ecKeyPair.getAddress());
+        String address = org.gsc.core.Wallet.encode58Check(ecKeyPair.getAddress());
         return new Credentials(ecKeyPair, address);
     }
 

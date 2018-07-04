@@ -1,7 +1,7 @@
 package org.gsc.common.utils;
 
 import java.util.Optional;
-import org.gsc.db.AbstractUndoStore.Dialog;
+import org.gsc.core.db.AbstractRevokingStore.Dialog;
 
 public final class DialogOptional {
 

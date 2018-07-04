@@ -14,8 +14,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.crypto.ECKey;
-import org.gsc.net.discover.dht.Utils;
+import org.gsc.common.crypto.ECKey;
+import org.gsc.common.utils.Utils;
 
 /**
  * Utility functions for working with Wallet files.
