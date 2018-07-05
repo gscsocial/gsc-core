@@ -16,20 +16,58 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.gsc.api.GrpcAPI;
+import org.gsc.api.GrpcAPI.AccountNetMessage;
+import org.gsc.api.GrpcAPI.AccountPaginated;
+import org.gsc.api.GrpcAPI.Address;
+import org.gsc.api.GrpcAPI.AddressPrKeyPairMessage;
+import org.gsc.api.GrpcAPI.AssetIssueList;
+import org.gsc.api.GrpcAPI.BlockLimit;
+import org.gsc.api.GrpcAPI.BlockList;
+import org.gsc.api.GrpcAPI.BytesMessage;
+import org.gsc.api.GrpcAPI.EasyTransferMessage;
+import org.gsc.api.GrpcAPI.EasyTransferResponse;
+import org.gsc.api.GrpcAPI.EmptyMessage;
+import org.gsc.api.GrpcAPI.NumberMessage;
+import org.gsc.api.GrpcAPI.PaginatedMessage;
+import org.gsc.api.GrpcAPI.TransactionList;
 import org.gsc.api.WalletExtensionGrpc;
+import org.gsc.api.WalletGrpc.WalletImplBase;
+import org.gsc.api.WalletSolidity;
 import org.gsc.common.exception.ContractValidateException;
 import org.gsc.common.exception.HeaderNotFound;
+import org.gsc.common.utils.AddressUtil;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.config.Args;
 import org.gsc.core.Constant;
+import org.gsc.core.operator.Operator;
+import org.gsc.core.operator.OperatorFactory;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.ProducerWrapper;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.crypto.ECKey;
 import org.gsc.db.Manager;
 import org.gsc.keystore.Wallet;
+import org.gsc.net.discover.Node;
 import org.gsc.net.discover.NodeHandler;
 import org.gsc.net.discover.NodeManager;
 import org.gsc.net.discover.dht.Utils;
 import org.gsc.protos.Contract;
+import org.gsc.protos.Contract.AccountCreateContract;
+import org.gsc.protos.Contract.AssetIssueContract;
+import org.gsc.protos.Contract.ParticipateAssetIssueContract;
+import org.gsc.protos.Contract.TransferAssetContract;
+import org.gsc.protos.Contract.TransferContract;
+import org.gsc.protos.Contract.UnfreezeAssetContract;
+import org.gsc.protos.Contract.VoteWitnessContract;
+import org.gsc.protos.Contract.WitnessCreateContract;
+import org.gsc.protos.Protocol.Account;
+import org.gsc.protos.Protocol.Block;
+import org.gsc.protos.Protocol.Transaction;
+import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
+import org.gsc.protos.Protocol.TransactionInfo;
+import org.gsc.protos.Protocol.TransactionSign;
 import org.gsc.service.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -260,7 +298,7 @@ public class RpcApiService implements Service {
       ECKey ecKey = new ECKey(Utils.getRandom());
       byte[] priKey = ecKey.getPrivKeyBytes();
       byte[] address = ecKey.getAddress();
-      String addressStr = Wallet.encode58Check(address);
+      String addressStr = AddressUtil.encode58Check(address);
       String priKeyStr = Hex.encodeHexString(priKey);
       AddressPrKeyPairMessage.Builder builder = AddressPrKeyPairMessage.newBuilder();
       builder.setAddress(addressStr);
@@ -344,8 +382,8 @@ public class RpcApiService implements Service {
     private TransactionWrapper createTransactionWrapper(com.google.protobuf.Message message,
         ContractType contractType) throws ContractValidateException {
       TransactionWrapper trx = new TransactionWrapper(message, contractType);
-      List<Actuator> actList = ActuatorFactory.createActuator(trx, dbManager);
-      for (Actuator act : actList) {
+      List<Operator> actList = OperatorFactory.createActuator(trx, dbManager);
+      for (Operator act : actList) {
         act.validate();
       }
       try {
@@ -376,7 +414,7 @@ public class RpcApiService implements Service {
     @Override
     public void createAdresss(BytesMessage req,
         StreamObserver<BytesMessage> responseObserver) {
-      byte[] address = wallet.createAdresss(req.getValue().toByteArray());
+      byte[] address = AddressUtil.createAdresss(req.getValue().toByteArray());
       BytesMessage.Builder builder = BytesMessage.newBuilder();
       builder.setValue(ByteString.copyFrom(address));
       responseObserver.onNext(builder.build());
@@ -468,7 +506,7 @@ public class RpcApiService implements Service {
 
       req.getVotesList().forEach(vote -> {
         ByteString voteAddress = vote.getVoteAddress();
-        WitnessWrapper witness = dbManager.getWitnessStore()
+        ProducerWrapper witness = dbManager.getProdStore()
             .get(voteAddress.toByteArray());
         String readableWitnessAddress = StringUtil.createReadableString(voteAddress);
 
@@ -635,7 +673,7 @@ public class RpcApiService implements Service {
 
       nodeHandlerMap.entrySet().stream()
           .forEach(v -> {
-            org.gsc.common.overlay.discover.node.Node node = v.getValue().getNode();
+            Node node = v.getValue().getNode();
             nodeListBuilder.addNodes(Node.newBuilder().setAddress(
                 Address.newBuilder()
                     .setHost(ByteString.copyFrom(ByteArray.fromString(node.getHost())))
