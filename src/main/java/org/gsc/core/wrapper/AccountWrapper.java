@@ -222,8 +222,8 @@ public class AccountWrapper implements StoreWrapper<Account>, Comparable<Account
     }
   }
 
-  //tp:Tron_Power
-  public long getTronPower() {
+  //tp:Gsc_Power
+  public long getGscPower() {
     long tp = 0;
     //long now = Time.getCurrentMillis();
     for (int i = 0; i < account.getFrozenCount(); ++i) {

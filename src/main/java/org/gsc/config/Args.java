@@ -180,7 +180,7 @@ public class Args {
   @Setter
   private String p2pNodeId;
 
-  //If you are running a solidity node for java tron, this flag is set to true
+  //If you are running a solidity node for java gsc, this flag is set to true
   @Getter
   @Setter
   private boolean solidityNode = false;

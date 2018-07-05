@@ -207,7 +207,7 @@ public class NetService implements Service{
     pool.init(this);
     isAdvertiseActive = true;
     isFetchActive = true;
-    activeTronPump();
+    activeGscPump();
   }
 
   @Override
@@ -258,7 +258,7 @@ public class NetService implements Service{
     getActivePeer().forEach(peer -> disconnectPeer(peer, ReasonCode.REQUESTED));
   }
 
-  private void activeTronPump() {
+  private void activeGscPump() {
     broadPool.submit(() -> {
       while (isAdvertiseActive) {
         consumerAdvObjToSpread();

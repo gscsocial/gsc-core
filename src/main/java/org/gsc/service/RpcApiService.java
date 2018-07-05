@@ -1,4 +1,4 @@
-package org.tron.core.services;
+package org.gsc.core.services;
 
 import com.google.common.base.Preconditions;
 import com.google.protobuf.ByteString;
@@ -115,8 +115,8 @@ public class RpcApiService implements Service {
   private class DatabaseApi extends DatabaseImplBase {
 
     @Override
-    public void getBlockReference(org.tron.api.GrpcAPI.EmptyMessage request,
-        io.grpc.stub.StreamObserver<org.tron.api.GrpcAPI.BlockReference> responseObserver) {
+    public void getBlockReference(org.gsc.api.GrpcAPI.EmptyMessage request,
+        io.grpc.stub.StreamObserver<org.gsc.api.GrpcAPI.BlockReference> responseObserver) {
       long headBlockNum = dbManager.getDynamicPropertiesStore()
           .getLatestBlockHeaderNumber();
       byte[] blockHeaderHash = dbManager.getDynamicPropertiesStore()
@@ -463,8 +463,8 @@ public class RpcApiService implements Service {
 
       int votesCount = req.getVotesCount();
       Preconditions.checkArgument(votesCount <= 0, "VotesCount[" + votesCount + "] <= 0");
-      Preconditions.checkArgument(account.getTronPower() < votesCount,
-          "tron power[" + account.getTronPower() + "] <  VotesCount[" + votesCount + "]");
+      Preconditions.checkArgument(account.getGscPower() < votesCount,
+          "gsc power[" + account.getGscPower() + "] <  VotesCount[" + votesCount + "]");
 
       req.getVotesList().forEach(vote -> {
         ByteString voteAddress = vote.getVoteAddress();
@@ -635,7 +635,7 @@ public class RpcApiService implements Service {
 
       nodeHandlerMap.entrySet().stream()
           .forEach(v -> {
-            org.tron.common.overlay.discover.node.Node node = v.getValue().getNode();
+            org.gsc.common.overlay.discover.node.Node node = v.getValue().getNode();
             nodeListBuilder.addNodes(Node.newBuilder().setAddress(
                 Address.newBuilder()
                     .setHost(ByteString.copyFrom(ByteArray.fromString(node.getHost())))
