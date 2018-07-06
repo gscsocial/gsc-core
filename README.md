@@ -4,52 +4,32 @@
   <br>
 </h1>
 
-## What's GSC
+## About
 
-GSC(global social chain) is a project dedicated to building the infrastructure for a truly decentralized Internet.
+GSC (Global Social Chain) is the world's first new generation of social networking chain that owns hundreds of millions of social users. This social chain is determined to use block chain technology to subvert centralized social networks such as Facebook, WeChat, etc., which plays a dual role as "manager" and "arbiter" simultaneously for the former social networking platforms.
 
-The GSC Protocol, one of the largest blockchain based operating systems in the world, offers scalable, high-availability and high-throughput support that underlies all the decentralized applications in the GSC ecosystem. 
-
-GSC enables large-scale development and engagement. With high TPS, high concurrency, low latency and massive data transmission, GSC is ideal for building decentralized entertainment applications. Free features and incentive systems allow developers to create premium app experiences for users.
-
-GSC Protocol and the GSC Virtual Machine (TVM) allow anyone to develop decentralized applications (DAPPs) for themselves or their communities with smart contracts thereby making decentralized crowdfunding and token issuance easier than ever.
-
-# How to Build
+# Running Gsc-core
 
 ## Prepare dependencies
 
 * JDK 1.8 (JDK 1.9+ are not supported yet)
-* On Linux Ubuntu system (e.g. Ubuntu 16.04.4 LTS), ensure that the machine has [__Oracle JDK 8__](https://www.digitalocean.com/community/tutorials/how-to-install-java-with-apt-get-on-ubuntu-16-04), instead of having __Open JDK 8__ in the system.
+* With Linux , ensure that the machine has __Oracle JDK 8__ .
 
-## Getting the code with git
+## How to get the code
 
 * Use Git from the Terminal, see the [Setting up Git](https://help.github.com/articles/set-up-git/) and [Fork a Repo](https://help.github.com/articles/fork-a-repo/) articles.
-* develop branch: the newest code 
-* master branch: more stable than develop.
+* master branch is suggested as more stable
+
 In the shell command, type:
 ```bash
 git clone https://github.com/gscsocial/gsc-core.git
 git checkout -t origin/master
 ```
 
-* For Mac, you can also install **[GitHub for Mac](https://mac.github.com/)** then **[fork and clone our repository](https://guides.github.com/activities/forking/)**. 
-
 * If you'd rather not use Git, [Download the ZIP](https://github.com/gscsocial/gsc-core/archive/master.zip)
 
-## Building from source code
+## How to build
 
-* Build in the Terminal
-
-```bash
-cd gsc-core
-./gradlew build
-```
-
-* Build an executable JAR
-
-```bash
-./gradlew clean shadowJar
-```
 
 * Build in [IntelliJ IDEA](https://www.jetbrains.com/idea/) (community version is enough):
 
@@ -58,31 +38,15 @@ cd gsc-core
   3. IntelliJ will open the project and start gradle syncing, which will take several minutes, depending on your network connection and your IntelliJ configuration
   4. After the syncing finished, select `Gradle` -> `Tasks` -> `build`, and then double click `build` option.
    
-# Running
 
-## Running a Private Testnet
-
-### How to run a full node
+## How to run
 
 * You should modify the config.conf
   1. Replace existing entry in genesis.block.witnesses with your address.
   2. Replace existing entry in seed.node ip.list with your ip list.
 
-* In the Terminal
-
-```bash
-./gradlew run
-```
-
-* Use the executable JAR
-
-```bash
-cd build/libs 
-java -jar gsc-core.jar 
-```
-
 * In IntelliJ IDEA
-  1. After the building finishes, locate `FullNode` in the project structure view panel, which is on the path `gsc-cire/src/main/java/org/gsc/program/Start`.
+  1. After the building finishes, locate `FullNode` in the project structure view panel, which is on the path `gsc-core/src/main/java/org/gsc/program/Start`.
   2. Select `Start`, right click on it, and select `Run 'Start.main()'`, then `Start` starts running.
 
 * In the Terminal
