@@ -1,8 +1,4 @@
-<h1 align="center">
-  <br>
-  <img width=20% src="https://i.loli.net/2018/05/03/5aeb2ffe1bc95.png">
-  <br>
-</h1>
+# Welcome to ethereumj
 
 ## About
 
