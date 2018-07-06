@@ -11,29 +11,15 @@ GSC (Global Social Chain) is the world's first new generation of social networki
 * [Facebook](https://www.facebook.com/GSCCoin/)
 * [Meidum](https://medium.com/@gsc_socialchain)
 * [Reddit](https://www.reddit.com/user/GSCOfficial/)
+* [Youtube](https://www.youtube.com/channel/UCWcQhl4N6_ggZFdHwTxuuIQ)
 
-# Running Gsc-core
 
 ## Prepare dependencies
 
 * JDK 1.8 (JDK 1.9+ are not supported yet)
 * With Linux , ensure that the machine has __Oracle JDK 8__ .
 
-## How to get the code
-
-* Use Git from the Terminal, see the [Setting up Git](https://help.github.com/articles/set-up-git/) and [Fork a Repo](https://help.github.com/articles/fork-a-repo/) articles.
-* master branch is suggested as more stable
-
-In the shell command, type:
-```bash
-git clone https://github.com/gscsocial/gsc-core.git
-git checkout -t origin/master
-```
-
-* If you'd rather not use Git, [Download the ZIP](https://github.com/gscsocial/gsc-core/archive/master.zip)
-
 ## How to build
-
 
 * Build in [IntelliJ IDEA](https://www.jetbrains.com/idea/) (community version is enough):
 
@@ -77,5 +63,3 @@ If the problem needs debating or you have questions on how to implement a featur
 [issue](https://github.com/gscsocial/gsc-core/issues). If you spotted a typo or a code formatting issue, just directly 
 opening a Pull Request is fine. 
 
-
-[Youtube](https://www.youtube.com/channel/UCWcQhl4N6_ggZFdHwTxuuIQ)
