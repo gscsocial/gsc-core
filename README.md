@@ -1,4 +1,4 @@
-# Welcome to ethereumj
+# Welcome to GSC
 
 ## About
 
