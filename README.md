@@ -4,6 +4,14 @@
 
 GSC (Global Social Chain) is the world's first new generation of social networking chain that owns hundreds of millions of social users. This social chain is determined to use block chain technology to subvert centralized social networks such as Facebook, WeChat, etc., which plays a dual role as "manager" and "arbiter" simultaneously for the former social networking platforms.
 
+## Links
+
+* [Telegram](https://t.me/gscofficial)
+* [Twitter](https://twitter.com/gsc_socialchain)
+* [Facebook](https://www.facebook.com/GSCCoin/)
+* [Meidum](https://medium.com/@gsc_socialchain)
+* [Reddit](https://www.reddit.com/user/GSCOfficial/)
+
 # Running Gsc-core
 
 ## Prepare dependencies
@@ -69,20 +77,5 @@ If the problem needs debating or you have questions on how to implement a featur
 [issue](https://github.com/gscsocial/gsc-core/issues). If you spotted a typo or a code formatting issue, just directly 
 opening a Pull Request is fine. 
 
-
-Follow us on:
-
-
-[Telegram](https://t.me/gscofficial)
-
-
-[Facebook](https://www.facebook.com/GSCCoin/)
-
-
-[Twitter](https://twitter.com/gsc_socialchain)
-
-[Meidum](https://medium.com/@gsc_socialchain)
-
-[Reddit](https://www.reddit.com/user/GSCOfficial/)
 
 [Youtube](https://www.youtube.com/channel/UCWcQhl4N6_ggZFdHwTxuuIQ)
