@@ -71,6 +71,12 @@ message Producer {
   int64 latestBlockNum = 7;
   int64 latestSlotNum = 8;
   bool isJobs = 9;
+  int64 connSize = 10;
+  int64 fanCount = 11;
+  int64 industry = 12;
+  int64 withdrawTime = 13;
+  int64 freezeCount = 14;
+  int64 resourceCount = 15;
 }
 
 // GlobalProperties
