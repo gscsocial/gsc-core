@@ -18,12 +18,20 @@ message PingMessage {
   Endpoint to = 2;
   int32 version = 3;
   int64 timestamp = 4;
+  ////
+  int64 longitude = 5;
+  int64 latitude = 6;
+  int64 GKadFactor = 7;
 }
 
 message PongMessage {
   Endpoint from = 1;
   int32 echo = 2;
   int64 timestamp = 3;
+  ////
+  int64 longitude = 5;
+  int64 latitude = 6;
+  int64 GKadFactor = 7;
 }
 
 message FindNeighbours {
