@@ -71,6 +71,7 @@ message Producer {
   int64 latestBlockNum = 7;
   int64 latestSlotNum = 8;
   bool isJobs = 9;
+  ////
   int64 connSize = 10;
   int64 fanCount = 11;
   int64 industry = 12;
@@ -220,4 +221,10 @@ message Account {
   map<string, int64> free_asset_net_usage = 20;
   int64 latest_consume_time = 21;
   int64 latest_consume_free_time = 22;
+  ////
+  int64 socialFactor = 23;
+  int64 fansCount = 24;
+  int64 interPersonalFactor = 25;
+  int64 lastLoginTime = 26;
+  int64 authorityLevel = 27;
 }
