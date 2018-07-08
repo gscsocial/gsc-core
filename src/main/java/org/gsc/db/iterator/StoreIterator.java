@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
-import org.iq80.leveldb.DBIterator;
+
 
 @Slf4j
 public final class StoreIterator implements org.gsc.db.iterator.DBIterator {
@@ -27,7 +27,8 @@ public final class StoreIterator implements org.gsc.db.iterator.DBIterator {
     // true is first item
     try {
       if (first) {
-        dbIterator.seekToFirst();
+        //TODO
+        //dbIterator.seekToFirst();
         first = false;
       }
 

@@ -2,9 +2,9 @@ package org.gsc.api;
 
 import com.google.protobuf.ByteString;
 import java.util.List;
-import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.exception.BadItemException;
+import org.gsc.api.GrpcAPI.TransactionList;
+import org.gsc.common.exception.NonUniqueObjectException;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.db.Manager;
 import org.gsc.db.api.StoreAPI;
@@ -32,21 +32,22 @@ public class WalletSolidity {
     return null;
   }
 
-  public TransactionInfo getTransactionInfoById(ByteString id) {
-    if (Objects.isNull(id)) {
-      return null;
-    }
-    TransactionInfoWrapper transactionInfoWrapper = null;
-    try {
-      transactionInfoWrapper = dbManager.getTransactionHistoryStore()
-          .get(id.toByteArray());
-    } catch (BadItemException e) {
-    }
-    if (transactionInfoWrapper != null) {
-      return transactionInfoWrapper.getInstance();
-    }
-    return null;
-  }
+  //TODO getTXInfoById
+//  public TransactionInfo getTransactionInfoById(ByteString id) {
+//    if (Objects.isNull(id)) {
+//      return null;
+//    }
+//    TransactionInfoWrapper transactionInfoWrapper = null;
+//    try {
+//      transactionInfoWrapper = dbManager.getTransactionHistoryStore()
+//          .get(id.toByteArray());
+//    } catch (BadItemException e) {
+//    }
+//    if (transactionInfoWrapper != null) {
+//      return transactionInfoWrapper.getInstance();
+//    }
+//    return null;
+//  }
 
   public TransactionList getTransactionsFromThis(ByteString thisAddress, long offset, long limit) {
     List<Transaction> transactionsFromThis = storeAPI
