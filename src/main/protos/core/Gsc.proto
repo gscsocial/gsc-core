@@ -175,6 +175,19 @@ message Vote {
   int64 vote_count = 2;
 }
 
+message Media {
+    bytes id = 1;
+    int32  weight = 2;
+    bytes desc = 3;
+    int32 status = 8;
+}
+
+message VoteFac {
+    int32 score = 1;
+    int32 social_score = 2;
+}
+
+
 // Account
 message Account {
   // frozen balance
@@ -227,4 +240,8 @@ message Account {
   int64 interPersonalFactor = 25;
   int64 lastLoginTime = 26;
   int64 authorityLevel = 27;
+  ////
+  map<string, int64> tokens = 28;
+  repeated Media  connected = 29;
+  VoteFac fac = 30;
 }
