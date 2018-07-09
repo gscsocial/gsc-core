@@ -78,6 +78,8 @@ message Producer {
   int64 withdrawTime = 13;
   int64 freezeCount = 14;
   int64 resourceCount = 15;
+  ////
+  VoteFac account_fac = 16;
 }
 
 // GlobalProperties
