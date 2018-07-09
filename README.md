@@ -23,7 +23,7 @@ GSC (Global Social Chain) is the world's first new generation of social networki
 
 * Build in [IntelliJ IDEA](https://www.jetbrains.com/idea/) (community version is enough):
 
-  1. Start IntelliJ. Select `File` -> `Open`, then locate to the gsc-core folder which you have git cloned to your local drive. Then click `Open` button on the right bottom.
+  1. Start IntelliJ. Select `File` -> `Open`, then locate to the gsc-core folder which you have git cloned to your local drive. Then click `Open` button on the right bottom.Branch of master is recommended.
   2. Check on `Use auto-import` on the `Import Project from Gradle` dialog. Select JDK 1.8 in the `Gradle JVM` option. Then click `OK`.
   3. IntelliJ will open the project and start gradle syncing, which will take several minutes, depending on your network connection and your IntelliJ configuration
   4. After the syncing finished, select `Gradle` -> `Tasks` -> `build`, and then double click `build` option.
