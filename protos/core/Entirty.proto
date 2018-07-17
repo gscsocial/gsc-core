@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+
+package protocol;
+
+option java_package = "org.gsc.entirty"; //Specify the name of the package that generated the Java file
+
+// Account
+message Account {
+  bytes account_name = 1; // account name
+  // create address
+  bytes address = 3; // like e83fe0c9cd6637158130fae10a4aa1391a70c7f2a0c78d47538aa95dd8af218b
+  int64 balance = 4;
+  map<string, int64> tokens = 6;
+  repeated Authrity auths = 8;
+}
+
+
+message AccountId {
+  bytes name = 1;
+  bytes address = 2;
+}
+
+message Authrity {
+  AccountId account = 1;
+  bytes permission_name = 2;
+
+}
+
+
+enum ActionType {
+      AccountCreateAction = 0;
+}
+  message Action {
+    Type type = 1;
+    google.protobuf.Any parameter = 2;
+    bytes provider = 3;
+    bytes ContractName = 4;
+  }
+message Transaction {
+   message raw {
+      TransactionType type = 1;
+      bytes ref_block_bytes = 2;
+      bytes ref_block_hash = 4;
+      int64 expiration = 8;
+      bytes data = 10;
+      repeated Contract contract = 11;
+      int64 timestamp = 14;
+    }
+    raw raw_data = 1;
+    repeated bytes signature = 2;
+  }
+message BlockHeader {
+  message raw {
+    int64 timestamp = 1;
+    bytes txTrieRoot = 2;
+    bytes parentHash = 3;
+    int64 number = 7;
+    int64 witness_id = 8;
+    bytes witness_address = 9;
+  }
+  raw raw_data = 1;
+  bytes witness_signature = 2;
+}
+
+message Block {
+  repeated Transaction transactions = 1;
+  BlockHeader block_header = 2;
+}
+

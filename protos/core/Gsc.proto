@@ -1,0 +1,249 @@
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "core/Discover.proto";
+
+package protocol;
+
+
+option java_package = "org.gsc.protos"; //Specify the name of the package that generated the Java file
+option java_outer_classname = "Protocol"; //Specify the class name of the generated Java file
+
+message BlockHeader {
+  message raw {
+    int64 timestamp = 1;
+    bytes txTrieRoot = 2;
+    bytes parentHash = 3;
+    int64 number = 7;
+    int64 producer_id = 8;
+    bytes producer_address = 9;
+  }
+  raw raw_data = 1;
+  bytes witness_signature = 2;
+}
+
+enum AccountType {
+  Normal = 0;
+  AssetIssue = 1;
+  Contract = 2;
+}
+
+// block
+message Block {
+  repeated Transaction transactions = 1;
+  BlockHeader block_header = 2;
+}
+
+message BlockId {
+  bytes hash = 1;
+  int64 number = 2;
+}
+
+message ChainInventory {
+  repeated BlockId ids = 1;
+  int64 remain_num = 2;
+}
+
+// Inventory
+message BlockInventory {
+  repeated BlockId ids = 1;
+}
+
+// inv
+message Inventory {
+  enum InventoryType {
+    TRX = 0;
+    BLOCK = 1;
+  }
+  InventoryType type = 1;
+  repeated bytes ids = 2;
+}
+
+
+// Producer
+message Producer {
+  bytes address = 1;
+  int64 voteCount = 2;
+  bytes pubKey = 3;
+  string url = 4;
+  int64 totalProduced = 5;
+  int64 totalMissed = 6;
+  int64 latestBlockNum = 7;
+  int64 latestSlotNum = 8;
+  bool isJobs = 9;
+  ////
+  int64 connSize = 10;
+  int64 fanCount = 11;
+  int64 industry = 12;
+  int64 withdrawTime = 13;
+  int64 freezeCount = 14;
+  int64 resourceCount = 15;
+  ////
+  VoteFac account_fac = 16;
+}
+
+// GlobalProperties
+message GlobalProperties {
+  int64 last_irreversible_block_num = 1;
+}
+
+message TransactionInfo {
+ bytes id = 1;
+ int64 fee = 2;
+ int64 blockNumber = 3;
+ int64 blockTimeStamp = 4;
+}
+
+
+message TransactionSign {
+  Transaction transaction = 1;
+  bytes privateKey = 2;
+}
+
+message Transaction {
+  message Contract {
+    enum ContractType {
+      AccountCreateContract = 0;
+      TransferContract = 1;
+      TransferAssetContract = 2;
+      VoteAssetContract = 3;
+      VoteWitnessContract = 4;
+      WitnessCreateContract = 5;
+      AssetIssueContract = 6;
+      DeployContract = 7;
+      WitnessUpdateContract = 8;
+      ParticipateAssetIssueContract = 9;
+      AccountUpdateContract = 10;
+      FreezeBalanceContract = 11;
+      UnfreezeBalanceContract = 12;
+      WithdrawBalanceContract = 13;
+      UnfreezeAssetContract = 14;
+      CustomContract = 20;
+    }
+    ContractType type = 1;
+    google.protobuf.Any parameter = 2;
+    bytes provider = 3;
+    bytes ContractName = 4;
+
+  }
+
+  message authority {
+    message AccountId {
+      bytes name = 1;
+      bytes address = 2;
+    }
+    AccountId account = 1;
+    bytes permission_name = 2;
+  }
+
+  message Result {
+    enum code {
+      SUCCESS = 0;
+      FAILED = 1;
+    }
+    int64 fee = 1;
+    code ret = 2;
+  }
+
+  message raw {
+    bytes ref_block_bytes = 1;
+    int64 ref_block_num = 3;
+    bytes ref_block_hash = 4;
+    int64 expiration = 8;
+    authority auth = 9;
+    Contract contract = 11;
+    // scripts not used
+    bytes scripts = 12;
+    int64 timestamp = 14;
+  }
+
+  raw raw_data = 1;
+  bytes signature = 2;
+  Result ret = 5;
+}
+
+// Vote Change
+message Votes {
+  bytes address = 1;
+  repeated Vote old_votes = 2;
+  repeated Vote new_votes = 3;
+}
+
+// vote message
+message Vote {
+  // the super rep address
+  bytes vote_address = 1;
+  // the vote num to this super rep.
+  int64 vote_count = 2;
+}
+
+message Media {
+    bytes id = 1;
+    int32  weight = 2;
+    bytes desc = 3;
+    int32 status = 8;
+}
+
+message VoteFac {
+    int32 score = 1;
+    int32 social_score = 2;
+}
+
+
+// Account
+message Account {
+  // frozen balance
+  message Frozen {
+    // the frozen trx balance
+    int64 frozen_balance = 1;
+    // the expire time
+    int64 expire_time = 2;
+  }
+
+  bytes account_name = 1;
+  AccountType type = 2;
+  // the create address
+  bytes address = 3;
+  // the trx balance
+  int64 balance = 4;
+  // the votes
+  repeated Vote votes = 5;
+  // the other asset owned by this account
+  map<string, int64> asset = 6;
+  // latest asset operation time
+  // the frozen balance
+  repeated Frozen frozen = 7;
+  // bandwidth, get from frozen
+  int64 net_usage = 8;
+  // this account create time
+  int64 create_time = 9;
+  // this last operation time, including transfer, voting and so on. //FIXME fix grammar
+  int64 latest_opration_time = 10;
+  // witness block producing allowance
+  int64 allowance = 11;
+  // last withdraw time
+  int64 latest_withdraw_time = 12;
+  // not used so far
+  bytes code = 13;
+  bool is_witness = 14;
+  bool is_committee = 15;
+  // frozen asset(for asset issuer)
+  repeated Frozen frozen_supply = 16;
+  // asset_issued_name
+  bytes asset_issued_name = 17;
+  map<string, int64> latest_asset_operation_time = 18;
+  int64 free_net_usage = 19;
+  map<string, int64> free_asset_net_usage = 20;
+  int64 latest_consume_time = 21;
+  int64 latest_consume_free_time = 22;
+  ////
+  int64 socialFactor = 23;
+  int64 fansCount = 24;
+  int64 interPersonalFactor = 25;
+  int64 lastLoginTime = 26;
+  int64 authorityLevel = 27;
+  ////
+  map<string, int64> tokens = 28;
+  repeated Media  connected = 29;
+  VoteFac fac = 30;
+}
