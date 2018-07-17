@@ -1,10 +1,7 @@
 package org.gsc.db;
 
-import static org.gsc.config.Parameter.ChainConstant.MAXIMUM_TIME_UNTIL_EXPIRATION;
-import static org.gsc.config.Parameter.ChainConstant.MAX_TRANSACTION_PENDING;
-import static org.gsc.config.Parameter.ChainConstant.SOLIDIFIED_THRESHOLD;
-import static org.gsc.config.Parameter.ChainConstant.TRANSACTION_MAX_BYTE_SIZE;
-import static org.gsc.config.Parameter.ChainConstant.WITNESS_PAY_PER_BLOCK;
+import static org.gsc.protos.Protocol.Transaction.Contract.ContractType.TransferAssetContract;
+import static org.gsc.protos.Protocol.Transaction.Contract.ContractType.TransferContract;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -16,6 +13,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
@@ -26,215 +24,306 @@ import java.util.stream.Collectors;
 import javafx.util.Pair;
 import javax.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.gsc.common.exception.AccountResourceInsufficientException;
-import org.gsc.common.exception.BadItemException;
-import org.gsc.common.exception.BadNumberBlockException;
-import org.gsc.common.exception.BalanceInsufficientException;
-import org.gsc.common.exception.ContractExeException;
-import org.gsc.common.exception.ContractValidateException;
-import org.gsc.common.exception.DupTransactionException;
-import org.gsc.common.exception.ItemNotFoundException;
-import org.gsc.common.exception.RevokingStoreIllegalStateException;
-import org.gsc.common.exception.TaposException;
-import org.gsc.common.exception.TooBigTransactionException;
-import org.gsc.common.exception.TransactionExpirationException;
-import org.gsc.common.exception.UnLinkedBlockException;
-import org.gsc.common.exception.ValidateScheduleException;
-import org.gsc.common.exception.ValidateSignatureException;
+import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.DialogOptional;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.StringUtil;
-import org.gsc.config.Args;
-import org.gsc.config.Parameter.ChainConstant;
-import org.gsc.config.args.GenesisBlock;
-import org.gsc.consensus.ProducerController;
-import org.gsc.core.chain.BlockId;
-import org.gsc.core.chain.Genesis;
-import org.gsc.core.chain.TransactionResultWrapper;
+import org.gsc.common.utils.Time;
+import org.gsc.core.Constant;
+import org.gsc.core.operator.Operator;
 import org.gsc.core.operator.Operator;
 import org.gsc.core.operator.OperatorFactory;
-import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.core.wrapper.BlockWrapper;
-import org.gsc.core.wrapper.BytesWrapper;
-import org.gsc.core.wrapper.ProducerWrapper;
-import org.gsc.core.wrapper.TransactionWrapper;
-import org.gsc.db.AbstractUndoStore.Dialog;
-import org.gsc.protos.Protocol.AccountType;
+import org.gsc.core.wrapper.AccountCapsule;
+import org.gsc.core.wrapper.BlockCapsule;
+import org.gsc.core.wrapper.BlockCapsule.BlockId;
+import org.gsc.core.wrapper.BytesCapsule;
+import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.core.wrapper.TransactionInfoCapsule;
+import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.core.wrapper.utils.BlockUtil;
+import org.gsc.config.Parameter.ChainConstant;
+import org.gsc.config.Parameter.NodeConstant;
+import org.gsc.config.args.Args;
+import org.gsc.config.args.GenesisBlock;
+import org.gsc.core.exception.AccountResourceInsufficientException;
+import org.gsc.core.exception.BadBlockException;
+import org.gsc.core.exception.BadItemException;
+import org.gsc.core.exception.BadNumberBlockException;
+import org.gsc.core.exception.BalanceInsufficientException;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractSizeNotEqualToOneException;
+import org.gsc.core.exception.ContractValidateException;
+import org.gsc.core.exception.DupTransactionException;
+import org.gsc.core.exception.HeaderNotFound;
+import org.gsc.core.exception.HighFreqException;
+import org.gsc.core.exception.ItemNotFoundException;
+import org.gsc.core.exception.NonCommonBlockException;
+import org.gsc.core.exception.TaposException;
+import org.gsc.core.exception.TooBigTransactionException;
+import org.gsc.core.exception.TransactionExpirationException;
+import org.gsc.core.exception.UnLinkedBlockException;
+import org.gsc.core.exception.ValidateScheduleException;
+import org.gsc.core.exception.ValidateSignatureException;
+import org.gsc.core.witness.WitnessController;
 import org.joda.time.DateTime;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.gsc.db.AbstractRevokingStore.Dialog;
+import org.gsc.protos.Protocol.AccountType;
+import org.gsc.protos.Protocol.Transaction;
 
-@Getter
 @Slf4j
 @Component
 public class Manager {
 
+  // db store
   @Autowired
   private AccountStore accountStore;
-
   @Autowired
   private TransactionStore transactionStore;
-
   @Autowired
   private BlockStore blockStore;
-
   @Autowired
-  private ProducerStore prodStore;
-
+  private UtxoStore utxoStore;
+  @Autowired
+  private WitnessStore witnessStore;
   @Autowired
   private AssetIssueStore assetIssueStore;
-
   @Autowired
-  private GlobalPropertiesStore globalPropertiesStore;
-
+  private DynamicPropertiesStore dynamicPropertiesStore;
   @Autowired
   private BlockIndexStore blockIndexStore;
-//  @Autowired
-//  private AccountIndexStore accountIndexStore;
   @Autowired
-  private ProducerScheduleStore prodScheduleStore;
-
+  private AccountIndexStore accountIndexStore;
   @Autowired
-  private TaposBlockStore taposStore;
-
+  private WitnessScheduleStore witnessScheduleStore;
+  @Autowired
+  private RecentBlockStore recentBlockStore;
   @Autowired
   private VotesStore votesStore;
-//
+  @Autowired
+  private TransactionHistoryStore transactionHistoryStore;
+
+
+  // for network
   @Autowired
   private PeersStore peersStore;
 
+
   @Autowired
-  private ForkDatabase forkDB;
+  private KhaosDatabase khaosDb;
+
+
+  private BlockCapsule genesisBlock;
+  private RevokingDatabase revokingStore;
 
   @Getter
-  private BlockWrapper genesisBlock;
-
-  private UndoStore undoStore = UndoStore.getInstance();
-
   private DialogOptional dialog = DialogOptional.instance();
 
-  private ProducerController prodController;
+  @Getter
+  @Setter
+  private boolean isSyncMode;
 
-  @Autowired
-  private  Args config;
+  @Getter
+  @Setter
+  private String netType;
+
+  @Getter
+  @Setter
+  private WitnessController witnessController;
+
+  private ExecutorService validateSignService;
 
   @Getter
   private Cache<Sha256Hash, Boolean> transactionIdCache = CacheBuilder
       .newBuilder().maximumSize(100_000).recordStats().build();
 
-  // transactions cache
-  private List<TransactionWrapper> pendingTransactions;
-
-  private ExecutorService validateSignService;
-
-  // transactions popped
-  @Getter
-  private List<TransactionWrapper> popedTransactions =
-      Collections.synchronizedList(Lists.newArrayList());
-
-  /**
-   * judge balance.
-   */
-  public void adjustBalance(byte[] accountAddress, long amount)
-      throws BalanceInsufficientException {
-    AccountWrapper account = getAccountStore().get(accountAddress);
-    long balance = account.getBalance();
-    if (amount == 0) {
-      return;
-    }
-
-    if (amount < 0 && balance < -amount) {
-      throw new BalanceInsufficientException(accountAddress + " Insufficient");
-    }
-    account.setBalance(Math.addExact(balance, amount));
-    this.getAccountStore().put(account.getAddress().toByteArray(), account);
+  public WitnessStore getWitnessStore() {
+    return this.witnessStore;
   }
 
-  public long getHeadBlockTimeStamp() {
-    return 0L;
-    //TODO
-    //return getDynamicPropertiesStore().getLatestBlockHeaderTimestamp();
+  private void setWitnessStore(final WitnessStore witnessStore) {
+    this.witnessStore = witnessStore;
+  }
+
+  public DynamicPropertiesStore getDynamicPropertiesStore() {
+    return this.dynamicPropertiesStore;
+  }
+
+  public void setDynamicPropertiesStore(final DynamicPropertiesStore dynamicPropertiesStore) {
+    this.dynamicPropertiesStore = dynamicPropertiesStore;
+  }
+
+  public WitnessScheduleStore getWitnessScheduleStore() {
+    return this.witnessScheduleStore;
+  }
+
+  public void setWitnessScheduleStore(final WitnessScheduleStore witnessScheduleStore) {
+    this.witnessScheduleStore = witnessScheduleStore;
+  }
+
+  public VotesStore getVotesStore() {
+    return this.votesStore;
+  }
+
+  public List<TransactionCapsule> getPendingTransactions() {
+    return this.pendingTransactions;
+  }
+
+  public List<TransactionCapsule> getPoppedTransactions() {
+    return this.popedTransactions;
+  }
+
+  // transactions cache
+  private List<TransactionCapsule> pendingTransactions;
+
+  // transactions popped
+  private List<TransactionCapsule> popedTransactions =
+      Collections.synchronizedList(Lists.newArrayList());
+
+  // for test only
+  public List<ByteString> getWitnesses() {
+    return witnessController.getActiveWitnesses();
+  }
+
+  // for test only
+  public void addWitness(final ByteString address) {
+    List<ByteString> witnessAddresses = witnessController.getActiveWitnesses();
+    witnessAddresses.add(address);
+    witnessController.setActiveWitnesses(witnessAddresses);
+  }
+
+  public BlockCapsule getHead() throws HeaderNotFound {
+    List<BlockCapsule> blocks = getBlockStore().getBlockByLatestNum(1);
+    if (CollectionUtils.isNotEmpty(blocks)) {
+      return blocks.get(0);
+    } else {
+      logger.info("Header block Not Found");
+      throw new HeaderNotFound("Header block Not Found");
+    }
   }
 
   public BlockId getHeadBlockId() {
-    return globalPropertiesStore.getLatestBlockHeaderId();
+    return new BlockId(
+        getDynamicPropertiesStore().getLatestBlockHeaderHash(),
+        getDynamicPropertiesStore().getLatestBlockHeaderNumber());
   }
 
-  public boolean lastHeadBlockIsMaintenance() {
-    return getGlobalPropertiesStore().getStateFlag() == 1;
+  public long getHeadBlockNum() {
+    return getDynamicPropertiesStore().getLatestBlockHeaderNumber();
+  }
+
+  public long getHeadBlockTimeStamp() {
+    return getDynamicPropertiesStore().getLatestBlockHeaderTimestamp();
+  }
+
+//  public PeersStore getPeersStore() {
+//    return peersStore;
+//  }
+//
+//  public void setPeersStore(PeersStore peersStore) {
+//    this.peersStore = peersStore;
+//  }
+//
+//  public Node getHomeNode() {
+//    final Args args = Args.getInstance();
+//    Set<Node> nodes = this.peersStore.get("home".getBytes());
+//    if (nodes.size() > 0) {
+//      return nodes.stream().findFirst().get();
+//    } else {
+//      Node node =
+//          new Node(new ECKey().getNodeId(), args.getNodeExternalIp(), args.getNodeListenPort());
+//      nodes.add(node);
+//      this.peersStore.put("home".getBytes(), nodes);
+//      return node;
+//    }
+//  }
+
+  public void clearAndWriteNeighbours(Set<Node> nodes) {
+    this.peersStore.put("neighbours".getBytes(), nodes);
+  }
+
+  public Set<Node> readNeighbours() {
+    return this.peersStore.get("neighbours".getBytes());
   }
 
   @PostConstruct
   public void init() {
-    undoStore.disable();
-    prodController = ProducerController.createInstance(this);
+    revokingStore = RevokingStore.getInstance();
+    revokingStore.disable();
+    this.setWitnessController(WitnessController.createInstance(this));
     this.pendingTransactions = Collections.synchronizedList(Lists.newArrayList());
     this.initGenesis();
     try {
-      this.forkDB.start(getBlockById(globalPropertiesStore.getLatestBlockHeaderHash()));
+      this.khaosDb.start(getBlockById(getDynamicPropertiesStore().getLatestBlockHeaderHash()));
     } catch (ItemNotFoundException e) {
       logger.error(
           "Can not find Dynamic highest block from DB! \nnumber={} \nhash={}",
-          globalPropertiesStore.getLatestBlockHeaderNumber(),
-          globalPropertiesStore.getLatestBlockHeaderHash());
+          getDynamicPropertiesStore().getLatestBlockHeaderNumber(),
+          getDynamicPropertiesStore().getLatestBlockHeaderHash());
       logger.error(
           "Please delete database directory({}) and restart",
-          config.getOutputDirectory());
+          Args.getInstance().getOutputDirectory());
       System.exit(1);
     } catch (BadItemException e) {
       e.printStackTrace();
       logger.error("DB data broken!");
       logger.error(
           "Please delete database directory({}) and restart",
-          config.getOutputDirectory());
+          Args.getInstance().getOutputDirectory());
       System.exit(1);
     }
-    undoStore.enable();
+    revokingStore.enable();
 
-    if (config.getValidateSignThreadNum() == 0) {
-      validateSignService = Executors
-          .newFixedThreadPool(1);
-    } else {
-      validateSignService = Executors
-          .newFixedThreadPool(config.getValidateSignThreadNum());
-    }
+    validateSignService = Executors
+        .newFixedThreadPool(Args.getInstance().getValidateSignThreadNum());
+  }
+
+  public BlockId getGenesisBlockId() {
+    return this.genesisBlock.getBlockId();
+  }
+
+  public BlockCapsule getGenesisBlock() {
+    return genesisBlock;
   }
 
   /**
    * init genesis block.
    */
   public void initGenesis() {
-    this.genesisBlock = Genesis.newGenesisBlock();
+    this.genesisBlock = BlockUtil.newGenesisBlockCapsule();
     if (this.containBlock(this.genesisBlock.getBlockId())) {
-      config.setChainId(this.genesisBlock.getBlockId().toString());
+      Args.getInstance().setChainId(this.genesisBlock.getBlockId().toString());
     } else {
       if (this.hasBlocks()) {
         logger.error(
             "genesis block modify, please delete database directory({}) and restart",
-            config.getOutputDirectory());
+            Args.getInstance().getOutputDirectory());
         System.exit(1);
       } else {
         logger.info("create genesis block");
-        config.setChainId(this.genesisBlock.getBlockId().toString());
+        Args.getInstance().setChainId(this.genesisBlock.getBlockId().toString());
         // this.pushBlock(this.genesisBlock);
         blockStore.put(this.genesisBlock.getBlockId().getBytes(), this.genesisBlock);
         this.blockIndexStore.put(this.genesisBlock.getBlockId());
 
         logger.info("save block: " + this.genesisBlock);
         // init DynamicPropertiesStore
-        globalPropertiesStore.saveLatestBlockHeaderNumber(0);
-        globalPropertiesStore.saveLatestBlockHeaderHash(
+        this.dynamicPropertiesStore.saveLatestBlockHeaderNumber(0);
+        this.dynamicPropertiesStore.saveLatestBlockHeaderHash(
             this.genesisBlock.getBlockId().getByteString());
-        globalPropertiesStore.saveLatestBlockHeaderTimestamp(
+        this.dynamicPropertiesStore.saveLatestBlockHeaderTimestamp(
             this.genesisBlock.getTimeStamp());
         this.initAccount();
         this.initWitness();
-        this.prodController.initProds();
-        forkDB.start(genesisBlock);
+        this.witnessController.initWits();
+        this.khaosDb.start(genesisBlock);
         this.updateRecentBlock(genesisBlock);
       }
     }
@@ -251,18 +340,20 @@ public class Manager {
         .forEach(
             account -> {
               account.setAccountType("Normal"); // to be set in conf
-              final AccountWrapper accountWrapper =
-                  new AccountWrapper(
+              final AccountCapsule accountCapsule =
+                  new AccountCapsule(
                       account.getAccountName(),
                       ByteString.copyFrom(account.getAddress()),
                       account.getAccountType(),
                       account.getBalance());
-              this.accountStore.put(account.getAddress(), accountWrapper);
-              //TODO
-              //this.accountIndexStore.put(accountWrapper);
+              this.accountStore.put(account.getAddress(), accountCapsule);
+              this.accountIndexStore.put(accountCapsule);
             });
   }
 
+  /**
+   * save witnesses into database.
+   */
   private void initWitness() {
     final Args args = Args.getInstance();
     final GenesisBlock genesisBlockArg = args.getGenesisBlock();
@@ -273,45 +364,76 @@ public class Manager {
               byte[] keyAddress = key.getAddress();
               ByteString address = ByteString.copyFrom(keyAddress);
 
-              final AccountWrapper accountWrapper;
+              final AccountCapsule accountCapsule;
               if (!this.accountStore.has(keyAddress)) {
-                accountWrapper = new AccountWrapper(ByteString.EMPTY,
+                accountCapsule = new AccountCapsule(ByteString.EMPTY,
                     address, AccountType.AssetIssue, 0L);
               } else {
-                accountWrapper = this.accountStore.get(keyAddress);
+                accountCapsule = this.accountStore.get(keyAddress);
               }
-              accountWrapper.setIsWitness(true);
-              this.accountStore.put(keyAddress, accountWrapper);
+              accountCapsule.setIsWitness(true);
+              this.accountStore.put(keyAddress, accountCapsule);
 
-              final ProducerWrapper witnessWrapper =
-                  new ProducerWrapper(address, key.getVoteCount(), key.getUrl());
-              witnessWrapper.setIsJobs(true);
-              this.prodStore.put(keyAddress, witnessWrapper);
+              final WitnessCapsule witnessCapsule =
+                  new WitnessCapsule(address, key.getVoteCount(), key.getUrl());
+              witnessCapsule.setIsJobs(true);
+              this.witnessStore.put(keyAddress, witnessCapsule);
             });
   }
 
+  public AccountStore getAccountStore() {
+    return this.accountStore;
+  }
+
+  public void adjustBalance(byte[] accountAddress, long amount)
+      throws BalanceInsufficientException {
+    AccountCapsule account = getAccountStore().get(accountAddress);
+    adjustBalance(account, amount);
+  }
+
+  /**
+   * judge balance.
+   */
+  public void adjustBalance(AccountCapsule account, long amount)
+      throws BalanceInsufficientException {
+
+    long balance = account.getBalance();
+    if (amount == 0) {
+      return;
+    }
+
+    if (amount < 0 && balance < -amount) {
+      throw new BalanceInsufficientException(
+          StringUtil.createReadableString(account.createDbKey()) + " insufficient balance");
+    }
+    account.setBalance(Math.addExact(balance, amount));
+    this.getAccountStore().put(account.getAddress().toByteArray(), account);
+  }
+
+
   public void adjustAllowance(byte[] accountAddress, long amount)
       throws BalanceInsufficientException {
-    AccountWrapper account = getAccountStore().get(accountAddress);
+    AccountCapsule account = getAccountStore().get(accountAddress);
     long allowance = account.getAllowance();
     if (amount == 0) {
       return;
     }
 
     if (amount < 0 && allowance < -amount) {
-      throw new BalanceInsufficientException(accountAddress + " Insufficient");
+      throw new BalanceInsufficientException(
+          StringUtil.createReadableString(accountAddress) + " insufficient balance");
     }
     account.setAllowance(allowance + amount);
     this.getAccountStore().put(account.createDbKey(), account);
   }
 
-  void validateTapos(TransactionWrapper transactionWrapper) throws TaposException {
-    byte[] refBlockHash = transactionWrapper.getInstance()
+  void validateTapos(TransactionCapsule transactionCapsule) throws TaposException {
+    byte[] refBlockHash = transactionCapsule.getInstance()
         .getRawData().getRefBlockHash().toByteArray();
-    byte[] refBlockNumBytes = transactionWrapper.getInstance()
+    byte[] refBlockNumBytes = transactionCapsule.getInstance()
         .getRawData().getRefBlockBytes().toByteArray();
     try {
-      byte[] blockHash = this.taposStore.get(refBlockNumBytes).getData();
+      byte[] blockHash = this.recentBlockStore.get(refBlockNumBytes).getData();
       if (Arrays.equals(blockHash, refBlockHash)) {
         return;
       } else {
@@ -319,8 +441,7 @@ public class Manager {
             "Tapos failed, different block hash, %s, %s , recent block %s, solid block %s head block %s",
             ByteArray.toLong(refBlockNumBytes), Hex.toHexString(refBlockHash),
             Hex.toHexString(blockHash),
-            getSolidBlockId(),
-            globalPropertiesStore.getLatestBlockHeaderHash());
+            getSolidBlockId().getString(), getHeadBlockId().getString()).toString();
         logger.info(str);
         throw new TaposException(str);
 
@@ -329,62 +450,47 @@ public class Manager {
       String str = String.
           format("Tapos failed, block not found, ref block %s, %s , solid block %s head block %s",
               ByteArray.toLong(refBlockNumBytes), Hex.toHexString(refBlockHash),
-              getSolidBlockId(),
-              globalPropertiesStore.getLatestBlockHeaderHash()).toString();
+              getSolidBlockId().getString(), getHeadBlockId().getString()).toString();
       logger.info(str);
       throw new TaposException(str);
     }
   }
 
-  public BlockId getSolidBlockId() {
-    try {
-      long num = globalPropertiesStore.getLatestSolidifiedBlockNum();
-      return getBlockIdByNum(num);
-    } catch (Exception e) {
-      return getGenesisBlockId();
-    }
-  }
-
-  public BlockId getGenesisBlockId() {
-    return this.genesisBlock.getBlockId();
-  }
-
-
-  void validateCommon(TransactionWrapper transactionWrapper)
+  void validateCommon(TransactionCapsule transactionCapsule)
       throws TransactionExpirationException, TooBigTransactionException {
-    if (transactionWrapper.getData().length > TRANSACTION_MAX_BYTE_SIZE) {
+    if (transactionCapsule.getData().length > Constant.TRANSACTION_MAX_BYTE_SIZE) {
       throw new TooBigTransactionException(
-          "too big transaction, the size is " + transactionWrapper.getData().length + " bytes");
+          "too big transaction, the size is " + transactionCapsule.getData().length + " bytes");
     }
-    long transactionExpiration = transactionWrapper.getExpiration();
+    long transactionExpiration = transactionCapsule.getExpiration();
     long headBlockTime = getHeadBlockTimeStamp();
     if (transactionExpiration <= headBlockTime ||
-        transactionExpiration > headBlockTime + MAXIMUM_TIME_UNTIL_EXPIRATION) {
+        transactionExpiration > headBlockTime + Constant.MAXIMUM_TIME_UNTIL_EXPIRATION) {
       throw new TransactionExpirationException(
           "transaction expiration, transaction expiration time is " + transactionExpiration
               + ", but headBlockTime is " + headBlockTime);
     }
   }
 
-  void validateDup(TransactionWrapper transactionWrapper) throws DupTransactionException {
+  void validateDup(TransactionCapsule transactionCapsule) throws DupTransactionException {
     try {
-      if (getTransactionStore().get(transactionWrapper.getTransactionId().getBytes()) != null) {
-        logger.debug(ByteArray.toHexString(transactionWrapper.getTransactionId().getBytes()));
+      if (getTransactionStore().get(transactionCapsule.getTransactionId().getBytes()) != null) {
+        logger.debug(ByteArray.toHexString(transactionCapsule.getTransactionId().getBytes()));
         throw new DupTransactionException("dup trans");
       }
     } catch (BadItemException e) {
-      logger.debug(ByteArray.toHexString(transactionWrapper.getTransactionId().getBytes()));
+      logger.debug(ByteArray.toHexString(transactionCapsule.getTransactionId().getBytes()));
       throw new DupTransactionException("dup trans");
     }
   }
+
   /**
    * push transaction into db.
    */
-  public boolean pushTransactions(final TransactionWrapper trx)
+  public boolean pushTransactions(final TransactionCapsule trx)
       throws ValidateSignatureException, ContractValidateException, ContractExeException,
       AccountResourceInsufficientException, DupTransactionException, TaposException,
       TooBigTransactionException, TransactionExpirationException {
-    logger.info("push transaction");
 
     if (!trx.validateSignature()) {
       throw new ValidateSignatureException("trans sig validate failed");
@@ -393,172 +499,261 @@ public class Manager {
     //validateFreq(trx);
     synchronized (this) {
       if (!dialog.valid()) {
-        dialog.setValue(undoStore.buildDialog());
+        dialog.setValue(revokingStore.buildDialog());
       }
 
-      try (Dialog tmpDialog = undoStore.buildDialog()) {
+      try (RevokingStore.Dialog tmpDialog = revokingStore.buildDialog()) {
         processTransaction(trx);
         pendingTransactions.add(trx);
         tmpDialog.merge();
-      } catch (RevokingStoreIllegalStateException e) {
-        logger.debug(e.getMessage(), e);
       }
     }
     return true;
   }
 
 
-  public void consumeBandwidth(TransactionWrapper trx)
+  public void consumeBandwidth(TransactionCapsule trx, TransactionResultCapsule ret)
       throws ContractValidateException, AccountResourceInsufficientException {
-    //TODO
-//    BandwidthProcessor processor = new BandwidthProcessor(this);
-//    processor.consumeBandwidth(trx);
+    BandwidthProcessor processor = new BandwidthProcessor(this);
+    processor.consumeBandwidth(trx, ret);
   }
+
+  @Deprecated
+  private void validateFreq(TransactionCapsule trx) throws HighFreqException {
+    List<org.gsc.protos.Protocol.Transaction.Contract> contracts =
+        trx.getInstance().getRawData().getContractList();
+    for (Transaction.Contract contract : contracts) {
+      if (contract.getType() == TransferContract || contract.getType() == TransferAssetContract) {
+        byte[] address = TransactionCapsule.getOwner(contract);
+        AccountCapsule accountCapsule = this.getAccountStore().get(address);
+        if (accountCapsule == null) {
+          throw new HighFreqException("account not exists");
+        }
+        long balance = accountCapsule.getBalance();
+        long latestOperationTime = accountCapsule.getLatestOperationTime();
+        if (latestOperationTime != 0) {
+          doValidateFreq(balance, 0, latestOperationTime);
+        }
+        accountCapsule.setLatestOperationTime(Time.getCurrentMillis());
+        this.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+      }
+    }
+  }
+
+  @Deprecated
+  private void doValidateFreq(long balance, int transNumber, long latestOperationTime)
+      throws HighFreqException {
+    long now = Time.getCurrentMillis();
+    // todo: avoid ddos, design more smoothly formula later.
+    if (balance < 1000000 * 1000) {
+      if (now - latestOperationTime < 5 * 60 * 1000) {
+        throw new HighFreqException("try later");
+      }
+    }
+  }
+
   /**
    * when switch fork need erase blocks on fork branch.
    */
-  public void eraseBlock() throws BadItemException, ItemNotFoundException {
+  public void eraseBlock() {
     dialog.reset();
-    BlockWrapper oldHeadBlock =
-        getBlockStore().get(globalPropertiesStore.getLatestBlockHeaderHash().getBytes());
     try {
-      undoStore.pop();
-    } catch (RevokingStoreIllegalStateException e) {
-      logger.info(e.getMessage(), e);
+      BlockCapsule oldHeadBlock = getBlockById(getDynamicPropertiesStore().getLatestBlockHeaderHash());
+      logger.info("begin to erase block:" + oldHeadBlock);
+      khaosDb.pop();
+      revokingStore.pop();
+      logger.info("end to erase block:" + oldHeadBlock);
+      popedTransactions.addAll(oldHeadBlock.getTransactions());
+    } catch (ItemNotFoundException | BadItemException e) {
+      logger.warn(e.getMessage(), e);
     }
-    logger.info("erase block:" + oldHeadBlock);
-    forkDB.pop();
-    popedTransactions.addAll(oldHeadBlock.getTransactions());
   }
 
-  private void applyBlock(BlockWrapper block) throws ContractValidateException,
+  private void applyBlock(BlockCapsule block) throws ContractValidateException,
       ContractExeException, ValidateSignatureException, AccountResourceInsufficientException,
       TransactionExpirationException, TooBigTransactionException, DupTransactionException,
       TaposException, ValidateScheduleException {
-    //TODO
-//    processBlock(block);
-//    this.blockStore.put(block.getBlockId().getBytes(), block);
-//    this.blockIndexStore.put(block.getBlockId());
+    processBlock(block);
+    this.blockStore.put(block.getBlockId().getBytes(), block);
+    this.blockIndexStore.put(block.getBlockId());
   }
 
-  private void switchFork(BlockWrapper newHead) {
-    Pair<LinkedList<BlockWrapper>, LinkedList<BlockWrapper>> binaryTree =
-        forkDB.getBranch(
-            newHead.getBlockId(), globalPropertiesStore.getLatestBlockHeaderHash());
+  private void switchFork(BlockCapsule newHead)
+      throws ValidateSignatureException, ContractValidateException, ContractExeException,
+      ValidateScheduleException, AccountResourceInsufficientException, TaposException,
+      TooBigTransactionException, DupTransactionException, TransactionExpirationException,
+      NonCommonBlockException {
+    Pair<LinkedList<KhaosDatabase.KhaosBlock>, LinkedList<KhaosDatabase.KhaosBlock>> binaryTree =
+        khaosDb.getBranch(
+            newHead.getBlockId(), getDynamicPropertiesStore().getLatestBlockHeaderHash());
 
     if (CollectionUtils.isNotEmpty(binaryTree.getValue())) {
-      while (!globalPropertiesStore
+      while (!getDynamicPropertiesStore()
           .getLatestBlockHeaderHash()
           .equals(binaryTree.getValue().peekLast().getParentHash())) {
-        try {
-          eraseBlock();
-        } catch (BadItemException e) {
-          logger.info(e.getMessage());
-        } catch (ItemNotFoundException e) {
-          logger.info(e.getMessage());
-        }
+        eraseBlock();
       }
     }
 
     if (CollectionUtils.isNotEmpty(binaryTree.getKey())) {
-      LinkedList<BlockWrapper> branch = binaryTree.getKey();
-      Collections.reverse(branch);
-      branch.forEach(
-          item -> {
-            // todo  process the exception carefully later
-            try (Dialog tmpDialog = undoStore.buildDialog()) {
-              applyBlock(item);
-              tmpDialog.commit();
-            } catch (AccountResourceInsufficientException e) {
-              logger.debug(e.getMessage(), e);
-            } catch (ValidateSignatureException e) {
-              logger.debug(e.getMessage(), e);
-            } catch (ContractValidateException e) {
-              logger.debug(e.getMessage(), e);
-            } catch (ContractExeException e) {
-              logger.debug(e.getMessage(), e);
-            } catch (RevokingStoreIllegalStateException e) {
-              logger.debug(e.getMessage(), e);
-            } catch (TaposException e) {
-              logger.debug(e.getMessage(), e);
-            } catch (DupTransactionException e) {
-              logger.debug(e.getMessage(), e);
-            } catch (TooBigTransactionException e) {
-              logger.debug(e.getMessage(), e);
-            } catch (TransactionExpirationException e) {
-              logger.debug(e.getMessage(), e);
-            } catch (ValidateScheduleException e) {
-              logger.debug(e.getMessage(), e);
+      List<KhaosDatabase.KhaosBlock> first = new ArrayList<>(binaryTree.getKey());
+      Collections.reverse(first);
+      for (KhaosDatabase.KhaosBlock item : first) {
+        Exception exception = null;
+        // todo  process the exception carefully later
+        try (Dialog tmpDialog = revokingStore.buildDialog()) {
+          applyBlock(item.getBlk());
+          tmpDialog.commit();
+        } catch (AccountResourceInsufficientException
+            | ValidateSignatureException
+            | ContractValidateException
+            | ContractExeException
+            | TaposException
+            | DupTransactionException
+            | TransactionExpirationException
+            | TooBigTransactionException
+            | ValidateScheduleException e) {
+          logger.warn(e.getMessage(), e);
+          exception = e;
+          throw e;
+        } finally {
+          if (exception != null) {
+            logger.warn("switch back because exception thrown while switching forks. " + exception.getMessage(),
+                exception);
+            first.forEach(khaosBlock -> khaosDb.removeBlk(khaosBlock.getBlk().getBlockId()));
+            khaosDb.setHead(binaryTree.getValue().peekFirst());
+
+            while (!getDynamicPropertiesStore()
+                .getLatestBlockHeaderHash()
+                .equals(binaryTree.getValue().peekLast().getParentHash())) {
+              eraseBlock();
             }
-          });
-      return;
+
+            List<KhaosDatabase.KhaosBlock> second = new ArrayList<>(binaryTree.getValue());
+            Collections.reverse(second);
+            for (KhaosDatabase.KhaosBlock khaosBlock : second) {
+              // todo  process the exception carefully later
+              try (Dialog tmpDialog = revokingStore.buildDialog()) {
+                applyBlock(khaosBlock.getBlk());
+                tmpDialog.commit();
+              } catch (AccountResourceInsufficientException
+                  | ValidateSignatureException
+                  | ContractValidateException
+                  | ContractExeException
+                  | TaposException
+                  | DupTransactionException
+                  | TransactionExpirationException
+                  | TooBigTransactionException
+                  | ValidateScheduleException e) {
+                logger.warn(e.getMessage(), e);
+              }
+            }
+          }
+        }
+      }
     }
   }
 
   // TODO: if error need to rollback.
 
-  private synchronized void filterPendingTrx(List<TransactionWrapper> listTrx) {
+  private synchronized void filterPendingTrx(List<TransactionCapsule> listTrx) {
   }
 
   /**
    * save a block.
    */
-  public synchronized void pushBlock(final BlockWrapper block)
+  public synchronized void pushBlock(final BlockCapsule block)
       throws ValidateSignatureException, ContractValidateException, ContractExeException,
-      UnLinkedBlockException, ValidateScheduleException, AccountResourceInsufficientException, TaposException, TooBigTransactionException, DupTransactionException, TransactionExpirationException, BadNumberBlockException {
+      UnLinkedBlockException, ValidateScheduleException, AccountResourceInsufficientException,
+      TaposException, TooBigTransactionException, DupTransactionException, TransactionExpirationException,
+      BadNumberBlockException, BadBlockException, NonCommonBlockException {
 
     try (PendingManager pm = new PendingManager(this)) {
 
       if (!block.generatedByMyself) {
         if (!block.validateSignature()) {
-          logger.info("The signature is not validated.");
-          // TODO: throw exception here.
-          return;
+          logger.warn("The signature is not validated.");
+          throw new BadBlockException("The signature is not validated");
         }
 
         if (!block.calcMerkleRoot().equals(block.getMerkleRoot())) {
-          logger.info(
-              "The merkler root doesn't match, Calc result is "
+          logger.warn(
+              "The merkle root doesn't match, Calc result is "
                   + block.calcMerkleRoot()
                   + " , the headers is "
                   + block.getMerkleRoot());
-          // TODO:throw exception here.
-          return;
+          throw new BadBlockException("The merkle hash is not validated");
         }
       }
 
-      BlockWrapper newBlock = this.forkDB.push(block);
+      BlockCapsule newBlock = this.khaosDb.push(block);
 
       // DB don't need lower block
-      if (globalPropertiesStore.getLatestBlockHeaderHash() == null) {
+      if (getDynamicPropertiesStore().getLatestBlockHeaderHash() == null) {
         if (newBlock.getNum() != 0) {
           return;
         }
       } else {
-        if (newBlock.getNum() <= globalPropertiesStore.getLatestBlockHeaderNumber()) {
+        if (newBlock.getNum() <= getDynamicPropertiesStore().getLatestBlockHeaderNumber()) {
           return;
         }
 
         // switch fork
         if (!newBlock
             .getParentHash()
-            .equals(globalPropertiesStore.getLatestBlockHeaderHash())) {
+            .equals(getDynamicPropertiesStore().getLatestBlockHeaderHash())) {
           logger.warn(
               "switch fork! new head num = {}, blockid = {}",
               newBlock.getNum(),
               newBlock.getBlockId());
 
+          logger.warn(
+              "******** before switchFork ******* push block: "
+                  + block.getShortString()
+                  + ", new block:"
+                  + newBlock.getShortString()
+                  + ", dynamic head num: "
+                  + dynamicPropertiesStore.getLatestBlockHeaderNumber()
+                  + ", dynamic head hash: "
+                  + dynamicPropertiesStore.getLatestBlockHeaderHash()
+                  + ", dynamic head timestamp: "
+                  + dynamicPropertiesStore.getLatestBlockHeaderTimestamp()
+                  + ", khaosDb head: "
+                  + khaosDb.getHead()
+                  + ", khaosDb miniStore size: "
+                  + khaosDb.getMiniStore().size()
+                  + ", khaosDb unlinkMiniStore size: "
+                  + khaosDb.getMiniUnlinkedStore().size());
+
           switchFork(newBlock);
+          logger.info("save block: " + newBlock);
+
+          logger.warn(
+              "******** after switchFork ******* push block: "
+                  + block.getShortString()
+                  + ", new block:"
+                  + newBlock.getShortString()
+                  + ", dynamic head num: "
+                  + dynamicPropertiesStore.getLatestBlockHeaderNumber()
+                  + ", dynamic head hash: "
+                  + dynamicPropertiesStore.getLatestBlockHeaderHash()
+                  + ", dynamic head timestamp: "
+                  + dynamicPropertiesStore.getLatestBlockHeaderTimestamp()
+                  + ", khaosDb head: "
+                  + khaosDb.getHead()
+                  + ", khaosDb miniStore size: "
+                  + khaosDb.getMiniStore().size()
+                  + ", khaosDb unlinkMiniStore size: "
+                  + khaosDb.getMiniUnlinkedStore().size());
+
           return;
         }
-        try (Dialog tmpDialog = undoStore.buildDialog()) {
+        try (Dialog tmpDialog = revokingStore.buildDialog()) {
           applyBlock(newBlock);
           tmpDialog.commit();
-        } catch (RevokingStoreIllegalStateException e) {
-          logger.error(e.getMessage(), e);
         } catch (Throwable throwable) {
           logger.error(throwable.getMessage(), throwable);
-          forkDB.removeBlk(block.getBlockId());
+          khaosDb.removeBlk(block.getBlockId());
           throw throwable;
         }
       }
@@ -566,66 +761,67 @@ public class Manager {
     }
   }
 
-
-  public void updateDynamicProperties(BlockWrapper block) {
+  public void updateDynamicProperties(BlockCapsule block) {
     long slot = 1;
     if (block.getNum() != 1) {
-      slot = prodController.getSlotAtTime(block.getTimeStamp());
+      slot = witnessController.getSlotAtTime(block.getTimeStamp());
     }
     for (int i = 1; i < slot; ++i) {
-      if (!prodController.getScheduledProducer(i).equals(block.getProducerAddress())) {
-        ProducerWrapper prod =
-            prodStore.get(StringUtil.createDbKey(prodController.getScheduledProducer(i)));
-        prod.setTotalMissed(prod.getTotalMissed() + 1);
-        this.prodStore.put(prod.createDbKey(), prod);
+      if (!witnessController.getScheduledWitness(i).equals(block.getWitnessAddress())) {
+        WitnessCapsule w =
+            this.witnessStore.get(StringUtil.createDbKey(witnessController.getScheduledWitness(i)));
+        w.setTotalMissed(w.getTotalMissed() + 1);
+        this.witnessStore.put(w.createDbKey(), w);
         logger.info(
-            "{} miss a block. totalMissed = {}", prod.createReadableString(), prod.getTotalMissed());
+            "{} miss a block. totalMissed = {}", w.createReadableString(), w.getTotalMissed());
       }
-      globalPropertiesStore.applyBlock(false);
+      this.dynamicPropertiesStore.applyBlock(false);
     }
-    globalPropertiesStore.applyBlock(true);
+    this.dynamicPropertiesStore.applyBlock(true);
 
     if (slot <= 0) {
       logger.warn("missedBlocks [" + slot + "] is illegal");
     }
 
     logger.info("update head, num = {}", block.getNum());
-    globalPropertiesStore.saveLatestBlockHeaderHash(block.getBlockId().getByteString());
+    this.dynamicPropertiesStore.saveLatestBlockHeaderHash(block.getBlockId().getByteString());
 
-    globalPropertiesStore.saveLatestBlockHeaderNumber(block.getNum());
-    globalPropertiesStore.saveLatestBlockHeaderTimestamp(block.getTimeStamp());
+    this.dynamicPropertiesStore.saveLatestBlockHeaderNumber(block.getNum());
+    this.dynamicPropertiesStore.saveLatestBlockHeaderTimestamp(block.getTimeStamp());
 
-    undoStore.setMaxSize(
+    ((AbstractRevokingStore) revokingStore)
+        .setMaxSize(
             (int)
-                (globalPropertiesStore.getLatestBlockHeaderNumber()
-                    - globalPropertiesStore.getLatestSolidifiedBlockNum()
+                (dynamicPropertiesStore.getLatestBlockHeaderNumber()
+                    - dynamicPropertiesStore.getLatestSolidifiedBlockNum()
                     + 1));
-    forkDB.setMaxSize((int)
-        (globalPropertiesStore.getLatestBlockHeaderNumber()
-            - globalPropertiesStore.getLatestSolidifiedBlockNum()
+    khaosDb.setMaxSize((int)
+        (dynamicPropertiesStore.getLatestBlockHeaderNumber()
+            - dynamicPropertiesStore.getLatestSolidifiedBlockNum()
             + 1));
   }
 
   /**
    * Get the fork branch.
    */
-  public LinkedList<BlockId> getBlockChainHashesOnFork(final BlockId forkBlockHash) {
-    final Pair<LinkedList<BlockWrapper>, LinkedList<BlockWrapper>> branch =
-        this.forkDB.getBranch(
-            globalPropertiesStore.getLatestBlockHeaderHash(), forkBlockHash);
+  public LinkedList<BlockId> getBlockChainHashesOnFork(final BlockId forkBlockHash) throws NonCommonBlockException {
+    final Pair<LinkedList<KhaosDatabase.KhaosBlock>, LinkedList<KhaosDatabase.KhaosBlock>> branch =
+        this.khaosDb.getBranch(
+            getDynamicPropertiesStore().getLatestBlockHeaderHash(), forkBlockHash);
 
-    LinkedList<BlockWrapper> blockWrappers = branch.getValue();
+    LinkedList<KhaosDatabase.KhaosBlock> blockCapsules = branch.getValue();
 
-    if (blockWrappers.isEmpty()) {
+    if (blockCapsules.isEmpty()) {
       logger.info("empty branch {}", forkBlockHash);
       return Lists.newLinkedList();
     }
 
-    LinkedList<BlockId> result = blockWrappers.stream()
-        .map(blockWrapper -> blockWrapper.getBlockId())
+    LinkedList<BlockId> result = blockCapsules.stream()
+        .map(KhaosDatabase.KhaosBlock::getBlk)
+        .map(BlockCapsule::getBlockId)
         .collect(Collectors.toCollection(LinkedList::new));
 
-    result.add(blockWrappers.peekLast().getParentBlockId());
+    result.add(blockCapsules.peekLast().getBlk().getParentBlockId());
 
     return result;
   }
@@ -637,7 +833,7 @@ public class Manager {
    */
   public boolean containBlock(final Sha256Hash blockHash) {
     try {
-      return this.forkDB.containBlock(blockHash)
+      return this.khaosDb.containBlockInMiniStore(blockHash)
           || blockStore.get(blockHash.getBytes()) != null;
     } catch (ItemNotFoundException e) {
       return false;
@@ -656,19 +852,19 @@ public class Manager {
     }
   }
 
-  public void setBlockReference(TransactionWrapper trans) {
-    byte[] headHash = globalPropertiesStore.getLatestBlockHeaderHash().getBytes();
-    long headNum =globalPropertiesStore.getLatestBlockHeaderNumber();
+  public void setBlockReference(TransactionCapsule trans) {
+    byte[] headHash = getDynamicPropertiesStore().getLatestBlockHeaderHash().getBytes();
+    long headNum = getDynamicPropertiesStore().getLatestBlockHeaderNumber();
     trans.setReference(headNum, headHash);
   }
 
   /**
-   * Get a BlockWrapper by id.
+   * Get a BlockCapsule by id.
    */
-  public BlockWrapper getBlockById(final Sha256Hash hash)
+  public BlockCapsule getBlockById(final Sha256Hash hash)
       throws BadItemException, ItemNotFoundException {
-    return this.forkDB.containBlock(hash)
-        ? this.forkDB.getBlock(hash)
+    return this.khaosDb.containBlock(hash)
+        ? this.khaosDb.getBlock(hash)
         : blockStore.get(hash.getBytes());
   }
 
@@ -677,13 +873,13 @@ public class Manager {
    * judge has blocks.
    */
   public boolean hasBlocks() {
-    return blockStore.dbSource.allKeys().size() > 0 || this.forkDB.hasData();
+    return blockStore.dbSource.iterator().hasNext() || this.khaosDb.hasData();
   }
 
   /**
    * Process transaction.
    */
-  public boolean processTransaction(final TransactionWrapper trxCap)
+  public boolean processTransaction(final TransactionCapsule trxCap)
       throws ValidateSignatureException, ContractValidateException, ContractExeException,
       AccountResourceInsufficientException, TransactionExpirationException, TooBigTransactionException,
       DupTransactionException, TaposException {
@@ -694,8 +890,9 @@ public class Manager {
     validateTapos(trxCap);
     validateCommon(trxCap);
 
-    if (trxCap.getInstance().getRawData().getContract() == null) {
-      throw new ContractValidateException("null tx");
+    if (trxCap.getInstance().getRawData().getContractList().size() != 1) {
+      throw new ContractSizeNotEqualToOneException(
+          "act size should be exactly 1, this is extend feature");
     }
 
     validateDup(trxCap);
@@ -704,16 +901,24 @@ public class Manager {
       throw new ValidateSignatureException("trans sig validate failed");
     }
 
-    final Operator op = OperatorFactory.createActuator(trxCap, this);
-    TransactionResultWrapper ret = new TransactionResultWrapper();
+    final List<Operator> actuatorList = OperatorFactory.createActuator(trxCap, this);
+    TransactionResultCapsule ret = new TransactionResultCapsule();
 
-    consumeBandwidth(trxCap);
+    consumeBandwidth(trxCap, ret);
 
-    op.validate();
-    op.execute(ret);
+    for (Operator act : actuatorList) {
+      act.validate();
+      act.execute(ret);
+    }
     trxCap.setResult(ret);
 
     transactionStore.put(trxCap.getTransactionId().getBytes(), trxCap);
+    if (Args.getInstance().isSolidityNode()) {
+      TransactionInfoCapsule transactionInfoCapsule = new TransactionInfoCapsule();
+      transactionInfoCapsule.setId(trxCap.getTransactionId().getBytes());
+      transactionInfoCapsule.setFee(ret.getFee());
+      transactionHistoryStore.put(trxCap.getTransactionId().getBytes(), transactionInfoCapsule);
+    }
     return true;
   }
 
@@ -724,21 +929,21 @@ public class Manager {
     return this.blockIndexStore.get(num);
   }
 
-  public BlockWrapper getBlockByNum(final long num) throws ItemNotFoundException, BadItemException {
+  public BlockCapsule getBlockByNum(final long num) throws ItemNotFoundException, BadItemException {
     return getBlockById(getBlockIdByNum(num));
   }
 
   /**
    * Generate a block.
    */
-  public synchronized BlockWrapper generateBlock(
-      final ProducerWrapper witnessWrapper, final long when, final byte[] privateKey)
+  public synchronized BlockCapsule generateBlock(
+      final WitnessCapsule witnessCapsule, final long when, final byte[] privateKey)
       throws ValidateSignatureException, ContractValidateException, ContractExeException,
       UnLinkedBlockException, ValidateScheduleException, AccountResourceInsufficientException {
 
-    final long timestamp = globalPropertiesStore.getLatestBlockHeaderTimestamp();
-    final long number = globalPropertiesStore.getLatestBlockHeaderNumber();
-    final Sha256Hash preHash = globalPropertiesStore.getLatestBlockHeaderHash();
+    final long timestamp = this.dynamicPropertiesStore.getLatestBlockHeaderTimestamp();
+    final long number = this.dynamicPropertiesStore.getLatestBlockHeaderNumber();
+    final Sha256Hash preHash = this.dynamicPropertiesStore.getLatestBlockHeaderHash();
 
     // judge create block time
     if (when < timestamp) {
@@ -747,38 +952,37 @@ public class Manager {
 
     long postponedTrxCount = 0;
 
-    final BlockWrapper blockWrapper =
-        new BlockWrapper(number + 1, preHash, when, witnessWrapper.getAddress());
+    final BlockCapsule blockCapsule =
+        new BlockCapsule(number + 1, preHash, when, witnessCapsule.getAddress());
     dialog.reset();
-    dialog.setValue(undoStore.buildDialog());
+    dialog.setValue(revokingStore.buildDialog());
     Iterator iterator = pendingTransactions.iterator();
     while (iterator.hasNext()) {
-      TransactionWrapper trx = (TransactionWrapper) iterator.next();
+      TransactionCapsule trx = (TransactionCapsule) iterator.next();
       if (DateTime.now().getMillis() - when
           > ChainConstant.BLOCK_PRODUCED_INTERVAL * 0.5 * ChainConstant.BLOCK_PRODUCED_TIME_OUT) {
         logger.warn("Processing transaction time exceeds the 50% producing time。");
         break;
       }
       // check the block size
-      if ((blockWrapper.getInstance().getSerializedSize() + trx.getSerializedSize() + 3) > ChainConstant.BLOCK_SIZE) {
+      if ((blockCapsule.getInstance().getSerializedSize() + trx.getSerializedSize() + 3)
+          > ChainConstant.BLOCK_SIZE) {
         postponedTrxCount++;
         continue;
       }
       // apply transaction
-      try (Dialog tmpDialog = undoStore.buildDialog()) {
+      try (Dialog tmpDialog = revokingStore.buildDialog()) {
         processTransaction(trx);
+//        trx.resetResult();
         tmpDialog.merge();
         // push into block
-        blockWrapper.addTransaction(trx);
+        blockCapsule.addTransaction(trx);
         iterator.remove();
       } catch (ContractExeException e) {
         logger.info("contract not processed during execute");
         logger.debug(e.getMessage(), e);
       } catch (ContractValidateException e) {
         logger.info("contract not processed during validate");
-        logger.debug(e.getMessage(), e);
-      } catch (RevokingStoreIllegalStateException e) {
-        logger.info("contract not processed during RevokingStoreIllegalState");
         logger.debug(e.getMessage(), e);
       } catch (TaposException e) {
         logger.info("contract not processed during TaposException");
@@ -792,6 +996,12 @@ public class Manager {
       } catch (TransactionExpirationException e) {
         logger.info("contract not processed during TransactionExpirationException");
         logger.debug(e.getMessage(), e);
+      } catch (AccountResourceInsufficientException e) {
+        logger.info("contract not processed during AccountResourceInsufficientException");
+        logger.debug(e.getMessage(), e);
+      } catch (ValidateSignatureException e) {
+        logger.info("contract not processed during ValidateSignatureException");
+        logger.debug(e.getMessage(), e);
       }
     }
 
@@ -804,12 +1014,12 @@ public class Manager {
     logger.info(
         "postponedTrxCount[" + postponedTrxCount + "],TrxLeft[" + pendingTransactions.size()
             + "]");
-    blockWrapper.setMerkleRoot();
-    blockWrapper.sign(privateKey);
-    blockWrapper.generatedByMyself = true;
+    blockCapsule.setMerkleRoot();
+    blockCapsule.sign(privateKey);
+    blockCapsule.generatedByMyself = true;
     try {
-      this.pushBlock(blockWrapper);
-      return blockWrapper;
+      this.pushBlock(blockCapsule);
+      return blockCapsule;
     } catch (TaposException e) {
       logger.info("contract not processed during TaposException");
     } catch (TooBigTransactionException e) {
@@ -820,36 +1030,76 @@ public class Manager {
       logger.info("contract not processed during TransactionExpirationException");
     } catch (BadNumberBlockException e) {
       logger.info("generate block using wrong number");
+    } catch (BadBlockException e) {
+      logger.info("block exception");
+    } catch (NonCommonBlockException e) {
+      logger.info("non common exception");
     }
 
     return null;
   }
-  
+
+  private void setAccountStore(final AccountStore accountStore) {
+    this.accountStore = accountStore;
+  }
+
+  public TransactionStore getTransactionStore() {
+    return this.transactionStore;
+  }
+
+  private void setTransactionStore(final TransactionStore transactionStore) {
+    this.transactionStore = transactionStore;
+  }
+
+  public TransactionHistoryStore getTransactionHistoryStore() {
+    return this.transactionHistoryStore;
+  }
+
+  private void setTransactionHistoryStore(final TransactionHistoryStore transactionHistoryStore) {
+    this.transactionHistoryStore = transactionHistoryStore;
+  }
+
+  public BlockStore getBlockStore() {
+    return this.blockStore;
+  }
+
+  private void setBlockStore(final BlockStore blockStore) {
+    this.blockStore = blockStore;
+  }
+
+  public UtxoStore getUtxoStore() {
+    return this.utxoStore;
+  }
+
+  private void setUtxoStore(final UtxoStore utxoStore) {
+    this.utxoStore = utxoStore;
+  }
+
   /**
    * process block.
    */
-  public void processBlock(BlockWrapper block)
+  public void processBlock(BlockCapsule block)
       throws ValidateSignatureException, ContractValidateException, ContractExeException,
       AccountResourceInsufficientException, TaposException, TooBigTransactionException,
       DupTransactionException, TransactionExpirationException, ValidateScheduleException {
     // todo set revoking db max size.
 
     // checkWitness
-    if (!prodController.validateProducerSchedule(block)) {
+    if (!witnessController.validateWitnessSchedule(block)) {
       throw new ValidateScheduleException("validateWitnessSchedule error");
     }
 
-    for (TransactionWrapper transactionWrapper : block.getTransactions()) {
+    for (TransactionCapsule transactionCapsule : block.getTransactions()) {
       if (block.generatedByMyself) {
-        transactionWrapper.setVerified(true);
+        transactionCapsule.setVerified(true);
       }
-      processTransaction(transactionWrapper);
+      processTransaction(transactionCapsule);
     }
 
     boolean needMaint = needMaintenance(block.getTimeStamp());
     if (needMaint) {
       if (block.getNum() == 1) {
-         globalPropertiesStore.updateNextMaintenanceTime(block.getTimeStamp());
+        this.dynamicPropertiesStore.updateNextMaintenanceTime(block.getTimeStamp());
       } else {
         this.processMaintenance(block);
       }
@@ -863,16 +1113,16 @@ public class Manager {
     updateRecentBlock(block);
   }
 
-  private void updateTransHashCache(BlockWrapper block) {
-    for (TransactionWrapper transactionWrapper : block.getTransactions()) {
-      this.transactionIdCache.put(transactionWrapper.getTransactionId(), true);
+  private void updateTransHashCache(BlockCapsule block) {
+    for (TransactionCapsule transactionCapsule : block.getTransactions()) {
+      this.transactionIdCache.put(transactionCapsule.getTransactionId(), true);
     }
   }
 
-  public void updateRecentBlock(BlockWrapper block) {
-    this.taposStore.put(ByteArray.subArray(
+  public void updateRecentBlock(BlockCapsule block) {
+    this.recentBlockStore.put(ByteArray.subArray(
         ByteArray.fromLong(block.getNum()), 6, 8),
-        new BytesWrapper(ByteArray.subArray(block.getBlockId().getBytes(), 8, 16)));
+        new BytesCapsule(ByteArray.subArray(block.getBlockId().getBytes(), 8, 16)));
   }
 
   /**
@@ -880,15 +1130,15 @@ public class Manager {
    */
   public void updateLatestSolidifiedBlock() {
     List<Long> numbers =
-        prodScheduleStore
-            .getActiveProducers()
+        witnessController
+            .getActiveWitnesses()
             .stream()
-            .map(address -> prodController.getProdByAddress(address).getLatestBlockNum())
+            .map(address -> witnessController.getWitnesseByAddress(address).getLatestBlockNum())
             .sorted()
             .collect(Collectors.toList());
 
-    long size = prodScheduleStore.getActiveProducers().size();
-    int solidifiedPosition = (int) (size * (1 - SOLIDIFIED_THRESHOLD));
+    long size = witnessController.getActiveWitnesses().size();
+    int solidifiedPosition = (int) (size * (1 - ChainConstant.SOLIDIFIED_THRESHOLD));
     if (solidifiedPosition < 0) {
       logger.warn(
           "updateLatestSolidifiedBlock error, solidifiedPosition:{},wits.size:{}",
@@ -898,91 +1148,98 @@ public class Manager {
     }
     long latestSolidifiedBlockNum = numbers.get(solidifiedPosition);
     //if current value is less than the previous value，keep the previous value.
-    if (latestSolidifiedBlockNum < globalPropertiesStore.getLatestSolidifiedBlockNum()) {
+    if (latestSolidifiedBlockNum < getDynamicPropertiesStore().getLatestSolidifiedBlockNum()) {
       logger.warn("latestSolidifiedBlockNum = 0,LatestBlockNum:{}", numbers);
       return;
     }
-    globalPropertiesStore.saveLatestSolidifiedBlockNum(latestSolidifiedBlockNum);
+    getDynamicPropertiesStore().saveLatestSolidifiedBlockNum(latestSolidifiedBlockNum);
     logger.info("update solid block, num = {}", latestSolidifiedBlockNum);
   }
 
   public long getSyncBeginNumber() {
-    logger.info("headNumber:" + globalPropertiesStore.getLatestBlockHeaderNumber());
+    logger.info("headNumber:" + dynamicPropertiesStore.getLatestBlockHeaderNumber());
     logger.info(
         "syncBeginNumber:"
-            + (globalPropertiesStore.getLatestBlockHeaderNumber() - undoStore.size()));
-    logger.info("solidBlockNumber:" + globalPropertiesStore.getLatestSolidifiedBlockNum());
-    return globalPropertiesStore.getLatestBlockHeaderNumber() - undoStore.size();
+            + (dynamicPropertiesStore.getLatestBlockHeaderNumber() - revokingStore.size()));
+    logger.info("solidBlockNumber:" + dynamicPropertiesStore.getLatestSolidifiedBlockNum());
+    return dynamicPropertiesStore.getLatestBlockHeaderNumber() - revokingStore.size();
+  }
+
+  public BlockId getSolidBlockId() {
+    try {
+      long num = dynamicPropertiesStore.getLatestSolidifiedBlockNum();
+      return getBlockIdByNum(num);
+    } catch (Exception e) {
+      return getGenesisBlockId();
+    }
   }
 
   /**
    * Determine if the current time is maintenance time.
    */
   public boolean needMaintenance(long blockTime) {
-    return globalPropertiesStore.getNextMaintenanceTime() <= blockTime;
+    return this.dynamicPropertiesStore.getNextMaintenanceTime() <= blockTime;
   }
 
   /**
    * Perform maintenance.
    */
-  private void processMaintenance(BlockWrapper block) {
-    prodController.updateProducer();
-    globalPropertiesStore.updateNextMaintenanceTime(block.getTimeStamp());
+  private void processMaintenance(BlockCapsule block) {
+    witnessController.updateWitness();
+    this.dynamicPropertiesStore.updateNextMaintenanceTime(block.getTimeStamp());
   }
 
   /**
    * @param block the block update signed witness. set witness who signed block the 1. the latest
    * block num 2. pay the trx to witness. 3. the latest slot num.
    */
-  public void updateSignedWitness(BlockWrapper block) {
+  public void updateSignedWitness(BlockCapsule block) {
     // TODO: add verification
-    ProducerWrapper witnessWrapper =
-        prodStore.get(
-            block.getInstance().getBlockHeader().getRawData().getProducerAddress().toByteArray());
-    witnessWrapper.setTotalProduced(witnessWrapper.getTotalProduced() + 1);
-    witnessWrapper.setLatestBlockNum(block.getNum());
-    witnessWrapper.setLatestSlotNum(prodController.getAbSlotAtTime(block.getTimeStamp()));
+    WitnessCapsule witnessCapsule =
+        witnessStore.get(
+            block.getInstance().getBlockHeader().getRawData().getWitnessAddress().toByteArray());
+    witnessCapsule.setTotalProduced(witnessCapsule.getTotalProduced() + 1);
+    witnessCapsule.setLatestBlockNum(block.getNum());
+    witnessCapsule.setLatestSlotNum(witnessController.getAbSlotAtTime(block.getTimeStamp()));
 
     // Update memory witness status
-    ProducerWrapper wit = prodController.getProdByAddress(block.getProducerAddress());
+    WitnessCapsule wit = witnessController.getWitnesseByAddress(block.getWitnessAddress());
     if (wit != null) {
-      wit.setTotalProduced(witnessWrapper.getTotalProduced() + 1);
+      wit.setTotalProduced(witnessCapsule.getTotalProduced() + 1);
       wit.setLatestBlockNum(block.getNum());
-      wit.setLatestSlotNum(prodController.getAbSlotAtTime(block.getTimeStamp()));
+      wit.setLatestSlotNum(witnessController.getAbSlotAtTime(block.getTimeStamp()));
     }
 
-    prodStore.put(witnessWrapper.getAddress().toByteArray(), witnessWrapper);
+    this.getWitnessStore().put(witnessCapsule.getAddress().toByteArray(), witnessCapsule);
 
-    AccountWrapper photon = accountStore.getPhoton();
     try {
-      adjustBalance(photon.getAddress().toByteArray(), - WITNESS_PAY_PER_BLOCK);
+      adjustAllowance(witnessCapsule.getAddress().toByteArray(), ChainConstant.WITNESS_PAY_PER_BLOCK);
     } catch (BalanceInsufficientException e) {
-      logger.debug(e.getMessage(), e);
-    }
-    try {
-      adjustAllowance(witnessWrapper.getAddress().toByteArray(), WITNESS_PAY_PER_BLOCK);
-    } catch (BalanceInsufficientException e) {
-      logger.debug(e.getMessage(), e);
+      logger.warn(e.getMessage(), e);
     }
 
     logger.debug(
         "updateSignedWitness. witness address:{}, blockNum:{}, totalProduced:{}",
-        witnessWrapper.createReadableString(),
+        witnessCapsule.createReadableString(),
         block.getNum(),
-        witnessWrapper.getTotalProduced());
+        witnessCapsule.getTotalProduced());
   }
 
   public void updateMaintenanceState(boolean needMaint) {
     if (needMaint) {
-      globalPropertiesStore.saveStateFlag(1);
+      getDynamicPropertiesStore().saveStateFlag(1);
     } else {
-      globalPropertiesStore.saveStateFlag(0);
+      getDynamicPropertiesStore().saveStateFlag(0);
     }
+  }
+
+  public boolean lastHeadBlockIsMaintenance() {
+    return getDynamicPropertiesStore().getStateFlag() == 1;
   }
 
   // To be added
   public long getSkipSlotInMaintenance() {
-    return globalPropertiesStore.getMaintenanceSkipSlots();
+    return getDynamicPropertiesStore().getMaintenanceSkipSlots();
   }
 
   public AssetIssueStore getAssetIssueStore() {
@@ -997,22 +1254,30 @@ public class Manager {
     this.blockIndexStore = indexStore;
   }
 
+  public AccountIndexStore getAccountIndexStore() {
+    return this.accountIndexStore;
+  }
+
+  public void setAccountIndexStore(AccountIndexStore indexStore) {
+    this.accountIndexStore = indexStore;
+  }
 
   public void closeAllStore() {
-    System.err.println("******** begin to close store ********");
+    System.err.println("******** begin to close db ********");
     closeOneStore(accountStore);
     closeOneStore(blockStore);
     closeOneStore(blockIndexStore);
-
-    closeOneStore(prodStore);
-    closeOneStore(prodScheduleStore);
+    closeOneStore(accountIndexStore);
+    closeOneStore(witnessStore);
+    closeOneStore(witnessScheduleStore);
     closeOneStore(assetIssueStore);
-    closeOneStore(globalPropertiesStore);
+    closeOneStore(dynamicPropertiesStore);
     closeOneStore(transactionStore);
-    System.err.println("******** end to close store ********");
+    closeOneStore(utxoStore);
+    System.err.println("******** end to close db ********");
   }
 
-  private void closeOneStore(Store database) {
+  private void closeOneStore(GscDatabase database) {
     System.err.println("******** begin to close " + database.getName() + " ********");
     try {
       database.close();
@@ -1025,25 +1290,25 @@ public class Manager {
 
   public boolean isTooManyPending() {
     if (getPendingTransactions().size() + PendingManager.getTmpTransactions().size()
-        > MAX_TRANSACTION_PENDING) {
+        > NodeConstant.MAX_TRANSACTION_PENDING) {
       return true;
     }
     return false;
   }
 
   public boolean isGeneratingBlock() {
-    if (config.isProd()) {
-      return prodController.isGeneratingBlock();
+    if (Args.getInstance().isWitness()) {
+      return witnessController.isGeneratingBlock();
     }
     return false;
   }
 
   private static class ValidateSignTask implements Callable<Boolean> {
 
-    private TransactionWrapper trx;
+    private TransactionCapsule trx;
     private CountDownLatch countDownLatch;
 
-    ValidateSignTask(TransactionWrapper trx, CountDownLatch countDownLatch) {
+    ValidateSignTask(TransactionCapsule trx, CountDownLatch countDownLatch) {
       this.trx = trx;
       this.countDownLatch = countDownLatch;
     }
@@ -1061,7 +1326,7 @@ public class Manager {
     }
   }
 
-  public synchronized void preValidateTransactionSign(BlockWrapper block)
+  public synchronized void preValidateTransactionSign(BlockCapsule block)
       throws InterruptedException, ValidateSignatureException {
     logger.info("PreValidate Transaction Sign, size:" + block.getTransactions().size()
         + ",block num:" + block.getNum());
@@ -1069,7 +1334,7 @@ public class Manager {
     CountDownLatch countDownLatch = new CountDownLatch(transSize);
     List<Future<Boolean>> futures = new ArrayList<>(transSize);
 
-    for (TransactionWrapper transaction : block.getTransactions()) {
+    for (TransactionCapsule transaction : block.getTransactions()) {
       Future<Boolean> future = validateSignService
           .submit(new ValidateSignTask(transaction, countDownLatch));
       futures.add(future);

@@ -3,14 +3,14 @@ package org.gsc.db;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
-import org.gsc.db.storage.leveldb.LevelDbDataSourceImpl;
-import org.gsc.net.discover.Node;
+import org.gsc.common.overlay.discover.node.Node;
+import org.gsc.common.storage.leveldb.LevelDbDataSourceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PeersStore extends Store<Set<Node>> {
+public class PeersStore extends GscDatabase<Set<Node>> {
 
   @Autowired
   public PeersStore(ApplicationContext ctx) {

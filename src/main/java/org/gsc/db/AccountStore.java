@@ -9,16 +9,16 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.common.utils.AddressUtil;
-import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.db.storage.Iterator.AccountIterator;
+import org.gsc.core.wrapper.AccountCapsule;
+import org.gsc.db.common.iterator.AccountIterator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.gsc.core.Wallet;
 
 @Slf4j
 @Component
-public class AccountStore extends ChainStore<AccountWrapper> {
+public class AccountStore extends GscStoreWithRevoking<AccountCapsule> {
 
   private static Map<String, byte[]> assertsAddress = new HashMap<>(); // key = name , value = address
 
@@ -28,9 +28,9 @@ public class AccountStore extends ChainStore<AccountWrapper> {
   }
 
   @Override
-  public AccountWrapper get(byte[] key) {
+  public AccountCapsule get(byte[] key) {
     byte[] value = dbSource.getData(key);
-    return ArrayUtils.isEmpty(value) ? null : new AccountWrapper(value);
+    return ArrayUtils.isEmpty(value) ? null : new AccountCapsule(value);
   }
 
   /**
@@ -45,52 +45,52 @@ public class AccountStore extends ChainStore<AccountWrapper> {
   }
 
   @Override
-  public void put(byte[] key, AccountWrapper item) {
+  public void put(byte[] key, AccountCapsule item) {
     super.put(key, item);
     if (Objects.nonNull(indexHelper)) {
-      //indexHelper.update(item.getInstance());
+      indexHelper.update(item.getInstance());
     }
   }
 
   /**
    * Max TRX account.
    */
-  public AccountWrapper getPhoton() {
-    byte[] data = dbSource.getData(assertsAddress.get("Photon"));
-    AccountWrapper accountWrapper = new AccountWrapper(data);
-    return accountWrapper;
-  }
+//  public AccountCapsule getSun() {
+//    byte[] data = dbSource.getData(assertsAddress.get("Sun"));
+//    AccountCapsule accountCapsule = new AccountCapsule(data);
+//    return accountCapsule;
+//  }
 
   /**
    * Min TRX account.
    */
-  public AccountWrapper getBlackhole() {
-    byte[] data = dbSource.getData(assertsAddress.get("Blackhole"));
-    AccountWrapper accountWrapper = new AccountWrapper(data);
-    return accountWrapper;
+  public AccountCapsule getBlackhole() {
+    //byte[] data = dbSource.getData(assertsAddress.get("Blackhole"));
+    AccountCapsule accountCapsule = new AccountCapsule("TSJD5rdu6wZXP7F2m3a3tn8Co3JcMjtBip".getBytes());
+    return accountCapsule;
   }
 
   /**
    * Get foundation account info.
    */
-  public AccountWrapper getZion() {
-    byte[] data = dbSource.getData(assertsAddress.get("Zion"));
-    AccountWrapper accountWrapper = new AccountWrapper(data);
-    return accountWrapper;
-  }
+//  public AccountCapsule getZion() {
+//    byte[] data = dbSource.getData(assertsAddress.get("Zion"));
+//    AccountCapsule accountCapsule = new AccountCapsule(data);
+//    return accountCapsule;
+//  }
 
   public static void setAccount(com.typesafe.config.Config config) {
     List list = config.getObjectList("genesis.block.assets");
     for (int i = 0; i < list.size(); i++) {
       ConfigObject obj = (ConfigObject) list.get(i);
       String accountName = obj.get("accountName").unwrapped().toString();
-      byte[] address = AddressUtil.decodeFromBase58Check(obj.get("address").unwrapped().toString());
+      byte[] address = Wallet.decodeFromBase58Check(obj.get("address").unwrapped().toString());
       assertsAddress.put(accountName, address);
     }
   }
 
   @Override
-  public Iterator<Entry<byte[], AccountWrapper>> iterator() {
+  public Iterator<Entry<byte[], AccountCapsule>> iterator() {
     return new AccountIterator(dbSource.iterator());
   }
 
@@ -102,9 +102,9 @@ public class AccountStore extends ChainStore<AccountWrapper> {
 
   private void deleteIndex(byte[] key) {
     if (Objects.nonNull(indexHelper)) {
-      AccountWrapper item = get(key);
+      AccountCapsule item = get(key);
       if (Objects.nonNull(item)) {
-       // indexHelper.remove(item.getInstance());
+        indexHelper.remove(item.getInstance());
       }
     }
   }

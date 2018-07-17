@@ -29,7 +29,7 @@ public class ByteUtil {
   public static final byte[] ZERO_BYTE_ARRAY = new byte[]{0};
 
   /**
-   * The regular {@link BigInteger#toByteArray()} method isn't quite what we often need:
+   * The regular {@link java.math.BigInteger#toByteArray()} method isn't quite what we often need:
    * it appends a leading zero to indicate that the number is positive and may need padding.
    *
    * @param b the integer to format into a byte array
@@ -155,10 +155,6 @@ public class ByteUtil {
     return new BigInteger(1, b).intValue();
   }
 
-  public static boolean isNullOrZeroArray(byte[] array) {
-    return (array == null) || (array.length == 0);
-  }
-
   public static boolean isSingleZero(byte[] array) {
     return (array.length == 1 && array[0] == 0);
   }
@@ -199,27 +195,11 @@ public class ByteUtil {
   /**
    * Converts int value into a byte array.
    *
-   * @ param val - int value to convert
+   * @param val - int value to convert
    * @return <code>byte[]</code> of length 4, representing the int value
    */
   public static byte[] intToBytes(int val) {
     return ByteBuffer.allocate(4).putInt(val).array();
   }
 
-  public static String intArrayToString(int[] a) {
-    StringBuilder sb = new StringBuilder();
-    for (int i : a) {
-      sb.append(i);
-    }
-    return sb.toString();
-  }
-
-  public static int[] stringToIntArray(String s) {
-    int length = s.length();
-    int[] result = new int[length];
-    for (int i = 0; i < length; ++i) {
-      result[i] = Integer.parseInt(s.substring(i, i + 1));
-    }
-    return result;
-  }
 }

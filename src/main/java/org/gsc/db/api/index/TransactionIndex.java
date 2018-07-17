@@ -6,18 +6,22 @@ import com.googlecode.cqengine.attribute.Attribute;
 import com.googlecode.cqengine.attribute.SimpleAttribute;
 import com.googlecode.cqengine.index.disk.DiskIndex;
 import com.googlecode.cqengine.persistence.disk.DiskPersistence;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.wrapper.TransactionWrapper;
-import org.gsc.db.Store;
-import org.gsc.db.WrappedByteArray;
-import org.gsc.protos.Protocol.Transaction;
+import org.gsc.common.utils.ByteArray;
+import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.db.GscDatabase;
+import org.gsc.db.common.WrappedByteArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.gsc.protos.Protocol.Transaction;
+
 @Component
 @Slf4j
-public class TransactionIndex extends AbstractIndex<TransactionWrapper, Transaction> {
+public class TransactionIndex extends AbstractIndex<TransactionCapsule, Transaction> {
 
   public static SimpleAttribute<WrappedByteArray, String> Transaction_ID;
   public static Attribute<WrappedByteArray, String> OWNERS;
@@ -26,7 +30,7 @@ public class TransactionIndex extends AbstractIndex<TransactionWrapper, Transact
 
   @Autowired
   public TransactionIndex(
-      @Qualifier("transactionStore") final Store<TransactionWrapper> database) {
+      @Qualifier("transactionStore") final GscDatabase<TransactionCapsule> database) {
     super(database);
   }
 
@@ -43,22 +47,21 @@ public class TransactionIndex extends AbstractIndex<TransactionWrapper, Transact
   protected void setAttribute() {
     Transaction_ID =
         attribute("transaction id",
-            bytes -> new TransactionWrapper(getObject(bytes)).getTransactionId().toString());
-    //TODO
-//    OWNERS =
-//        attribute(String.class, "owner address",
-//            bytes -> getObject(bytes).getRawData().getContract()
-//                .map(ProtoUtil::getOwner)
-//                .filter(Objects::nonNull)
-//                .map(ByteArray::toHexString)
-//                .collect(Collectors.toList()));
-//    TOS =
-//        attribute(String.class, "to address",
-//            bytes -> getObject(bytes).getRawData().getContract()
-//                .map(ProtoUtil::getOwner)
-//                .filter(Objects::nonNull)
-//                .map(ByteArray::toHexString)
-//                .collect(Collectors.toList()));
+            bytes -> new TransactionCapsule(getObject(bytes)).getTransactionId().toString());
+    OWNERS =
+        attribute(String.class, "owner address",
+            bytes -> getObject(bytes).getRawData().getContractList().stream()
+                .map(TransactionCapsule::getOwner)
+                .filter(Objects::nonNull)
+                .map(ByteArray::toHexString)
+                .collect(Collectors.toList()));
+    TOS =
+        attribute(String.class, "to address",
+            bytes -> getObject(bytes).getRawData().getContractList().stream()
+                .map(TransactionCapsule::getToAddress)
+                .filter(Objects::nonNull)
+                .map(ByteArray::toHexString)
+                .collect(Collectors.toList()));
     TIMESTAMP =
         attribute("timestamp", bytes -> getObject(bytes).getRawData().getTimestamp());
 

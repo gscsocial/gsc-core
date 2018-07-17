@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.gsc.crypto.jce;
 
 import java.security.KeyFactory;
@@ -29,25 +30,15 @@ public final class ECKeyFactory {
   private static final String algorithmAssertionMsg =
       "Assumed the JRE supports EC key factories";
 
-  private ECKeyFactory() { }
-
-  private static class Holder {
-    private static final KeyFactory INSTANCE;
-
-    static {
-      try {
-        INSTANCE = KeyFactory.getInstance(ALGORITHM);
-      } catch (NoSuchAlgorithmException ex) {
-        throw new AssertionError(algorithmAssertionMsg, ex);
-      }
-    }
+  private ECKeyFactory() {
   }
 
   public static KeyFactory getInstance() {
     return Holder.INSTANCE;
   }
 
-  public static KeyFactory getInstance(final String provider) throws NoSuchProviderException {
+  public static KeyFactory getInstance(final String provider) throws
+      NoSuchProviderException {
     try {
       return KeyFactory.getInstance(ALGORITHM, provider);
     } catch (NoSuchAlgorithmException ex) {
@@ -60,6 +51,19 @@ public final class ECKeyFactory {
       return KeyFactory.getInstance(ALGORITHM, provider);
     } catch (NoSuchAlgorithmException ex) {
       throw new AssertionError(algorithmAssertionMsg, ex);
+    }
+  }
+
+  private static class Holder {
+
+    private static final KeyFactory INSTANCE;
+
+    static {
+      try {
+        INSTANCE = KeyFactory.getInstance(ALGORITHM);
+      } catch (NoSuchAlgorithmException ex) {
+        throw new AssertionError(algorithmAssertionMsg, ex);
+      }
     }
   }
 }

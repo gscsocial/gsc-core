@@ -4,17 +4,17 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.protos.Protocol.Account;
-import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.core.wrapper.AssetIssueWrapper;
-import org.gsc.core.wrapper.BlockWrapper;
-import org.gsc.core.wrapper.ProducerWrapper;
-import org.gsc.core.wrapper.TransactionWrapper;
+import org.gsc.core.wrapper.AccountCapsule;
+import org.gsc.core.wrapper.AssetIssueCapsule;
+import org.gsc.core.wrapper.BlockCapsule;
+import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.core.wrapper.WitnessCapsule;
 import org.gsc.db.api.index.Index;
 import org.gsc.protos.Contract.AssetIssueContract;
+import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Block;
-import org.gsc.protos.Protocol.Producer;
 import org.gsc.protos.Protocol.Transaction;
+import org.gsc.protos.Protocol.Witness;
 
 @Slf4j
 public class IndexHelper {
@@ -27,7 +27,7 @@ public class IndexHelper {
   private Index.Iface<Block> blockIndex;
   @Getter
   @Resource
-  private Index.Iface<Producer> witnessIndex;
+  private Index.Iface<Witness> witnessIndex;
   @Getter
   @Resource
   private Index.Iface<Account> accountIndex;
@@ -56,7 +56,7 @@ public class IndexHelper {
     //add(blockIndex, getKey(b));
   }
 
-  public void add(Producer w) {
+  public void add(Witness w) {
     //add(witnessIndex, getKey(w));
   }
 
@@ -80,7 +80,7 @@ public class IndexHelper {
     // update(blockIndex, getKey(b));
   }
 
-  public void update(Producer w) {
+  public void update(Witness w) {
     //update(witnessIndex, getKey(w));
   }
 
@@ -104,7 +104,7 @@ public class IndexHelper {
     //remove(blockIndex, getKey(b));
   }
 
-  public void remove(Producer w) {
+  public void remove(Witness w) {
     //remove(witnessIndex, getKey(w));
   }
 
@@ -117,22 +117,22 @@ public class IndexHelper {
   }
 
   private byte[] getKey(Transaction t) {
-    return new TransactionWrapper(t).getTransactionId().getBytes();
+    return new TransactionCapsule(t).getTransactionId().getBytes();
   }
 
   private byte[] getKey(Block b) {
-    return new BlockWrapper(b).getBlockId().getBytes();
+    return new BlockCapsule(b).getBlockId().getBytes();
   }
 
-  private byte[] getKey(Producer w) {
-    return new ProducerWrapper(w).createDbKey();
+  private byte[] getKey(Witness w) {
+    return new WitnessCapsule(w).createDbKey();
   }
 
   private byte[] getKey(Account a) {
-    return new AccountWrapper(a).createDbKey();
+    return new AccountCapsule(a).createDbKey();
   }
 
   private byte[] getKey(AssetIssueContract a) {
-    return new AssetIssueWrapper(a).getName().toByteArray();
+    return new AssetIssueCapsule(a).getName().toByteArray();
   }
 }

@@ -5,14 +5,14 @@
   <!-- Be sure to flush latest logs on exit -->
   <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
 
-  <!--<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">-->
-  <!--<encoder>-->
-  <!--<pattern>%d{HH:mm:ss.SSS} %-5level [%t] [%c{1}]\(%F:%L\) %m%n</pattern>-->
-  <!--</encoder>-->
-  <!--<filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
-  <!--<level>INFO</level>-->
-  <!--</filter>-->
-  <!--</appender>-->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+  <encoder>
+  <pattern>%d{HH:mm:ss.SSS} %-5level [%t] [%c{1}]\(%F:%L\) %m%n</pattern>
+  </encoder>
+  <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+  <level>INFO</level>
+  </filter>
+  </appender>
 
   <appender name="FILE"
     class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -46,7 +46,7 @@
   </appender>
 
   <root level="INFO">
-    <!--<appender-ref ref="STDOUT"/>-->
+    <appender-ref ref="STDOUT"/>
     <appender-ref ref="ASYNC"/>
   </root>
 
@@ -55,6 +55,8 @@
   <logger name="Wallet" level="INFO"/>
   <logger name="DB" level="INFO"/>
   <logger name="Command" level="INFO"/>
+  <logger name="UTXOSet" level="INFO"/>
+  <logger name="UTXOStore" level="INFO"/>
   <logger name="TransactionMessageHandler" level="INFO"/>
   <logger name="BlockMessageHandler" level="INFO"/>
   <logger name="BlockStores" level="INFO"/>
@@ -82,8 +84,8 @@
   <logger name="Args" level="INFO"/>
   <logger name="WitnessCteateActuator" level="INFO"/>
   <logger name="AssetIssueActuator" level="INFO"/>
-  <logger name="AccountWrapper" level="INFO"/>
-  <logger name="AssetIssueWrapper" level="INFO"/>
+  <logger name="AccountCapsule" level="INFO"/>
+  <logger name="AssetIssueCapsule" level="INFO"/>
   <logger name="Manager" level="INFO"/>
   <logger name="Net" level="INFO"/>
 

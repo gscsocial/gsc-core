@@ -1,6 +1,6 @@
 package org.gsc.config;
 
-import org.gsc.db.api.IndexHelper;
+import org.gsc.config.args.Args;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.gsc.db.api.IndexHelper;
 
 @Configuration
 @Import(CommonConfig.class)
@@ -34,4 +35,3 @@ public class DefaultConfig {
   }
 
 }
-

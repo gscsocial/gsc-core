@@ -4,23 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.exception.AccountResourceInsufficientException;
-import org.gsc.common.exception.BadItemException;
-import org.gsc.common.exception.ContractExeException;
-import org.gsc.common.exception.ContractValidateException;
-import org.gsc.common.exception.DupTransactionException;
-import org.gsc.common.exception.TaposException;
-import org.gsc.common.exception.TooBigTransactionException;
-import org.gsc.common.exception.TransactionExpirationException;
-import org.gsc.common.exception.ValidateSignatureException;
-import org.gsc.core.wrapper.TransactionWrapper;
-
+import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.core.exception.AccountResourceInsufficientException;
+import org.gsc.core.exception.BadItemException;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
+import org.gsc.core.exception.DupTransactionException;
+import org.gsc.core.exception.TaposException;
+import org.gsc.core.exception.TooBigTransactionException;
+import org.gsc.core.exception.TransactionExpirationException;
+import org.gsc.core.exception.ValidateSignatureException;
 
 @Slf4j
 public class PendingManager implements AutoCloseable {
 
   @Getter
-  static List<TransactionWrapper> tmpTransactions = new ArrayList<>();
+  static List<TransactionCapsule> tmpTransactions = new ArrayList<>();
   Manager dbManager;
 
   public PendingManager(Manager db) {
@@ -33,12 +32,12 @@ public class PendingManager implements AutoCloseable {
   @Override
   public void close() {
     rePush(this.tmpTransactions);
-    rePush(dbManager.getPopedTransactions());
-    dbManager.getPopedTransactions().clear();
+    rePush(dbManager.getPoppedTransactions());
+    dbManager.getPoppedTransactions().clear();
     tmpTransactions.clear();
   }
 
-  private void rePush(List<TransactionWrapper> txs) {
+  private void rePush(List<TransactionCapsule> txs) {
     txs.stream()
         .filter(
             trx -> {

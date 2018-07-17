@@ -1,11 +1,31 @@
+/*
+ * java-gsc is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * java-gsc is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.gsc.config.args;
 
 import com.google.protobuf.ByteString;
 import java.io.Serializable;
+import java.util.Arrays;
+
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.common.utils.AddressUtil;
 import org.gsc.common.utils.ByteArray;
+import org.gsc.common.utils.StringUtil;
+import org.gsc.common.utils.ByteArray;
+import org.gsc.common.utils.StringUtil;
+import org.gsc.core.Wallet;
 import org.gsc.protos.Protocol.AccountType;
 
 public class Account implements Serializable {
@@ -32,9 +52,9 @@ public class Account implements Serializable {
    * Account address is a 21-bits hex string.
    */
   public void setAddress(final byte[] address) {
-    if (!AddressUtil.addressValid(address)){
+    if (!Wallet.addressValid(address)){
       throw new IllegalArgumentException(
-          "The address(" + address + ") must be a 21 bytes.");
+          "The address(" + StringUtil.createReadableString(address) + ") must be a 21 bytes.");
     }
     this.address = address;
   }

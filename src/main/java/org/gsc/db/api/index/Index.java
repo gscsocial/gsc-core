@@ -3,7 +3,7 @@ package org.gsc.db.api.index;
 import com.googlecode.cqengine.query.Query;
 import com.googlecode.cqengine.query.option.QueryOptions;
 import com.googlecode.cqengine.resultset.ResultSet;
-import org.gsc.db.WrappedByteArray;
+import org.gsc.db.common.WrappedByteArray;
 
 public class Index {
 

@@ -5,50 +5,28 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.core.wrapper.AssetIssueWrapper;
-import org.gsc.db.storage.Iterator.AssetIssueIterator;
+import org.gsc.core.wrapper.AssetIssueCapsule;
+import org.gsc.config.Parameter.DatabaseConstants;
+import org.gsc.db.common.iterator.AssetIssueIterator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 
 @Slf4j
 @Component
-public class AssetIssueStore extends ChainStore<AssetIssueWrapper> {
-
-  private static AssetIssueStore instance;
+public class AssetIssueStore extends GscStoreWithRevoking<AssetIssueCapsule> {
 
   @Autowired
   private AssetIssueStore(@Value("asset-issue") String dbName) {
     super(dbName);
   }
 
-  public static void destroy() {
-    instance = null;
-  }
-
-  /**
-   * create fun.
-   *
-   * @param dbName the name of database
-   */
-  public static AssetIssueStore create(String dbName) {
-    if (instance == null) {
-      synchronized (AssetIssueStore.class) {
-        if (instance == null) {
-          instance = new AssetIssueStore(dbName);
-        }
-      }
-    }
-    return instance;
-  }
-
   @Override
-  public AssetIssueWrapper get(byte[] key) {
+  public AssetIssueCapsule get(byte[] key) {
     byte[] value = dbSource.getData(key);
-    return ArrayUtils.isEmpty(value) ? null : new AssetIssueWrapper(value);
+    return ArrayUtils.isEmpty(value) ? null : new AssetIssueCapsule(value);
   }
 
   /**
@@ -59,30 +37,47 @@ public class AssetIssueStore extends ChainStore<AssetIssueWrapper> {
   @Override
   public boolean has(byte[] key) {
     byte[] assetIssue = dbSource.getData(key);
-    logger.info("name is {}, asset issue is {}", key, assetIssue);
     return null != assetIssue;
   }
 
   @Override
-  public void put(byte[] key, AssetIssueWrapper item) {
+  public void put(byte[] key, AssetIssueCapsule item) {
     super.put(key, item);
     if (Objects.nonNull(indexHelper)) {
-      //TODO
-      //indexHelper.update(item.getInstance());
+      indexHelper.update(item.getInstance());
     }
   }
 
   /**
    * get all asset issues.
    */
-  public List<AssetIssueWrapper> getAllAssetIssues() {
+  public List<AssetIssueCapsule> getAllAssetIssues() {
     return dbSource.allKeys().stream()
         .map(this::get)
         .collect(Collectors.toList());
   }
 
+  public List<AssetIssueCapsule> getAssetIssuesPaginated(long offset, long limit) {
+    if (limit < 0 || offset < 0) {
+      return null;
+    }
+    List<AssetIssueCapsule> assetIssueList = dbSource.allKeys().stream()
+        .map(this::get)
+        .collect(Collectors.toList());
+    if (assetIssueList.size() <= offset) {
+      return null;
+    }
+    assetIssueList.sort((o1, o2) -> {
+      return o1.getName().toStringUtf8().compareTo(o2.getName().toStringUtf8());
+    });
+    limit = limit > DatabaseConstants.ASSET_ISSUE_COUNT_LIMIT_MAX ? DatabaseConstants.ASSET_ISSUE_COUNT_LIMIT_MAX : limit;
+    long end = offset + limit;
+    end = end > assetIssueList.size() ? assetIssueList.size() : end ;
+    return assetIssueList.subList((int)offset,(int)end);
+  }
+
   @Override
-  public Iterator<Entry<byte[], AssetIssueWrapper>> iterator() {
+  public Iterator<Entry<byte[], AssetIssueCapsule>> iterator() {
     return new AssetIssueIterator(dbSource.iterator());
   }
 
@@ -94,10 +89,9 @@ public class AssetIssueStore extends ChainStore<AssetIssueWrapper> {
 
   private void deleteIndex(byte[] key) {
     if (Objects.nonNull(indexHelper)) {
-      AssetIssueWrapper item = get(key);
+      AssetIssueCapsule item = get(key);
       if (Objects.nonNull(item)) {
-        //TODO
-        //indexHelper.remove(item.getInstance());
+        indexHelper.remove(item.getInstance());
       }
     }
   }

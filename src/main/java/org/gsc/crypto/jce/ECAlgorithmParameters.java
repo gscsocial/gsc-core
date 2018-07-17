@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.gsc.crypto.jce;
 
 import java.io.IOException;
@@ -29,26 +30,7 @@ public final class ECAlgorithmParameters {
   public static final String ALGORITHM = "EC";
   public static final String CURVE_NAME = "secp256k1";
 
-  private ECAlgorithmParameters() { }
-
-  private static class Holder {
-    private static final AlgorithmParameters INSTANCE;
-
-    private static final ECGenParameterSpec SECP256K1_CURVE
-        = new ECGenParameterSpec(CURVE_NAME);
-
-    static {
-      try {
-        INSTANCE = AlgorithmParameters.getInstance(ALGORITHM);
-        INSTANCE.init(SECP256K1_CURVE);
-      } catch (NoSuchAlgorithmException ex) {
-        throw new AssertionError(
-            "Assumed the JRE supports EC algorithm params", ex);
-      } catch (InvalidParameterSpecException ex) {
-        throw new AssertionError(
-            "Assumed correct key spec statically", ex);
-      }
-    }
+  private ECAlgorithmParameters() {
   }
 
   public static ECParameterSpec getParameterSpec() {
@@ -66,6 +48,27 @@ public final class ECAlgorithmParameters {
     } catch (IOException ex) {
       throw new AssertionError(
           "Assumed algo params has been initialized", ex);
+    }
+  }
+
+  private static class Holder {
+
+    private static final AlgorithmParameters INSTANCE;
+
+    private static final ECGenParameterSpec SECP256K1_CURVE
+        = new ECGenParameterSpec(CURVE_NAME);
+
+    static {
+      try {
+        INSTANCE = AlgorithmParameters.getInstance(ALGORITHM);
+        INSTANCE.init(SECP256K1_CURVE);
+      } catch (NoSuchAlgorithmException ex) {
+        throw new AssertionError(
+            "Assumed the JRE supports EC algorithm params", ex);
+      } catch (InvalidParameterSpecException ex) {
+        throw new AssertionError(
+            "Assumed correct key spec statically", ex);
+      }
     }
   }
 }

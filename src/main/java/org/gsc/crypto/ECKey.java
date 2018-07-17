@@ -1,10 +1,26 @@
+/*
+ * Copyright (c) [2016] [ <ether.camp> ]
+ * This file is part of the ethereumJ library.
+ *
+ * The ethereumJ library is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The ethereumJ library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.gsc.crypto;
 
-import static java.util.Arrays.copyOfRange;
 import static org.gsc.common.utils.BIUtil.isLessThan;
 import static org.gsc.common.utils.ByteUtil.bigIntegerToBytes;
 
-import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -12,13 +28,10 @@ import java.nio.charset.Charset;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.interfaces.ECPrivateKey;
@@ -28,12 +41,11 @@ import java.util.Arrays;
 import javax.annotation.Nullable;
 import javax.crypto.KeyAgreement;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.utils.ByteUtil;
 import org.gsc.crypto.jce.ECKeyAgreement;
 import org.gsc.crypto.jce.ECKeyFactory;
 import org.gsc.crypto.jce.ECKeyPairGenerator;
 import org.gsc.crypto.jce.ECSignatureFactory;
-import org.gsc.crypto.jce.SpongyCastleProvider;
+import org.gsc.crypto.jce.GscCastleProvider;
 import org.spongycastle.asn1.ASN1InputStream;
 import org.spongycastle.asn1.ASN1Integer;
 import org.spongycastle.asn1.DLSequence;
@@ -62,6 +74,7 @@ import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.util.BigIntegers;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
+import org.gsc.common.utils.ByteUtil;
 
 @Slf4j
 public class ECKey implements Serializable {
@@ -158,7 +171,7 @@ public class ECKey implements Serializable {
    * @param secureRandom -
    */
   public ECKey(SecureRandom secureRandom) {
-    this(SpongyCastleProvider.getInstance(), secureRandom);
+    this(GscCastleProvider.getInstance(), secureRandom);
   }
 
   /**
@@ -194,7 +207,7 @@ public class ECKey implements Serializable {
    */
   public ECKey(@Nullable BigInteger priv, ECPoint pub) {
     this(
-        SpongyCastleProvider.getInstance(),
+        GscCastleProvider.getInstance(),
         privateKeyFromBigInteger(priv),
         pub
     );
@@ -229,7 +242,7 @@ public class ECKey implements Serializable {
     } else {
       try {
         return ECKeyFactory
-            .getInstance(SpongyCastleProvider.getInstance())
+            .getInstance(GscCastleProvider.getInstance())
             .generatePrivate(new ECPrivateKeySpec(priv,
                 CURVE_SPEC));
       } catch (InvalidKeySpecException ex) {
@@ -356,34 +369,8 @@ public class ECKey implements Serializable {
    * @return 21-byte address
    */
   public static byte[] computeAddress(byte[] pubBytes) {
-    return sha3omit12(
+    return Hash.sha3omit12(
         Arrays.copyOfRange(pubBytes, 1, pubBytes.length));
-  }
-
-  /**
-   * Calculates RIGTMOST160(SHA3(input)). This is used in address calculations. *
-   *
-   * @param input - data
-   * @return - add_pre_fix + 20 right bytes of the hash keccak of the data
-   */
-  public static byte[] sha3omit12(byte[] input) {
-    byte[] hash = sha3(input);
-    byte[] address = copyOfRange(hash, 11, hash.length);
-    return address;
-  }
-
-  public static byte[] sha3(byte[] input) {
-    MessageDigest digest;
-    try {
-      digest = MessageDigest.getInstance("GSC-KECCAK-256",
-          Security.getProvider("SC"));
-      digest.update(input);
-      return digest.digest();
-    } catch (NoSuchAlgorithmException e) {
-      logger.error("Can't find such algorithm", e);
-      throw new RuntimeException(e);
-    }
-
   }
 
   /**
@@ -443,17 +430,6 @@ public class ECKey implements Serializable {
             Arrays.copyOfRange(signatureEncoded, 1, 33),
             Arrays.copyOfRange(signatureEncoded, 33, 65),
             (byte) (signatureEncoded[0] & 0xFF)));
-  }
-
-  public static String getBase64FromByteString(ByteString sign) {
-    byte[] r = sign.substring(0, 32).toByteArray();
-    byte[] s = sign.substring(32, 64).toByteArray();
-    byte v = sign.byteAt(64);
-    if (v < 27) {
-      v += 27; //revId -> v
-    }
-    ECDSASignature signature = ECDSASignature.fromComponents(r, s, v);
-    return signature.toBase64();
   }
 
   public static byte[] signatureToKeyBytes(byte[] messageHash,
@@ -536,8 +512,7 @@ public class ECKey implements Serializable {
   }
 
   /**
-   * <p>Verifies the given ECDSA signature against the message bytes using the public key
-   * bytes.</p>
+   * <p>Verifies the given ECDSA signature against the message bytes using the public key bytes.</p>
    * <p> <p>When using native ECDSA verification, data must be 32 bytes, and no element may be
    * larger than 520 bytes.</p>
    *
@@ -599,10 +574,10 @@ public class ECKey implements Serializable {
    * <p>Given the components of a signature and a selector value, recover and return the public key
    * that generated the signature according to the algorithm in SEC1v2 section 4.1.6.</p>
    *
-   * <p> <p>The recId is an index from 0 to 3 which indicates which of the 4 possible allKeys is
-   * the correct one. Because the key recovery operation yields multiple potential allKeys, the
-   * correct key must either be stored alongside the signature, or you must be willing to try each
-   * recId in turn until you find one that outputs the key you are expecting.</p>
+   * <p> <p>The recId is an index from 0 to 3 which indicates which of the 4 possible allKeys is the
+   * correct one. Because the key recovery operation yields multiple potential allKeys, the correct
+   * key must either be stored alongside the signature, or you must be willing to try each recId in
+   * turn until you find one that outputs the key you are expecting.</p>
    *
    * <p> <p>If this method returns null it means recovery was not possible and recId should be
    * iterated.</p>
@@ -1079,7 +1054,8 @@ public class ECKey implements Serializable {
     if (this == o) {
       return true;
     }
-    if (o == null || !(o instanceof ECKey)) {
+
+    if (o == null || getClass() != o.getClass()) {
       return false;
     }
 
@@ -1234,7 +1210,7 @@ public class ECKey implements Serializable {
 
       return ByteUtil.merge(
           ByteUtil.bigIntegerToBytes(this.r, 32),
-          ByteUtil.bigIntegerToBytes(this.s, 32),
+          ByteUtil.bigIntegerToBytes(this.s,32),
           new byte[]{fixedV});
     }
 

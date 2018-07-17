@@ -5,16 +5,17 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.common.exception.BadItemException;
-import org.gsc.common.exception.StoreException;
-import org.gsc.core.wrapper.TransactionWrapper;
-import org.gsc.db.storage.Iterator.TransactionIterator;
+import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.db.common.iterator.TransactionIterator;
+import org.gsc.core.exception.BadItemException;
+import org.gsc.core.exception.StoreException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
 @Slf4j
 @Component
-public class TransactionStore extends ChainStore<TransactionWrapper> {
+public class TransactionStore extends GscStoreWithRevoking<TransactionCapsule> {
 
   @Autowired
   private TransactionStore(@Value("trans") String dbName) {
@@ -22,9 +23,9 @@ public class TransactionStore extends ChainStore<TransactionWrapper> {
   }
 
   @Override
-  public TransactionWrapper get(byte[] key) throws BadItemException {
+  public TransactionCapsule get(byte[] key) throws BadItemException {
     byte[] value = dbSource.getData(key);
-    return ArrayUtils.isEmpty(value) ? null : new TransactionWrapper(value);
+    return ArrayUtils.isEmpty(value) ? null : new TransactionCapsule(value);
   }
 
   @Override
@@ -35,11 +36,10 @@ public class TransactionStore extends ChainStore<TransactionWrapper> {
   }
 
   @Override
-  public void put(byte[] key, TransactionWrapper item) {
+  public void put(byte[] key, TransactionCapsule item) {
     super.put(key, item);
     if (Objects.nonNull(indexHelper)) {
-      //TODO
-      //indexHelper.update(item.getInstance());
+      indexHelper.update(item.getInstance());
     }
   }
 
@@ -50,25 +50,8 @@ public class TransactionStore extends ChainStore<TransactionWrapper> {
     return dbSource.getTotal();
   }
 
-  private static TransactionStore instance;
-
-  public static void destory() {
-    instance = null;
-  }
-
-  public static void destroy() {
-    instance = null;
-  }
-
-  /**
-   * find a transaction  by it's id.
-   */
-  public byte[] findTransactionByHash(byte[] trxHash) {
-    return dbSource.getData(trxHash);
-  }
-
   @Override
-  public Iterator<Entry<byte[], TransactionWrapper>> iterator() {
+  public Iterator<Entry<byte[], TransactionCapsule>> iterator() {
     return new TransactionIterator(dbSource.iterator());
   }
 
@@ -80,12 +63,11 @@ public class TransactionStore extends ChainStore<TransactionWrapper> {
 
   private void deleteIndex(byte[] key) {
     if (Objects.nonNull(indexHelper)) {
-      TransactionWrapper item;
+      TransactionCapsule item;
       try {
         item = get(key);
         if (Objects.nonNull(item)) {
-          //TODO
-          //indexHelper.remove(item.getInstance());
+          indexHelper.remove(item.getInstance());
         }
       } catch (StoreException e) {
         return;

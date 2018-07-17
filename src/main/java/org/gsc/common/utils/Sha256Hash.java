@@ -1,20 +1,5 @@
 package org.gsc.common.utils;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-import com.google.common.io.ByteStreams;
-import com.google.common.primitives.Ints;
-import com.google.common.primitives.Longs;
-import com.google.protobuf.ByteString;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.Serializable;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-
 /*
  * Copyright 2011 Google Inc.
  * Copyright 2014 Andreas Schildbach
@@ -32,6 +17,21 @@ import java.util.Arrays;
  * limitations under the License.
  */
 
+import static com.google.common.base.Preconditions.checkArgument;
+
+import com.google.common.io.ByteStreams;
+import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
+import com.google.protobuf.ByteString;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+
 
 /**
  * A Sha256Hash just wraps a byte[] so that equals and hashcode work correctly, allowing it to be
@@ -44,7 +44,6 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
   public static final Sha256Hash ZERO_HASH = wrap(new byte[LENGTH]);
 
   private final byte[] bytes;
-
 
   private byte[] generateBlockId(long blockNum, Sha256Hash blockHash) {
     byte[] numBytes = Longs.toByteArray(blockNum);
@@ -236,7 +235,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
 
   @Override
   public String toString() {
-    return org.gsc.common.utils.ByteArray.toHexString(bytes);
+    return ByteArray.toHexString(bytes);
   }
 
   /**
@@ -288,4 +287,3 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
     return 0;
   }
 }
-

@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package org.gsc.crypto.jce;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -40,9 +41,43 @@ public final class ECKeyPairGenerator {
   private static final ECGenParameterSpec SECP256K1_CURVE
       = new ECGenParameterSpec(CURVE_NAME);
 
-  private ECKeyPairGenerator() { }
+  private ECKeyPairGenerator() {
+  }
+
+  public static KeyPair generateKeyPair() {
+    return Holder.INSTANCE.generateKeyPair();
+  }
+
+  public static KeyPairGenerator getInstance(final String provider, final
+  SecureRandom random) throws NoSuchProviderException {
+    try {
+      final KeyPairGenerator gen = KeyPairGenerator.getInstance
+          (ALGORITHM, provider);
+      gen.initialize(SECP256K1_CURVE, random);
+      return gen;
+    } catch (NoSuchAlgorithmException ex) {
+      throw new AssertionError(algorithmAssertionMsg, ex);
+    } catch (InvalidAlgorithmParameterException ex) {
+      throw new AssertionError(keySpecAssertionMsg, ex);
+    }
+  }
+
+  public static KeyPairGenerator getInstance(final Provider provider, final
+  SecureRandom random) {
+    try {
+      final KeyPairGenerator gen = KeyPairGenerator.getInstance
+          (ALGORITHM, provider);
+      gen.initialize(SECP256K1_CURVE, random);
+      return gen;
+    } catch (NoSuchAlgorithmException ex) {
+      throw new AssertionError(algorithmAssertionMsg, ex);
+    } catch (InvalidAlgorithmParameterException ex) {
+      throw new AssertionError(keySpecAssertionMsg, ex);
+    }
+  }
 
   private static class Holder {
+
     private static final KeyPairGenerator INSTANCE;
 
     static {
@@ -54,34 +89,6 @@ public final class ECKeyPairGenerator {
       } catch (InvalidAlgorithmParameterException ex) {
         throw new AssertionError(keySpecAssertionMsg, ex);
       }
-    }
-  }
-
-  public static KeyPair generateKeyPair() {
-    return Holder.INSTANCE.generateKeyPair();
-  }
-
-  public static KeyPairGenerator getInstance(final String provider, final SecureRandom random) throws NoSuchProviderException {
-    try {
-      final KeyPairGenerator gen = KeyPairGenerator.getInstance(ALGORITHM, provider);
-      gen.initialize(SECP256K1_CURVE, random);
-      return gen;
-    } catch (NoSuchAlgorithmException ex) {
-      throw new AssertionError(algorithmAssertionMsg, ex);
-    } catch (InvalidAlgorithmParameterException ex) {
-      throw new AssertionError(keySpecAssertionMsg, ex);
-    }
-  }
-
-  public static KeyPairGenerator getInstance(final Provider provider, final SecureRandom random) {
-    try {
-      final KeyPairGenerator gen = KeyPairGenerator.getInstance(ALGORITHM, provider);
-      gen.initialize(SECP256K1_CURVE, random);
-      return gen;
-    } catch (NoSuchAlgorithmException ex) {
-      throw new AssertionError(algorithmAssertionMsg, ex);
-    } catch (InvalidAlgorithmParameterException ex) {
-      throw new AssertionError(keySpecAssertionMsg, ex);
     }
   }
 }

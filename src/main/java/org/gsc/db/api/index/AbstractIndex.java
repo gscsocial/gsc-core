@@ -10,16 +10,15 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Objects;
-import org.gsc.config.Args;
-import org.gsc.core.wrapper.StoreWrapper;
-import org.gsc.db.Store;
-import org.gsc.db.WrappedByteArray;
-import org.gsc.db.WrappedResultSet;
-import org.gsc.db.api.index.Index.Iface;
+import org.gsc.core.wrapper.ProtoCapsule;
+import org.gsc.config.args.Args;
+import org.gsc.db.GscDatabase;
+import org.gsc.db.common.WrappedByteArray;
+import org.gsc.db.common.WrappedResultSet;
 
-public abstract class AbstractIndex<E extends StoreWrapper<T>, T> implements Iface<T> {
+public abstract class AbstractIndex<E extends ProtoCapsule<T>, T> implements Index.Iface<T> {
 
-  protected Store<E> database;
+  protected GscDatabase<E> database;
   protected ConcurrentIndexedCollection<WrappedByteArray> index;
   private File parent = new File(Args.getInstance().getOutputDirectory() + "index");
   protected File indexPath;
@@ -32,7 +31,7 @@ public abstract class AbstractIndex<E extends StoreWrapper<T>, T> implements Ifa
     setAttribute();
   }
 
-  public AbstractIndex(Store<E> database) {
+  public AbstractIndex(GscDatabase<E> database) {
     this.database = database;
     String dbName = database.getDbSource().getDBName();
     File parentDir = Paths.get(

@@ -7,35 +7,47 @@ public enum MessageTypes {
 
   FIRST(0x00),
 
-  DISCOVER_PING(0x01),
+  TRX(0x01),
 
-  DISCOVER_PONG(0x02),
+  BLOCK(0x02),
 
-  DISCOVER_FIND_PEER(0x03),
+  TRXS(0x03),
 
-  DISCOVER_PEERS(0x04),
+  BLOCKS(0x04),
 
-  P2P_HELLO(0x05),
+  BLOCKHEADERS(0x05),
 
-  P2P_DISCONNECT(0x06),
+  INVENTORY(0x06),
 
-  P2P_PING(0x07),
+  FETCH_INV_DATA(0x07),
 
-  P2P_PONG(0x08),
+  SYNC_BLOCK_CHAIN(0x08),
 
-  BLOCK(0x10),
+  BLOCK_CHAIN_INVENTORY(0x09),
 
-  TRANSACTION(0x11),
+  ITEM_NOT_FOUND(0x10),
 
-  INVENTORY(0x12),
+  FETCH_BLOCK_HEADERS(0x11),
 
-  FETCH(0x13),
+  BLOCK_INVENTORY(0x12),
 
-  SYNC(0x14),
+  TRX_INVENTORY(0x13),
 
-  ATTENTION(0x15),
+  P2P_HELLO(0x20),
 
-  TIME(0x16),
+  P2P_DISCONNECT(0x21),
+
+  P2P_PING(0x22),
+
+  P2P_PONG(0x23),
+
+  DISCOVER_PING(0x30),
+
+  DISCOVER_PONG(0x31),
+
+  DISCOVER_FIND_PEER(0x32),
+
+  DISCOVER_PEERS(0x33),
 
   LAST(0xFF);
 
@@ -70,34 +82,29 @@ public enum MessageTypes {
   }
 
   public static boolean inGscRange(byte code) {
-    return false;
+    return code <= TRX_INVENTORY.asByte() && code >= FIRST.asByte();
   }
 
   @Override
   public String toString() {
     switch (type) {
       case 1:
-        return "DISCOVER_PING";
+        return "TRX";
       case 2:
-        return "DISCOVER_PONG";
-      case 3:
-        return "DISCOVER_FIND_PEER";
-      case 4:
-        return "DISCOVER_PEERS";
-      case 5:
-        return "P2P_HELLO";
+        return "BLOCK";
       case 6:
-        return "P2P_DISCONNECT";
+        return "INVENTORY";
       case 7:
-        return "P2P_PING";
+        return "FETCH_INV_DATA";
       case 8:
-        return "P2P_PONG";
+        return "SYNC_BLOCK_CHAIN";
+      case 11:
+        return "BLOCK_INVENTORY";
       default:
         break;
     }
     return super.toString();
   }
 }
-
 
 

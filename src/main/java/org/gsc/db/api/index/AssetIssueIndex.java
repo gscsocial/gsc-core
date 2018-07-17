@@ -1,25 +1,26 @@
 package org.gsc.db.api.index;
 
-import static com.googlecode.cqengine.query.QueryFactory.attribute;
-
 import com.googlecode.cqengine.attribute.Attribute;
 import com.googlecode.cqengine.attribute.SimpleAttribute;
 import com.googlecode.cqengine.index.disk.DiskIndex;
 import com.googlecode.cqengine.persistence.disk.DiskPersistence;
-import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.wrapper.AssetIssueWrapper;
-import org.gsc.db.Store;
-import org.gsc.db.WrappedByteArray;
-import org.gsc.protos.Contract.AssetIssueContract;
+import org.gsc.core.wrapper.AssetIssueCapsule;
+import org.gsc.db.GscDatabase;
+import org.gsc.db.common.WrappedByteArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.gsc.protos.Contract.AssetIssueContract;
+
+import javax.annotation.PostConstruct;
+
+import static com.googlecode.cqengine.query.QueryFactory.attribute;
 
 @Component
 @Slf4j
-public class AssetIssueIndex extends AbstractIndex<AssetIssueWrapper, AssetIssueContract> {
+public class AssetIssueIndex extends AbstractIndex<AssetIssueCapsule, AssetIssueContract> {
 
   public static Attribute<WrappedByteArray, String> AssetIssue_OWNER_ADDRESS;
   public static SimpleAttribute<WrappedByteArray, String> AssetIssue_NAME;
@@ -28,7 +29,7 @@ public class AssetIssueIndex extends AbstractIndex<AssetIssueWrapper, AssetIssue
 
   @Autowired
   public AssetIssueIndex(
-      @Qualifier("assetIssueStore") final Store<AssetIssueWrapper> database) {
+      @Qualifier("assetIssueStore") final GscDatabase<AssetIssueCapsule> database) {
     super(database);
   }
 

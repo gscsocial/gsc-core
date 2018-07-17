@@ -1,14 +1,14 @@
 package org.gsc.db;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.consensus.VotesWrapper;
-import org.gsc.db.iterator.DBIterator;
+import org.gsc.core.wrapper.VotesCapsule;
+import org.gsc.db.common.iterator.DBIterator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class VotesStore extends ChainStore<VotesWrapper> {
+public class VotesStore extends GscStoreWithRevoking<VotesCapsule> {
 
   @Autowired
   public VotesStore(@Value("votes") String dbName) {
@@ -16,9 +16,9 @@ public class VotesStore extends ChainStore<VotesWrapper> {
   }
 
   @Override
-  public VotesWrapper get(byte[] key) {
+  public VotesCapsule get(byte[] key) {
     byte[] value = dbSource.getData(key);
-    return ArrayUtils.isEmpty(value) ? null : new VotesWrapper(value);
+    return ArrayUtils.isEmpty(value) ? null : new VotesCapsule(value);
   }
 
   /**
@@ -33,7 +33,7 @@ public class VotesStore extends ChainStore<VotesWrapper> {
   }
 
   @Override
-  public void put(byte[] key, VotesWrapper item) {
+  public void put(byte[] key, VotesCapsule item) {
     super.put(key, item);
   }
 
