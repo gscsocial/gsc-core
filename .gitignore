@@ -21,6 +21,7 @@ doc
 
 # protobuf generated classes
 src/main/gen
+src/main/protos
 
 /bin/
 
