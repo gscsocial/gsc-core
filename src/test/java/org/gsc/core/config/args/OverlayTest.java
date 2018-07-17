@@ -15,6 +15,7 @@
 
 package org.gsc.core.config.args;
 
+import org.gsc.config.args.Overlay;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

@@ -20,9 +20,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.gsc.common.overlay.client.PeerClient;
-import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.db.ByteArrayWrapper;
+import org.gsc.config.args.Args;
+import org.gsc.db.ByteArrayWrapper;
 import org.gsc.protos.Protocol.ReasonCode;
 
 

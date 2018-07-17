@@ -18,8 +18,8 @@ import org.spongycastle.crypto.digests.SHA256Digest;
 import org.spongycastle.crypto.generators.PKCS5S2ParametersGenerator;
 import org.spongycastle.crypto.generators.SCrypt;
 import org.spongycastle.crypto.params.KeyParameter;
-import org.gsc.common.crypto.ECKey;
-import org.gsc.common.crypto.Hash;
+import org.gsc.crypto.ECKey;
+import org.gsc.crypto.Hash;
 import org.gsc.common.utils.ByteArray;
 
 /**

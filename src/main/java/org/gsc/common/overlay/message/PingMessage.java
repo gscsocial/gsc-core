@@ -1,7 +1,7 @@
 package org.gsc.common.overlay.message;
 
 import org.spongycastle.util.encoders.Hex;
-import org.gsc.core.net.message.MessageTypes;
+import org.gsc.net.message.MessageTypes;
 
 public class PingMessage extends P2pMessage {
 

@@ -1,7 +1,7 @@
 package org.gsc.core.net.node;
 
-import static org.gsc.core.net.message.MessageTypes.P2P_DISCONNECT;
-import static org.gsc.core.net.message.MessageTypes.P2P_HELLO;
+import static org.gsc.net.message.MessageTypes.P2P_DISCONNECT;
+import static org.gsc.net.message.MessageTypes.P2P_HELLO;
 import static org.gsc.protos.Protocol.ReasonCode.DUPLICATE_PEER;
 import static org.gsc.protos.Protocol.ReasonCode.FORKED;
 import static org.gsc.protos.Protocol.ReasonCode.INCOMPATIBLE_CHAIN;
@@ -30,11 +30,11 @@ import org.gsc.common.overlay.message.Message;
 import org.gsc.common.overlay.message.P2pMessage;
 import org.gsc.common.overlay.message.P2pMessageFactory;
 import org.gsc.common.utils.ReflectUtils;
-import org.gsc.core.capsule.BlockCapsule;
-import org.gsc.core.capsule.BlockCapsule.BlockId;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.net.message.BlockMessage;
-import org.gsc.core.net.peer.PeerConnection;
+import org.gsc.core.wrapper.BlockCapsule;
+import org.gsc.core.wrapper.BlockCapsule.BlockId;
+import org.gsc.config.args.Args;
+import org.gsc.net.message.BlockMessage;
+import org.gsc.net.peer.PeerConnection;
 import org.gsc.protos.Protocol.Block;
 
 @Slf4j

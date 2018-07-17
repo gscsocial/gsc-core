@@ -47,8 +47,8 @@ import org.gsc.common.overlay.discover.DiscoverListener;
 import org.gsc.common.overlay.discover.node.NodeHandler.State;
 import org.gsc.common.overlay.discover.table.NodeTable;
 import org.gsc.common.utils.CollectionUtils;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.db.Manager;
+import org.gsc.config.args.Args;
+import org.gsc.db.Manager;
 
 @Component
 public class NodeManager implements EventHandler {

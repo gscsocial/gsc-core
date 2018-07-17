@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.db.VotesStore;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -12,9 +13,9 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
-import org.gsc.core.capsule.VotesCapsule;
-import org.gsc.core.config.DefaultConfig;
-import org.gsc.core.config.args.Args;
+import org.gsc.core.wrapper.VotesCapsule;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
 import org.gsc.protos.Protocol.Vote;
 
 @Slf4j

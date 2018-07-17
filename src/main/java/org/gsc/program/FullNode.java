@@ -8,14 +8,13 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.gsc.api.GrpcAPI.AddressPrKeyPairMessage;
 import org.gsc.common.application.Application;
 import org.gsc.common.application.ApplicationFactory;
-import org.gsc.common.crypto.ECKey;
+import org.gsc.crypto.ECKey;
 import org.gsc.common.utils.Utils;
-import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.config.DefaultConfig;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.services.RpcApiService;
-import org.gsc.core.services.WitnessService;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
+import org.gsc.services.RpcApiService;
+import org.gsc.services.WitnessService;
 
 @Slf4j
 public class FullNode {

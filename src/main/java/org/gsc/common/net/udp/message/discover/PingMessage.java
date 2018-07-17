@@ -6,9 +6,8 @@ import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.net.udp.message.Message;
-import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.config.args.Args;
+import org.gsc.config.args.Args;
 import org.gsc.protos.Discover;
 import org.gsc.protos.Discover.Endpoint;
 

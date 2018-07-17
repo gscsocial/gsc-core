@@ -3,6 +3,8 @@ package org.gsc.core.db;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import java.util.Random;
+
+import org.gsc.db.AccountIndexStore;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -11,9 +13,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.capsule.AccountCapsule;
-import org.gsc.core.config.DefaultConfig;
-import org.gsc.core.config.args.Args;
+import org.gsc.core.wrapper.AccountCapsule;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
 import org.gsc.protos.Protocol.AccountType;
 
 public class AccountIndexStoreTest {

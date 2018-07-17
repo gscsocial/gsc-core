@@ -11,9 +11,9 @@ import org.gsc.common.application.Application;
 import org.gsc.common.application.ApplicationFactory;
 import org.gsc.common.overlay.client.DatabaseGrpcClient;
 import org.gsc.core.Constant;
-import org.gsc.core.config.DefaultConfig;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.services.RpcApiService;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
+import org.gsc.services.RpcApiService;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.DynamicProperties;
 

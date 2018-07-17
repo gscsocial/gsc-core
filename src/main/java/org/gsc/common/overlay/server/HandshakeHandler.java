@@ -35,14 +35,9 @@ import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.overlay.message.DisconnectMessage;
-import org.gsc.common.overlay.message.HelloMessage;
-import org.gsc.common.overlay.message.P2pMessage;
-import org.gsc.common.overlay.message.P2pMessageFactory;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.db.Manager;
-import org.gsc.core.net.peer.PeerConnection;
+import org.gsc.config.args.Args;
+import org.gsc.db.Manager;
+import org.gsc.net.peer.PeerConnection;
 import org.gsc.protos.Protocol.ReasonCode;
 
 @Component

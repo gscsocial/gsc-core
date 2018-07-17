@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import org.gsc.core.db.ByteArrayWrapper;
+import org.gsc.db.ByteArrayWrapper;
 
 
 public class ByteArraySet implements Set<byte[]> {

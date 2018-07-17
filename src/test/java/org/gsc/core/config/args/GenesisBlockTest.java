@@ -17,6 +17,10 @@ package org.gsc.core.config.args;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.gsc.config.args.Account;
+import org.gsc.config.args.GenesisBlock;
+import org.gsc.config.args.Witness;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

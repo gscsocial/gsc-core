@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Maps;
-import org.gsc.core.db.ByteArrayWrapper;
+import org.gsc.db.ByteArrayWrapper;
 
 
 public class ByteArrayMap<V> implements Map<byte[], V> {

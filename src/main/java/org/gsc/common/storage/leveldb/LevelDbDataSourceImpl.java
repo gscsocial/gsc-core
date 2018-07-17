@@ -42,8 +42,8 @@ import org.iq80.leveldb.WriteBatch;
 import org.iq80.leveldb.WriteOptions;
 import org.gsc.common.storage.DbSourceInter;
 import org.gsc.common.utils.FileUtil;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.db.common.iterator.StoreIterator;
+import org.gsc.config.args.Args;
+import org.gsc.db.common.iterator.StoreIterator;
 
 @Slf4j
 @NoArgsConstructor
@@ -392,7 +392,7 @@ public class LevelDbDataSourceImpl implements DbSourceInter<byte[]>,
   }
 
   @Override
-  public org.gsc.core.db.common.iterator.DBIterator iterator() {
+  public org.gsc.db.common.iterator.DBIterator iterator() {
     return new StoreIterator(database.iterator());
   }
 

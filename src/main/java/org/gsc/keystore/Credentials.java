@@ -1,6 +1,6 @@
 package org.gsc.keystore;
 
-import org.gsc.common.crypto.ECKey;
+import org.gsc.crypto.ECKey;
 import org.gsc.common.utils.ByteArray;
 
 /**

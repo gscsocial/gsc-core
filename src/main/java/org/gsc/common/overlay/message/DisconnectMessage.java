@@ -1,6 +1,6 @@
 package org.gsc.common.overlay.message;
 
-import org.gsc.core.net.message.MessageTypes;
+import org.gsc.net.message.MessageTypes;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.ReasonCode;
 

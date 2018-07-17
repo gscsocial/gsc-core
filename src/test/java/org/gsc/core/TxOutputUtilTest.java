@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.capsule.utils.TxOutputUtil;
+import org.gsc.core.wrapper.utils.TxOutputUtil;
 import org.gsc.protos.Protocol.TXOutput;
 
 @Slf4j

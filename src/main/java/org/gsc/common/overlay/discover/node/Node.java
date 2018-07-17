@@ -17,14 +17,14 @@
  */
 package org.gsc.common.overlay.discover.node;
 
-import static org.gsc.common.crypto.Hash.sha3;
+import static org.gsc.crypto.Hash.sha3;
 
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.commons.lang3.StringUtils;
 import org.spongycastle.util.encoders.Hex;
-import org.gsc.common.crypto.ECKey;
+import org.gsc.crypto.ECKey;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Utils;
 

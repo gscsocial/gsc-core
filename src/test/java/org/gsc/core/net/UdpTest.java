@@ -17,8 +17,8 @@ import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.overlay.discover.node.NodeManager;
 import org.gsc.common.overlay.discover.RefreshTask;
 import org.gsc.common.utils.FileUtil;
-import org.gsc.core.config.DefaultConfig;
-import org.gsc.core.config.args.Args;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;

@@ -19,6 +19,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.net.node.NodeDelegate;
+import org.gsc.net.node.NodeDelegateImpl;
+import org.gsc.net.node.NodeImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -29,12 +32,12 @@ import org.gsc.common.overlay.server.ChannelManager;
 import org.gsc.common.overlay.server.SyncPool;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.common.utils.ReflectUtils;
-import org.gsc.core.config.DefaultConfig;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.db.Manager;
-import org.gsc.core.net.peer.PeerConnection;
-import org.gsc.core.services.RpcApiService;
-import org.gsc.core.services.WitnessService;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
+import org.gsc.db.Manager;
+import org.gsc.net.peer.PeerConnection;
+import org.gsc.services.RpcApiService;
+import org.gsc.services.WitnessService;
 
 @Slf4j
 public abstract class BaseNetTest {

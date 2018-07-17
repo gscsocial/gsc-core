@@ -29,7 +29,7 @@ import org.gsc.common.net.udp.message.discover.FindNodeMessage;
 import org.gsc.common.net.udp.message.discover.NeighborsMessage;
 import org.gsc.common.net.udp.message.discover.PingMessage;
 import org.gsc.common.net.udp.message.discover.PongMessage;
-import org.gsc.core.config.args.Args;
+import org.gsc.config.args.Args;
 
 /**
  * The instance of this class responsible for discovery messages exchange with the specified Node It

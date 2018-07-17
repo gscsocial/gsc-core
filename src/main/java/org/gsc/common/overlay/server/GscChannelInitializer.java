@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.gsc.core.net.node.NodeImpl;
-import org.gsc.core.net.peer.PeerConnection;
+import org.gsc.net.node.NodeImpl;
+import org.gsc.net.peer.PeerConnection;
 
 /**
  * @author Roman Mandeleil

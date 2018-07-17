@@ -14,10 +14,10 @@
  */
 package org.gsc.common.application;
 
-import org.gsc.core.config.args.Args;
-import org.gsc.core.db.BlockStore;
-import org.gsc.core.db.Manager;
-import org.gsc.core.net.node.Node;
+import org.gsc.config.args.Args;
+import org.gsc.db.BlockStore;
+import org.gsc.db.Manager;
+import org.gsc.net.node.Node;
 
 public class CliApplication implements Application {
 

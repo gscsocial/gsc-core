@@ -14,7 +14,7 @@
  */
 package org.gsc.common.application;
 
-import org.gsc.core.config.args.Args;
+import org.gsc.config.args.Args;
 
 public interface Service {
 

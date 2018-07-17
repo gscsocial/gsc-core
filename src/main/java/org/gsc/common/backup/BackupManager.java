@@ -3,21 +3,14 @@ package org.gsc.common.backup;
 import static org.gsc.common.backup.BackupManager.BackupStatusEnum.INIT;
 import static org.gsc.common.backup.BackupManager.BackupStatusEnum.MASTER;
 import static org.gsc.common.backup.BackupManager.BackupStatusEnum.SLAVER;
-import static org.gsc.common.net.udp.message.UdpMessageTypeEnum.BACKUP_KEEP_ALIVE;
 
 import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
+
 import org.gsc.common.net.udp.handler.EventHandler;
 import org.gsc.common.net.udp.handler.MessageHandler;
 import org.gsc.common.net.udp.handler.UdpEvent;
@@ -26,20 +19,8 @@ import org.gsc.common.net.udp.message.UdpMessageTypeEnum;
 import org.gsc.common.net.udp.message.backup.KeepAliveMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.gsc.common.net.udp.handler.EventHandler;
-import org.gsc.common.net.udp.handler.MessageHandler;
-import org.gsc.common.net.udp.handler.UdpEvent;
-import org.gsc.common.net.udp.message.Message;
-import org.gsc.common.net.udp.message.backup.KeepAliveMessage;
-import org.gsc.common.net.udp.message.discover.FindNodeMessage;
-import org.gsc.common.net.udp.message.discover.NeighborsMessage;
-import org.gsc.common.net.udp.message.discover.PingMessage;
-import org.gsc.common.net.udp.message.discover.PongMessage;
-import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.common.overlay.discover.node.NodeHandler;
-import org.gsc.core.config.args.Args;
+import org.gsc.config.args.Args;
 
 @Component
 public class BackupManager implements EventHandler {

@@ -15,6 +15,7 @@
 
 package org.gsc.core.config.args;
 
+import org.gsc.config.args.Witness;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

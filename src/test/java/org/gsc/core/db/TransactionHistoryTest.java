@@ -1,6 +1,8 @@
 package org.gsc.core.db;
 
 import java.io.File;
+
+import org.gsc.db.TransactionHistoryStore;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -9,9 +11,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
-import org.gsc.core.capsule.TransactionInfoCapsule;
-import org.gsc.core.config.DefaultConfig;
-import org.gsc.core.config.args.Args;
+import org.gsc.core.wrapper.TransactionInfoCapsule;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
 import org.gsc.core.exception.BadItemException;
 
 public class TransactionHistoryTest {

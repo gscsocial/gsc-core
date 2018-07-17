@@ -17,7 +17,7 @@ import org.gsc.api.GrpcAPI;
 import org.gsc.api.GrpcAPI.NumberMessage;
 import org.gsc.api.GrpcAPI.Return;
 import org.gsc.api.WalletGrpc;
-import org.gsc.common.crypto.ECKey;
+import org.gsc.crypto.ECKey;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Utils;
 import org.gsc.core.Wallet;

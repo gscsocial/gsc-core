@@ -17,6 +17,7 @@ package org.gsc.core.config.args;
 
 import com.google.protobuf.ByteString;
 import org.apache.commons.lang3.ArrayUtils;
+import org.gsc.config.args.Account;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

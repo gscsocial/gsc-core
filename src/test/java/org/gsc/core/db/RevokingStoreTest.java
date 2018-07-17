@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.db.AbstractRevokingStore;
+import org.gsc.db.GscStoreWithRevoking;
+import org.gsc.db.RevokingDatabase;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,9 +18,9 @@ import org.junit.Test;
 import org.gsc.common.utils.DialogOptional;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
-import org.gsc.core.capsule.ProtoCapsule;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.db.AbstractRevokingStore.Dialog;
+import org.gsc.core.wrapper.ProtoCapsule;
+import org.gsc.config.args.Args;
+import org.gsc.db.AbstractRevokingStore.Dialog;
 import org.gsc.core.exception.RevokingStoreIllegalStateException;
 
 @Slf4j

@@ -7,7 +7,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.net.message.MessageTypes;
+import org.gsc.net.message.MessageTypes;
 
 public abstract class Message {
 

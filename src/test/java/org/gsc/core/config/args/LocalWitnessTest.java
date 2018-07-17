@@ -16,6 +16,7 @@
 package org.gsc.core.config.args;
 
 import com.google.common.collect.Lists;
+import org.gsc.config.args.LocalWitnesses;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

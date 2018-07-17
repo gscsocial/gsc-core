@@ -20,7 +20,7 @@ package org.gsc.common.overlay.message;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.core.exception.P2pException;
-import org.gsc.core.net.message.MessageTypes;
+import org.gsc.net.message.MessageTypes;
 
 public class P2pMessageFactory extends MessageFactory {
 

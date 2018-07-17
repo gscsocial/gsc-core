@@ -42,13 +42,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.gsc.common.overlay.client.PeerClient;
-import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.common.overlay.discover.node.NodeHandler;
-import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.overlay.discover.node.NodeStatistics;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.net.peer.PeerConnection;
-import org.gsc.core.net.peer.PeerConnectionDelegate;
+import org.gsc.config.args.Args;
+import org.gsc.net.peer.PeerConnection;
+import org.gsc.net.peer.PeerConnectionDelegate;
 
 @Component
 public class SyncPool {

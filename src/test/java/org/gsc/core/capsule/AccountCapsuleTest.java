@@ -5,13 +5,15 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import org.gsc.core.wrapper.AccountCapsule;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
-import org.gsc.core.config.args.Args;
+import org.gsc.config.args.Args;
 import org.gsc.protos.Protocol.Vote;
 import org.gsc.protos.Protocol.AccountType;
 

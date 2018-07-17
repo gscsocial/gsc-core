@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.net.node.NodeImpl;
+import org.gsc.config.args.Args;
+import org.gsc.net.node.NodeImpl;
 
 @Component
 public class PeerServer {

@@ -3,6 +3,7 @@ package org.gsc.common.crypto;
 import static org.junit.Assert.assertEquals;
 
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.crypto.ECKey;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 import org.gsc.common.utils.ByteArray;

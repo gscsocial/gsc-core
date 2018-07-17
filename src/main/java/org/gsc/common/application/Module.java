@@ -15,16 +15,13 @@
 
 package org.gsc.common.application;
 
-import static org.gsc.core.Constant.BLOCK_DB_NAME;
-import static org.gsc.core.Constant.TRANSACTION_DB_NAME;
-
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import javax.inject.Named;
 import org.gsc.core.Constant;
 import org.gsc.common.storage.leveldb.LevelDbDataSourceImpl;
-import org.gsc.core.config.args.Args;
+import org.gsc.config.args.Args;
 
 public class Module extends AbstractModule {
 

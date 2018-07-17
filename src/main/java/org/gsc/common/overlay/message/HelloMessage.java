@@ -2,12 +2,11 @@ package org.gsc.common.overlay.message;
 
 import com.google.protobuf.ByteString;
 import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.capsule.BlockCapsule;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.net.message.MessageTypes;
+import org.gsc.core.wrapper.BlockCapsule;
+import org.gsc.config.args.Args;
+import org.gsc.net.message.MessageTypes;
 import org.gsc.protos.Discover.Endpoint;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.HelloMessage.Builder;

@@ -38,17 +38,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.overlay.discover.node.NodeStatistics;
-import org.gsc.common.overlay.message.DisconnectMessage;
-import org.gsc.common.overlay.message.HelloMessage;
-import org.gsc.common.overlay.message.MessageCodec;
-import org.gsc.common.overlay.message.StaticMessages;
-import org.gsc.core.db.ByteArrayWrapper;
+import org.gsc.db.ByteArrayWrapper;
 import org.gsc.core.exception.P2pException;
-import org.gsc.core.net.peer.PeerConnectionDelegate;
-import org.gsc.core.net.peer.GscHandler;
+import org.gsc.net.peer.PeerConnectionDelegate;
+import org.gsc.net.peer.GscHandler;
 import org.gsc.protos.Protocol.ReasonCode;
 
 @Component

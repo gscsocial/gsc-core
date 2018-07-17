@@ -11,14 +11,10 @@ import org.gsc.keystore.Credentials;
 import org.gsc.keystore.WalletUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.gsc.common.crypto.ECKey;
+import org.gsc.crypto.ECKey;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Utils;
-import org.gsc.core.Constant;
-import org.gsc.core.config.args.Args;
-import org.gsc.keystore.CipherException;
-import org.gsc.keystore.Credentials;
-import org.gsc.keystore.WalletUtils;
+import org.gsc.config.args.Args;
 
 
 public class KeystoreFactory {

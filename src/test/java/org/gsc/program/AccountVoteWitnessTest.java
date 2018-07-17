@@ -10,11 +10,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.core.Constant;
-import org.gsc.core.capsule.AccountCapsule;
-import org.gsc.core.capsule.WitnessCapsule;
-import org.gsc.core.config.DefaultConfig;
-import org.gsc.core.config.args.Args;
-import org.gsc.core.db.Manager;
+import org.gsc.core.wrapper.AccountCapsule;
+import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
+import org.gsc.db.Manager;
 import org.gsc.protos.Protocol.AccountType;
 
 @Slf4j

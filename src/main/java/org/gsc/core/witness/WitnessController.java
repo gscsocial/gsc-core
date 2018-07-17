@@ -17,20 +17,17 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.common.utils.Time;
 import org.gsc.core.exception.HeaderNotFound;
+import org.gsc.db.common.iterator.DBIterator;
 import org.joda.time.DateTime;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.StringUtil;
-import org.gsc.common.utils.Time;
-import org.gsc.core.capsule.AccountCapsule;
-import org.gsc.core.capsule.BlockCapsule;
-import org.gsc.core.capsule.VotesCapsule;
-import org.gsc.core.capsule.WitnessCapsule;
-import org.gsc.core.config.Parameter.ChainConstant;
-import org.gsc.core.db.AccountStore;
-import org.gsc.core.db.Manager;
-import org.gsc.core.db.VotesStore;
-import org.gsc.core.db.WitnessStore;
-import org.gsc.core.exception.HeaderNotFound;
+import org.gsc.core.wrapper.AccountCapsule;
+import org.gsc.core.wrapper.BlockCapsule;
+import org.gsc.core.wrapper.VotesCapsule;
+import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.config.Parameter.ChainConstant;
+import org.gsc.db.AccountStore;
+import org.gsc.db.Manager;
+import org.gsc.db.VotesStore;
+import org.gsc.db.WitnessStore;
 
 @Slf4j
 public class WitnessController {
@@ -246,7 +243,7 @@ public class WitnessController {
 
   private Map<ByteString, Long> countVote(VotesStore votesStore) {
     final Map<ByteString, Long> countWitness = Maps.newHashMap();
-    org.gsc.core.db.common.iterator.DBIterator dbIterator = votesStore.getIterator();
+    DBIterator dbIterator = votesStore.getIterator();
 
     long sizeCount = 0;
     while (dbIterator.hasNext()) {

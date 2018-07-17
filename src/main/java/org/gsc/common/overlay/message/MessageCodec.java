@@ -3,20 +3,15 @@ package org.gsc.common.overlay.message;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import java.io.IOException;
+
 import java.util.List;
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongycastle.util.encoders.Hex;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.gsc.common.overlay.server.Channel;
 import org.gsc.core.exception.P2pException;
-import org.gsc.core.net.message.MessageTypes;
-import org.gsc.core.net.message.GscMessageFactory;
+import org.gsc.net.message.MessageTypes;
+import org.gsc.net.message.GscMessageFactory;
 
 @Component
 @Scope("prototype")

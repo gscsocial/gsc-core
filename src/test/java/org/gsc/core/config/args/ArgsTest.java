@@ -19,6 +19,8 @@ import com.google.common.collect.Lists;
 import io.grpc.internal.GrpcUtil;
 import io.grpc.netty.NettyServerBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.config.args.Args;
+import org.gsc.config.args.GenesisBlock;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;

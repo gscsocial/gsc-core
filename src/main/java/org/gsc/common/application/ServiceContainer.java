@@ -17,7 +17,7 @@ package org.gsc.common.application;
 import java.util.ArrayList;
 
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.config.args.Args;
+import org.gsc.config.args.Args;
 
 @Slf4j
 public class ServiceContainer {

@@ -2,14 +2,15 @@ package org.gsc.core.db;
 
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.db.BlockStore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
-import org.gsc.core.config.DefaultConfig;
-import org.gsc.core.config.args.Args;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
 
 @Slf4j
 public class BlockStoreTest {

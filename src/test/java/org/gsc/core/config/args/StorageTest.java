@@ -15,6 +15,8 @@
 
 package org.gsc.core.config.args;
 
+import org.gsc.config.args.Args;
+import org.gsc.config.args.Storage;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.Options;
 import org.junit.AfterClass;
