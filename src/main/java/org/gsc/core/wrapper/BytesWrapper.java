@@ -1,10 +1,10 @@
 package org.gsc.core.wrapper;
 
-public class BytesCapsule implements ProtoCapsule {
+public class BytesWrapper implements ProtoWrapper {
 
   byte[] bytes;
 
-  public BytesCapsule(byte[] bytes) {
+  public BytesWrapper(byte[] bytes) {
     this.bytes = bytes;
   }
 

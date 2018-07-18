@@ -24,9 +24,9 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.AssetIssueCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.AssetIssueWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
 import org.gsc.db.Manager;
 import org.gsc.protos.Contract;
@@ -43,7 +43,7 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     try {
       final ParticipateAssetIssueContract participateAssetIssueContract =
@@ -52,24 +52,24 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
 
       //subtract from owner address
       byte[] ownerAddress = participateAssetIssueContract.getOwnerAddress().toByteArray();
-      AccountCapsule ownerAccount = this.dbManager.getAccountStore().get(ownerAddress);
+      AccountWrapper ownerAccount = this.dbManager.getAccountStore().get(ownerAddress);
       long balance = Math.subtractExact(ownerAccount.getBalance(), cost);
       balance = Math.subtractExact(balance, fee);
       ownerAccount.setBalance(balance);
 
       //calculate the exchange amount
-      AssetIssueCapsule assetIssueCapsule =
+      AssetIssueWrapper assetIssueWrapper =
           this.dbManager.getAssetIssueStore()
               .get(participateAssetIssueContract.getAssetName().toByteArray());
-      long exchangeAmount = Math.multiplyExact(cost, assetIssueCapsule.getNum());
-      exchangeAmount = Math.floorDiv(exchangeAmount, assetIssueCapsule.getTrxNum());
-      ownerAccount.addAssetAmount(assetIssueCapsule.getName(), exchangeAmount);
+      long exchangeAmount = Math.multiplyExact(cost, assetIssueWrapper.getNum());
+      exchangeAmount = Math.floorDiv(exchangeAmount, assetIssueWrapper.getTrxNum());
+      ownerAccount.addAssetAmount(assetIssueWrapper.getName(), exchangeAmount);
 
       //add to to_address
       byte[] toAddress = participateAssetIssueContract.getToAddress().toByteArray();
-      AccountCapsule toAccount = this.dbManager.getAccountStore().get(toAddress);
+      AccountWrapper toAccount = this.dbManager.getAccountStore().get(toAddress);
       toAccount.setBalance(Math.addExact(toAccount.getBalance(), cost));
-      if (!toAccount.reduceAssetAmount(assetIssueCapsule.getName(), exchangeAmount)) {
+      if (!toAccount.reduceAssetAmount(assetIssueWrapper.getName(), exchangeAmount)) {
         throw new ContractExeException("reduceAssetAmount failed !");
       }
 
@@ -136,7 +136,7 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
     }
 
     //Whether the account exist
-    AccountCapsule ownerAccount = this.dbManager.getAccountStore().get(ownerAddress);
+    AccountWrapper ownerAccount = this.dbManager.getAccountStore().get(ownerAddress);
     if (ownerAccount == null) {
       throw new ContractValidateException("Account does not exist!");
     }
@@ -148,36 +148,36 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
       }
 
       //Whether have the mapping
-      AssetIssueCapsule assetIssueCapsule = this.dbManager.getAssetIssueStore().get(assetName);
-      if (assetIssueCapsule == null) {
+      AssetIssueWrapper assetIssueWrapper = this.dbManager.getAssetIssueStore().get(assetName);
+      if (assetIssueWrapper == null) {
         throw new ContractValidateException("No asset named " + ByteArray.toStr(assetName));
       }
 
-      if (!Arrays.equals(toAddress, assetIssueCapsule.getOwnerAddress().toByteArray())) {
+      if (!Arrays.equals(toAddress, assetIssueWrapper.getOwnerAddress().toByteArray())) {
         throw new ContractValidateException(
             "The asset is not issued by " + ByteArray.toHexString(toAddress));
       }
       //Whether the exchange can be processed: to see if the exchange can be the exact int
       long now = dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp();
-      if (now >= assetIssueCapsule.getEndTime() || now < assetIssueCapsule
+      if (now >= assetIssueWrapper.getEndTime() || now < assetIssueWrapper
           .getStartTime()) {
         throw new ContractValidateException("No longer valid period!");
       }
 
-      int trxNum = assetIssueCapsule.getTrxNum();
-      int num = assetIssueCapsule.getNum();
+      int trxNum = assetIssueWrapper.getTrxNum();
+      int num = assetIssueWrapper.getNum();
       long exchangeAmount = Math.multiplyExact(amount, num);
       exchangeAmount = Math.floorDiv(exchangeAmount, trxNum);
       if (exchangeAmount <= 0) {
         throw new ContractValidateException("Can not process the exchange!");
       }
 
-      AccountCapsule toAccount = this.dbManager.getAccountStore().get(toAddress);
+      AccountWrapper toAccount = this.dbManager.getAccountStore().get(toAddress);
       if (toAccount == null) {
         throw new ContractValidateException("To account does not exist!");
       }
 
-      if (!toAccount.assetBalanceEnough(assetIssueCapsule.getName(), exchangeAmount)) {
+      if (!toAccount.assetBalanceEnough(assetIssueWrapper.getName(), exchangeAmount)) {
         throw new ContractValidateException("Asset balance is not enough !");
       }
     } catch (ArithmeticException e) {

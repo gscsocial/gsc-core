@@ -7,6 +7,7 @@ import com.google.protobuf.ByteString;
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.net.node.Item;
 import org.gsc.net.node.NodeDelegateImpl;
 import org.gsc.net.node.NodeImpl;
@@ -22,8 +23,7 @@ import org.gsc.common.overlay.server.SyncPool;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.core.Constant;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.BlockCapsule.BlockId;
+import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.core.wrapper.utils.BlockUtil;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.Parameter.NetConstants;
@@ -98,7 +98,7 @@ public class NodeImplTest {
   @Test
   public void testSyncBlockMessage() throws Exception {
     PeerConnection peer = new PeerConnection();
-    BlockCapsule genesisBlockCapsule = BlockUtil.newGenesisBlockCapsule();
+    BlockWrapper genesisBlockWrapper = BlockUtil.newGenesisBlockCapsule();
 
     ByteString witnessAddress = ByteString.copyFrom(
         ECKey.fromPrivate(
@@ -107,8 +107,8 @@ public class NodeImplTest {
             .getAddress());
     BlockHeader.raw raw = BlockHeader.raw.newBuilder()
         .setTimestamp(System.currentTimeMillis())
-        .setParentHash(genesisBlockCapsule.getParentHash().getByteString())
-        .setNumber(genesisBlockCapsule.getNum() + 1)
+        .setParentHash(genesisBlockWrapper.getParentHash().getByteString())
+        .setNumber(genesisBlockWrapper.getNum() + 1)
         .setWitnessAddress(witnessAddress)
         .setWitnessId(1).build();
     BlockHeader blockHeader = BlockHeader.newBuilder()
@@ -117,11 +117,11 @@ public class NodeImplTest {
 
     Block block = Block.newBuilder().setBlockHeader(blockHeader).build();
 
-    BlockCapsule blockCapsule = new BlockCapsule(block);
-    blockCapsule.sign(
+    BlockWrapper blockWrapper = new BlockWrapper(block);
+    blockWrapper.sign(
         ByteArray.fromHexString(Args.getInstance().getLocalWitnesses().getPrivateKey()));
-    blockCapsule.setMerkleRoot();
-    BlockMessage blockMessage = new BlockMessage(blockCapsule);
+    blockWrapper.setMerkleRoot();
+    BlockMessage blockMessage = new BlockMessage(blockWrapper);
     peer.getSyncBlockRequested().put(blockMessage.getBlockId(), System.currentTimeMillis());
     nodeImpl.onMessage(peer, blockMessage);
     Assert.assertEquals(peer.getSyncBlockRequested().size(), 0);
@@ -130,7 +130,7 @@ public class NodeImplTest {
   @Test
   public void testAdvBlockMessage() throws Exception {
     PeerConnection peer = new PeerConnection();
-    BlockCapsule genesisBlockCapsule = BlockUtil.newGenesisBlockCapsule();
+    BlockWrapper genesisBlockWrapper = BlockUtil.newGenesisBlockCapsule();
 
     ByteString witnessAddress = ByteString.copyFrom(
         ECKey.fromPrivate(
@@ -139,8 +139,8 @@ public class NodeImplTest {
             .getAddress());
     BlockHeader.raw raw = BlockHeader.raw.newBuilder()
         .setTimestamp(System.currentTimeMillis())
-        .setParentHash(genesisBlockCapsule.getBlockId().getByteString())
-        .setNumber(genesisBlockCapsule.getNum() + 1)
+        .setParentHash(genesisBlockWrapper.getBlockId().getByteString())
+        .setNumber(genesisBlockWrapper.getNum() + 1)
         .setWitnessAddress(witnessAddress)
         .setWitnessId(1).build();
     BlockHeader blockHeader = BlockHeader.newBuilder()
@@ -149,11 +149,11 @@ public class NodeImplTest {
 
     Block block = Block.newBuilder().setBlockHeader(blockHeader).build();
 
-    BlockCapsule blockCapsule = new BlockCapsule(block);
-    blockCapsule.setMerkleRoot();
-    blockCapsule.sign(
+    BlockWrapper blockWrapper = new BlockWrapper(block);
+    blockWrapper.setMerkleRoot();
+    blockWrapper.sign(
         ByteArray.fromHexString(Args.getInstance().getLocalWitnesses().getPrivateKey()));
-    BlockMessage blockMessage = new BlockMessage(blockCapsule);
+    BlockMessage blockMessage = new BlockMessage(blockWrapper);
     peer.getAdvObjWeRequested().put(new Item(blockMessage.getBlockId(), InventoryType.BLOCK), System.currentTimeMillis());
     nodeImpl.onMessage(peer, blockMessage);
     Assert.assertEquals(peer.getAdvObjWeRequested().size(), 0);

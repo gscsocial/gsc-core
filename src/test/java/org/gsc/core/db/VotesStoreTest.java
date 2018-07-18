@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
-import org.gsc.core.wrapper.VotesCapsule;
+import org.gsc.core.wrapper.VotesWrapper;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.protos.Protocol.Vote;
@@ -46,21 +46,21 @@ public class VotesStoreTest {
   public void putAndGetVotes() {
     List<Vote> oldVotes = new ArrayList<Vote>();
 
-    VotesCapsule votesCapsule = new VotesCapsule(ByteString.copyFromUtf8("100000000x"), oldVotes);
-    this.votesStore.put(votesCapsule.createDbKey(), votesCapsule);
+    VotesWrapper votesWrapper = new VotesWrapper(ByteString.copyFromUtf8("100000000x"), oldVotes);
+    this.votesStore.put(votesWrapper.createDbKey(), votesWrapper);
 
     Assert.assertTrue("votesStore is empyt", votesStore.getIterator().hasNext());
-    Assert.assertTrue(votesStore.has(votesCapsule.createDbKey()));
-    VotesCapsule votesSource = this.votesStore
+    Assert.assertTrue(votesStore.has(votesWrapper.createDbKey()));
+    VotesWrapper votesSource = this.votesStore
         .get(ByteString.copyFromUtf8("100000000x").toByteArray());
-    Assert.assertEquals(votesCapsule.getAddress(), votesSource.getAddress());
+    Assert.assertEquals(votesWrapper.getAddress(), votesSource.getAddress());
     Assert.assertEquals(ByteString.copyFromUtf8("100000000x"), votesSource.getAddress());
 
-//    votesCapsule = new VotesCapsule(ByteString.copyFromUtf8(""), oldVotes);
-//    this.votesStore.put(votesCapsule.createDbKey(), votesCapsule);
+//    votesWrapper = new VotesWrapper(ByteString.copyFromUtf8(""), oldVotes);
+//    this.votesStore.put(votesWrapper.createDbKey(), votesWrapper);
 //    votesSource = this.votesStore.get(ByteString.copyFromUtf8("").toByteArray());
 //    Assert.assertEquals(votesStore.getAllVotes().size(), 2);
-//    Assert.assertEquals(votesCapsule.getAddress(), votesSource.getAddress());
+//    Assert.assertEquals(votesWrapper.getAddress(), votesSource.getAddress());
 //    Assert.assertEquals(null, votesSource.getAddress());
   }
 }

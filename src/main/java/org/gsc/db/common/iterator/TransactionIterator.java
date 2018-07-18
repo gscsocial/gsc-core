@@ -2,19 +2,19 @@ package org.gsc.db.common.iterator;
 
 import java.util.Iterator;
 import java.util.Map.Entry;
-import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.core.exception.BadItemException;
 
-public class TransactionIterator extends AbstractIterator<TransactionCapsule> {
+public class TransactionIterator extends AbstractIterator<TransactionWrapper> {
 
   public TransactionIterator(Iterator<Entry<byte[], byte[]>> iterator) {
     super(iterator);
   }
 
   @Override
-  protected TransactionCapsule of(byte[] value) {
+  protected TransactionWrapper of(byte[] value) {
     try {
-      return new TransactionCapsule(value);
+      return new TransactionWrapper(value);
     } catch (BadItemException e) {
       throw new RuntimeException(e);
     }

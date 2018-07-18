@@ -1,14 +1,14 @@
 package org.gsc.db;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.core.wrapper.TransactionInfoCapsule;
+import org.gsc.core.wrapper.TransactionInfoWrapper;
 import org.gsc.core.exception.BadItemException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TransactionHistoryStore extends GscStoreWithRevoking<TransactionInfoCapsule> {
+public class TransactionHistoryStore extends GscStoreWithRevoking<TransactionInfoWrapper> {
 
   @Autowired
   public TransactionHistoryStore(@Value("transactionHistoryStore") String dbName) {
@@ -17,7 +17,7 @@ public class TransactionHistoryStore extends GscStoreWithRevoking<TransactionInf
 
 
   @Override
-  public void put(byte[] key, TransactionInfoCapsule item) {
+  public void put(byte[] key, TransactionInfoWrapper item) {
     super.put(key, item);
   }
 
@@ -27,9 +27,9 @@ public class TransactionHistoryStore extends GscStoreWithRevoking<TransactionInf
   }
 
   @Override
-  public TransactionInfoCapsule get(byte[] key) throws BadItemException {
+  public TransactionInfoWrapper get(byte[] key) throws BadItemException {
     byte[] value = dbSource.getData(key);
-    return ArrayUtils.isEmpty(value) ? null : new TransactionInfoCapsule(value);
+    return ArrayUtils.isEmpty(value) ? null : new TransactionInfoWrapper(value);
   }
 
   @Override

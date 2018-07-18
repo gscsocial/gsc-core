@@ -7,26 +7,26 @@ import org.gsc.core.exception.BadItemException;
 import org.gsc.protos.Protocol.TransactionInfo;
 
 @Slf4j
-public class TransactionInfoCapsule implements ProtoCapsule<TransactionInfo> {
+public class TransactionInfoWrapper implements ProtoWrapper<TransactionInfo> {
 
   private TransactionInfo transactionInfo;
 
   /**
-   * constructor TransactionCapsule.
+   * constructor TransactionWrapper.
    */
-  public TransactionInfoCapsule(TransactionInfo trxRet) {
-    this.transactionInfo = trxRet;
+  public TransactionInfoWrapper(TransactionInfo gscRet) {
+    this.transactionInfo = gscRet;
   }
 
-  public TransactionInfoCapsule(byte[] data) throws BadItemException {
+  public TransactionInfoWrapper(byte[] data) throws BadItemException {
     try {
       this.transactionInfo = TransactionInfo.parseFrom(data);
     } catch (InvalidProtocolBufferException e) {
-      throw new BadItemException("TransactionInfoCapsule proto data parse exception");
+      throw new BadItemException("TransactionInfoWrapper proto data parse exception");
     }
   }
 
-  public TransactionInfoCapsule() {
+  public TransactionInfoWrapper() {
     this.transactionInfo = TransactionInfo.newBuilder().build();
   }
 

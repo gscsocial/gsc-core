@@ -4,7 +4,7 @@ import com.google.protobuf.ByteString;
 import java.util.Arrays;
 import org.gsc.common.utils.Sha256Hash;
 
-public class BlockIdCapsule extends Sha256Hash implements ProtoCapsule {
+public class BlockIdWrapper extends Sha256Hash implements ProtoWrapper {
 
   @Override
   public byte[] getData() {
@@ -43,8 +43,8 @@ public class BlockIdCapsule extends Sha256Hash implements ProtoCapsule {
 
   @Override
   public int compareTo(Sha256Hash other) {
-    if (other.getClass().equals(BlockIdCapsule.class)) {
-      long otherNum = ((BlockIdCapsule) other).getNum();
+    if (other.getClass().equals(BlockIdWrapper.class)) {
+      long otherNum = ((BlockIdWrapper) other).getNum();
       return Long.compare(num, otherNum);
     }
     return super.compareTo(other);
@@ -52,7 +52,7 @@ public class BlockIdCapsule extends Sha256Hash implements ProtoCapsule {
 
   private long num;
 
-  public BlockIdCapsule() {
+  public BlockIdWrapper() {
     super(Sha256Hash.ZERO_HASH.getBytes());
     num = 0;
   }
@@ -60,17 +60,17 @@ public class BlockIdCapsule extends Sha256Hash implements ProtoCapsule {
   /**
    * Use {@link #wrap(byte[])} instead.
    */
-  public BlockIdCapsule(Sha256Hash hash, long num) {
+  public BlockIdWrapper(Sha256Hash hash, long num) {
     super(hash.getBytes());
     this.num = num;
   }
 
-  public BlockIdCapsule(byte[] hash, long num) {
+  public BlockIdWrapper(byte[] hash, long num) {
     super(hash);
     this.num = num;
   }
 
-  public BlockIdCapsule(ByteString hash, long num) {
+  public BlockIdWrapper(ByteString hash, long num) {
     super(hash.toByteArray());
     this.num = num;
   }

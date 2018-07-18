@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
 import org.gsc.common.application.Service;
 import org.gsc.core.operator.Operator;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.crypto.ECKey;
 import org.gsc.common.overlay.discover.node.NodeHandler;
 import org.gsc.common.overlay.discover.node.NodeManager;
@@ -56,12 +58,9 @@ import org.gsc.api.WalletGrpc.WalletImplBase;
 import org.gsc.api.WalletSolidityGrpc.WalletSolidityImplBase;
 import org.gsc.core.Wallet;
 import org.gsc.core.WalletSolidity;
-import org.gsc.core.operator.Operator;
 import org.gsc.core.operator.OperatorFactory;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.TransactionCapsule;
-import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.protos.Contract;
@@ -223,10 +222,10 @@ public class RpcApiService implements Service {
         if (reply == null) {
           responseObserver.onNext(null);
         } else {
-          AccountCapsule accountCapsule = new AccountCapsule(reply);
+          AccountWrapper accountWrapper = new AccountWrapper(reply);
           BandwidthProcessor processor = new BandwidthProcessor(dbManager);
-          processor.updateUsage(accountCapsule);
-          responseObserver.onNext(accountCapsule.getInstance());
+          processor.updateUsage(accountWrapper);
+          responseObserver.onNext(accountWrapper.getInstance());
         }
       } else {
         responseObserver.onNext(null);
@@ -386,34 +385,34 @@ public class RpcApiService implements Service {
       responseObserver.onCompleted();
     }
 
-    private TransactionCapsule createTransactionCapsule(com.google.protobuf.Message message,
-        ContractType contractType) throws ContractValidateException {
-      TransactionCapsule trx = new TransactionCapsule(message, contractType);
-      List<Operator> actList = OperatorFactory.createActuator(trx, dbManager);
+    private TransactionWrapper createTransactionCapsule(com.google.protobuf.Message message,
+                                                        ContractType contractType) throws ContractValidateException {
+      TransactionWrapper gsc = new TransactionWrapper(message, contractType);
+      List<Operator> actList = OperatorFactory.createActuator(gsc, dbManager);
       for (Operator act : actList) {
         act.validate();
       }
       try {
-        BlockCapsule headBlock = null;
-        List<BlockCapsule> blockList = dbManager.getBlockStore().getBlockByLatestNum(1);
+        BlockWrapper headBlock = null;
+        List<BlockWrapper> blockList = dbManager.getBlockStore().getBlockByLatestNum(1);
         if (CollectionUtils.isEmpty(blockList)) {
           throw new HeaderNotFound("latest block not found");
         } else {
           headBlock = blockList.get(0);
         }
-        trx.setReference(headBlock.getNum(), headBlock.getBlockId().getBytes());
+        gsc.setReference(headBlock.getNum(), headBlock.getBlockId().getBytes());
         long expiration = headBlock.getTimeStamp() + Constant.TRANSACTION_DEFAULT_EXPIRATION_TIME;
-        trx.setExpiration(expiration);
+        gsc.setExpiration(expiration);
       } catch (HeaderNotFound headerNotFound) {
         headerNotFound.printStackTrace();
       }
-      return trx;
+      return gsc;
     }
 
     @Override
     public void getTransactionSign(TransactionSign req,
         StreamObserver<Transaction> responseObserver) {
-      TransactionCapsule retur = wallet.getTransactionSign(req);
+      TransactionWrapper retur = wallet.getTransactionSign(req);
       responseObserver.onNext(retur.getInstance());
       responseObserver.onCompleted();
     }
@@ -439,11 +438,11 @@ public class RpcApiService implements Service {
       builder.setToAddress(req.getToAddress());
       builder.setAmount(req.getAmount());
 
-      TransactionCapsule transactionCapsule = null;
+      TransactionWrapper transactionWrapper = null;
       GrpcAPI.Return.Builder returnBuilder = GrpcAPI.Return.newBuilder();
       EasyTransferResponse.Builder responseBuild = EasyTransferResponse.newBuilder();
       try {
-        transactionCapsule = createTransactionCapsule(builder.build(),
+        transactionWrapper = createTransactionCapsule(builder.build(),
             ContractType.TransferContract);
       } catch (ContractValidateException e) {
         returnBuilder.setResult(false).setCode(response_code.CONTRACT_VALIDATE_ERROR)
@@ -454,9 +453,9 @@ public class RpcApiService implements Service {
         return;
       }
 
-      transactionCapsule.sign(privateKey);
-      GrpcAPI.Return retur = wallet.broadcastTransaction(transactionCapsule.getInstance());
-      responseBuild.setTransaction(transactionCapsule.getInstance());
+      transactionWrapper.sign(privateKey);
+      GrpcAPI.Return retur = wallet.broadcastTransaction(transactionWrapper.getInstance());
+      responseBuild.setTransaction(transactionWrapper.getInstance());
       responseBuild.setResult(retur);
       responseObserver.onNext(responseBuild.build());
       responseObserver.onCompleted();
@@ -502,7 +501,7 @@ public class RpcApiService implements Service {
       ByteString ownerAddress = req.getOwnerAddress();
       Preconditions.checkNotNull(ownerAddress, "OwnerAddress is null");
 
-      AccountCapsule account = dbManager.getAccountStore().get(ownerAddress.toByteArray());
+      AccountWrapper account = dbManager.getAccountStore().get(ownerAddress.toByteArray());
       Preconditions.checkNotNull(account,
           "OwnerAddress[" + StringUtil.createReadableString(ownerAddress) + "] not exists");
 
@@ -513,7 +512,7 @@ public class RpcApiService implements Service {
 
       req.getVotesList().forEach(vote -> {
         ByteString voteAddress = vote.getVoteAddress();
-        WitnessCapsule witness = dbManager.getWitnessStore()
+        WitnessWrapper witness = dbManager.getWitnessStore()
             .get(voteAddress.toByteArray());
         String readableWitnessAddress = StringUtil.createReadableString(voteAddress);
 

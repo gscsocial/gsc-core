@@ -10,13 +10,13 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Objects;
-import org.gsc.core.wrapper.ProtoCapsule;
 import org.gsc.config.args.Args;
+import org.gsc.core.wrapper.ProtoWrapper;
 import org.gsc.db.GscDatabase;
 import org.gsc.db.common.WrappedByteArray;
 import org.gsc.db.common.WrappedResultSet;
 
-public abstract class AbstractIndex<E extends ProtoCapsule<T>, T> implements Index.Iface<T> {
+public abstract class AbstractIndex<E extends ProtoWrapper<T>, T> implements Index.Iface<T> {
 
   protected GscDatabase<E> database;
   protected ConcurrentIndexedCollection<WrappedByteArray> index;

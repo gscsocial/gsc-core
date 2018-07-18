@@ -5,6 +5,7 @@ import com.google.protobuf.ByteString;
 import java.io.File;
 import java.util.List;
 
+import org.gsc.core.wrapper.*;
 import org.gsc.db.api.StoreAPI;
 import org.joda.time.DateTime;
 import org.junit.AfterClass;
@@ -14,11 +15,7 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.AssetIssueCapsule;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.TransactionCapsule;
-import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
@@ -155,10 +152,10 @@ public class StoreAPITest {
   }
 
   private static void addAssetIssueToStore(AssetIssueContract assetIssueContract) {
-    AssetIssueCapsule assetIssueCapsule = new AssetIssueCapsule(assetIssueContract);
+    AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
     dbManager
         .getAssetIssueStore()
-        .put(assetIssueCapsule.getName().toByteArray(), assetIssueCapsule);
+        .put(assetIssueWrapper.getName().toByteArray(), assetIssueWrapper);
   }
 
   private static AssetIssueContract getBuildAssetIssueContract(
@@ -188,10 +185,10 @@ public class StoreAPITest {
   }
 
   private static void addTransactionToStore(Transaction transaction) {
-    TransactionCapsule transactionCapsule = new TransactionCapsule(transaction);
+    TransactionWrapper transactionWrapper = new TransactionWrapper(transaction);
     dbManager
         .getTransactionStore()
-        .put(transactionCapsule.getTransactionId().getBytes(), transactionCapsule);
+        .put(transactionWrapper.getTransactionId().getBytes(), transactionWrapper);
   }
 
   private static Transaction getBuildTransaction(
@@ -241,8 +238,8 @@ public class StoreAPITest {
   }
 
   private static void addWitnessToStore(Witness transaction) {
-    WitnessCapsule witnessCapsule = new WitnessCapsule(transaction);
-    dbManager.getWitnessStore().put(witnessCapsule.getAddress().toByteArray(), witnessCapsule);
+    WitnessWrapper witnessWrapper = new WitnessWrapper(transaction);
+    dbManager.getWitnessStore().put(witnessWrapper.getAddress().toByteArray(), witnessWrapper);
   }
 
   private static Witness getBuildWitness(
@@ -272,8 +269,8 @@ public class StoreAPITest {
   }
 
   private static void addBlockToStore(Block block) {
-    BlockCapsule blockCapsule = new BlockCapsule(block);
-    dbManager.getBlockStore().put(blockCapsule.getBlockId().getBytes(), blockCapsule);
+    BlockWrapper blockWrapper = new BlockWrapper(block);
+    dbManager.getBlockStore().put(blockWrapper.getBlockId().getBytes(), blockWrapper);
   }
 
   private static Block getBuildBlock(
@@ -311,8 +308,8 @@ public class StoreAPITest {
   }
 
   private static void addAccountToStore(Account account) {
-    AccountCapsule accountCapsule = new AccountCapsule(account);
-    dbManager.getAccountStore().put(account.getAddress().toByteArray(), accountCapsule);
+    AccountWrapper accountWrapper = new AccountWrapper(account);
+    dbManager.getAccountStore().put(account.getAddress().toByteArray(), accountWrapper);
   }
 
   private static Account getBuildAccount(String address, String name) {
@@ -354,11 +351,11 @@ public class StoreAPITest {
     try {
       Transaction transaction =
           storeAPI.getTransactionById(
-              new TransactionCapsule(transaction1).getTransactionId().toString());
+              new TransactionWrapper(transaction1).getTransactionId().toString());
       Assert.assertEquals("TransactionById1", transaction1, transaction);
       transaction =
           storeAPI.getTransactionById(
-              new TransactionCapsule(transaction2).getTransactionId().toString());
+              new TransactionWrapper(transaction2).getTransactionId().toString());
       Assert.assertEquals("TransactionById2", transaction2, transaction);
     } catch (NonUniqueObjectException e) {
       Assert.fail("Exception " + e);

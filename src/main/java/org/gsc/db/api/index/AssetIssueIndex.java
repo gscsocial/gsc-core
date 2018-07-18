@@ -6,7 +6,7 @@ import com.googlecode.cqengine.index.disk.DiskIndex;
 import com.googlecode.cqengine.persistence.disk.DiskPersistence;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.wrapper.AssetIssueCapsule;
+import org.gsc.core.wrapper.AssetIssueWrapper;
 import org.gsc.db.GscDatabase;
 import org.gsc.db.common.WrappedByteArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ import static com.googlecode.cqengine.query.QueryFactory.attribute;
 
 @Component
 @Slf4j
-public class AssetIssueIndex extends AbstractIndex<AssetIssueCapsule, AssetIssueContract> {
+public class AssetIssueIndex extends AbstractIndex<AssetIssueWrapper, AssetIssueContract> {
 
   public static Attribute<WrappedByteArray, String> AssetIssue_OWNER_ADDRESS;
   public static SimpleAttribute<WrappedByteArray, String> AssetIssue_NAME;
@@ -29,7 +29,7 @@ public class AssetIssueIndex extends AbstractIndex<AssetIssueCapsule, AssetIssue
 
   @Autowired
   public AssetIssueIndex(
-      @Qualifier("assetIssueStore") final GscDatabase<AssetIssueCapsule> database) {
+      @Qualifier("assetIssueStore") final GscDatabase<AssetIssueWrapper> database) {
     super(database);
   }
 

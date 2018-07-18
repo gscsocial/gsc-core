@@ -7,8 +7,8 @@ import com.googlecode.cqengine.persistence.disk.DiskPersistence;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.db.GscDatabase;
 import org.gsc.db.common.WrappedByteArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +25,7 @@ import static com.googlecode.cqengine.query.QueryFactory.attribute;
 
 @Component
 @Slf4j
-public class BlockIndex extends AbstractIndex<BlockCapsule, Block> {
+public class BlockIndex extends AbstractIndex<BlockWrapper, Block> {
 
   public static SimpleAttribute<WrappedByteArray, String> Block_ID;
   public static Attribute<WrappedByteArray, Long> Block_NUMBER;
@@ -37,7 +37,7 @@ public class BlockIndex extends AbstractIndex<BlockCapsule, Block> {
 
   @Autowired
   public BlockIndex(
-      @Qualifier("blockStore") final GscDatabase<BlockCapsule> database) {
+      @Qualifier("blockStore") final GscDatabase<BlockWrapper> database) {
     super(database);
   }
 
@@ -59,7 +59,7 @@ public class BlockIndex extends AbstractIndex<BlockCapsule, Block> {
         attribute("block id",
             bytes -> {
               Block block = getObject(bytes);
-              return new BlockCapsule(block).getBlockId().toString();
+              return new BlockWrapper(block).getBlockId().toString();
             });
     Block_NUMBER =
         attribute("block number",
@@ -96,7 +96,7 @@ public class BlockIndex extends AbstractIndex<BlockCapsule, Block> {
               return block.getTransactionsList().stream()
                   .map(transaction -> transaction.getRawData().getContractList())
                   .flatMap(List::stream)
-                  .map(TransactionCapsule::getOwner)
+                  .map(TransactionWrapper::getOwner)
                   .filter(Objects::nonNull)
                   .distinct()
                   .map(ByteArray::toHexString)
@@ -109,7 +109,7 @@ public class BlockIndex extends AbstractIndex<BlockCapsule, Block> {
               return block.getTransactionsList().stream()
                   .map(transaction -> transaction.getRawData().getContractList())
                   .flatMap(List::stream)
-                  .map(TransactionCapsule::getToAddress)
+                  .map(TransactionWrapper::getToAddress)
                   .filter(Objects::nonNull)
                   .distinct()
                   .map(ByteArray::toHexString)

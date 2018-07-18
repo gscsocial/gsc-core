@@ -11,9 +11,9 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.overlay.message.Message;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.BlockCapsule.BlockId;
-import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.BlockWrapper.BlockId;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.Parameter.NodeConstant;
 import org.gsc.core.exception.AccountResourceInsufficientException;
@@ -50,7 +50,7 @@ public class NodeDelegateImpl implements NodeDelegate {
   }
 
   @Override
-  public synchronized LinkedList<Sha256Hash> handleBlock(BlockCapsule block, boolean syncMode)
+  public synchronized LinkedList<Sha256Hash> handleBlock(BlockWrapper block, boolean syncMode)
       throws BadBlockException, UnLinkedBlockException, InterruptedException, NonCommonBlockException {
 
     if (block.getInstance().getSerializedSize() > ChainConstant.BLOCK_SIZE + 100) {
@@ -66,10 +66,10 @@ public class NodeDelegateImpl implements NodeDelegate {
       dbManager.preValidateTransactionSign(block);
       dbManager.pushBlock(block);
       if (!syncMode) {
-        List<TransactionCapsule> trx = null;
+        List<TransactionWrapper> trx = null;
         trx = block.getTransactions();
         return trx.stream()
-            .map(TransactionCapsule::getTransactionId)
+            .map(TransactionWrapper::getTransactionId)
             .collect(Collectors.toCollection(LinkedList::new));
       } else {
         return null;
@@ -101,7 +101,7 @@ public class NodeDelegateImpl implements NodeDelegate {
 
 
   @Override
-  public boolean handleTransaction(TransactionCapsule trx) throws BadTransactionException {
+  public boolean handleTransaction(TransactionWrapper trx) throws BadTransactionException {
     logger.debug("handle transaction");
     if (dbManager.getTransactionIdCache().getIfPresent(trx.getTransactionId()) != null) {
       logger.warn("This transaction has been processed");
@@ -344,7 +344,7 @@ public class NodeDelegateImpl implements NodeDelegate {
   }
 
   @Override
-  public BlockCapsule getGenesisBlock() {
+  public BlockWrapper getGenesisBlock() {
     //TODO return a genesisBlock
     return dbManager.getGenesisBlock();
   }

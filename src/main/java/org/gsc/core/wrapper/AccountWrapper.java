@@ -31,20 +31,20 @@ import org.gsc.protos.Protocol.AccountType;
 import org.gsc.protos.Protocol.Vote;
 
 @Slf4j
-public class AccountCapsule implements ProtoCapsule<Account>, Comparable<AccountCapsule> {
+public class AccountWrapper implements ProtoWrapper<Account>, Comparable<AccountWrapper> {
 
   private Account account;
 
 
   @Override
-  public int compareTo(AccountCapsule otherObject) {
+  public int compareTo(AccountWrapper otherObject) {
     return Long.compare(otherObject.getBalance(), this.getBalance());
   }
 
   /**
    * get account from bytes data.
    */
-  public AccountCapsule(byte[] data) {
+  public AccountWrapper(byte[] data) {
     try {
       this.account = Account.parseFrom(data);
     } catch (InvalidProtocolBufferException e) {
@@ -55,8 +55,8 @@ public class AccountCapsule implements ProtoCapsule<Account>, Comparable<Account
   /**
    * initial account capsule.
    */
-  public AccountCapsule(ByteString accountName, ByteString address, AccountType accountType,
-      long balance) {
+  public AccountWrapper(ByteString accountName, ByteString address, AccountType accountType,
+                        long balance) {
     this.account = Account.newBuilder()
         .setAccountName(accountName)
         .setType(accountType)
@@ -68,7 +68,7 @@ public class AccountCapsule implements ProtoCapsule<Account>, Comparable<Account
   /**
    * construct account from AccountCreateContract.
    */
-  public AccountCapsule(final AccountCreateContract contract) {
+  public AccountWrapper(final AccountCreateContract contract) {
     this.account = Account.newBuilder()
         .setType(contract.getType())
         .setAddress(contract.getAccountAddress())
@@ -79,7 +79,7 @@ public class AccountCapsule implements ProtoCapsule<Account>, Comparable<Account
   /**
    * construct account from AccountCreateContract and createTime.
    */
-  public AccountCapsule(final AccountCreateContract contract, long createTime) {
+  public AccountWrapper(final AccountCreateContract contract, long createTime) {
     this.account = Account.newBuilder()
         .setType(contract.getType())
         .setAddress(contract.getAccountAddress())
@@ -91,15 +91,15 @@ public class AccountCapsule implements ProtoCapsule<Account>, Comparable<Account
   /**
    * construct account from AccountUpdateContract
    */
-  public AccountCapsule(final AccountUpdateContract contract) {
+  public AccountWrapper(final AccountUpdateContract contract) {
 
   }
 
   /**
    * get account from address and account name.
    */
-  public AccountCapsule(ByteString address, ByteString accountName,
-      AccountType accountType) {
+  public AccountWrapper(ByteString address, ByteString accountName,
+                        AccountType accountType) {
     this.account = Account.newBuilder()
         .setType(accountType)
         .setAccountName(accountName)
@@ -110,8 +110,8 @@ public class AccountCapsule implements ProtoCapsule<Account>, Comparable<Account
   /**
    * get account from address.
    */
-  public AccountCapsule(ByteString address,
-      AccountType accountType) {
+  public AccountWrapper(ByteString address,
+                        AccountType accountType) {
     this.account = Account.newBuilder()
         .setType(accountType)
         .setAddress(address)
@@ -121,8 +121,8 @@ public class AccountCapsule implements ProtoCapsule<Account>, Comparable<Account
   /**
    * get account from address.
    */
-  public AccountCapsule(ByteString address,
-      AccountType accountType, long createTime) {
+  public AccountWrapper(ByteString address,
+                        AccountType accountType, long createTime) {
     this.account = Account.newBuilder()
         .setType(accountType)
         .setAddress(address)
@@ -130,7 +130,7 @@ public class AccountCapsule implements ProtoCapsule<Account>, Comparable<Account
         .build();
   }
 
-  public AccountCapsule(Account account) {
+  public AccountWrapper(Account account) {
     this.account = account;
   }
 

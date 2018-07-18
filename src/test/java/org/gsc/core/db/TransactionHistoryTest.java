@@ -2,6 +2,7 @@ package org.gsc.core.db;
 
 import java.io.File;
 
+import org.gsc.core.wrapper.TransactionInfoWrapper;
 import org.gsc.db.TransactionHistoryStore;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -11,7 +12,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
-import org.gsc.core.wrapper.TransactionInfoCapsule;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.core.exception.BadItemException;
@@ -47,19 +47,19 @@ public class TransactionHistoryTest {
   @BeforeClass
   public static void init() {
     transactionHistoryStore = context.getBean(TransactionHistoryStore.class);
-    TransactionInfoCapsule transactionInfoCapsule = new TransactionInfoCapsule();
+    TransactionInfoWrapper transactionInfoWrapper = new TransactionInfoWrapper();
 
-    transactionInfoCapsule.setId(transactionId);
-    transactionInfoCapsule.setFee(1000L);
-    transactionInfoCapsule.setBlockNumber(100L);
-    transactionInfoCapsule.setBlockTimeStamp(200L);
-    transactionHistoryStore.put(transactionId, transactionInfoCapsule);
+    transactionInfoWrapper.setId(transactionId);
+    transactionInfoWrapper.setFee(1000L);
+    transactionInfoWrapper.setBlockNumber(100L);
+    transactionInfoWrapper.setBlockTimeStamp(200L);
+    transactionHistoryStore.put(transactionId, transactionInfoWrapper);
   }
 
   @Test
   public void get() throws BadItemException {
     //test get and has Method
-    TransactionInfoCapsule resultCapsule = transactionHistoryStore.get(transactionId);
+    TransactionInfoWrapper resultCapsule = transactionHistoryStore.get(transactionId);
     Assert.assertEquals(1000L, resultCapsule.getFee());
     Assert.assertEquals(100L, resultCapsule.getBlockNumber());
     Assert.assertEquals(200L, resultCapsule.getBlockTimeStamp());

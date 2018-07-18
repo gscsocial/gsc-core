@@ -8,20 +8,20 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.protos.Protocol.Witness;
 
 @Slf4j
-public class WitnessCapsule implements ProtoCapsule<Witness>, Comparable<WitnessCapsule> {
+public class WitnessWrapper implements ProtoWrapper<Witness>, Comparable<WitnessWrapper> {
 
   private Witness witness;
 
   
   @Override
-  public int compareTo(WitnessCapsule otherObject) {
+  public int compareTo(WitnessWrapper otherObject) {
     return Long.compare(otherObject.getVoteCount(), this.getVoteCount());
   }
 
   /**
-   * WitnessCapsule constructor with pubKey and url.
+   * WitnessWrapper constructor with pubKey and url.
    */
-  public WitnessCapsule(final ByteString pubKey, final String url) {
+  public WitnessWrapper(final ByteString pubKey, final String url) {
     final Witness.Builder witnessBuilder = Witness.newBuilder();
     this.witness = witnessBuilder
         .setPubKey(pubKey)
@@ -29,28 +29,28 @@ public class WitnessCapsule implements ProtoCapsule<Witness>, Comparable<Witness
         .setUrl(url).build();
   }
 
-  public WitnessCapsule(final Witness witness) {
+  public WitnessWrapper(final Witness witness) {
     this.witness = witness;
   }
 
   /**
-   * WitnessCapsule constructor with address.
+   * WitnessWrapper constructor with address.
    */
-  public WitnessCapsule(final ByteString address) {
+  public WitnessWrapper(final ByteString address) {
     this.witness = Witness.newBuilder().setAddress(address).build();
   }
 
   /**
-   * WitnessCapsule constructor with address and voteCount.
+   * WitnessWrapper constructor with address and voteCount.
    */
-  public WitnessCapsule(final ByteString address, final long voteCount, final String url) {
+  public WitnessWrapper(final ByteString address, final long voteCount, final String url) {
     final Witness.Builder witnessBuilder = Witness.newBuilder();
     this.witness = witnessBuilder
         .setAddress(address)
         .setVoteCount(voteCount).setUrl(url).build();
   }
 
-  public WitnessCapsule(final byte[] data) {
+  public WitnessWrapper(final byte[] data) {
     try {
       this.witness = Witness.parseFrom(data);
     } catch (InvalidProtocolBufferException e) {

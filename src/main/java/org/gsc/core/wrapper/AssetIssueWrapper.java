@@ -23,14 +23,14 @@ import org.gsc.protos.Contract.AssetIssueContract;
 import org.gsc.protos.Contract.AssetIssueContract.FrozenSupply;
 
 @Slf4j
-public class AssetIssueCapsule implements ProtoCapsule<AssetIssueContract> {
+public class AssetIssueWrapper implements ProtoWrapper<AssetIssueContract> {
 
   private AssetIssueContract assetIssueContract;
 
   /**
    * get asset issue contract from bytes data.
    */
-  public AssetIssueCapsule(byte[] data) {
+  public AssetIssueWrapper(byte[] data) {
     try {
       this.assetIssueContract = AssetIssueContract.parseFrom(data);
     } catch (InvalidProtocolBufferException e) {
@@ -38,7 +38,7 @@ public class AssetIssueCapsule implements ProtoCapsule<AssetIssueContract> {
     }
   }
 
-  public AssetIssueCapsule(AssetIssueContract assetIssueContract) {
+  public AssetIssueWrapper(AssetIssueContract assetIssueContract) {
     this.assetIssueContract = assetIssueContract;
   }
 

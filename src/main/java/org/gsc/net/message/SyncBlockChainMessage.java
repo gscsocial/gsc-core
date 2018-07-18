@@ -2,7 +2,7 @@ package org.gsc.net.message;
 
 import java.util.List;
 
-import org.gsc.core.wrapper.BlockCapsule.BlockId;
+import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.protos.Protocol.BlockInventory.Type;
 
 public class SyncBlockChainMessage extends BlockInventoryMessage {

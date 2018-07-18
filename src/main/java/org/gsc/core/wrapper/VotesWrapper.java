@@ -9,15 +9,15 @@ import org.gsc.protos.Protocol.Vote;
 import org.gsc.protos.Protocol.Votes;
 
 @Slf4j
-public class VotesCapsule implements ProtoCapsule<Votes> {
+public class VotesWrapper implements ProtoWrapper<Votes> {
 
   private Votes votes;
 
-  public VotesCapsule(final Votes votes) {
+  public VotesWrapper(final Votes votes) {
     this.votes = votes;
   }
 
-  public VotesCapsule(final byte[] data) {
+  public VotesWrapper(final byte[] data) {
     try {
       this.votes = Votes.parseFrom(data);
     } catch (InvalidProtocolBufferException e) {
@@ -25,7 +25,7 @@ public class VotesCapsule implements ProtoCapsule<Votes> {
     }
   }
 
-  public VotesCapsule(ByteString address, List<Vote> oldVotes) {
+  public VotesWrapper(ByteString address, List<Vote> oldVotes) {
     this.votes = Votes.newBuilder()
         .setAddress(address)
         .addAllOldVotes(oldVotes)

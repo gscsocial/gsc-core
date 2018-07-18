@@ -11,9 +11,9 @@ import org.gsc.common.utils.StringUtil;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
-import org.gsc.core.wrapper.VotesCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
+import org.gsc.core.wrapper.VotesWrapper;
 import org.gsc.db.AccountStore;
 import org.gsc.db.Manager;
 import org.gsc.db.VotesStore;
@@ -30,7 +30,7 @@ public class VoteWitnessOperator extends AbstractOperator {
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     try {
       VoteWitnessContract voteContract = contract.unpack(VoteWitnessContract.class);
@@ -107,13 +107,13 @@ public class VoteWitnessOperator extends AbstractOperator {
         sum = LongMath.checkedAdd(sum, vote.getVoteCount());
       }
 
-      AccountCapsule accountCapsule = accountStore.get(ownerAddress);
-      if (accountCapsule == null) {
+      AccountWrapper accountWrapper = accountStore.get(ownerAddress);
+      if (accountWrapper == null) {
         throw new ContractValidateException(
             "Account[" + readableOwnerAddress + "] not exists");
       }
 
-      long gscPower = accountCapsule.getGscPower();
+      long gscPower = accountWrapper.getGscPower();
 
       sum = LongMath.checkedMultiply(sum, 1000000L); //trx -> drop. The vote count is based on TRX
       if (sum > gscPower) {
@@ -132,31 +132,31 @@ public class VoteWitnessOperator extends AbstractOperator {
   private void countVoteAccount(VoteWitnessContract voteContract) {
     byte[] ownerAddress = voteContract.getOwnerAddress().toByteArray();
 
-    VotesCapsule votesCapsule;
+    VotesWrapper votesWrapper;
     VotesStore votesStore = dbManager.getVotesStore();
     AccountStore accountStore = dbManager.getAccountStore();
 
-    AccountCapsule accountCapsule = accountStore.get(ownerAddress);
+    AccountWrapper accountWrapper = accountStore.get(ownerAddress);
 
     if (!votesStore.has(ownerAddress)) {
-      votesCapsule = new VotesCapsule(voteContract.getOwnerAddress(), accountCapsule.getVotesList());
+      votesWrapper = new VotesWrapper(voteContract.getOwnerAddress(), accountWrapper.getVotesList());
     } else {
-      votesCapsule = votesStore.get(ownerAddress);
+      votesWrapper = votesStore.get(ownerAddress);
     }
 
-    accountCapsule.clearVotes();
-    votesCapsule.clearNewVotes();
+    accountWrapper.clearVotes();
+    votesWrapper.clearNewVotes();
 
     voteContract.getVotesList().forEach(vote -> {
       logger.debug("countVoteAccount,address[{}]",
           ByteArray.toHexString(vote.getVoteAddress().toByteArray()));
 
-      votesCapsule.addNewVotes(vote.getVoteAddress(), vote.getVoteCount());
-      accountCapsule.addVotes(vote.getVoteAddress(), vote.getVoteCount());
+      votesWrapper.addNewVotes(vote.getVoteAddress(), vote.getVoteCount());
+      accountWrapper.addVotes(vote.getVoteAddress(), vote.getVoteCount());
     });
 
-    accountStore.put(accountCapsule.createDbKey(), accountCapsule);
-    votesStore.put(ownerAddress, votesCapsule);
+    accountStore.put(accountWrapper.createDbKey(), accountWrapper);
+    votesStore.put(ownerAddress, votesWrapper);
   }
 
   @Override

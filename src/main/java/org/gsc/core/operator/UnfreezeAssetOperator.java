@@ -8,8 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
@@ -26,17 +26,17 @@ public class UnfreezeAssetOperator extends AbstractOperator {
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     try {
       final UnfreezeAssetContract unfreezeAssetContract = contract
           .unpack(UnfreezeAssetContract.class);
       byte[] ownerAddress = unfreezeAssetContract.getOwnerAddress().toByteArray();
 
-      AccountCapsule accountCapsule = dbManager.getAccountStore().get(ownerAddress);
+      AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
       long unfreezeAsset = 0L;
       List<Frozen> frozenList = Lists.newArrayList();
-      frozenList.addAll(accountCapsule.getFrozenSupplyList());
+      frozenList.addAll(accountWrapper.getFrozenSupplyList());
       Iterator<Frozen> iterator = frozenList.iterator();
       long now = dbManager.getHeadBlockTimeStamp();
       while (iterator.hasNext()) {
@@ -47,10 +47,10 @@ public class UnfreezeAssetOperator extends AbstractOperator {
         }
       }
 
-      accountCapsule.addAssetAmount(accountCapsule.getAssetIssuedName(), unfreezeAsset);
-      accountCapsule.setInstance(accountCapsule.getInstance().toBuilder()
+      accountWrapper.addAssetAmount(accountWrapper.getAssetIssuedName(), unfreezeAsset);
+      accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
           .clearFrozenSupply().addAllFrozenSupply(frozenList).build());
-      dbManager.getAccountStore().put(ownerAddress, accountCapsule);
+      dbManager.getAccountStore().put(ownerAddress, accountWrapper);
       ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
@@ -90,23 +90,23 @@ public class UnfreezeAssetOperator extends AbstractOperator {
       throw new ContractValidateException("Invalid address");
     }
 
-    AccountCapsule accountCapsule = dbManager.getAccountStore().get(ownerAddress);
-    if (accountCapsule == null) {
+    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+    if (accountWrapper == null) {
       String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
       throw new ContractValidateException(
           "Account[" + readableOwnerAddress + "] not exists");
     }
 
-    if (accountCapsule.getFrozenSupplyCount() <= 0) {
+    if (accountWrapper.getFrozenSupplyCount() <= 0) {
       throw new ContractValidateException("no frozen supply balance");
     }
 
-    if (accountCapsule.getAssetIssuedName().isEmpty()) {
+    if (accountWrapper.getAssetIssuedName().isEmpty()) {
       throw new ContractValidateException("this account did not issue any asset");
     }
 
     long now = dbManager.getHeadBlockTimeStamp();
-    long allowedUnfreezeCount = accountCapsule.getFrozenSupplyList().stream()
+    long allowedUnfreezeCount = accountWrapper.getFrozenSupplyList().stream()
         .filter(frozen -> frozen.getExpireTime() <= now).count();
     if (allowedUnfreezeCount <= 0) {
       throw new ContractValidateException("It's not time to unfreeze asset supply");

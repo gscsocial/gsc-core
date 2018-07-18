@@ -8,8 +8,8 @@ import org.gsc.common.utils.StringUtil;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.db.Manager;
 import org.gsc.protos.Contract.AccountCreateContract;
 import org.gsc.protos.Protocol.Transaction.Result.code;
@@ -22,15 +22,15 @@ public class CreateAccountOperator extends AbstractOperator {
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret)
+  public boolean execute(TransactionResultWrapper ret)
       throws ContractExeException {
     long fee = calcFee();
     try {
       AccountCreateContract accountCreateContract = contract.unpack(AccountCreateContract.class);
-      AccountCapsule accountCapsule = new AccountCapsule(accountCreateContract,
+      AccountWrapper accountWrapper = new AccountWrapper(accountCreateContract,
           dbManager.getHeadBlockTimeStamp());
       dbManager.getAccountStore()
-          .put(accountCreateContract.getAccountAddress().toByteArray(), accountCapsule);
+          .put(accountCreateContract.getAccountAddress().toByteArray(), accountWrapper);
       ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
@@ -69,8 +69,8 @@ public class CreateAccountOperator extends AbstractOperator {
       throw new ContractValidateException("Invalid ownerAddress");
     }
 
-    AccountCapsule accountCapsule = dbManager.getAccountStore().get(ownerAddress);
-    if (accountCapsule == null) {
+    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+    if (accountWrapper == null) {
       String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
       throw new ContractValidateException(
           "Account[" + readableOwnerAddress + "] not exists");

@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.db.common.iterator.WitnessIterator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class WitnessStore extends GscStoreWithRevoking<WitnessCapsule> {
+public class WitnessStore extends GscStoreWithRevoking<WitnessWrapper> {
 
   @Autowired
   protected WitnessStore(@Value("witness") String dbName) {
@@ -23,9 +23,9 @@ public class WitnessStore extends GscStoreWithRevoking<WitnessCapsule> {
   }
 
   @Override
-  public WitnessCapsule get(byte[] key) {
+  public WitnessWrapper get(byte[] key) {
     byte[] value = dbSource.getData(key);
-    return ArrayUtils.isEmpty(value) ? null : new WitnessCapsule(value);
+    return ArrayUtils.isEmpty(value) ? null : new WitnessWrapper(value);
   }
 
   @Override
@@ -35,7 +35,7 @@ public class WitnessStore extends GscStoreWithRevoking<WitnessCapsule> {
   }
 
   @Override
-  public void put(byte[] key, WitnessCapsule item) {
+  public void put(byte[] key, WitnessWrapper item) {
     super.put(key, item);
     if (Objects.nonNull(indexHelper)) {
       indexHelper.update(item.getInstance());
@@ -45,16 +45,16 @@ public class WitnessStore extends GscStoreWithRevoking<WitnessCapsule> {
   /**
    * get all witnesses.
    */
-  public List<WitnessCapsule> getAllWitnesses() {
+  public List<WitnessWrapper> getAllWitnesses() {
     return dbSource
         .allValues()
         .stream()
-        .map(bytes -> new WitnessCapsule(bytes))
+        .map(bytes -> new WitnessWrapper(bytes))
         .collect(Collectors.toList());
   }
 
   @Override
-  public Iterator<Entry<byte[], WitnessCapsule>> iterator() {
+  public Iterator<Entry<byte[], WitnessWrapper>> iterator() {
     return new WitnessIterator(dbSource.iterator());
   }
 
@@ -66,7 +66,7 @@ public class WitnessStore extends GscStoreWithRevoking<WitnessCapsule> {
 
   private void deleteIndex(byte[] key) {
     if (Objects.nonNull(indexHelper)) {
-      WitnessCapsule item = get(key);
+      WitnessWrapper item = get(key);
       if (Objects.nonNull(item)) {
         indexHelper.remove(item.getInstance());
       }

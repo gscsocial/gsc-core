@@ -25,8 +25,8 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
 import org.gsc.db.AccountStore;
 import org.gsc.db.Manager;
@@ -42,7 +42,7 @@ public class TransferAssetOperator extends AbstractOperator {
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     try {
       TransferAssetContract transferAssetContract = this.contract
@@ -50,23 +50,23 @@ public class TransferAssetOperator extends AbstractOperator {
       AccountStore accountStore = this.dbManager.getAccountStore();
       byte[] ownerAddress = transferAssetContract.getOwnerAddress().toByteArray();
       byte[] toAddress = transferAssetContract.getToAddress().toByteArray();
-      AccountCapsule toAccountCapsule = accountStore.get(toAddress);
-      if (toAccountCapsule == null) {
-        toAccountCapsule = new AccountCapsule(ByteString.copyFrom(toAddress), AccountType.Normal,
+      AccountWrapper toAccountWrapper = accountStore.get(toAddress);
+      if (toAccountWrapper == null) {
+        toAccountWrapper = new AccountWrapper(ByteString.copyFrom(toAddress), AccountType.Normal,
             dbManager.getHeadBlockTimeStamp());
-        dbManager.getAccountStore().put(toAddress, toAccountCapsule);
+        dbManager.getAccountStore().put(toAddress, toAccountWrapper);
       }
       ByteString assetName = transferAssetContract.getAssetName();
       long amount = transferAssetContract.getAmount();
 
-      AccountCapsule ownerAccountCapsule = accountStore.get(ownerAddress);
-      if (!ownerAccountCapsule.reduceAssetAmount(assetName, amount)) {
+      AccountWrapper ownerAccountWrapper = accountStore.get(ownerAddress);
+      if (!ownerAccountWrapper.reduceAssetAmount(assetName, amount)) {
         throw new ContractExeException("reduceAssetAmount failed !");
       }
-      accountStore.put(ownerAddress, ownerAccountCapsule);
+      accountStore.put(ownerAddress, ownerAccountWrapper);
 
-      toAccountCapsule.addAssetAmount(assetName, amount);
-      accountStore.put(toAddress, toAccountCapsule);
+      toAccountWrapper.addAssetAmount(assetName, amount);
+      accountStore.put(toAddress, toAccountWrapper);
 
       ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
@@ -123,7 +123,7 @@ public class TransferAssetOperator extends AbstractOperator {
       throw new ContractValidateException("Cannot transfer asset to yourself.");
     }
 
-    AccountCapsule ownerAccount = this.dbManager.getAccountStore().get(ownerAddress);
+    AccountWrapper ownerAccount = this.dbManager.getAccountStore().get(ownerAddress);
     if (ownerAccount == null) {
       throw new ContractValidateException("No owner account!");
     }
@@ -145,7 +145,7 @@ public class TransferAssetOperator extends AbstractOperator {
       throw new ContractValidateException("assetBalance is not sufficient.");
     }
 
-    AccountCapsule toAccount = this.dbManager.getAccountStore().get(toAddress);
+    AccountWrapper toAccount = this.dbManager.getAccountStore().get(toAddress);
     if (toAccount != null) {
       assetBalance = toAccount.getAssetMap().get(ByteArray.toStr(assetName));
       if (assetBalance != null) {

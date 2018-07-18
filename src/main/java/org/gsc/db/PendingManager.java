@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.core.exception.AccountResourceInsufficientException;
 import org.gsc.core.exception.BadItemException;
 import org.gsc.core.exception.ContractExeException;
@@ -19,7 +19,7 @@ import org.gsc.core.exception.ValidateSignatureException;
 public class PendingManager implements AutoCloseable {
 
   @Getter
-  static List<TransactionCapsule> tmpTransactions = new ArrayList<>();
+  static List<TransactionWrapper> tmpTransactions = new ArrayList<>();
   Manager dbManager;
 
   public PendingManager(Manager db) {
@@ -37,7 +37,7 @@ public class PendingManager implements AutoCloseable {
     tmpTransactions.clear();
   }
 
-  private void rePush(List<TransactionCapsule> txs) {
+  private void rePush(List<TransactionWrapper> txs) {
     txs.stream()
         .filter(
             trx -> {

@@ -6,6 +6,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,8 +18,6 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.args.Args;
@@ -78,8 +78,8 @@ public class FreezeBalanceOperatorTest {
    */
   @Before
   public void createAccountCapsule() {
-    AccountCapsule ownerCapsule =
-        new AccountCapsule(
+    AccountWrapper ownerCapsule =
+        new AccountWrapper(
             ByteString.copyFromUtf8("owner"),
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)),
             AccountType.Normal,
@@ -102,12 +102,12 @@ public class FreezeBalanceOperatorTest {
     long duration = 3;
     FreezeBalanceOperator actuator = new FreezeBalanceOperator(
         getContract(OWNER_ADDRESS, frozenBalance, duration), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), initBalance - frozenBalance
@@ -126,7 +126,7 @@ public class FreezeBalanceOperatorTest {
     long duration = 3;
     FreezeBalanceOperator actuator = new FreezeBalanceOperator(
         getContract(OWNER_ADDRESS, frozenBalance, duration), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -146,7 +146,7 @@ public class FreezeBalanceOperatorTest {
     long duration = 3;
     FreezeBalanceOperator actuator = new FreezeBalanceOperator(
         getContract(OWNER_ADDRESS, frozenBalance, duration), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -165,7 +165,7 @@ public class FreezeBalanceOperatorTest {
     long duration = 3;
     FreezeBalanceOperator actuator = new FreezeBalanceOperator(
         getContract(OWNER_ADDRESS_INVALIDATE, frozenBalance, duration), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -188,7 +188,7 @@ public class FreezeBalanceOperatorTest {
     long duration = 3;
     FreezeBalanceOperator actuator = new FreezeBalanceOperator(
         getContract(OWNER_ACCOUNT_INVALIDATE, frozenBalance, duration), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -208,7 +208,7 @@ public class FreezeBalanceOperatorTest {
     long duration = 2;
     FreezeBalanceOperator actuator = new FreezeBalanceOperator(
         getContract(OWNER_ADDRESS, frozenBalance, duration), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -232,7 +232,7 @@ public class FreezeBalanceOperatorTest {
     long duration = 4;
     FreezeBalanceOperator actuator = new FreezeBalanceOperator(
         getContract(OWNER_ADDRESS, frozenBalance, duration), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -255,14 +255,14 @@ public class FreezeBalanceOperatorTest {
     long duration = 3;
     FreezeBalanceOperator actuator = new FreezeBalanceOperator(
         getContract(OWNER_ADDRESS, frozenBalance, duration), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
       fail("cannot run here.");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("frozenBalance must be more than 1TRX", e.getMessage());
+      Assert.assertEquals("frozenBalance must be more than 1GSC", e.getMessage());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -270,7 +270,7 @@ public class FreezeBalanceOperatorTest {
 
   @Test
   public void frozenNumTest() {
-    AccountCapsule account = dbManager.getAccountStore()
+    AccountWrapper account = dbManager.getAccountStore()
         .get(ByteArray.fromHexString(OWNER_ADDRESS));
     account.setFrozen(1_000L, 1_000_000_000L);
     account.setFrozen(1_000_000L, 1_000_000_000L);
@@ -280,7 +280,7 @@ public class FreezeBalanceOperatorTest {
     long duration = 3L;
     FreezeBalanceOperator actuator = new FreezeBalanceOperator(
         getContract(OWNER_ADDRESS, frozenBalance, duration), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -299,7 +299,7 @@ public class FreezeBalanceOperatorTest {
     long duration = 3;
     FreezeBalanceOperator actuator = new FreezeBalanceOperator(
         getContract(OWNER_ADDRESS, frozenBalance, duration), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);

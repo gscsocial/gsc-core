@@ -3,6 +3,7 @@ package org.gsc.core.db;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.db.WitnessStore;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -11,7 +12,6 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
-import org.gsc.core.wrapper.WitnessCapsule;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 
@@ -41,24 +41,24 @@ public class WitnessStoreTest {
 
   @Test
   public void putAndGetWitness() {
-    WitnessCapsule witnessCapsule = new WitnessCapsule(ByteString.copyFromUtf8("100000000x"), 100L,
+    WitnessWrapper witnessWrapper = new WitnessWrapper(ByteString.copyFromUtf8("100000000x"), 100L,
         "");
 
-    this.witnessStore.put(witnessCapsule.getAddress().toByteArray(), witnessCapsule);
-    WitnessCapsule witnessSource = this.witnessStore
+    this.witnessStore.put(witnessWrapper.getAddress().toByteArray(), witnessWrapper);
+    WitnessWrapper witnessSource = this.witnessStore
         .get(ByteString.copyFromUtf8("100000000x").toByteArray());
-    Assert.assertEquals(witnessCapsule.getAddress(), witnessSource.getAddress());
-    Assert.assertEquals(witnessCapsule.getVoteCount(), witnessSource.getVoteCount());
+    Assert.assertEquals(witnessWrapper.getAddress(), witnessSource.getAddress());
+    Assert.assertEquals(witnessWrapper.getVoteCount(), witnessSource.getVoteCount());
 
     Assert.assertEquals(ByteString.copyFromUtf8("100000000x"), witnessSource.getAddress());
     Assert.assertEquals(100L, witnessSource.getVoteCount());
 
-    witnessCapsule = new WitnessCapsule(ByteString.copyFromUtf8(""), 100L, "");
+    witnessWrapper = new WitnessWrapper(ByteString.copyFromUtf8(""), 100L, "");
 
-    this.witnessStore.put(witnessCapsule.getAddress().toByteArray(), witnessCapsule);
+    this.witnessStore.put(witnessWrapper.getAddress().toByteArray(), witnessWrapper);
     witnessSource = this.witnessStore.get(ByteString.copyFromUtf8("").toByteArray());
-    Assert.assertEquals(witnessCapsule.getAddress(), witnessSource.getAddress());
-    Assert.assertEquals(witnessCapsule.getVoteCount(), witnessSource.getVoteCount());
+    Assert.assertEquals(witnessWrapper.getAddress(), witnessSource.getAddress());
+    Assert.assertEquals(witnessWrapper.getVoteCount(), witnessSource.getVoteCount());
 
     Assert.assertEquals(ByteString.copyFromUtf8(""), witnessSource.getAddress());
     Assert.assertEquals(100L, witnessSource.getVoteCount());

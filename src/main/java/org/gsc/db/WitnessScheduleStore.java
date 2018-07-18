@@ -6,14 +6,14 @@ import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.wrapper.BytesCapsule;
+import org.gsc.core.wrapper.BytesWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class WitnessScheduleStore extends GscStoreWithRevoking<BytesCapsule> {
+public class WitnessScheduleStore extends GscStoreWithRevoking<BytesWrapper> {
 
   private static final byte[] ACTIVE_WITNESSES = "active_witnesses".getBytes();
   private static final byte[] CURRENT_SHUFFLED_WITNESSES = "current_shuffled_witnesses".getBytes();
@@ -26,7 +26,7 @@ public class WitnessScheduleStore extends GscStoreWithRevoking<BytesCapsule> {
   }
 
   @Override
-  public BytesCapsule get(byte[] key) {
+  public BytesWrapper get(byte[] key) {
     return null;
   }
 
@@ -44,7 +44,7 @@ public class WitnessScheduleStore extends GscStoreWithRevoking<BytesCapsule> {
       i++;
     }
     ;
-    this.put(species, new BytesCapsule(ba));
+    this.put(species, new BytesWrapper(ba));
   }
 
   private List<ByteString> getData(byte[] species) {

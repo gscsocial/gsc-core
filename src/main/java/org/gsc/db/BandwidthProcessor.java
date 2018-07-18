@@ -9,10 +9,10 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.core.exception.AccountResourceInsufficientException;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.AssetIssueCapsule;
-import org.gsc.core.wrapper.TransactionCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.AssetIssueWrapper;
+import org.gsc.core.wrapper.TransactionWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.core.exception.BalanceInsufficientException;
 import org.gsc.core.exception.ContractValidateException;
@@ -59,28 +59,28 @@ public class BandwidthProcessor {
     return usage * windowSize / precision;
   }
 
-  public void updateUsage(AccountCapsule accountCapsule) {
+  public void updateUsage(AccountWrapper accountWrapper) {
     long now = dbManager.getWitnessController().getHeadSlot();
-    updateUsage(accountCapsule, now);
+    updateUsage(accountWrapper, now);
   }
 
-  public void updateUsage(AccountCapsule accountCapsule, long now) {
-    long oldNetUsage = accountCapsule.getNetUsage();
-    long latestConsumeTime = accountCapsule.getLatestConsumeTime();
-    accountCapsule.setNetUsage(increase(oldNetUsage, 0, latestConsumeTime, now));
-    long oldFreeNetUsage = accountCapsule.getFreeNetUsage();
-    long latestConsumeFreeTime = accountCapsule.getLatestConsumeFreeTime();
-    accountCapsule.setFreeNetUsage(increase(oldFreeNetUsage, 0, latestConsumeFreeTime, now));
-    Map<String, Long> assetMap = accountCapsule.getAssetMap();
+  public void updateUsage(AccountWrapper accountWrapper, long now) {
+    long oldNetUsage = accountWrapper.getNetUsage();
+    long latestConsumeTime = accountWrapper.getLatestConsumeTime();
+    accountWrapper.setNetUsage(increase(oldNetUsage, 0, latestConsumeTime, now));
+    long oldFreeNetUsage = accountWrapper.getFreeNetUsage();
+    long latestConsumeFreeTime = accountWrapper.getLatestConsumeFreeTime();
+    accountWrapper.setFreeNetUsage(increase(oldFreeNetUsage, 0, latestConsumeFreeTime, now));
+    Map<String, Long> assetMap = accountWrapper.getAssetMap();
     assetMap.forEach((assetName, balance) -> {
-      long oldFreeAssetNetUsage = accountCapsule.getFreeAssetNetUsage(assetName);
-      long latestAssetOperationTime = accountCapsule.getLatestAssetOperationTime(assetName);
-      accountCapsule.putFreeAssetNetUsage(assetName,
+      long oldFreeAssetNetUsage = accountWrapper.getFreeAssetNetUsage(assetName);
+      long latestAssetOperationTime = accountWrapper.getLatestAssetOperationTime(assetName);
+      accountWrapper.putFreeAssetNetUsage(assetName,
           increase(oldFreeAssetNetUsage, 0, latestAssetOperationTime, now));
     });
   }
 
-  public void consumeBandwidth(TransactionCapsule trx, TransactionResultCapsule ret)
+  public void consumeBandwidth(TransactionWrapper trx, TransactionResultWrapper ret)
       throws ContractValidateException, AccountResourceInsufficientException {
     List<Contract> contracts =
         trx.getInstance().getRawData().getContractList();
@@ -88,33 +88,33 @@ public class BandwidthProcessor {
     for (Contract contract : contracts) {
       long bytes = trx.getSerializedSize();
       logger.debug("trxId {},bandwidth cost :{}", trx.getTransactionId(), bytes);
-      byte[] address = TransactionCapsule.getOwner(contract);
-      AccountCapsule accountCapsule = dbManager.getAccountStore().get(address);
-      if (accountCapsule == null) {
+      byte[] address = TransactionWrapper.getOwner(contract);
+      AccountWrapper accountWrapper = dbManager.getAccountStore().get(address);
+      if (accountWrapper == null) {
         throw new ContractValidateException("account not exists");
       }
       long now = dbManager.getWitnessController().getHeadSlot();
 
       if (contractCreateNewAccount(contract)) {
-        consumeForCreateNewAccount(accountCapsule, bytes, now, ret);
+        consumeForCreateNewAccount(accountWrapper, bytes, now, ret);
         continue;
       }
 
       if (contract.getType() == TransferAssetContract) {
-        if (useAssetAccountNet(contract, accountCapsule, now, bytes)) {
+        if (useAssetAccountNet(contract, accountWrapper, now, bytes)) {
           continue;
         }
       }
 
-      if (useAccountNet(accountCapsule, bytes, now)) {
+      if (useAccountNet(accountWrapper, bytes, now)) {
         continue;
       }
 
-      if (useFreeNet(accountCapsule, bytes, now)) {
+      if (useFreeNet(accountWrapper, bytes, now)) {
         continue;
       }
 
-      if (useTransactionFee(accountCapsule, bytes, ret)) {
+      if (useTransactionFee(accountWrapper, bytes, ret)) {
         continue;
       }
 
@@ -123,21 +123,21 @@ public class BandwidthProcessor {
     }
   }
 
-  private boolean consumeFee(AccountCapsule accountCapsule, long fee) {
+  private boolean consumeFee(AccountWrapper accountWrapper, long fee) {
     try {
       long latestOperationTime = dbManager.getHeadBlockTimeStamp();
-      accountCapsule.setLatestOperationTime(latestOperationTime);
-      dbManager.adjustBalance(accountCapsule, -fee);
+      accountWrapper.setLatestOperationTime(latestOperationTime);
+      dbManager.adjustBalance(accountWrapper, -fee);
       return true;
     } catch (BalanceInsufficientException e) {
       return false;
     }
   }
 
-  private boolean useTransactionFee(AccountCapsule accountCapsule, long bytes,
-      TransactionResultCapsule ret) {
+  private boolean useTransactionFee(AccountWrapper accountWrapper, long bytes,
+                                    TransactionResultWrapper ret) {
     long fee = dbManager.getDynamicPropertiesStore().getTransactionFee() * bytes;
-    if (consumeFee(accountCapsule, fee)) {
+    if (consumeFee(accountWrapper, fee)) {
       ret.addFee(fee);
       dbManager.getDynamicPropertiesStore().addTotalTransactionCost(fee);
       return true;
@@ -146,24 +146,24 @@ public class BandwidthProcessor {
     }
   }
 
-  private void consumeForCreateNewAccount(AccountCapsule accountCapsule, long bytes,
-      long now, TransactionResultCapsule resultCapsule)
+  private void consumeForCreateNewAccount(AccountWrapper accountWrapper, long bytes,
+                                          long now, TransactionResultWrapper resultCapsule)
       throws AccountResourceInsufficientException {
-    boolean ret = consumeBandwidthForCreateNewAccount(accountCapsule, bytes, now);
+    boolean ret = consumeBandwidthForCreateNewAccount(accountWrapper, bytes, now);
 
     if (!ret) {
-      ret = consumeFeeForCreateNewAccount(accountCapsule, resultCapsule);
+      ret = consumeFeeForCreateNewAccount(accountWrapper, resultCapsule);
       if (!ret) {
         throw new AccountResourceInsufficientException();
       }
     }
   }
 
-  public boolean consumeBandwidthForCreateNewAccount(AccountCapsule accountCapsule, long bytes,
-      long now) {
-    long netUsage = accountCapsule.getNetUsage();
-    long latestConsumeTime = accountCapsule.getLatestConsumeTime();
-    long netLimit = calculateGlobalNetLimit(accountCapsule.getFrozenBalance());
+  public boolean consumeBandwidthForCreateNewAccount(AccountWrapper accountWrapper, long bytes,
+                                                     long now) {
+    long netUsage = accountWrapper.getNetUsage();
+    long latestConsumeTime = accountWrapper.getLatestConsumeTime();
+    long netLimit = calculateGlobalNetLimit(accountWrapper.getFrozenBalance());
 
     long newNetUsage = increase(netUsage, 0, latestConsumeTime, now);
 
@@ -171,19 +171,19 @@ public class BandwidthProcessor {
       latestConsumeTime = now;
       long latestOperationTime = dbManager.getHeadBlockTimeStamp();
       newNetUsage = increase(newNetUsage, bytes, latestConsumeTime, now);
-      accountCapsule.setLatestConsumeTime(latestConsumeTime);
-      accountCapsule.setLatestOperationTime(latestOperationTime);
-      accountCapsule.setNetUsage(newNetUsage);
-      dbManager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+      accountWrapper.setLatestConsumeTime(latestConsumeTime);
+      accountWrapper.setLatestOperationTime(latestOperationTime);
+      accountWrapper.setNetUsage(newNetUsage);
+      dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
       return true;
     }
     return false;
   }
 
-  public boolean consumeFeeForCreateNewAccount(AccountCapsule accountCapsule,
-      TransactionResultCapsule ret) {
+  public boolean consumeFeeForCreateNewAccount(AccountWrapper accountWrapper,
+      TransactionResultWrapper ret) {
     long fee = dbManager.getDynamicPropertiesStore().getCreateAccountFee();
-    if (consumeFee(accountCapsule, fee)) {
+    if (consumeFee(accountWrapper, fee)) {
       ret.addFee(fee);
       dbManager.getDynamicPropertiesStore().addTotalCreateAccountCost(fee);
       return true;
@@ -193,7 +193,7 @@ public class BandwidthProcessor {
   }
 
   public boolean contractCreateNewAccount(Contract contract) {
-    AccountCapsule toAccount;
+    AccountWrapper toAccount;
     switch (contract.getType()) {
       case AccountCreateContract:
         return true;
@@ -222,8 +222,8 @@ public class BandwidthProcessor {
   }
 
 
-  private boolean useAssetAccountNet(Contract contract, AccountCapsule accountCapsule, long now,
-      long bytes)
+  private boolean useAssetAccountNet(Contract contract, AccountWrapper accountWrapper, long now,
+                                     long bytes)
       throws ContractValidateException {
 
     ByteString assetName;
@@ -233,19 +233,19 @@ public class BandwidthProcessor {
       throw new RuntimeException(ex.getMessage());
     }
     String assetNameString = ByteArray.toStr(assetName.toByteArray());
-    AssetIssueCapsule assetIssueCapsule
+    AssetIssueWrapper assetIssueWrapper
         = dbManager.getAssetIssueStore().get(assetName.toByteArray());
-    if (assetIssueCapsule == null) {
+    if (assetIssueWrapper == null) {
       throw new ContractValidateException("asset not exists");
     }
 
-    if (assetIssueCapsule.getOwnerAddress() == accountCapsule.getAddress()) {
-      return useAccountNet(accountCapsule, bytes, now);
+    if (assetIssueWrapper.getOwnerAddress() == accountWrapper.getAddress()) {
+      return useAccountNet(accountWrapper, bytes, now);
     }
 
-    long publicFreeAssetNetLimit = assetIssueCapsule.getPublicFreeAssetNetLimit();
-    long publicFreeAssetNetUsage = assetIssueCapsule.getPublicFreeAssetNetUsage();
-    long publicLatestFreeNetTime = assetIssueCapsule.getPublicLatestFreeNetTime();
+    long publicFreeAssetNetLimit = assetIssueWrapper.getPublicFreeAssetNetLimit();
+    long publicFreeAssetNetUsage = assetIssueWrapper.getPublicFreeAssetNetUsage();
+    long publicLatestFreeNetTime = assetIssueWrapper.getPublicLatestFreeNetTime();
 
     long newPublicFreeAssetNetUsage = increase(publicFreeAssetNetUsage, 0,
         publicLatestFreeNetTime, now);
@@ -255,11 +255,11 @@ public class BandwidthProcessor {
       return false;
     }
 
-    long freeAssetNetLimit = assetIssueCapsule.getFreeAssetNetLimit();
+    long freeAssetNetLimit = assetIssueWrapper.getFreeAssetNetLimit();
 
-    long freeAssetNetUsage = accountCapsule
+    long freeAssetNetUsage = accountWrapper
         .getFreeAssetNetUsage(assetNameString);
-    long latestAssetOperationTime = accountCapsule
+    long latestAssetOperationTime = accountWrapper
         .getLatestAssetOperationTime(assetNameString);
 
     long newFreeAssetNetUsage = increase(freeAssetNetUsage, 0,
@@ -270,12 +270,12 @@ public class BandwidthProcessor {
       return false;
     }
 
-    AccountCapsule issuerAccountCapsule = dbManager.getAccountStore()
-        .get(assetIssueCapsule.getOwnerAddress().toByteArray());
+    AccountWrapper issuerAccountWrapper = dbManager.getAccountStore()
+        .get(assetIssueWrapper.getOwnerAddress().toByteArray());
 
-    long issuerNetUsage = issuerAccountCapsule.getNetUsage();
-    long latestConsumeTime = issuerAccountCapsule.getLatestConsumeTime();
-    long issuerNetLimit = calculateGlobalNetLimit(issuerAccountCapsule.getFrozenBalance());
+    long issuerNetUsage = issuerAccountWrapper.getNetUsage();
+    long latestConsumeTime = issuerAccountWrapper.getLatestConsumeTime();
+    long issuerNetLimit = calculateGlobalNetLimit(issuerAccountWrapper.getFrozenBalance());
 
     long newIssuerNetUsage = increase(issuerNetUsage, 0, latestConsumeTime, now);
 
@@ -294,21 +294,21 @@ public class BandwidthProcessor {
     newPublicFreeAssetNetUsage = increase(newPublicFreeAssetNetUsage, bytes,
         publicLatestFreeNetTime, now);
 
-    issuerAccountCapsule.setNetUsage(newIssuerNetUsage);
-    issuerAccountCapsule.setLatestConsumeTime(latestConsumeTime);
+    issuerAccountWrapper.setNetUsage(newIssuerNetUsage);
+    issuerAccountWrapper.setLatestConsumeTime(latestConsumeTime);
 
-    accountCapsule.setLatestOperationTime(latestOperationTime);
-    accountCapsule.putLatestAssetOperationTimeMap(assetNameString,
+    accountWrapper.setLatestOperationTime(latestOperationTime);
+    accountWrapper.putLatestAssetOperationTimeMap(assetNameString,
         latestAssetOperationTime);
-    accountCapsule.putFreeAssetNetUsage(assetNameString, newFreeAssetNetUsage);
+    accountWrapper.putFreeAssetNetUsage(assetNameString, newFreeAssetNetUsage);
 
-    assetIssueCapsule.setPublicFreeAssetNetUsage(newPublicFreeAssetNetUsage);
-    assetIssueCapsule.setPublicLatestFreeNetTime(publicLatestFreeNetTime);
+    assetIssueWrapper.setPublicFreeAssetNetUsage(newPublicFreeAssetNetUsage);
+    assetIssueWrapper.setPublicLatestFreeNetTime(publicLatestFreeNetTime);
 
-    dbManager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
-    dbManager.getAccountStore().put(issuerAccountCapsule.createDbKey(),
-        issuerAccountCapsule);
-    dbManager.getAssetIssueStore().put(assetIssueCapsule.createDbKey(), assetIssueCapsule);
+    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
+    dbManager.getAccountStore().put(issuerAccountWrapper.createDbKey(),
+            issuerAccountWrapper);
+    dbManager.getAssetIssueStore().put(assetIssueWrapper.createDbKey(), assetIssueWrapper);
 
     return true;
 
@@ -325,11 +325,11 @@ public class BandwidthProcessor {
     return (long) (netWeight * ((double) totalNetLimit / totalNetWeight));
   }
 
-  private boolean useAccountNet(AccountCapsule accountCapsule, long bytes, long now) {
+  private boolean useAccountNet(AccountWrapper accountWrapper, long bytes, long now) {
 
-    long netUsage = accountCapsule.getNetUsage();
-    long latestConsumeTime = accountCapsule.getLatestConsumeTime();
-    long netLimit = calculateGlobalNetLimit(accountCapsule.getFrozenBalance());
+    long netUsage = accountWrapper.getNetUsage();
+    long latestConsumeTime = accountWrapper.getLatestConsumeTime();
+    long netLimit = calculateGlobalNetLimit(accountWrapper.getFrozenBalance());
 
     long newNetUsage = increase(netUsage, 0, latestConsumeTime, now);
 
@@ -341,19 +341,19 @@ public class BandwidthProcessor {
     latestConsumeTime = now;
     long latestOperationTime = dbManager.getHeadBlockTimeStamp();
     newNetUsage = increase(newNetUsage, bytes, latestConsumeTime, now);
-    accountCapsule.setNetUsage(newNetUsage);
-    accountCapsule.setLatestOperationTime(latestOperationTime);
-    accountCapsule.setLatestConsumeTime(latestConsumeTime);
+    accountWrapper.setNetUsage(newNetUsage);
+    accountWrapper.setLatestOperationTime(latestOperationTime);
+    accountWrapper.setLatestConsumeTime(latestConsumeTime);
 
-    dbManager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     return true;
   }
 
-  private boolean useFreeNet(AccountCapsule accountCapsule, long bytes, long now) {
+  private boolean useFreeNet(AccountWrapper accountWrapper, long bytes, long now) {
 
     long freeNetLimit = dbManager.getDynamicPropertiesStore().getFreeNetLimit();
-    long freeNetUsage = accountCapsule.getFreeNetUsage();
-    long latestConsumeFreeTime = accountCapsule.getLatestConsumeFreeTime();
+    long freeNetUsage = accountWrapper.getFreeNetUsage();
+    long latestConsumeFreeTime = accountWrapper.getLatestConsumeFreeTime();
     long newFreeNetUsage = increase(freeNetUsage, 0, latestConsumeFreeTime, now);
 
     if (bytes > (freeNetLimit - newFreeNetUsage)) {
@@ -377,13 +377,13 @@ public class BandwidthProcessor {
     publicNetTime = now;
     newFreeNetUsage = increase(newFreeNetUsage, bytes, latestConsumeFreeTime, now);
     newPublicNetUsage = increase(newPublicNetUsage, bytes, publicNetTime, now);
-    accountCapsule.setFreeNetUsage(newFreeNetUsage);
-    accountCapsule.setLatestConsumeFreeTime(latestConsumeFreeTime);
-    accountCapsule.setLatestOperationTime(latestOperationTime);
+    accountWrapper.setFreeNetUsage(newFreeNetUsage);
+    accountWrapper.setLatestConsumeFreeTime(latestConsumeFreeTime);
+    accountWrapper.setLatestOperationTime(latestOperationTime);
 
     dbManager.getDynamicPropertiesStore().savePublicNetUsage(newPublicNetUsage);
     dbManager.getDynamicPropertiesStore().savePublicNetTime(publicNetTime);
-    dbManager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     return true;
 
   }

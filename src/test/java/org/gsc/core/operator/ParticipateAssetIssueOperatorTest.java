@@ -4,6 +4,9 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.AssetIssueWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.joda.time.DateTime;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -17,9 +20,6 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.AssetIssueCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
@@ -44,10 +44,10 @@ public class ParticipateAssetIssueOperatorTest {
   private static final long OWNER_BALANCE = 99999;
   private static final long TO_BALANCE = 100001;
   private static final long TOTAL_SUPPLY = 10000000000000L;
-  private static final int TRX_NUM = 2;
+  private static final int GSC_NUM = 2;
   private static final int NUM = 2147483647;
   private static final int VOTE_SCORE = 2;
-  private static final String DESCRIPTION = "TRX";
+  private static final String DESCRIPTION = "GSC";
   private static final String URL = "https://gsc.network";
 
   static {
@@ -86,20 +86,20 @@ public class ParticipateAssetIssueOperatorTest {
    */
   @Before
   public void createCapsule() {
-    AccountCapsule ownerCapsule =
-        new AccountCapsule(
+    AccountWrapper ownerCapsule =
+        new AccountWrapper(
             ByteString.copyFromUtf8("owner"),
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)),
             AccountType.Normal,
             OWNER_BALANCE);
-    AccountCapsule toAccountCapsule =
-        new AccountCapsule(
+    AccountWrapper toAccountWrapper =
+        new AccountWrapper(
             ByteString.copyFromUtf8("toAccount"),
             ByteString.copyFrom(ByteArray.fromHexString(TO_ADDRESS)),
             AccountType.Normal,
             TO_BALANCE);
     dbManager.getAccountStore().put(ownerCapsule.getAddress().toByteArray(), ownerCapsule);
-    dbManager.getAccountStore().put(toAccountCapsule.getAddress().toByteArray(), toAccountCapsule);
+    dbManager.getAccountStore().put(toAccountWrapper.getAddress().toByteArray(), toAccountWrapper);
   }
 
   private Any getContract(long count) {
@@ -158,7 +158,7 @@ public class ParticipateAssetIssueOperatorTest {
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(TO_ADDRESS)))
             .setName(ByteString.copyFrom(ByteArray.fromString(ASSET_NAME)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setTrxNum(TRX_NUM)
+            .setTrxNum(GSC_NUM)
             .setNum(NUM)
             .setStartTime(startTimestmp)
             .setEndTime(endTimestmp)
@@ -166,13 +166,13 @@ public class ParticipateAssetIssueOperatorTest {
             .setDescription(ByteString.copyFrom(ByteArray.fromString(DESCRIPTION)))
             .setUrl(ByteString.copyFrom(ByteArray.fromString(URL)))
             .build();
-    AssetIssueCapsule assetIssueCapsule = new AssetIssueCapsule(assetIssueContract);
+    AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
     dbManager.getAssetIssueStore()
-        .put(assetIssueCapsule.getName().toByteArray(), assetIssueCapsule);
-    AccountCapsule toAccountCapsule = dbManager.getAccountStore()
+        .put(assetIssueWrapper.getName().toByteArray(), assetIssueWrapper);
+    AccountWrapper toAccountWrapper = dbManager.getAccountStore()
         .get(ByteArray.fromHexString(TO_ADDRESS));
-    toAccountCapsule.addAsset(ASSET_NAME, TOTAL_SUPPLY);
-    dbManager.getAccountStore().put(toAccountCapsule.getAddress().toByteArray(), toAccountCapsule);
+    toAccountWrapper.addAsset(ASSET_NAME, TOTAL_SUPPLY);
+    dbManager.getAccountStore().put(toAccountWrapper.getAddress().toByteArray(), toAccountWrapper);
   }
 
   private void initAssetIssue(long startTimestmp, long endTimestmp, String assetName) {
@@ -181,7 +181,7 @@ public class ParticipateAssetIssueOperatorTest {
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(TO_ADDRESS)))
             .setName(ByteString.copyFrom(ByteArray.fromString(assetName)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setTrxNum(TRX_NUM)
+            .setTrxNum(GSC_NUM)
             .setNum(NUM)
             .setStartTime(startTimestmp)
             .setEndTime(endTimestmp)
@@ -189,13 +189,13 @@ public class ParticipateAssetIssueOperatorTest {
             .setDescription(ByteString.copyFrom(ByteArray.fromString(DESCRIPTION)))
             .setUrl(ByteString.copyFrom(ByteArray.fromString(URL)))
             .build();
-    AssetIssueCapsule assetIssueCapsule = new AssetIssueCapsule(assetIssueContract);
+    AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
     dbManager.getAssetIssueStore()
-        .put(assetIssueCapsule.getName().toByteArray(), assetIssueCapsule);
-    AccountCapsule toAccountCapsule = dbManager.getAccountStore()
+        .put(assetIssueWrapper.getName().toByteArray(), assetIssueWrapper);
+    AccountWrapper toAccountWrapper = dbManager.getAccountStore()
         .get(ByteArray.fromHexString(TO_ADDRESS));
-    toAccountCapsule.addAsset(assetName, TOTAL_SUPPLY);
-    dbManager.getAccountStore().put(toAccountCapsule.getAddress().toByteArray(), toAccountCapsule);
+    toAccountWrapper.addAsset(assetName, TOTAL_SUPPLY);
+    dbManager.getAccountStore().put(toAccountWrapper.getAddress().toByteArray(), toAccountWrapper);
   }
 
   private void initAssetIssueWithOwner(long startTimestmp, long endTimestmp, String owner) {
@@ -204,7 +204,7 @@ public class ParticipateAssetIssueOperatorTest {
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(owner)))
             .setName(ByteString.copyFrom(ByteArray.fromString(ASSET_NAME)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setTrxNum(TRX_NUM)
+            .setTrxNum(GSC_NUM)
             .setNum(NUM)
             .setStartTime(startTimestmp)
             .setEndTime(endTimestmp)
@@ -212,13 +212,13 @@ public class ParticipateAssetIssueOperatorTest {
             .setDescription(ByteString.copyFrom(ByteArray.fromString(DESCRIPTION)))
             .setUrl(ByteString.copyFrom(ByteArray.fromString(URL)))
             .build();
-    AssetIssueCapsule assetIssueCapsule = new AssetIssueCapsule(assetIssueContract);
+    AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
     dbManager.getAssetIssueStore()
-        .put(assetIssueCapsule.getName().toByteArray(), assetIssueCapsule);
-    AccountCapsule toAccountCapsule = dbManager.getAccountStore()
+        .put(assetIssueWrapper.getName().toByteArray(), assetIssueWrapper);
+    AccountWrapper toAccountWrapper = dbManager.getAccountStore()
         .get(ByteArray.fromHexString(TO_ADDRESS));
-    toAccountCapsule.addAsset(ASSET_NAME, TOTAL_SUPPLY);
-    dbManager.getAccountStore().put(toAccountCapsule.getAddress().toByteArray(), toAccountCapsule);
+    toAccountWrapper.addAsset(ASSET_NAME, TOTAL_SUPPLY);
+    dbManager.getAccountStore().put(toAccountWrapper.getAddress().toByteArray(), toAccountWrapper);
   }
 
   @Test
@@ -227,22 +227,22 @@ public class ParticipateAssetIssueOperatorTest {
         dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() + 1000);
     ParticipateAssetIssueOperator actuator =
         new ParticipateAssetIssueOperator(getContract(1000L), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE - 1000);
       Assert.assertEquals(toAccount.getBalance(), TO_BALANCE + 1000);
-      Assert.assertEquals(owner.getAssetMap().get(ASSET_NAME).longValue(), (1000L) / TRX_NUM * NUM);
+      Assert.assertEquals(owner.getAssetMap().get(ASSET_NAME).longValue(), (1000L) / GSC_NUM * NUM);
       Assert.assertEquals(
           toAccount.getAssetMap().get(ASSET_NAME).longValue(),
-          TOTAL_SUPPLY - (1000L) / TRX_NUM * NUM);
+          TOTAL_SUPPLY - (1000L) / GSC_NUM * NUM);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {
@@ -256,7 +256,7 @@ public class ParticipateAssetIssueOperatorTest {
     initAssetIssue(now.minusDays(1).getMillis(), now.getMillis());
     ParticipateAssetIssueOperator actuator =
         new ParticipateAssetIssueOperator(getContract(1000L), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -264,9 +264,9 @@ public class ParticipateAssetIssueOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("No longer valid period!".equals(e.getMessage()));
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE);
@@ -284,7 +284,7 @@ public class ParticipateAssetIssueOperatorTest {
     initAssetIssue(now.minusDays(1).getMillis(), now.getMillis());
     ParticipateAssetIssueOperator actuator =
         new ParticipateAssetIssueOperator(getContract(1000L), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -292,9 +292,9 @@ public class ParticipateAssetIssueOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("No longer valid period!".equals(e.getMessage()));
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE);
@@ -312,20 +312,20 @@ public class ParticipateAssetIssueOperatorTest {
         dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() + 1000);
     ParticipateAssetIssueOperator actuator =
         new ParticipateAssetIssueOperator(getContract(999L), dbManager); //no problem
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
 
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
-      Assert.assertEquals(owner.getAssetMap().get(ASSET_NAME).longValue(), (999L * NUM) / TRX_NUM);
+      Assert.assertEquals(owner.getAssetMap().get(ASSET_NAME).longValue(), (999L * NUM) / GSC_NUM);
       Assert.assertEquals(
           toAccount.getAssetMap().get(ASSET_NAME).longValue(),
-          TOTAL_SUPPLY - (999L * NUM) / TRX_NUM);
+          TOTAL_SUPPLY - (999L * NUM) / GSC_NUM);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {
@@ -339,7 +339,7 @@ public class ParticipateAssetIssueOperatorTest {
     initAssetIssue(now.minusDays(1).getMillis(), now.plusDays(1).getMillis());
     ParticipateAssetIssueOperator actuator =
         new ParticipateAssetIssueOperator(getContract(-999L), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -348,9 +348,9 @@ public class ParticipateAssetIssueOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("Amount must greater than 0!".equals(e.getMessage()));
 
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE);
@@ -368,7 +368,7 @@ public class ParticipateAssetIssueOperatorTest {
     initAssetIssue(now.minusDays(1).getMillis(), now.plusDays(1).getMillis());
     ParticipateAssetIssueOperator actuator =
         new ParticipateAssetIssueOperator(getContract(0), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -377,9 +377,9 @@ public class ParticipateAssetIssueOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("Amount must greater than 0!".equals(e.getMessage()));
 
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE);
@@ -401,7 +401,7 @@ public class ParticipateAssetIssueOperatorTest {
     ParticipateAssetIssueOperator actuator = new ParticipateAssetIssueOperator(
         getContractWithOwner(101, NOT_EXIT_ADDRESS),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -410,9 +410,9 @@ public class ParticipateAssetIssueOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("Account does not exist!", e.getMessage());
 
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE);
@@ -436,7 +436,7 @@ public class ParticipateAssetIssueOperatorTest {
     ParticipateAssetIssueOperator actuator = new ParticipateAssetIssueOperator(
         getContractWithTo(101, NOT_EXIT_ADDRESS),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -445,9 +445,9 @@ public class ParticipateAssetIssueOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("To account does not exist!", e.getMessage());
 
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE);
@@ -471,7 +471,7 @@ public class ParticipateAssetIssueOperatorTest {
     ParticipateAssetIssueOperator actuator = new ParticipateAssetIssueOperator(
         getContractWithTo(101, OWNER_ADDRESS),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -480,9 +480,9 @@ public class ParticipateAssetIssueOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("Cannot participate asset Issue yourself !", e.getMessage());
 
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE);
@@ -503,7 +503,7 @@ public class ParticipateAssetIssueOperatorTest {
         dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() + 1000);
     ParticipateAssetIssueOperator actuator = new ParticipateAssetIssueOperator(
         getContractWithTo(101, THIRD_ADDRESS), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -512,9 +512,9 @@ public class ParticipateAssetIssueOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("The asset is not issued by " + THIRD_ADDRESS, e.getMessage());
 
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE);
@@ -535,7 +535,7 @@ public class ParticipateAssetIssueOperatorTest {
     ByteString emptyName = ByteString.EMPTY;
     ParticipateAssetIssueOperator actuator = new ParticipateAssetIssueOperator(
         getContract(1000L, emptyName), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -550,7 +550,7 @@ public class ParticipateAssetIssueOperatorTest {
     //Too long name, throw exception. Max long is 32.
     String assetName = "testname0123456789abcdefghijgklmo";
     actuator = new ParticipateAssetIssueOperator(getContract(1000L, assetName), dbManager);
-    ret = new TransactionResultCapsule();
+    ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -558,7 +558,7 @@ public class ParticipateAssetIssueOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("Invalid assetName", e.getMessage());
-      AccountCapsule ownerAccount = dbManager.getAccountStore()
+      AccountWrapper ownerAccount = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
       Assert.assertTrue(isNullOrZero(ownerAccount.getAssetMap().get(assetName)));
     } catch (ContractExeException e) {
@@ -568,7 +568,7 @@ public class ParticipateAssetIssueOperatorTest {
     //Contain space, throw exception. Every character need readable .
     assetName = "t e";
     actuator = new ParticipateAssetIssueOperator(getContract(1000L, assetName), dbManager);
-    ret = new TransactionResultCapsule();
+    ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -576,7 +576,7 @@ public class ParticipateAssetIssueOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("Invalid assetName", e.getMessage());
-      AccountCapsule ownerAccount = dbManager.getAccountStore()
+      AccountWrapper ownerAccount = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
       Assert.assertTrue(isNullOrZero(ownerAccount.getAssetMap().get(assetName)));
     } catch (ContractExeException e) {
@@ -587,7 +587,7 @@ public class ParticipateAssetIssueOperatorTest {
     actuator = new ParticipateAssetIssueOperator(
         getContract(1000L, ByteString.copyFrom(ByteArray.fromHexString("E6B58BE8AF95"))),
         dbManager);
-    ret = new TransactionResultCapsule();
+    ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -595,7 +595,7 @@ public class ParticipateAssetIssueOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("Invalid assetName", e.getMessage());
-      AccountCapsule ownerAccount = dbManager.getAccountStore()
+      AccountWrapper ownerAccount = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
       Assert.assertTrue(isNullOrZero(ownerAccount.getAssetMap().get(assetName)));
     } catch (ContractExeException e) {
@@ -611,16 +611,16 @@ public class ParticipateAssetIssueOperatorTest {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE - 1000);
       Assert.assertEquals(toAccount.getBalance(), TO_BALANCE + 1000);
-      Assert.assertEquals(owner.getAssetMap().get(assetName).longValue(), (1000L) / TRX_NUM * NUM);
+      Assert.assertEquals(owner.getAssetMap().get(assetName).longValue(), (1000L) / GSC_NUM * NUM);
       Assert.assertEquals(toAccount.getAssetMap().get(assetName).longValue(),
-          TOTAL_SUPPLY - (1000L) / TRX_NUM * NUM);
+          TOTAL_SUPPLY - (1000L) / GSC_NUM * NUM);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {
@@ -636,16 +636,16 @@ public class ParticipateAssetIssueOperatorTest {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE - 2000);
       Assert.assertEquals(toAccount.getBalance(), TO_BALANCE + 2000);
-      Assert.assertEquals(owner.getAssetMap().get(assetName).longValue(), (1000L) / TRX_NUM * NUM);
+      Assert.assertEquals(owner.getAssetMap().get(assetName).longValue(), (1000L) / GSC_NUM * NUM);
       Assert.assertEquals(toAccount.getAssetMap().get(assetName).longValue(),
-          TOTAL_SUPPLY - (1000L) / TRX_NUM * NUM);
+          TOTAL_SUPPLY - (1000L) / GSC_NUM * NUM);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {
@@ -658,12 +658,12 @@ public class ParticipateAssetIssueOperatorTest {
     initAssetIssue(dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() - 1000,
         dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() + 1000);
     // First, reduce the owner trx balance. Else can't complete this test case.
-    AccountCapsule owner = dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
+    AccountWrapper owner = dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
     owner.setBalance(100);
     dbManager.getAccountStore().put(owner.getAddress().toByteArray(), owner);
     ParticipateAssetIssueOperator actuator = new ParticipateAssetIssueOperator(getContract(101),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -674,7 +674,7 @@ public class ParticipateAssetIssueOperatorTest {
 
       owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), 100);
@@ -691,12 +691,12 @@ public class ParticipateAssetIssueOperatorTest {
     initAssetIssue(dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() - 1000,
         dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() + 1000);
     // First, reduce to account asset balance. Else can't complete this test case.
-    AccountCapsule toAccount = dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
+    AccountWrapper toAccount = dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
     toAccount.reduceAssetAmount(ByteString.copyFromUtf8(ASSET_NAME), TOTAL_SUPPLY - 10000);
     dbManager.getAccountStore().put(toAccount.getAddress().toByteArray(), toAccount);
     ParticipateAssetIssueOperator actuator = new ParticipateAssetIssueOperator(getContract(1),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -705,7 +705,7 @@ public class ParticipateAssetIssueOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("Asset balance is not enough !".equals(e.getMessage()));
 
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
@@ -726,7 +726,7 @@ public class ParticipateAssetIssueOperatorTest {
     ParticipateAssetIssueOperator actuator = new ParticipateAssetIssueOperator(
         getContract(1, "TTTTTTTTTTTT"),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -735,9 +735,9 @@ public class ParticipateAssetIssueOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue(("No asset named " + "TTTTTTTTTTTT").equals(e.getMessage()));
 
-      AccountCapsule owner =
+      AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE);
@@ -754,7 +754,7 @@ public class ParticipateAssetIssueOperatorTest {
     initAssetIssue(dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() - 1000,
         dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() + 1000);
     // First, increase the owner asset balance. Else can't complete this test case.
-    AccountCapsule owner = dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
+    AccountWrapper owner = dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
     owner.addAsset(ASSET_NAME, Long.MAX_VALUE);
     dbManager.getAccountStore().put(owner.getAddress().toByteArray(), owner);
     ParticipateAssetIssueOperator actuator = new ParticipateAssetIssueOperator(
@@ -762,7 +762,7 @@ public class ParticipateAssetIssueOperatorTest {
         dbManager);
     //NUM = 2147483647;
     //ASSET_BLANCE = Long.MAX_VALUE + 2147483647/2
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -775,7 +775,7 @@ public class ParticipateAssetIssueOperatorTest {
 
       owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE);
@@ -790,7 +790,7 @@ public class ParticipateAssetIssueOperatorTest {
     initAssetIssue(dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() - 1000,
         dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() + 1000);
     // First, increase the owner trx balance. Else can't complete this test case.
-    AccountCapsule owner = dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
+    AccountWrapper owner = dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
     owner.setBalance(100000000000000L);
     dbManager.getAccountStore().put(owner.getAddress().toByteArray(), owner);
     ParticipateAssetIssueOperator actuator = new ParticipateAssetIssueOperator(
@@ -802,7 +802,7 @@ public class ParticipateAssetIssueOperatorTest {
     //8589934596 * 2147483647 = 4294967298 * 2147483647 *2 = 0xfffffffffffffffc = -4
     //8589934597 * 2147483647 = 8589934596 * 2147483647 + 2147483647 = -4 + 2147483647 = 2147483643  vs 9223372036854775806*2 + 2147483647
 
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -813,7 +813,7 @@ public class ParticipateAssetIssueOperatorTest {
 
       owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
-      AccountCapsule toAccount =
+      AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), 100000000000000L);
@@ -826,7 +826,7 @@ public class ParticipateAssetIssueOperatorTest {
   }
 
   /**
-   * exchangeAmount <= 0 trx, throw exception
+   * exchangeAmount <= 0 GSC, throw exception
    */
   @Test
   public void exchangeAmountTest() {
@@ -845,22 +845,22 @@ public class ParticipateAssetIssueOperatorTest {
             .setDescription(ByteString.copyFrom(ByteArray.fromString(DESCRIPTION)))
             .setUrl(ByteString.copyFrom(ByteArray.fromString(URL)))
             .build();
-    AssetIssueCapsule assetIssueCapsule = new AssetIssueCapsule(assetIssueContract);
+    AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
     dbManager.getAssetIssueStore()
-        .put(assetIssueCapsule.getName().toByteArray(), assetIssueCapsule);
+        .put(assetIssueWrapper.getName().toByteArray(), assetIssueWrapper);
 
-    AccountCapsule toAccountCapsule = dbManager.getAccountStore()
+    AccountWrapper toAccountWrapper = dbManager.getAccountStore()
         .get(ByteArray.fromHexString(TO_ADDRESS));
-    toAccountCapsule.addAsset(ASSET_NAME, TOTAL_SUPPLY);
-    dbManager.getAccountStore().put(toAccountCapsule.getAddress().toByteArray(), toAccountCapsule);
-    AccountCapsule owner = dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
+    toAccountWrapper.addAsset(ASSET_NAME, TOTAL_SUPPLY);
+    dbManager.getAccountStore().put(toAccountWrapper.getAddress().toByteArray(), toAccountWrapper);
+    AccountWrapper owner = dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
     owner.setBalance(100000000000000L);
     dbManager.getAccountStore().put(owner.getAddress().toByteArray(), owner);
 
     ParticipateAssetIssueOperator actuator = new ParticipateAssetIssueOperator(getContract(1),
         dbManager);
 
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);

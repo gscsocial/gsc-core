@@ -4,6 +4,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,8 +17,6 @@ import org.gsc.common.utils.FileUtil;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
@@ -76,8 +76,8 @@ public class UnfreezeAssetOperatorTest {
    */
   @Before
   public void createAccountCapsule() {
-    AccountCapsule ownerCapsule =
-        new AccountCapsule(
+    AccountWrapper ownerCapsule =
+        new AccountWrapper(
             ByteString.copyFromUtf8("owner"),
             StringUtil.hexString2ByteString(OWNER_ADDRESS),
             AccountType.Normal,
@@ -109,16 +109,16 @@ public class UnfreezeAssetOperatorTest {
         .setExpireTime(now+600000)
         .build();
     account = account.toBuilder().addFrozenSupply(newFrozen0).addFrozenSupply(newFrozen1).build();
-    AccountCapsule accountCapsule = new AccountCapsule(account);
-    dbManager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+    AccountWrapper accountWrapper = new AccountWrapper(account);
+    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     UnfreezeAssetOperator actuator = new UnfreezeAssetOperator(getContract(OWNER_ADDRESS),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      AccountCapsule owner = dbManager.getAccountStore()
+      AccountWrapper owner = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
       Assert.assertEquals(owner.getAssetMap().get(assetName).longValue(), frozenBalance);
       Assert.assertEquals(owner.getFrozenSupplyCount(), 1);
@@ -133,7 +133,7 @@ public class UnfreezeAssetOperatorTest {
   public void invalidOwnerAddress() {
     UnfreezeAssetOperator actuator = new UnfreezeAssetOperator(getContract(OWNER_ADDRESS_INVALIDATE),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -150,7 +150,7 @@ public class UnfreezeAssetOperatorTest {
   public void invalidOwnerAccount() {
     UnfreezeAssetOperator actuator = new UnfreezeAssetOperator(getContract(OWNER_ACCOUNT_INVALIDATE),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -177,11 +177,11 @@ public class UnfreezeAssetOperatorTest {
         .build();
     account = account.toBuilder().addFrozenSupply(newFrozen).setAssetIssuedName(ByteString.EMPTY)
         .build();
-    AccountCapsule accountCapsule = new AccountCapsule(account);
-    dbManager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+    AccountWrapper accountWrapper = new AccountWrapper(account);
+    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     UnfreezeAssetOperator actuator = new UnfreezeAssetOperator(getContract(OWNER_ADDRESS),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -198,7 +198,7 @@ public class UnfreezeAssetOperatorTest {
   public void noFrozenSupply() {
     UnfreezeAssetOperator actuator = new UnfreezeAssetOperator(getContract(OWNER_ADDRESS),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -223,11 +223,11 @@ public class UnfreezeAssetOperatorTest {
         .setExpireTime(now + 60000)
         .build();
     account = account.toBuilder().addFrozenSupply(newFrozen).build();
-    AccountCapsule accountCapsule = new AccountCapsule(account);
-    dbManager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+    AccountWrapper accountWrapper = new AccountWrapper(account);
+    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     UnfreezeAssetOperator actuator = new UnfreezeAssetOperator(getContract(OWNER_ADDRESS),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);

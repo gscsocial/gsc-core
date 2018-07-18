@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.wrapper.TransactionInfoCapsule;
+import org.gsc.core.wrapper.TransactionInfoWrapper;
 import org.gsc.db.Manager;
 import org.gsc.db.api.StoreAPI;
 import org.gsc.core.exception.BadItemException;
@@ -40,14 +40,14 @@ public class WalletSolidity {
     if (Objects.isNull(id)) {
       return null;
     }
-    TransactionInfoCapsule transactionInfoCapsule = null;
+    TransactionInfoWrapper transactionInfoWrapper = null;
     try {
-      transactionInfoCapsule = dbManager.getTransactionHistoryStore()
+      transactionInfoWrapper = dbManager.getTransactionHistoryStore()
           .get(id.toByteArray());
     } catch (BadItemException e) {
     }
-    if (transactionInfoCapsule != null) {
-      return transactionInfoCapsule.getInstance();
+    if (transactionInfoWrapper != null) {
+      return transactionInfoWrapper.getInstance();
     }
     return null;
   }

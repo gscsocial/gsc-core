@@ -4,6 +4,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,8 +16,7 @@ import org.gsc.common.utils.FileUtil;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
@@ -62,8 +62,8 @@ public class CreateAccountOperatorTest {
    */
   @Before
   public void createCapsule() {
-    AccountCapsule ownerCapsule =
-        new AccountCapsule(
+    AccountWrapper ownerCapsule =
+        new AccountWrapper(
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_SECOND)),
             ByteString.copyFromUtf8(ACCOUNT_NAME_SECOND),
             AccountType.AssetIssue);
@@ -87,16 +87,16 @@ public class CreateAccountOperatorTest {
     CreateAccountOperator actuator =
         new CreateAccountOperator(getContract(OWNER_ADDRESS_SECOND, OWNER_ADDRESS_FIRST),
             dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      AccountCapsule accountCapsule =
+      AccountWrapper accountWrapper =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS_FIRST));
-      Assert.assertNotNull(accountCapsule);
+      Assert.assertNotNull(accountWrapper);
       Assert.assertEquals(
-          StringUtil.createReadableString(accountCapsule.getAddress()),
+          StringUtil.createReadableString(accountWrapper.getAddress()),
           OWNER_ADDRESS_FIRST);
     } catch (ContractValidateException e) {
       logger.info(e.getMessage());
@@ -114,17 +114,17 @@ public class CreateAccountOperatorTest {
     CreateAccountOperator actuator =
         new CreateAccountOperator(
             getContract(OWNER_ADDRESS_SECOND, OWNER_ADDRESS_SECOND), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      AccountCapsule accountCapsule =
+      AccountWrapper accountWrapper =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS_SECOND));
-      Assert.assertNotNull(accountCapsule);
+      Assert.assertNotNull(accountWrapper);
       Assert.assertEquals(
-          accountCapsule.getAddress(),
+          accountWrapper.getAddress(),
           ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_SECOND)));
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);

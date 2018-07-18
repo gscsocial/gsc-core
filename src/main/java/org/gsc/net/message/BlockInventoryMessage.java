@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.gsc.core.wrapper.BlockCapsule.BlockId;
+import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.BlockInventory;
 

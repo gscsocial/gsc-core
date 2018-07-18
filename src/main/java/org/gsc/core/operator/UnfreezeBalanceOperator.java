@@ -8,9 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
-import org.gsc.core.wrapper.VotesCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
+import org.gsc.core.wrapper.VotesWrapper;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
@@ -27,7 +27,7 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     final UnfreezeBalanceContract unfreezeBalanceContract;
     try {
@@ -39,11 +39,11 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
     }
     byte[] ownerAddress = unfreezeBalanceContract.getOwnerAddress().toByteArray();
 
-    AccountCapsule accountCapsule = dbManager.getAccountStore().get(ownerAddress);
-    long oldBalance = accountCapsule.getBalance();
+    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+    long oldBalance = accountWrapper.getBalance();
     long unfreezeBalance = 0L;
     List<Frozen> frozenList = Lists.newArrayList();
-    frozenList.addAll(accountCapsule.getFrozenList());
+    frozenList.addAll(accountWrapper.getFrozenList());
     Iterator<Frozen> iterator = frozenList.iterator();
     long now = dbManager.getHeadBlockTimeStamp();
     while (iterator.hasNext()) {
@@ -54,22 +54,22 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
       }
     }
 
-    accountCapsule.setInstance(accountCapsule.getInstance().toBuilder()
+    accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
         .setBalance(oldBalance + unfreezeBalance)
         .clearFrozen().addAllFrozen(frozenList).build());
 
-    VotesCapsule votesCapsule;
+    VotesWrapper votesWrapper;
     if (!dbManager.getVotesStore().has(ownerAddress)) {
-      votesCapsule = new VotesCapsule(unfreezeBalanceContract.getOwnerAddress(),
-          accountCapsule.getVotesList());
+      votesWrapper = new VotesWrapper(unfreezeBalanceContract.getOwnerAddress(),
+          accountWrapper.getVotesList());
     } else {
-      votesCapsule = dbManager.getVotesStore().get(ownerAddress);
+      votesWrapper = dbManager.getVotesStore().get(ownerAddress);
     }
-    accountCapsule.clearVotes();
-    votesCapsule.clearNewVotes();
+    accountWrapper.clearVotes();
+    votesWrapper.clearNewVotes();
 
-    dbManager.getAccountStore().put(ownerAddress, accountCapsule);
-    dbManager.getVotesStore().put(ownerAddress, votesCapsule);
+    dbManager.getAccountStore().put(ownerAddress, accountWrapper);
+    dbManager.getVotesStore().put(ownerAddress, votesWrapper);
     dbManager.getDynamicPropertiesStore().addTotalNetWeight(-unfreezeBalance / 1000_000L);
 
     ret.setStatus(fee, code.SUCESS);
@@ -102,18 +102,18 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
       throw new ContractValidateException("Invalid address");
     }
 
-    AccountCapsule accountCapsule = dbManager.getAccountStore().get(ownerAddress);
-    if (accountCapsule == null) {
+    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+    if (accountWrapper == null) {
       String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
       throw new ContractValidateException(
           "Account[" + readableOwnerAddress + "] not exists");
     }
-    if (accountCapsule.getFrozenCount() <= 0) {
+    if (accountWrapper.getFrozenCount() <= 0) {
       throw new ContractValidateException("no frozenBalance");
     }
 
     long now = dbManager.getHeadBlockTimeStamp();
-    long allowedUnfreezeCount = accountCapsule.getFrozenList().stream()
+    long allowedUnfreezeCount = accountWrapper.getFrozenList().stream()
         .filter(frozen -> frozen.getExpireTime() <= now).count();
     if (allowedUnfreezeCount <= 0) {
       throw new ContractValidateException("It's not time to unfreeze.");

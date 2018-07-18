@@ -7,6 +7,7 @@ import com.google.protobuf.ByteString;
 import com.googlecode.cqengine.resultset.ResultSet;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.*;
 import org.gsc.db.api.IndexHelper;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -16,11 +17,7 @@ import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.AssetIssueCapsule;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.TransactionCapsule;
-import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
@@ -51,29 +48,29 @@ public class IndexHelperTest {
   @BeforeClass
   public static void init() {
     dbManager = context.getBean(Manager.class);
-    AccountCapsule accountCapsule =
-        new AccountCapsule(
+    AccountWrapper accountWrapper =
+        new AccountWrapper(
             Account.newBuilder()
                 .setAddress(ByteString.copyFrom(ByteArray.fromHexString("121212abc")))
                 .build());
-    dbManager.getAccountStore().put(ByteArray.fromHexString("121212abc"), accountCapsule);
-    BlockCapsule blockCapsule =
-        new BlockCapsule(
+    dbManager.getAccountStore().put(ByteArray.fromHexString("121212abc"), accountWrapper);
+    BlockWrapper blockWrapper =
+        new BlockWrapper(
             Block.newBuilder()
                 .setBlockHeader(
                     BlockHeader.newBuilder()
                         .setRawData(raw.newBuilder().setNumber(4).build())
                         .build())
                 .build());
-    dbManager.getBlockStore().put(blockCapsule.getBlockId().getBytes(), blockCapsule);
-    WitnessCapsule witnessCapsule =
-        new WitnessCapsule(
+    dbManager.getBlockStore().put(blockWrapper.getBlockId().getBytes(), blockWrapper);
+    WitnessWrapper witnessWrapper =
+        new WitnessWrapper(
             Witness.newBuilder()
                 .setAddress(ByteString.copyFrom(ByteArray.fromHexString("121212abc")))
                 .build());
-    dbManager.getWitnessStore().put(ByteArray.fromHexString("121212abc"), witnessCapsule);
-    TransactionCapsule transactionCapsule =
-        new TransactionCapsule(
+    dbManager.getWitnessStore().put(ByteArray.fromHexString("121212abc"), witnessWrapper);
+    TransactionWrapper transactionWrapper =
+        new TransactionWrapper(
             Transaction.newBuilder()
                 .setRawData(
                     Transaction.raw
@@ -83,14 +80,14 @@ public class IndexHelperTest {
                 .build());
     dbManager
         .getTransactionStore()
-        .put(transactionCapsule.getTransactionId().getBytes(), transactionCapsule);
-    AssetIssueCapsule assetIssueCapsule =
-        new AssetIssueCapsule(
+        .put(transactionWrapper.getTransactionId().getBytes(), transactionWrapper);
+    AssetIssueWrapper assetIssueWrapper =
+        new AssetIssueWrapper(
             AssetIssueContract.newBuilder()
                 .setName(ByteString.copyFrom("assetIssueName".getBytes()))
                 .setNum(12581)
                 .build());
-    dbManager.getAssetIssueStore().put("assetIssueName".getBytes(), assetIssueCapsule);
+    dbManager.getAssetIssueStore().put("assetIssueName".getBytes(), assetIssueWrapper);
     indexHelper = context.getBean(IndexHelper.class);
   }
 
@@ -124,16 +121,16 @@ public class IndexHelperTest {
   @Ignore
   @Test
   public void addAndRemoveAccount() {
-    AccountCapsule accountCapsule =
-        new AccountCapsule(
+    AccountWrapper accountWrapper =
+        new AccountWrapper(
             Account.newBuilder()
                 .setAddress(ByteString.copyFrom(ByteArray.fromHexString("232323abc")))
                 .build());
-    dbManager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
-    indexHelper.add(accountCapsule.getInstance());
+    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
+    indexHelper.add(accountWrapper.getInstance());
     int size = getIndexSizeOfAccount();
     Assert.assertEquals("account index add", 2, size);
-    indexHelper.remove(accountCapsule.getInstance());
+    indexHelper.remove(accountWrapper.getInstance());
     size = getIndexSizeOfAccount();
     Assert.assertEquals("account index remove", 1, size);
   }
@@ -147,19 +144,19 @@ public class IndexHelperTest {
   @Ignore
   @Test
   public void addAndRemoveBlock() {
-    BlockCapsule blockCapsule =
-        new BlockCapsule(
+    BlockWrapper blockWrapper =
+        new BlockWrapper(
             Block.newBuilder()
                 .setBlockHeader(
                     BlockHeader.newBuilder()
                         .setRawData(raw.newBuilder().setNumber(6).build())
                         .build())
                 .build());
-    dbManager.getBlockStore().put(blockCapsule.getBlockId().getBytes(), blockCapsule);
-    indexHelper.add(blockCapsule.getInstance());
+    dbManager.getBlockStore().put(blockWrapper.getBlockId().getBytes(), blockWrapper);
+    indexHelper.add(blockWrapper.getInstance());
     int size = getIndexSizeOfBlock();
     Assert.assertEquals("block index add", 3, size);
-    indexHelper.remove(blockCapsule.getInstance());
+    indexHelper.remove(blockWrapper.getInstance());
     size = getIndexSizeOfBlock();
     Assert.assertEquals("block index remove", 2, size);
   }
@@ -173,16 +170,16 @@ public class IndexHelperTest {
   @Ignore
   @Test
   public void addAndRemoveWitness() {
-    WitnessCapsule witnessCapsule =
-        new WitnessCapsule(
+    WitnessWrapper witnessWrapper =
+        new WitnessWrapper(
             Witness.newBuilder()
                 .setAddress(ByteString.copyFrom(ByteArray.fromHexString("343434abc")))
                 .build());
-    dbManager.getWitnessStore().put(witnessCapsule.createDbKey(), witnessCapsule);
-    indexHelper.add(witnessCapsule.getInstance());
+    dbManager.getWitnessStore().put(witnessWrapper.createDbKey(), witnessWrapper);
+    indexHelper.add(witnessWrapper.getInstance());
     int size = getIndexSizeOfWitness();
     Assert.assertEquals("witness index add", 2, size);
-    indexHelper.remove(witnessCapsule.getInstance());
+    indexHelper.remove(witnessWrapper.getInstance());
     size = getIndexSizeOfWitness();
     Assert.assertEquals("witness index remove", 1, size);
   }
@@ -195,8 +192,8 @@ public class IndexHelperTest {
 
   @Test
   public void addAndRemoveTransaction() {
-    TransactionCapsule transactionCapsule =
-        new TransactionCapsule(
+    TransactionWrapper transactionWrapper =
+        new TransactionWrapper(
             Transaction.newBuilder()
                 .setRawData(
                     Transaction.raw
@@ -205,11 +202,11 @@ public class IndexHelperTest {
                         .build())
                 .build());
     dbManager.getTransactionStore()
-        .put(transactionCapsule.getTransactionId().getBytes(), transactionCapsule);
-    indexHelper.add(transactionCapsule.getInstance());
+        .put(transactionWrapper.getTransactionId().getBytes(), transactionWrapper);
+    indexHelper.add(transactionWrapper.getInstance());
     int size = getIndexSizeOfTransaction();
     Assert.assertEquals("account index add", 1, size);
-    indexHelper.remove(transactionCapsule.getInstance());
+    indexHelper.remove(transactionWrapper.getInstance());
     size = getIndexSizeOfTransaction();
     Assert.assertEquals("account index remove", 0, size);
   }
@@ -223,18 +220,18 @@ public class IndexHelperTest {
   @Ignore
   @Test
   public void addAndRemoveAssetIssue() {
-    AssetIssueCapsule assetIssueCapsule =
-        new AssetIssueCapsule(
+    AssetIssueWrapper assetIssueWrapper =
+        new AssetIssueWrapper(
             AssetIssueContract.newBuilder()
                 .setName(ByteString.copyFrom("assetIssueName".getBytes()))
                 .setNum(12581)
                 .build());
     dbManager.getAssetIssueStore()
-        .put(assetIssueCapsule.getName().toByteArray(), assetIssueCapsule);
-    indexHelper.add(assetIssueCapsule.getInstance());
+        .put(assetIssueWrapper.getName().toByteArray(), assetIssueWrapper);
+    indexHelper.add(assetIssueWrapper.getInstance());
     int size = getIndexSizeOfAssetIssue();
     Assert.assertEquals("account index add", 1, size);
-    indexHelper.remove(assetIssueCapsule.getInstance());
+    indexHelper.remove(assetIssueWrapper.getInstance());
     size = getIndexSizeOfAssetIssue();
     Assert.assertEquals("account index remove", 0, size);
   }
@@ -259,7 +256,7 @@ public class IndexHelperTest {
         .setBalance(123)
         .build();
     dbManager.getAccountStore()
-        .put(account1.getAddress().toByteArray(), new AccountCapsule(account1));
+        .put(account1.getAddress().toByteArray(), new AccountWrapper(account1));
     indexHelper.update(account1);
     ResultSet<Account> resultSet = indexHelper.getAccountIndex()
         .retrieve(equal(AccountIndex.Account_ADDRESS,
@@ -274,7 +271,7 @@ public class IndexHelperTest {
         .setBalance(456)
         .build();
     dbManager.getAccountStore()
-        .put(account1.getAddress().toByteArray(), new AccountCapsule(account2));
+        .put(account1.getAddress().toByteArray(), new AccountWrapper(account2));
     indexHelper.update(account2);
     resultSet = indexHelper.getAccountIndex()
         .retrieve(equal(AccountIndex.Account_ADDRESS,
@@ -289,7 +286,7 @@ public class IndexHelperTest {
         .setBalance(789)
         .build();
     dbManager.getAccountStore()
-        .put(account1.getAddress().toByteArray(), new AccountCapsule(account3));
+        .put(account1.getAddress().toByteArray(), new AccountWrapper(account3));
     indexHelper.update(account3);
     resultSet = indexHelper.getAccountIndex()
         .retrieve(equal(AccountIndex.Account_ADDRESS,

@@ -18,19 +18,19 @@ package org.gsc.core.wrapper;
 import com.google.protobuf.ByteString;
 import org.gsc.protos.Protocol.TXInput;
 
-public class TxInputCapsule implements ProtoCapsule<TXInput> {
+public class TxInputWrapper implements ProtoWrapper<TXInput> {
 
   private TXInput txInput;
 
   /**
-   * constructor TxInputCapsule.
+   * constructor TxInputWrapper.
    *
    * @param txId byte[] txId
    * @param vout int vout
    * @param signature byte[] signature
    * @param pubKey byte[] pubKey
    */
-  public TxInputCapsule(byte[] txId, long vout, byte[]
+  public TxInputWrapper(byte[] txId, long vout, byte[]
       signature, byte[] pubKey) {
     TXInput.raw txInputRaw = TXInput.raw.newBuilder()
         .setTxID(ByteString.copyFrom(txId))

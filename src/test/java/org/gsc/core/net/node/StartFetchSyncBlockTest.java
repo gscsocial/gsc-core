@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
+import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.net.node.NodeDelegate;
 import org.gsc.net.node.NodeDelegateImpl;
 import org.gsc.net.node.NodeImpl;
@@ -26,7 +27,6 @@ import org.gsc.common.overlay.server.SyncPool;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.common.utils.ReflectUtils;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.wrapper.BlockCapsule;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.ByteArrayWrapper;
@@ -67,7 +67,7 @@ public class StartFetchSyncBlockTest {
 
   private Sha256Hash testBlockBroad() {
     Protocol.Block block = Protocol.Block.getDefaultInstance();
-    BlockMessage blockMessage = new BlockMessage(new BlockCapsule(block));
+    BlockMessage blockMessage = new BlockMessage(new BlockWrapper(block));
     node.broadcast(blockMessage);
     ConcurrentHashMap<Sha256Hash, Protocol.Inventory.InventoryType> advObjToSpread = ReflectUtils
         .getFieldValue(node, "advObjToSpread");
@@ -118,7 +118,7 @@ public class StartFetchSyncBlockTest {
     ReflectUtils.setFieldValue(activePeers.iterator().next(), "needSyncFromPeer", true);
     // construct a block
     Protocol.Block block = Protocol.Block.getDefaultInstance();
-    BlockMessage blockMessage = new BlockMessage(new BlockCapsule(block));
+    BlockMessage blockMessage = new BlockMessage(new BlockWrapper(block));
     // push the block to syncBlockToFetch
     activePeers.iterator().next().getSyncBlockToFetch().push(blockMessage.getBlockId());
     // invoke testing method

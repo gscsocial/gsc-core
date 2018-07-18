@@ -40,7 +40,7 @@ import org.gsc.protos.Protocol.BlockHeader;
 import org.gsc.protos.Protocol.Transaction;
 
 @Slf4j
-public class BlockCapsule implements ProtoCapsule<Block> {
+public class BlockWrapper implements ProtoWrapper<Block> {
 
   public static class BlockId extends Sha256Hash {
 
@@ -119,9 +119,9 @@ public class BlockCapsule implements ProtoCapsule<Block> {
 
   private Block block;
   public boolean generatedByMyself = false;
-  private List<TransactionCapsule> transactions = new ArrayList<>();
+  private List<TransactionWrapper> transactions = new ArrayList<>();
 
-  public BlockCapsule(long number, Sha256Hash hash, long when, ByteString witnessAddress) {
+  public BlockWrapper(long number, Sha256Hash hash, long when, ByteString witnessAddress) {
     // blockheader raw
     BlockHeader.raw.Builder blockHeaderRawBuild = BlockHeader.raw.newBuilder();
     BlockHeader.raw blockHeaderRaw = blockHeaderRawBuild
@@ -141,8 +141,8 @@ public class BlockCapsule implements ProtoCapsule<Block> {
   }
 
 
-  public BlockCapsule(long timestamp, ByteString parentHash, long number,
-      List<Transaction> transactionList) {
+  public BlockWrapper(long timestamp, ByteString parentHash, long number,
+                      List<Transaction> transactionList) {
     // blockheader raw
     BlockHeader.raw.Builder blockHeaderRawBuild = BlockHeader.raw.newBuilder();
     BlockHeader.raw blockHeaderRaw = blockHeaderRawBuild
@@ -157,17 +157,17 @@ public class BlockCapsule implements ProtoCapsule<Block> {
 
     // block
     Block.Builder blockBuild = Block.newBuilder();
-    transactionList.forEach(trx -> blockBuild.addTransactions(trx));
+    transactionList.forEach(gsc -> blockBuild.addTransactions(gsc));
     this.block = blockBuild.setBlockHeader(blockHeader).build();
     initTxs();
   }
 
-  public BlockCapsule(Block block) {
+  public BlockWrapper(Block block) {
     this.block = block;
     initTxs();
   }
 
-  public BlockCapsule(byte[] data) throws BadItemException {
+  public BlockWrapper(byte[] data) throws BadItemException {
     try {
       this.block = Block.parseFrom(data);
       initTxs();
@@ -176,18 +176,18 @@ public class BlockCapsule implements ProtoCapsule<Block> {
     }
   }
 
-  public void addTransaction(TransactionCapsule pendingTrx) {
-    this.block = this.block.toBuilder().addTransactions(pendingTrx.getInstance()).build();
-    getTransactions().add(pendingTrx);
+  public void addTransaction(TransactionWrapper pendingGsc) {
+    this.block = this.block.toBuilder().addTransactions(pendingGsc.getInstance()).build();
+    getTransactions().add(pendingGsc);
   }
 
-  public List<TransactionCapsule> getTransactions() {
+  public List<TransactionWrapper> getTransactions() {
     return transactions;
   }
 
   private void initTxs() {
     transactions = this.block.getTransactionsList().stream()
-        .map(trx -> new TransactionCapsule(trx))
+        .map(gsc -> new TransactionWrapper(gsc))
         .collect(Collectors.toList());
   }
 
@@ -211,7 +211,7 @@ public class BlockCapsule implements ProtoCapsule<Block> {
     try {
       return Arrays
           .equals(ECKey.signatureToAddress(getRawHash().getBytes(),
-              TransactionCapsule
+              TransactionWrapper
                   .getBase64FromByteString(block.getBlockHeader().getWitnessSignature())),
               block.getBlockHeader().getRawData().getWitnessAddress().toByteArray());
     } catch (SignatureException e) {
@@ -234,8 +234,8 @@ public class BlockCapsule implements ProtoCapsule<Block> {
     }
 
     Vector<Sha256Hash> ids = transactionsList.stream()
-        .map(TransactionCapsule::new)
-        .map(TransactionCapsule::getMerkleHash)
+        .map(TransactionWrapper::new)
+        .map(TransactionWrapper::getMerkleHash)
         .collect(Collectors.toCollection(Vector::new));
 
     return MerkleTree.getInstance().createTree(ids).getRoot().getHash();
@@ -302,7 +302,7 @@ public class BlockCapsule implements ProtoCapsule<Block> {
   public String getShortString() {
     toStringBuff.setLength(0);
 
-    toStringBuff.append("BlockCapsule \n[ ");
+    toStringBuff.append("BlockWrapper \n[ ");
     toStringBuff.append("hash=").append(getBlockId()).append("\n");
     toStringBuff.append("number=").append(getNum()).append("\n");
     toStringBuff.append("parentId=").append(getParentHash()).append("\n");
@@ -326,7 +326,7 @@ public class BlockCapsule implements ProtoCapsule<Block> {
   public String toString() {
     toStringBuff.setLength(0);
 
-    toStringBuff.append("BlockCapsule \n[ ");
+    toStringBuff.append("BlockWrapper \n[ ");
     toStringBuff.append("hash=").append(getBlockId()).append("\n");
     toStringBuff.append("number=").append(getNum()).append("\n");
     toStringBuff.append("parentId=").append(getParentHash()).append("\n");

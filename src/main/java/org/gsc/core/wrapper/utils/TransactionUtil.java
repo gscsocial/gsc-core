@@ -19,7 +19,7 @@ import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.protos.Contract.TransferContract;
 import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Contract;
@@ -39,7 +39,7 @@ public class TransactionUtil {
         .setToAddress(ByteString.copyFrom(key))
         .build();
 
-    return new TransactionCapsule(transferContract,
+    return new TransactionWrapper(transferContract,
         Contract.ContractType.TransferContract).getInstance();
   }
 

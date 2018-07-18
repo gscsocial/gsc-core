@@ -27,9 +27,9 @@ import org.gsc.core.exception.BalanceInsufficientException;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.AssetIssueCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.AssetIssueWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.db.Manager;
@@ -46,18 +46,18 @@ public class AssetIssueOperator extends AbstractOperator {
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     try {
       AssetIssueContract assetIssueContract = contract.unpack(AssetIssueContract.class);
       byte[] ownerAddress = assetIssueContract.getOwnerAddress().toByteArray();
-      AssetIssueCapsule assetIssueCapsule = new AssetIssueCapsule(assetIssueContract);
+      AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
       dbManager.getAssetIssueStore()
-          .put(assetIssueCapsule.createDbKey(), assetIssueCapsule);
+          .put(assetIssueWrapper.createDbKey(), assetIssueWrapper);
 
       dbManager.adjustBalance(ownerAddress, -fee);
 
-      AccountCapsule accountCapsule = dbManager.getAccountStore().get(ownerAddress);
+      AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
       List<FrozenSupply> frozenSupplyList = assetIssueContract.getFrozenSupplyList();
       Iterator<FrozenSupply> iterator = frozenSupplyList.iterator();
       long remainSupply = assetIssueContract.getTotalSupply();
@@ -75,13 +75,13 @@ public class AssetIssueOperator extends AbstractOperator {
         remainSupply -= next.getFrozenAmount();
       }
 
-      accountCapsule.setAssetIssuedName(assetIssueContract.getName());
-      accountCapsule.addAsset(ByteArray.toStr(assetIssueContract.getName().toByteArray()),
+      accountWrapper.setAssetIssuedName(assetIssueContract.getName());
+      accountWrapper.addAsset(ByteArray.toStr(assetIssueContract.getName().toByteArray()),
           remainSupply);
-      accountCapsule.setInstance(accountCapsule.getInstance().toBuilder()
+      accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
           .addAllFrozenSupply(frozenList).build());
 
-      dbManager.getAccountStore().put(ownerAddress, accountCapsule);
+      dbManager.getAccountStore().put(ownerAddress, accountWrapper);
       ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
@@ -210,16 +210,16 @@ public class AssetIssueOperator extends AbstractOperator {
       remainSupply -= next.getFrozenAmount();
     }
 
-    AccountCapsule accountCapsule = dbManager.getAccountStore().get(ownerAddress);
-    if (accountCapsule == null) {
+    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+    if (accountWrapper == null) {
       throw new ContractValidateException("Account not exists");
     }
 
-    if (!accountCapsule.getAssetIssuedName().isEmpty()) {
+    if (!accountWrapper.getAssetIssuedName().isEmpty()) {
       throw new ContractValidateException("An account can only issue one asset");
     }
 
-    if (accountCapsule.getBalance() < calcFee()) {
+    if (accountWrapper.getBalance() < calcFee()) {
       throw new ContractValidateException("No enough balance for fee!");
     }
     return true;

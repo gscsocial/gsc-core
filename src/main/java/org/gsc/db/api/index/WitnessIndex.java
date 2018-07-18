@@ -6,7 +6,7 @@ import com.googlecode.cqengine.index.disk.DiskIndex;
 import com.googlecode.cqengine.persistence.disk.DiskPersistence;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.db.GscDatabase;
 import org.gsc.db.common.WrappedByteArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ import static com.googlecode.cqengine.query.QueryFactory.attribute;
 
 @Component
 @Slf4j
-public class WitnessIndex extends AbstractIndex<WitnessCapsule, Witness> {
+public class WitnessIndex extends AbstractIndex<WitnessWrapper, Witness> {
 
   public static SimpleAttribute<WrappedByteArray, String> Witness_ADDRESS;
   public static Attribute<WrappedByteArray, String> PUBLIC_KEY;
@@ -28,7 +28,7 @@ public class WitnessIndex extends AbstractIndex<WitnessCapsule, Witness> {
 
   @Autowired
   public WitnessIndex(
-      @Qualifier("witnessStore") final GscDatabase<WitnessCapsule> database) {
+      @Qualifier("witnessStore") final GscDatabase<WitnessWrapper> database) {
     super(database);
   }
 

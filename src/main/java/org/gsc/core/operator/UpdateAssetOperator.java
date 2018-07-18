@@ -5,9 +5,9 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.AssetIssueCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.AssetIssueWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.db.AssetIssueStore;
@@ -26,7 +26,7 @@ public class UpdateAssetOperator extends AbstractOperator {
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     try {
       final UpdateAssetContract updateAssetContract = this.contract
@@ -39,15 +39,15 @@ public class UpdateAssetOperator extends AbstractOperator {
       ByteString newDescription = updateAssetContract.getDescription();
 
       AssetIssueStore assetIssueStore = dbManager.getAssetIssueStore();
-      AccountCapsule accountCapsule = dbManager.getAccountStore().get(ownerAddress);
-      AssetIssueCapsule assetIssueCapsule =
-          assetIssueStore.get(accountCapsule.getAssetIssuedName().toByteArray());
+      AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+      AssetIssueWrapper assetIssueWrapper =
+          assetIssueStore.get(accountWrapper.getAssetIssuedName().toByteArray());
 
-      assetIssueCapsule.setFreeAssetNetLimit(newLimit);
-      assetIssueCapsule.setPublicFreeAssetNetLimit(newPublicLimit);
-      assetIssueCapsule.setUrl(newUrl);
-      assetIssueCapsule.setDescription(newDescription);
-      assetIssueStore.put(assetIssueCapsule.createDbKey(), assetIssueCapsule);
+      assetIssueWrapper.setFreeAssetNetLimit(newLimit);
+      assetIssueWrapper.setPublicFreeAssetNetLimit(newPublicLimit);
+      assetIssueWrapper.setUrl(newUrl);
+      assetIssueWrapper.setDescription(newDescription);
+      assetIssueStore.put(assetIssueWrapper.createDbKey(), assetIssueWrapper);
 
       ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
@@ -91,7 +91,7 @@ public class UpdateAssetOperator extends AbstractOperator {
       throw new ContractValidateException("Invalid ownerAddress");
     }
 
-    AccountCapsule account = dbManager.getAccountStore().get(ownerAddress);
+    AccountWrapper account = dbManager.getAccountStore().get(ownerAddress);
     if (account == null) {
       throw new ContractValidateException("Account has not existed");
     }

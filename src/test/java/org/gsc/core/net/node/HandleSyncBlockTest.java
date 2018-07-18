@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
+import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.net.node.NodeDelegate;
 import org.gsc.net.node.NodeDelegateImpl;
 import org.gsc.net.node.NodeImpl;
@@ -30,7 +31,6 @@ import org.gsc.common.utils.FileUtil;
 import org.gsc.common.utils.ReflectUtils;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.core.Constant;
-import org.gsc.core.wrapper.BlockCapsule;
 import org.gsc.core.wrapper.utils.BlockUtil;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
@@ -71,7 +71,7 @@ public class HandleSyncBlockTest {
 
   private Sha256Hash testBlockBroad() {
     Protocol.Block block = Protocol.Block.getDefaultInstance();
-    BlockMessage blockMessage = new BlockMessage(new BlockCapsule(block));
+    BlockMessage blockMessage = new BlockMessage(new BlockWrapper(block));
     node.broadcast(blockMessage);
     ConcurrentHashMap<Sha256Hash, Protocol.Inventory.InventoryType> advObjToSpread = ReflectUtils
         .getFieldValue(node, "advObjToSpread");
@@ -100,7 +100,7 @@ public class HandleSyncBlockTest {
   }
 
   private BlockMessage buildBlockMessage() throws Exception {
-    BlockCapsule genesisBlockCapsule = BlockUtil.newGenesisBlockCapsule();
+    BlockWrapper genesisBlockWrapper = BlockUtil.newGenesisBlockCapsule();
 
     ByteString witnessAddress = ByteString.copyFrom(
         ECKey.fromPrivate(
@@ -109,8 +109,8 @@ public class HandleSyncBlockTest {
             .getAddress());
     Protocol.BlockHeader.raw raw = Protocol.BlockHeader.raw.newBuilder()
         .setTimestamp(System.currentTimeMillis())
-        .setParentHash(genesisBlockCapsule.getBlockId().getByteString())
-        .setNumber(genesisBlockCapsule.getNum() + 1)
+        .setParentHash(genesisBlockWrapper.getBlockId().getByteString())
+        .setNumber(genesisBlockWrapper.getNum() + 1)
         .setWitnessAddress(witnessAddress)
         .setWitnessId(1).build();
     Protocol.BlockHeader blockHeader = Protocol.BlockHeader.newBuilder()
@@ -119,10 +119,10 @@ public class HandleSyncBlockTest {
 
     Protocol.Block block = Protocol.Block.newBuilder().setBlockHeader(blockHeader).build();
 
-    BlockCapsule blockCapsule = new BlockCapsule(block);
-    blockCapsule.setMerkleRoot();
-    blockCapsule.sign(ByteArray.fromHexString(Args.getInstance().getLocalWitnesses().getPrivateKey()));
-    BlockMessage blockMessage = new BlockMessage(blockCapsule);
+    BlockWrapper blockWrapper = new BlockWrapper(block);
+    blockWrapper.setMerkleRoot();
+    blockWrapper.sign(ByteArray.fromHexString(Args.getInstance().getLocalWitnesses().getPrivateKey()));
+    BlockMessage blockMessage = new BlockMessage(blockWrapper);
     return blockMessage;
   }
 
@@ -140,7 +140,7 @@ public class HandleSyncBlockTest {
     Collection<PeerConnection> activePeers = ReflectUtils.invokeMethod(node, "getActivePeer");
     activePeers.iterator().next().getSyncBlockToFetch().push(blockMessage.getBlockId());
     // clean up freshBlockId
-    Queue<BlockCapsule.BlockId> freshBlockId = ReflectUtils
+    Queue<BlockWrapper.BlockId> freshBlockId = ReflectUtils
         .getFieldValue(node, "freshBlockId");
     freshBlockId.poll();
     // trigger handlesyncBlock method

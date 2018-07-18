@@ -4,11 +4,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.AssetIssueCapsule;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.TransactionCapsule;
-import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.core.wrapper.*;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.db.api.index.Index;
 import org.gsc.protos.Contract.AssetIssueContract;
 import org.gsc.protos.Protocol.Account;
@@ -117,22 +114,22 @@ public class IndexHelper {
   }
 
   private byte[] getKey(Transaction t) {
-    return new TransactionCapsule(t).getTransactionId().getBytes();
+    return new TransactionWrapper(t).getTransactionId().getBytes();
   }
 
   private byte[] getKey(Block b) {
-    return new BlockCapsule(b).getBlockId().getBytes();
+    return new BlockWrapper(b).getBlockId().getBytes();
   }
 
   private byte[] getKey(Witness w) {
-    return new WitnessCapsule(w).createDbKey();
+    return new WitnessWrapper(w).createDbKey();
   }
 
   private byte[] getKey(Account a) {
-    return new AccountCapsule(a).createDbKey();
+    return new AccountWrapper(a).createDbKey();
   }
 
   private byte[] getKey(AssetIssueContract a) {
-    return new AssetIssueCapsule(a).getName().toByteArray();
+    return new AssetIssueWrapper(a).getName().toByteArray();
   }
 }

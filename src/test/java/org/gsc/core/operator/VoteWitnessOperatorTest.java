@@ -6,6 +6,9 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,9 +20,6 @@ import org.gsc.common.utils.FileUtil;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
-import org.gsc.core.wrapper.WitnessCapsule;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
@@ -76,19 +76,19 @@ public class VoteWitnessOperatorTest {
    */
   @Before
   public void createCapsule() {
-    WitnessCapsule ownerCapsule =
-        new WitnessCapsule(
+    WitnessWrapper ownerCapsule =
+        new WitnessWrapper(
             StringUtil.hexString2ByteString(WITNESS_ADDRESS),
             10L,
             URL);
-    AccountCapsule witnessAccountSecondCapsule =
-        new AccountCapsule(
+    AccountWrapper witnessAccountSecondCapsule =
+        new AccountWrapper(
             ByteString.copyFromUtf8(WITNESS_NAME),
             StringUtil.hexString2ByteString(WITNESS_ADDRESS),
             AccountType.Normal,
             300L);
-    AccountCapsule ownerAccountFirstCapsule =
-        new AccountCapsule(
+    AccountWrapper ownerAccountFirstCapsule =
+        new AccountWrapper(
             ByteString.copyFromUtf8(ACCOUNT_NAME),
             StringUtil.hexString2ByteString(OWNER_ADDRESS),
             AccountType.Normal,
@@ -142,7 +142,7 @@ public class VoteWitnessOperatorTest {
         getContract(OWNER_ADDRESS, frozenBalance, duration), dbManager);
     VoteWitnessOperator actuator =
         new VoteWitnessOperator(getContract(OWNER_ADDRESS, WITNESS_ADDRESS, 1L), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       freezeBalanceOperator.validate();
       freezeBalanceOperator.execute(ret);
@@ -156,8 +156,8 @@ public class VoteWitnessOperatorTest {
               .get(0).getVoteAddress().toByteArray());
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(10+1, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(10+1, witnessWrapper.getVoteCount());
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {
@@ -173,7 +173,7 @@ public class VoteWitnessOperatorTest {
     VoteWitnessOperator actuator =
         new VoteWitnessOperator(getContract(ADDRESS_INVALIDATE, WITNESS_ADDRESS, 1L),
             dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -182,8 +182,8 @@ public class VoteWitnessOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("Invalid address", e.getMessage());
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(10, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(10, witnessWrapper.getVoteCount());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -199,7 +199,7 @@ public class VoteWitnessOperatorTest {
     VoteWitnessOperator actuator =
         new VoteWitnessOperator(getContract(OWNER_ADDRESS, WITNESS_ADDRESS_NOACCOUNT, 1L),
             dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -210,8 +210,8 @@ public class VoteWitnessOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("Account[" + WITNESS_ADDRESS_NOACCOUNT + "] not exists", e.getMessage());
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(10, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(10, witnessWrapper.getVoteCount());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -224,8 +224,8 @@ public class VoteWitnessOperatorTest {
    */
   @Test
   public void noWitness() {
-    AccountCapsule accountSecondCapsule =
-        new AccountCapsule(
+    AccountWrapper accountSecondCapsule =
+        new AccountWrapper(
             ByteString.copyFromUtf8(WITNESS_NAME),
             StringUtil.hexString2ByteString(WITNESS_ADDRESS_NOACCOUNT),
             AccountType.Normal,
@@ -235,7 +235,7 @@ public class VoteWitnessOperatorTest {
     VoteWitnessOperator actuator =
         new VoteWitnessOperator(getContract(OWNER_ADDRESS, WITNESS_ADDRESS_NOACCOUNT, 1L),
             dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -246,8 +246,8 @@ public class VoteWitnessOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("Witness[" + WITNESS_ADDRESS_NOACCOUNT + "] not exists", e.getMessage());
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(10, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(10, witnessWrapper.getVoteCount());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -258,8 +258,8 @@ public class VoteWitnessOperatorTest {
    */
   @Test
   public void invalideVoteAddress() {
-    AccountCapsule accountSecondCapsule =
-        new AccountCapsule(
+    AccountWrapper accountSecondCapsule =
+        new AccountWrapper(
             ByteString.copyFromUtf8(WITNESS_NAME),
             StringUtil.hexString2ByteString(WITNESS_ADDRESS_NOACCOUNT),
             AccountType.Normal,
@@ -269,7 +269,7 @@ public class VoteWitnessOperatorTest {
     VoteWitnessOperator actuator =
         new VoteWitnessOperator(getContract(OWNER_ADDRESS, ADDRESS_INVALIDATE, 1L),
             dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -280,8 +280,8 @@ public class VoteWitnessOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("Invalid vote address!", e.getMessage());
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(10, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(10, witnessWrapper.getVoteCount());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -299,7 +299,7 @@ public class VoteWitnessOperatorTest {
     //0 votes
     VoteWitnessOperator actuator =
         new VoteWitnessOperator(getContract(OWNER_ADDRESS, WITNESS_ADDRESS, 0L), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       freezeBalanceOperator.validate();
       freezeBalanceOperator.execute(ret);
@@ -310,14 +310,14 @@ public class VoteWitnessOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("vote count must be greater than 0", e.getMessage());
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(10, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(10, witnessWrapper.getVoteCount());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
     //-1 votes
     actuator = new VoteWitnessOperator(getContract(OWNER_ADDRESS, WITNESS_ADDRESS, -1L), dbManager);
-    ret = new TransactionResultCapsule();
+    ret = new TransactionResultWrapper();
     try {
       freezeBalanceOperator.validate();
       freezeBalanceOperator.execute(ret);
@@ -328,8 +328,8 @@ public class VoteWitnessOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("vote count must be greater than 0", e.getMessage());
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(10, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(10, witnessWrapper.getVoteCount());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -347,7 +347,7 @@ public class VoteWitnessOperatorTest {
     VoteWitnessOperator actuator = new VoteWitnessOperator(
         getRepeateContract(OWNER_ADDRESS, WITNESS_ADDRESS, 1L, 0),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       freezeBalanceOperator.validate();
       freezeBalanceOperator.execute(ret);
@@ -358,8 +358,8 @@ public class VoteWitnessOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("VoteNumber must more than 0", e.getMessage());
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(10, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(10, witnessWrapper.getVoteCount());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -374,8 +374,8 @@ public class VoteWitnessOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("VoteNumber more than maxVoteNumber 30", e.getMessage());
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(10, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(10, witnessWrapper.getVoteCount());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -393,7 +393,7 @@ public class VoteWitnessOperatorTest {
     VoteWitnessOperator actuator = new VoteWitnessOperator(
         getRepeateContract(OWNER_ADDRESS, WITNESS_ADDRESS, 1L, 30),
         dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       freezeBalanceOperator.validate();
       freezeBalanceOperator.execute(ret);
@@ -401,8 +401,8 @@ public class VoteWitnessOperatorTest {
       actuator.execute(ret);
 
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(10+30, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(10+30, witnessWrapper.getVoteCount());
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {
@@ -419,7 +419,7 @@ public class VoteWitnessOperatorTest {
     VoteWitnessOperator actuator =
         new VoteWitnessOperator(getContract(OWNER_ADDRESS_NOACCOUNT, WITNESS_ADDRESS, 1L),
             dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -428,8 +428,8 @@ public class VoteWitnessOperatorTest {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("Account[" + OWNER_ADDRESS_NOACCOUNT + "] not exists", e.getMessage());
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(10, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(10, witnessWrapper.getVoteCount());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -441,8 +441,8 @@ public class VoteWitnessOperatorTest {
    */
   @Test
   public void balanceNotSufficient() {
-    AccountCapsule balanceNotSufficientCapsule =
-        new AccountCapsule(
+    AccountWrapper balanceNotSufficientCapsule =
+        new AccountWrapper(
             ByteString.copyFromUtf8("balanceNotSufficient"),
             StringUtil.hexString2ByteString(OWNER_ADDRESS_BALANCENOTSUFFICIENT),
             AccountType.Normal,
@@ -452,7 +452,7 @@ public class VoteWitnessOperatorTest {
     VoteWitnessOperator actuator =
         new VoteWitnessOperator(getContract(OWNER_ADDRESS_BALANCENOTSUFFICIENT, WITNESS_ADDRESS, 1L),
             dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -466,8 +466,8 @@ public class VoteWitnessOperatorTest {
           .assertEquals("The total number of votes[" + 1000000 + "] is greater than the gscPower["
               + balanceNotSufficientCapsule.getGscPower() + "]", e.getMessage());
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(10, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(10, witnessWrapper.getVoteCount());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -486,7 +486,7 @@ public class VoteWitnessOperatorTest {
         new VoteWitnessOperator(getContract(OWNER_ADDRESS, WITNESS_ADDRESS, 1L), dbManager);
     VoteWitnessOperator actuatorTwice =
         new VoteWitnessOperator(getContract(OWNER_ADDRESS, WITNESS_ADDRESS, 3L), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       freezeBalanceOperator.validate();
       freezeBalanceOperator.execute(ret);
@@ -503,8 +503,8 @@ public class VoteWitnessOperatorTest {
 
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       witnessController.updateWitness();
-      WitnessCapsule witnessCapsule = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
-      Assert.assertEquals(13, witnessCapsule.getVoteCount());
+      WitnessWrapper witnessWrapper = witnessController.getWitnesseByAddress(StringUtil.hexString2ByteString(WITNESS_ADDRESS));
+      Assert.assertEquals(13, witnessWrapper.getVoteCount());
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {

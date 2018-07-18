@@ -19,17 +19,17 @@ import com.google.protobuf.ByteString;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.protos.Protocol.TXOutput;
 
-public class TxOutputCapsule implements ProtoCapsule<TXOutput> {
+public class TxOutputWrapper implements ProtoWrapper<TXOutput> {
 
   private TXOutput txOutput;
 
   /**
-   * constructor TxOutputCapsule.
+   * constructor TxOutputWrapper.
    *
    * @param value int value
    * @param address String address
    */
-  public TxOutputCapsule(long value, String address) {
+  public TxOutputWrapper(long value, String address) {
     this.txOutput = TXOutput.newBuilder()
         .setValue(value)
         .setPubKeyHash(ByteString.copyFrom(ByteArray.fromHexString(address)))

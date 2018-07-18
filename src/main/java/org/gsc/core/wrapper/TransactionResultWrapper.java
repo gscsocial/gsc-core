@@ -7,18 +7,18 @@ import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Result;
 
 @Slf4j
-public class TransactionResultCapsule implements ProtoCapsule<Transaction.Result> {
+public class TransactionResultWrapper implements ProtoWrapper<Transaction.Result> {
 
   private Transaction.Result transactionResult;
 
   /**
-   * constructor TransactionCapsule.
+   * constructor TransactionWrapper.
    */
-  public TransactionResultCapsule(Transaction.Result trxRet) {
+  public TransactionResultWrapper(Transaction.Result trxRet) {
     this.transactionResult = trxRet;
   }
 
-  public TransactionResultCapsule(byte[] data) throws BadItemException {
+  public TransactionResultWrapper(byte[] data) throws BadItemException {
     try {
       this.transactionResult = Transaction.Result.parseFrom(data);
     } catch (InvalidProtocolBufferException e) {
@@ -26,11 +26,11 @@ public class TransactionResultCapsule implements ProtoCapsule<Transaction.Result
     }
   }
 
-  public TransactionResultCapsule() {
+  public TransactionResultWrapper() {
     this.transactionResult = Transaction.Result.newBuilder().build();
   }
 
-  public TransactionResultCapsule(Transaction.Result.code code, long fee) {
+  public TransactionResultWrapper(Transaction.Result.code code, long fee) {
     this.transactionResult = Transaction.Result.newBuilder().setRet(code).setFee(fee).build();
   }
 

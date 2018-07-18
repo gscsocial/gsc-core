@@ -1,21 +1,21 @@
 package org.gsc.net.message;
 
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.BlockCapsule.BlockId;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.core.exception.BadItemException;
 
 public class BlockMessage extends GscMessage {
 
-  private BlockCapsule block;
+  private BlockWrapper block;
 
   public BlockMessage(byte[] data) throws BadItemException {
     this.type = MessageTypes.BLOCK.asByte();
     this.data = data;
-    this.block = new BlockCapsule(data);
+    this.block = new BlockWrapper(data);
   }
 
-  public BlockMessage(BlockCapsule block) {
+  public BlockMessage(BlockWrapper block) {
     data = block.getData();
     this.type = MessageTypes.BLOCK.asByte();
     this.block = block;
@@ -25,7 +25,7 @@ public class BlockMessage extends GscMessage {
     return getBlockCapsule().getBlockId();
   }
 
-  public BlockCapsule getBlockCapsule() {
+  public BlockWrapper getBlockCapsule() {
     return block;
   }
 

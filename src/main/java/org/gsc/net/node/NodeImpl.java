@@ -38,8 +38,8 @@ import org.gsc.common.utils.ExecutorLoop;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.SlidingWindowCounter;
 import org.gsc.common.utils.Time;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.BlockCapsule.BlockId;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.Parameter.NetConstants;
 import org.gsc.config.Parameter.NodeConstant;
@@ -773,7 +773,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
 
   }
 
-  private void processAdvBlock(PeerConnection peer, BlockCapsule block) {
+  private void processAdvBlock(PeerConnection peer, BlockWrapper block) {
     //TODO: lack the complete flow.
     if (!freshBlockId.contains(block.getBlockId())) {
       try {
@@ -814,7 +814,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     }
   }
 
-  private boolean processSyncBlock(BlockCapsule block) {
+  private boolean processSyncBlock(BlockWrapper block) {
     boolean isAccept = false;
     ReasonCode reason = null;
     try {
@@ -852,7 +852,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     return isAccept;
   }
 
-  private void finishProcessSyncBlock(BlockCapsule block) {
+  private void finishProcessSyncBlock(BlockWrapper block) {
     getActivePeer().forEach(peer -> {
       if (peer.getSyncBlockToFetch().isEmpty()
           && peer.getBlockInProc().isEmpty()
@@ -888,7 +888,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
             peer.getNode().getHost());
         return;
       }
-      if(del.handleTransaction(trxMsg.getTransactionCapsule())){
+      if(del.handleTransaction(trxMsg.getTransactionWrapper())){
         broadcast(trxMsg);
       }
     } catch (TraitorPeerException e) {
@@ -954,7 +954,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
 
     MessageTypes type = fetchInvDataMsg.getInvMessageType();
 
-    BlockCapsule block = null;
+    BlockWrapper block = null;
 
     List<Protocol.Transaction> transactions = Lists.newArrayList();
 
@@ -984,8 +984,8 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
         block = ((BlockMessage) msg).getBlockCapsule();
         peer.sendMessage(msg);
       } else {
-        transactions.add(((TransactionMessage) msg).getTransactionCapsule().getInstance());
-        size += ((TransactionMessage) msg).getTransactionCapsule().getInstance().getSerializedSize();
+        transactions.add(((TransactionMessage) msg).getTransactionWrapper().getInstance());
+        size += ((TransactionMessage) msg).getTransactionWrapper().getInstance().getSerializedSize();
         if (transactions.size() % maxTrxsCnt == 0 || size > maxTrxsSize) {
           peer.sendMessage(new TransactionsMessage(transactions));
           transactions = Lists.newArrayList();
@@ -1216,7 +1216,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     send.clear();
   }
 
-  private void updateBlockWeBothHave(PeerConnection peer, BlockCapsule block) {
+  private void updateBlockWeBothHave(PeerConnection peer, BlockWrapper block) {
     logger.info("update peer {} block both we have {}", peer.getNode().getHost(),
         block.getBlockId().getString());
     peer.setHeadBlockWeBothHave(block.getBlockId());

@@ -7,8 +7,8 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.config.args.Args;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
@@ -26,7 +26,7 @@ public class WithdrawBalanceOperator extends AbstractOperator {
 
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     final WithdrawBalanceContract withdrawBalanceContract;
     try {
@@ -37,18 +37,18 @@ public class WithdrawBalanceOperator extends AbstractOperator {
       throw new ContractExeException(e.getMessage());
     }
 
-    AccountCapsule accountCapsule = dbManager.getAccountStore()
+    AccountWrapper accountWrapper = dbManager.getAccountStore()
         .get(withdrawBalanceContract.getOwnerAddress().toByteArray());
-    long oldBalance = accountCapsule.getBalance();
-    long allowance = accountCapsule.getAllowance();
+    long oldBalance = accountWrapper.getBalance();
+    long allowance = accountWrapper.getAllowance();
 
     long now = dbManager.getHeadBlockTimeStamp();
-    accountCapsule.setInstance(accountCapsule.getInstance().toBuilder()
+    accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
         .setBalance(oldBalance + allowance)
         .setAllowance(0L)
         .setLatestWithdrawTime(now)
         .build());
-    dbManager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     ret.setStatus(fee, code.SUCESS);
 
     return true;
@@ -79,8 +79,8 @@ public class WithdrawBalanceOperator extends AbstractOperator {
       throw new ContractValidateException("Invalid address");
     }
 
-    AccountCapsule accountCapsule = dbManager.getAccountStore().get(ownerAddress);
-    if (accountCapsule == null) {
+    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+    if (accountWrapper == null) {
       String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
       throw new ContractValidateException(
           "Account[" + readableOwnerAddress + "] not exists");
@@ -100,7 +100,7 @@ public class WithdrawBalanceOperator extends AbstractOperator {
               + "] is a guard representative and is not allowed to withdraw Balance");
     }
 
-    long latestWithdrawTime = accountCapsule.getLatestWithdrawTime();
+    long latestWithdrawTime = accountWrapper.getLatestWithdrawTime();
     long now = dbManager.getHeadBlockTimeStamp();
     long witnessAllowanceFrozenTime =
         dbManager.getDynamicPropertiesStore().getWitnessAllowanceFrozenTime() * 86_400_000L;
@@ -110,11 +110,11 @@ public class WithdrawBalanceOperator extends AbstractOperator {
           + latestWithdrawTime + ",less than 24 hours");
     }
 
-    if (accountCapsule.getAllowance() <= 0) {
+    if (accountWrapper.getAllowance() <= 0) {
       throw new ContractValidateException("witnessAccount does not have any allowance");
     }
     try {
-      LongMath.checkedAdd(accountCapsule.getBalance(), accountCapsule.getAllowance());
+      LongMath.checkedAdd(accountWrapper.getBalance(), accountWrapper.getAllowance());
     } catch (ArithmeticException e) {
       logger.debug(e.getMessage(), e);
       throw new ContractValidateException(e.getMessage());

@@ -9,9 +9,9 @@ import org.gsc.core.exception.BalanceInsufficientException;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
-import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
 import org.gsc.db.Manager;
 import org.gsc.protos.Contract.WitnessCreateContract;
@@ -25,7 +25,7 @@ public class WitnessCreateOperator extends AbstractOperator {
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     try {
       final WitnessCreateContract witnessCreateContract = this.contract
@@ -75,13 +75,13 @@ public class WitnessCreateOperator extends AbstractOperator {
       throw new ContractValidateException("Invalid url");
     }
 
-    AccountCapsule accountCapsule = this.dbManager.getAccountStore().get(ownerAddress);
+    AccountWrapper accountWrapper = this.dbManager.getAccountStore().get(ownerAddress);
 
-    if (accountCapsule == null) {
+    if (accountWrapper == null) {
       throw new ContractValidateException("account[" + readableOwnerAddress + "] not exists");
     }
     /* todo later
-    if (ArrayUtils.isEmpty(accountCapsule.getAccountName().toByteArray())) {
+    if (ArrayUtils.isEmpty(accountWrapper.getAccountName().toByteArray())) {
       throw new ContractValidateException("account name not set");
     } */
 
@@ -89,7 +89,7 @@ public class WitnessCreateOperator extends AbstractOperator {
       throw new ContractValidateException("Witness[" + readableOwnerAddress + "] has existed");
     }
 
-    if (accountCapsule.getBalance() < dbManager.getDynamicPropertiesStore()
+    if (accountWrapper.getBalance() < dbManager.getDynamicPropertiesStore()
         .getAccountUpgradeCost()) {
       throw new ContractValidateException("balance < AccountUpgradeCost");
     }
@@ -110,17 +110,17 @@ public class WitnessCreateOperator extends AbstractOperator {
   private void createWitness(final WitnessCreateContract witnessCreateContract)
       throws BalanceInsufficientException {
     //Create Witness by witnessCreateContract
-    final WitnessCapsule witnessCapsule = new WitnessCapsule(
+    final WitnessWrapper witnessWrapper = new WitnessWrapper(
         witnessCreateContract.getOwnerAddress(),
         0,
         witnessCreateContract.getUrl().toStringUtf8());
 
-    logger.debug("createWitness,address[{}]", witnessCapsule.createReadableString());
-    this.dbManager.getWitnessStore().put(witnessCapsule.createDbKey(), witnessCapsule);
-    AccountCapsule accountCapsule = this.dbManager.getAccountStore()
-        .get(witnessCapsule.createDbKey());
-    accountCapsule.setIsWitness(true);
-    this.dbManager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+    logger.debug("createWitness,address[{}]", witnessWrapper.createReadableString());
+    this.dbManager.getWitnessStore().put(witnessWrapper.createDbKey(), witnessWrapper);
+    AccountWrapper accountWrapper = this.dbManager.getAccountStore()
+        .get(witnessWrapper.createDbKey());
+    accountWrapper.setIsWitness(true);
+    this.dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     long cost = dbManager.getDynamicPropertiesStore().getAccountUpgradeCost();
     dbManager.adjustBalance(witnessCreateContract.getOwnerAddress().toByteArray(), -cost);
 

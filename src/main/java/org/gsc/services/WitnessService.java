@@ -1,6 +1,6 @@
 package org.gsc.services;
 
-import static org.gsc.core.witness.BlockProductionCondition.NOT_MY_TURN;
+import static org.gsc.consensus.BlockProductionCondition.NOT_MY_TURN;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
@@ -12,6 +12,8 @@ import org.gsc.common.application.Service;
 import org.gsc.common.backup.BackupManager;
 import org.gsc.common.backup.BackupManager.BackupStatusEnum;
 import org.gsc.common.backup.BackupServer;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.crypto.ECKey;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.StringUtil;
@@ -24,12 +26,10 @@ import org.gsc.core.exception.ValidateScheduleException;
 import org.gsc.core.exception.ValidateSignatureException;
 import org.joda.time.DateTime;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.WitnessCapsule;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.args.Args;
 import org.gsc.net.message.BlockMessage;
-import org.gsc.core.witness.BlockProductionCondition;
+import org.gsc.consensus.BlockProductionCondition;
 import org.gsc.core.witness.WitnessController;
 
 @Slf4j
@@ -40,8 +40,8 @@ public class WitnessService implements Service {
   private static final int PRODUCE_TIME_OUT = 500; // ms
   private Application gscApp;
   @Getter
-  protected Map<ByteString, WitnessCapsule> localWitnessStateMap = Maps
-      .newHashMap(); //  <address,WitnessCapsule>
+  protected Map<ByteString, WitnessWrapper> localWitnessStateMap = Maps
+      .newHashMap(); //  <address,WitnessWrapper>
   private Thread generateThread;
   private volatile boolean isRunning = false;
   private Map<ByteString, byte[]> privateKeyMap = Maps.newHashMap();
@@ -219,7 +219,7 @@ public class WitnessService implements Service {
 
     try {
       controller.setGeneratingBlock(true);
-      BlockCapsule block = generateBlock(scheduledTime, scheduledWitness);
+      BlockWrapper block = generateBlock(scheduledTime, scheduledWitness);
 
       if (block == null) {
         logger.warn("exception when generate block");
@@ -251,7 +251,7 @@ public class WitnessService implements Service {
 
   }
 
-  private void broadcastBlock(BlockCapsule block) {
+  private void broadcastBlock(BlockWrapper block) {
     try {
       gscApp.getP2pNode().broadcast(new BlockMessage(block.getData()));
     } catch (Exception ex) {
@@ -259,7 +259,7 @@ public class WitnessService implements Service {
     }
   }
 
-  private BlockCapsule generateBlock(long when, ByteString witnessAddress)
+  private BlockWrapper generateBlock(long when, ByteString witnessAddress)
       throws ValidateSignatureException, ContractValidateException, ContractExeException, UnLinkedBlockException, ValidateScheduleException, AccountResourceInsufficientException {
     return gscApp.getDbManager().generateBlock(this.localWitnessStateMap.get(witnessAddress), when,
         this.privateKeyMap.get(witnessAddress));
@@ -274,16 +274,16 @@ public class WitnessService implements Service {
       byte[] privateKey = ByteArray.fromHexString(key);
       final ECKey ecKey = ECKey.fromPrivate(privateKey);
       byte[] address = ecKey.getAddress();
-      WitnessCapsule witnessCapsule = this.gscApp.getDbManager().getWitnessStore()
+      WitnessWrapper witnessWrapper = this.gscApp.getDbManager().getWitnessStore()
           .get(address);
       // need handle init witness
-      if (null == witnessCapsule) {
-        logger.warn("WitnessCapsule[" + address + "] is not in witnessStore");
-        witnessCapsule = new WitnessCapsule(ByteString.copyFrom(address));
+      if (null == witnessWrapper) {
+        logger.warn("WitnessWrapper[" + address + "] is not in witnessStore");
+        witnessWrapper = new WitnessWrapper(ByteString.copyFrom(address));
       }
 
-      this.privateKeyMap.put(witnessCapsule.getAddress(), privateKey);
-      this.localWitnessStateMap.put(witnessCapsule.getAddress(), witnessCapsule);
+      this.privateKeyMap.put(witnessWrapper.getAddress(), privateKey);
+      this.localWitnessStateMap.put(witnessWrapper.getAddress(), witnessWrapper);
     });
 
   }

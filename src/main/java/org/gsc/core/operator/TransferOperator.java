@@ -9,8 +9,8 @@ import org.gsc.core.exception.BalanceInsufficientException;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.db.Manager;
 import org.gsc.protos.Contract.TransferContract;
@@ -25,7 +25,7 @@ public class TransferOperator extends AbstractOperator {
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     try {
       TransferContract transferContract = contract.unpack(TransferContract.class);
@@ -34,9 +34,9 @@ public class TransferOperator extends AbstractOperator {
       byte[] ownerAddress = transferContract.getOwnerAddress().toByteArray();
 
       // if account with to_address does not exist, create it first.
-      AccountCapsule toAccount = dbManager.getAccountStore().get(toAddress);
+      AccountWrapper toAccount = dbManager.getAccountStore().get(toAddress);
       if (toAccount == null) {
-        toAccount = new AccountCapsule(ByteString.copyFrom(toAddress), AccountType.Normal,
+        toAccount = new AccountWrapper(ByteString.copyFrom(toAddress), AccountType.Normal,
             dbManager.getHeadBlockTimeStamp());
         dbManager.getAccountStore().put(toAddress, toAccount);
       }
@@ -97,7 +97,7 @@ public class TransferOperator extends AbstractOperator {
       throw new ContractValidateException("Cannot transfer trx to yourself.");
     }
 
-    AccountCapsule ownerAccount = dbManager.getAccountStore().get(ownerAddress);
+    AccountWrapper ownerAccount = dbManager.getAccountStore().get(ownerAddress);
     if (ownerAccount == null) {
       throw new ContractValidateException("Validate TransferContract error, no OwnerAccount.");
     }
@@ -117,7 +117,7 @@ public class TransferOperator extends AbstractOperator {
         throw new ContractValidateException("balance is not sufficient.");
       }
 
-      AccountCapsule toAccount = dbManager.getAccountStore()
+      AccountWrapper toAccount = dbManager.getAccountStore()
           .get(transferContract.getToAddress().toByteArray());
       if (toAccount != null) {
         long toAddressBalance = Math.addExact(toAccount.getBalance(), amount);

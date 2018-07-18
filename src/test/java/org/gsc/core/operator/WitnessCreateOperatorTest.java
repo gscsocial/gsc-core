@@ -6,6 +6,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.TransactionResultWrapper;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,9 +18,7 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
-import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
@@ -71,19 +71,19 @@ public class WitnessCreateOperatorTest {
    */
   @Before
   public void createCapsule() {
-    WitnessCapsule ownerCapsule =
-        new WitnessCapsule(
+    WitnessWrapper ownerCapsule =
+        new WitnessWrapper(
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_SECOND)),
             10_000_000L,
             URL);
-    AccountCapsule ownerAccountSecondCapsule =
-        new AccountCapsule(
+    AccountWrapper ownerAccountSecondCapsule =
+        new AccountWrapper(
             ByteString.copyFromUtf8(ACCOUNT_NAME_SECOND),
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_SECOND)),
             AccountType.Normal,
             300_000_000L);
-    AccountCapsule ownerAccountFirstCapsule =
-        new AccountCapsule(
+    AccountWrapper ownerAccountFirstCapsule =
+        new AccountWrapper(
             ByteString.copyFromUtf8(ACCOUNT_NAME_FIRST),
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_FIRST)),
             AccountType.Normal,
@@ -121,18 +121,18 @@ public class WitnessCreateOperatorTest {
   public void firstCreateWitness() {
     WitnessCreateOperator actuator =
         new WitnessCreateOperator(getContract(OWNER_ADDRESS_FIRST, URL), dbManager);
-    AccountCapsule accountCapsule = dbManager.getAccountStore()
+    AccountWrapper accountWrapper = dbManager.getAccountStore()
         .get(ByteArray.fromHexString(OWNER_ADDRESS_FIRST));
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      WitnessCapsule witnessCapsule =
+      WitnessWrapper witnessWrapper =
           dbManager.getWitnessStore().get(ByteArray.fromHexString(OWNER_ADDRESS_FIRST));
-      Assert.assertNotNull(witnessCapsule);
+      Assert.assertNotNull(witnessWrapper);
       Assert.assertEquals(
-          witnessCapsule.getInstance().getUrl(),
+          witnessWrapper.getInstance().getUrl(),
           URL);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
@@ -148,7 +148,7 @@ public class WitnessCreateOperatorTest {
   public void secondCreateAccount() {
     WitnessCreateOperator actuator =
         new WitnessCreateOperator(getContract(OWNER_ADDRESS_SECOND, URL), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -168,7 +168,7 @@ public class WitnessCreateOperatorTest {
   public void InvalidAddress() {
     WitnessCreateOperator actuator =
         new WitnessCreateOperator(getContract(OWNER_ADDRESS_INVALIDATE, URL), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -186,7 +186,7 @@ public class WitnessCreateOperatorTest {
    */
   @Test
   public void InvalidUrlTest() {
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     //Url cannot empty
     try {
       WitnessCreateOperator actuator = new WitnessCreateOperator(
@@ -224,10 +224,10 @@ public class WitnessCreateOperatorTest {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      WitnessCapsule witnessCapsule =
+      WitnessWrapper witnessWrapper =
           dbManager.getWitnessStore().get(ByteArray.fromHexString(OWNER_ADDRESS_FIRST));
-      Assert.assertNotNull(witnessCapsule);
-      Assert.assertEquals(witnessCapsule.getInstance().getUrl(), "0");
+      Assert.assertNotNull(witnessWrapper);
+      Assert.assertEquals(witnessWrapper.getInstance().getUrl(), "0");
       Assert.assertTrue(true);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
@@ -243,10 +243,10 @@ public class WitnessCreateOperatorTest {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      WitnessCapsule witnessCapsule =
+      WitnessWrapper witnessWrapper =
           dbManager.getWitnessStore().get(ByteArray.fromHexString(OWNER_ADDRESS_FIRST));
-      Assert.assertNotNull(witnessCapsule);
-      Assert.assertEquals(witnessCapsule.getInstance().getUrl(), url256Bytes);
+      Assert.assertNotNull(witnessWrapper);
+      Assert.assertEquals(witnessWrapper.getInstance().getUrl(), url256Bytes);
       Assert.assertTrue(true);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
@@ -263,7 +263,7 @@ public class WitnessCreateOperatorTest {
   public void noAccount() {
     WitnessCreateOperator actuator =
         new WitnessCreateOperator(getContract(OWNER_ADDRESS_NOACCOUNT, URL), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
@@ -282,8 +282,8 @@ public class WitnessCreateOperatorTest {
    */
   @Test
   public void balanceNotSufficient() {
-    AccountCapsule balanceNotSufficientCapsule =
-        new AccountCapsule(
+    AccountWrapper balanceNotSufficientCapsule =
+        new AccountWrapper(
             ByteString.copyFromUtf8("balanceNotSufficient"),
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_BALANCENOTSUFFIENT)),
             AccountType.Normal,
@@ -293,7 +293,7 @@ public class WitnessCreateOperatorTest {
         .put(balanceNotSufficientCapsule.getAddress().toByteArray(), balanceNotSufficientCapsule);
     WitnessCreateOperator actuator =
         new WitnessCreateOperator(getContract(OWNER_ADDRESS_BALANCENOTSUFFIENT, URL), dbManager);
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);

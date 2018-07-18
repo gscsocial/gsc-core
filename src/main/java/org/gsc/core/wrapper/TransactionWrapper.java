@@ -53,22 +53,22 @@ import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
 
 @Slf4j
-public class TransactionCapsule implements ProtoCapsule<Transaction> {
+public class TransactionWrapper implements ProtoWrapper<Transaction> {
 
   private Transaction transaction;
   @Setter
   private boolean isVerified = false;
   /**
-   * constructor TransactionCapsule.
+   * constructor TransactionWrapper.
    */
-  public TransactionCapsule(Transaction trx) {
+  public TransactionWrapper(Transaction trx) {
     this.transaction = trx;
   }
 
   /**
    * get account from bytes data.
    */
-  public TransactionCapsule(byte[] data) throws BadItemException {
+  public TransactionWrapper(byte[] data) throws BadItemException {
     try {
       this.transaction = Transaction.parseFrom(data);
     } catch (InvalidProtocolBufferException e) {
@@ -77,7 +77,7 @@ public class TransactionCapsule implements ProtoCapsule<Transaction> {
   }
 
   /*lll
-  public TransactionCapsule(byte[] key, long value) throws IllegalArgumentException {
+  public TransactionWrapper(byte[] key, long value) throws IllegalArgumentException {
     if (!Wallet.addressValid(key)) {
       throw new IllegalArgumentException("Invalid address");
     }
@@ -93,8 +93,8 @@ public class TransactionCapsule implements ProtoCapsule<Transaction> {
     transaction = Transaction.newBuilder().setRawData(transactionBuilder.build()).build();
   }*/
 
-  public TransactionCapsule(AccountCreateContract contract, AccountStore accountStore) {
-    AccountCapsule account = accountStore.get(contract.getOwnerAddress().toByteArray());
+  public TransactionWrapper(AccountCreateContract contract, AccountStore accountStore) {
+    AccountWrapper account = accountStore.get(contract.getOwnerAddress().toByteArray());
     if (account != null && account.getType() == contract.getType()) {
       return; // Account isexit
     }
@@ -102,10 +102,10 @@ public class TransactionCapsule implements ProtoCapsule<Transaction> {
     createTransaction(contract, ContractType.AccountCreateContract);
   }
 
-  public TransactionCapsule(TransferContract contract, AccountStore accountStore) {
+  public TransactionWrapper(TransferContract contract, AccountStore accountStore) {
     Transaction.Contract.Builder contractBuilder = Transaction.Contract.newBuilder();
 
-    AccountCapsule owner = accountStore.get(contract.getOwnerAddress().toByteArray());
+    AccountWrapper owner = accountStore.get(contract.getOwnerAddress().toByteArray());
     if (owner == null || owner.getBalance() < contract.getAmount()) {
       return; //The balance is not enough
     }
@@ -113,23 +113,23 @@ public class TransactionCapsule implements ProtoCapsule<Transaction> {
     createTransaction(contract, ContractType.TransferContract);
   }
 
-  public TransactionCapsule(VoteWitnessContract voteWitnessContract) {
+  public TransactionWrapper(VoteWitnessContract voteWitnessContract) {
     createTransaction(voteWitnessContract, ContractType.VoteWitnessContract);
   }
 
-  public TransactionCapsule(WitnessCreateContract witnessCreateContract) {
+  public TransactionWrapper(WitnessCreateContract witnessCreateContract) {
     createTransaction(witnessCreateContract, ContractType.WitnessCreateContract);
   }
 
-  public TransactionCapsule(WitnessUpdateContract witnessUpdateContract) {
+  public TransactionWrapper(WitnessUpdateContract witnessUpdateContract) {
     createTransaction(witnessUpdateContract, ContractType.WitnessUpdateContract);
   }
 
-  public TransactionCapsule(TransferAssetContract transferAssetContract) {
+  public TransactionWrapper(TransferAssetContract transferAssetContract) {
     createTransaction(transferAssetContract, ContractType.TransferAssetContract);
   }
 
-  public TransactionCapsule(ParticipateAssetIssueContract participateAssetIssueContract) {
+  public TransactionWrapper(ParticipateAssetIssueContract participateAssetIssueContract) {
     createTransaction(participateAssetIssueContract, ContractType.ParticipateAssetIssueContract);
   }
 
@@ -137,8 +137,8 @@ public class TransactionCapsule implements ProtoCapsule<Transaction> {
     this.transaction = this.getInstance().toBuilder().clearRet().build();
   }
 
-  public void setResult(TransactionResultCapsule transactionResultCapsule) {
-//    this.transaction = this.getInstance().toBuilder().addRet(transactionResultCapsule.getInstance()).build();
+  public void setResult(TransactionResultWrapper transactionResultWrapper) {
+//    this.transaction = this.getInstance().toBuilder().addRet(transactionResultWrapper.getInstance()).build();
   }
 
   public void setReference(long blockNum, byte[] blockHash) {
@@ -164,11 +164,11 @@ public class TransactionCapsule implements ProtoCapsule<Transaction> {
   }
 
   @Deprecated
-  public TransactionCapsule(AssetIssueContract assetIssueContract) {
+  public TransactionWrapper(AssetIssueContract assetIssueContract) {
     createTransaction(assetIssueContract, ContractType.AssetIssueContract);
   }
 
-  public TransactionCapsule(com.google.protobuf.Message message, ContractType contractType) {
+  public TransactionWrapper(com.google.protobuf.Message message, ContractType contractType) {
     Transaction.raw.Builder transactionBuilder = Transaction.raw.newBuilder().addContract(
         Transaction.Contract.newBuilder().setType(contractType).setParameter(
             Any.pack(message)).build());
@@ -388,7 +388,7 @@ public class TransactionCapsule implements ProtoCapsule<Transaction> {
   public String toString() {
 
     toStringBuff.setLength(0);
-    toStringBuff.append("TransactionCapsule \n[ ");
+    toStringBuff.append("TransactionWrapper \n[ ");
 
     toStringBuff.append("hash=").append(getTransactionId()).append("\n");
     AtomicInteger i = new AtomicInteger();

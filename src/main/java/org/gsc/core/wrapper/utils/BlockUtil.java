@@ -19,7 +19,7 @@ import com.google.protobuf.ByteString;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.wrapper.BlockCapsule;
+import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.config.args.Args;
 import org.gsc.config.args.GenesisBlock;
 import org.gsc.protos.Protocol.Transaction;
@@ -29,7 +29,7 @@ public class BlockUtil {
   /**
    * create genesis block from transactions.
    */
-  public static BlockCapsule newGenesisBlockCapsule() {
+  public static BlockWrapper newGenesisBlockCapsule() {
 
     Args args = Args.getInstance();
     GenesisBlock genesisBlockArg = args.getGenesisBlock();
@@ -47,19 +47,19 @@ public class BlockUtil {
         ByteString.copyFrom(ByteArray.fromHexString(genesisBlockArg.getParentHash()));
     long number = Long.parseLong(genesisBlockArg.getNumber());
 
-    BlockCapsule blockCapsule = new BlockCapsule(timestamp, parentHash, number, transactionList);
+    BlockWrapper blockWrapper = new BlockWrapper(timestamp, parentHash, number, transactionList);
 
-    blockCapsule.setMerkleRoot();
-    blockCapsule.setWitness("GSC");
-    blockCapsule.generatedByMyself = true;
+    blockWrapper.setMerkleRoot();
+    blockWrapper.setWitness("GSC");
+    blockWrapper.generatedByMyself = true;
 
-    return blockCapsule;
+    return blockWrapper;
   }
 
   /**
    * Whether the hash of the judge block is equal to the hash of the parent block.
    */
-  public static boolean isParentOf(BlockCapsule blockCapsule1, BlockCapsule blockCapsule2) {
-    return blockCapsule1.getBlockId().equals(blockCapsule2.getParentHash());
+  public static boolean isParentOf(BlockWrapper blockWrapper1, BlockWrapper blockWrapper2) {
+    return blockWrapper1.getBlockId().equals(blockWrapper2.getParentHash());
   }
 }

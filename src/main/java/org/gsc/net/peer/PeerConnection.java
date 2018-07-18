@@ -18,7 +18,7 @@ import org.gsc.common.overlay.message.Message;
 import org.gsc.common.overlay.server.Channel;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Time;
-import org.gsc.core.wrapper.BlockCapsule.BlockId;
+import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.config.Parameter.NetConstants;
 import org.gsc.net.node.Item;
 import org.springframework.context.annotation.Scope;

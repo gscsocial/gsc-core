@@ -5,8 +5,8 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
@@ -23,7 +23,7 @@ public class FreezeBalanceOperator extends AbstractOperator {
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     final FreezeBalanceContract freezeBalanceContract;
     try {
@@ -33,15 +33,15 @@ public class FreezeBalanceOperator extends AbstractOperator {
       ret.setStatus(fee, code.FAILED);
       throw new ContractExeException(e.getMessage());
     }
-    AccountCapsule accountCapsule = dbManager.getAccountStore()
+    AccountWrapper accountWrapper = dbManager.getAccountStore()
         .get(freezeBalanceContract.getOwnerAddress().toByteArray());
 
     long now = dbManager.getHeadBlockTimeStamp();
     long duration = freezeBalanceContract.getFrozenDuration() * 86_400_000;
 
-    long newBalance = accountCapsule.getBalance() - freezeBalanceContract.getFrozenBalance();
+    long newBalance = accountWrapper.getBalance() - freezeBalanceContract.getFrozenBalance();
 
-    long currentFrozenBalance = accountCapsule.getFrozenBalance();
+    long currentFrozenBalance = accountWrapper.getFrozenBalance();
     long newFrozenBalance = freezeBalanceContract.getFrozenBalance() + currentFrozenBalance;
 
     Frozen newFrozen = Frozen.newBuilder()
@@ -49,20 +49,20 @@ public class FreezeBalanceOperator extends AbstractOperator {
         .setExpireTime(now + duration)
         .build();
 
-    long frozenCount = accountCapsule.getFrozenCount();
+    long frozenCount = accountWrapper.getFrozenCount();
     if (frozenCount == 0) {
-      accountCapsule.setInstance(accountCapsule.getInstance().toBuilder()
+      accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
           .addFrozen(newFrozen)
           .setBalance(newBalance)
           .build());
     } else {
-      accountCapsule.setInstance(accountCapsule.getInstance().toBuilder()
+      accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
           .setFrozen(0, newFrozen)
           .setBalance(newBalance)
           .build()
       );
     }
-    dbManager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     dbManager.getDynamicPropertiesStore()
         .addTotalNetWeight(freezeBalanceContract.getFrozenBalance() / 1000_000L);
 
@@ -98,8 +98,8 @@ public class FreezeBalanceOperator extends AbstractOperator {
       throw new ContractValidateException("Invalid address");
     }
 
-    AccountCapsule accountCapsule = dbManager.getAccountStore().get(ownerAddress);
-    if (accountCapsule == null) {
+    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+    if (accountWrapper == null) {
       String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
       throw new ContractValidateException(
           "Account[" + readableOwnerAddress + "] not exists");
@@ -113,16 +113,16 @@ public class FreezeBalanceOperator extends AbstractOperator {
       throw new ContractValidateException("frozenBalance must be more than 1TRX");
     }
 
-    int frozenCount = accountCapsule.getFrozenCount();
+    int frozenCount = accountWrapper.getFrozenCount();
     if (!(frozenCount == 0 || frozenCount == 1)) {
       throw new ContractValidateException("frozenCount must be 0 or 1");
     }
-    if (frozenBalance > accountCapsule.getBalance()) {
+    if (frozenBalance > accountWrapper.getBalance()) {
       throw new ContractValidateException("frozenBalance must be less than accountBalance");
     }
 
 //    long maxFrozenNumber = dbManager.getDynamicPropertiesStore().getMaxFrozenNumber();
-//    if (accountCapsule.getFrozenCount() >= maxFrozenNumber) {
+//    if (accountWrapper.getFrozenCount() >= maxFrozenNumber) {
 //      throw new ContractValidateException("max frozen number is: " + maxFrozenNumber);
 //    }
 

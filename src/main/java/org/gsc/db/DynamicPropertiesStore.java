@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.wrapper.BytesCapsule;
+import org.gsc.core.wrapper.BytesWrapper;
 import org.gsc.config.args.Args;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
+public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesWrapper> {
 
   private static final byte[] MAINTENANCE_TIME_INTERVAL = "MAINTENANCE_TIME_INTERVAL".getBytes();
   private static final long MAINTENANCE_SKIP_SLOTS = 2;
@@ -299,7 +299,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   }
 
   @Override
-  public BytesCapsule get(byte[] key) {
+  public BytesWrapper get(byte[] key) {
     return null;
   }
 
@@ -334,7 +334,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveMaintenanceTimeInterval(long maintenanceTimeInterval) {
     logger.debug("MaintenanceTimeInterval:" + maintenanceTimeInterval);
     this.put(MAINTENANCE_TIME_INTERVAL,
-        new BytesCapsule(ByteArray.fromObject(maintenanceTimeInterval)));
+        new BytesWrapper(ByteArray.fromObject(maintenanceTimeInterval)));
   }
 
   public long getMaintenanceTimeInterval() {
@@ -347,7 +347,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveVoteRewardRate(double voteRewardRate) {
     logger.debug("VoteRewardRate:" + voteRewardRate);
     this.put(VOTE_REWARD_RATE,
-        new BytesCapsule(ByteArray.fromString(Double.toString(voteRewardRate))));
+        new BytesWrapper(ByteArray.fromString(Double.toString(voteRewardRate))));
   }
 
   public double getVoteRewardRate() {
@@ -361,7 +361,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveSingleRepeat(int singleRepeat) {
     logger.debug("SingleRepeat:" + singleRepeat);
     this.put(SINGLE_REPEAT,
-        new BytesCapsule(ByteArray.fromInt(singleRepeat)));
+        new BytesWrapper(ByteArray.fromInt(singleRepeat)));
   }
 
   public int getSingleRepeat() {
@@ -374,7 +374,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveBlockFilledSlotsIndex(int blockFilledSlotsIndex) {
     logger.debug("blockFilledSlotsIndex:" + blockFilledSlotsIndex);
     this.put(BLOCK_FILLED_SLOTS_INDEX,
-        new BytesCapsule(ByteArray.fromInt(blockFilledSlotsIndex)));
+        new BytesWrapper(ByteArray.fromInt(blockFilledSlotsIndex)));
   }
 
   public int getBlockFilledSlotsIndex() {
@@ -387,7 +387,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveMaxFrozenNumber(int maxFrozenNumber) {
     logger.debug("MAX_FROZEN_NUMBER:" + maxFrozenNumber);
     this.put(MAX_FROZEN_NUMBER,
-        new BytesCapsule(ByteArray.fromInt(maxFrozenNumber)));
+        new BytesWrapper(ByteArray.fromInt(maxFrozenNumber)));
   }
 
   public int getMaxFrozenNumber() {
@@ -400,7 +400,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveMaxFrozenTime(int maxFrozenTime) {
     logger.debug("MAX_FROZEN_NUMBER:" + maxFrozenTime);
     this.put(MAX_FROZEN_TIME,
-        new BytesCapsule(ByteArray.fromInt(maxFrozenTime)));
+        new BytesWrapper(ByteArray.fromInt(maxFrozenTime)));
   }
 
   public int getMaxFrozenTime() {
@@ -413,7 +413,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveMinFrozenTime(int minFrozenTime) {
     logger.debug("MIN_FROZEN_NUMBER:" + minFrozenTime);
     this.put(MIN_FROZEN_TIME,
-        new BytesCapsule(ByteArray.fromInt(minFrozenTime)));
+        new BytesWrapper(ByteArray.fromInt(minFrozenTime)));
   }
 
   public int getMinFrozenTime() {
@@ -426,7 +426,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveMaxFrozenSupplyNumber(int maxFrozenSupplyNumber) {
     logger.debug("MAX_FROZEN_SUPPLY_NUMBER:" + maxFrozenSupplyNumber);
     this.put(MAX_FROZEN_SUPPLY_NUMBER,
-        new BytesCapsule(ByteArray.fromInt(maxFrozenSupplyNumber)));
+        new BytesWrapper(ByteArray.fromInt(maxFrozenSupplyNumber)));
   }
 
   public int getMaxFrozenSupplyNumber() {
@@ -439,7 +439,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveMaxFrozenSupplyTime(int maxFrozenSupplyTime) {
     logger.debug("MAX_FROZEN_SUPPLY_NUMBER:" + maxFrozenSupplyTime);
     this.put(MAX_FROZEN_SUPPLY_TIME,
-        new BytesCapsule(ByteArray.fromInt(maxFrozenSupplyTime)));
+        new BytesWrapper(ByteArray.fromInt(maxFrozenSupplyTime)));
   }
 
   public int getMaxFrozenSupplyTime() {
@@ -452,7 +452,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveMinFrozenSupplyTime(int minFrozenSupplyTime) {
     logger.debug("MIN_FROZEN_SUPPLY_NUMBER:" + minFrozenSupplyTime);
     this.put(MIN_FROZEN_SUPPLY_TIME,
-        new BytesCapsule(ByteArray.fromInt(minFrozenSupplyTime)));
+        new BytesWrapper(ByteArray.fromInt(minFrozenSupplyTime)));
   }
 
   public int getMinFrozenSupplyTime() {
@@ -465,7 +465,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveWitnessAllowanceFrozenTime(int witnessAllowanceFrozenTime) {
     logger.debug("WITNESS_ALLOWANCE_FROZEN_TIME:" + witnessAllowanceFrozenTime);
     this.put(WITNESS_ALLOWANCE_FROZEN_TIME,
-        new BytesCapsule(ByteArray.fromInt(witnessAllowanceFrozenTime)));
+        new BytesWrapper(ByteArray.fromInt(witnessAllowanceFrozenTime)));
   }
 
   public int getWitnessAllowanceFrozenTime() {
@@ -478,7 +478,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveAccountUpgradeCost(long accountUpgradeCost) {
     logger.debug("ACCOUNT_UPGRADE_COST:" + accountUpgradeCost);
     this.put(ACCOUNT_UPGRADE_COST,
-        new BytesCapsule(ByteArray.fromLong(accountUpgradeCost)));
+        new BytesWrapper(ByteArray.fromLong(accountUpgradeCost)));
   }
 
   public long getAccountUpgradeCost() {
@@ -491,7 +491,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveNonExistentAccountTransferLimit(long limit) {
     logger.debug("NON_EXISTENT_ACCOUNT_TRANSFER_MIN:" + limit);
     this.put(NON_EXISTENT_ACCOUNT_TRANSFER_MIN,
-        new BytesCapsule(ByteArray.fromLong(limit)));
+        new BytesWrapper(ByteArray.fromLong(limit)));
   }
 
   public long getNonExistentAccountTransferMin() {
@@ -504,7 +504,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   public void savePublicNetUsage(long publicNetUsage) {
     this.put(PUBLIC_NET_USAGE,
-        new BytesCapsule(ByteArray.fromLong(publicNetUsage)));
+        new BytesWrapper(ByteArray.fromLong(publicNetUsage)));
   }
 
   public long getPublicNetUsage() {
@@ -516,7 +516,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   public void savePublicNetLimit(long publicNetLimit) {
     this.put(PUBLIC_NET_LIMIT,
-        new BytesCapsule(ByteArray.fromLong(publicNetLimit)));
+        new BytesWrapper(ByteArray.fromLong(publicNetLimit)));
   }
 
   public long getPublicNetLimit() {
@@ -528,7 +528,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   public void savePublicNetTime(long publicNetTime) {
     this.put(PUBLIC_NET_TIME,
-        new BytesCapsule(ByteArray.fromLong(publicNetTime)));
+        new BytesWrapper(ByteArray.fromLong(publicNetTime)));
   }
 
   public long getPublicNetTime() {
@@ -540,7 +540,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   public void saveFreeNetLimit(long freeNetLimit) {
     this.put(FREE_NET_LIMIT,
-        new BytesCapsule(ByteArray.fromLong(freeNetLimit)));
+        new BytesWrapper(ByteArray.fromLong(freeNetLimit)));
   }
 
   public long getFreeNetLimit() {
@@ -552,7 +552,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   public void saveTotalNetWeight(long totalNetWeight) {
     this.put(TOTAL_NET_WEIGHT,
-        new BytesCapsule(ByteArray.fromLong(totalNetWeight)));
+        new BytesWrapper(ByteArray.fromLong(totalNetWeight)));
   }
 
   public long getTotalNetWeight() {
@@ -564,7 +564,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   public void saveTotalNetLimit(long totalNetLimit) {
     this.put(TOTAL_NET_LIMIT,
-        new BytesCapsule(ByteArray.fromLong(totalNetLimit)));
+        new BytesWrapper(ByteArray.fromLong(totalNetLimit)));
   }
 
   public long getTotalNetLimit() {
@@ -576,7 +576,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   public void saveBlockNetUsage(long blockNetUsage) {
     this.put(BLOCK_NET_USAGE,
-        new BytesCapsule(ByteArray.fromLong(blockNetUsage)));
+        new BytesWrapper(ByteArray.fromLong(blockNetUsage)));
   }
 
   public long getBlockNetUsage() {
@@ -588,7 +588,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   public void saveCreateAccountFee(long blockNetUsage) {
     this.put(CREATE_ACCOUNT_FEE,
-        new BytesCapsule(ByteArray.fromLong(blockNetUsage)));
+        new BytesWrapper(ByteArray.fromLong(blockNetUsage)));
   }
 
   public long getCreateAccountFee() {
@@ -601,7 +601,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   public void saveTransactionFee(long blockNetUsage) {
     this.put(TRANSACTION_FEE,
-        new BytesCapsule(ByteArray.fromLong(blockNetUsage)));
+        new BytesWrapper(ByteArray.fromLong(blockNetUsage)));
   }
 
   public long getTransactionFee() {
@@ -613,7 +613,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   public void saveTotalTransactionCost(long value) {
     this.put(TOTAL_TRANSACTION_COST,
-        new BytesCapsule(ByteArray.fromLong(value)));
+        new BytesWrapper(ByteArray.fromLong(value)));
   }
 
   public long getTotalTransactionCost() {
@@ -625,7 +625,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   public void saveTotalCreateAccountFee(long value) {
     this.put(TOTAL_CREATE_ACCOUNT_COST,
-        new BytesCapsule(ByteArray.fromLong(value)));
+        new BytesWrapper(ByteArray.fromLong(value)));
   }
 
   public long getTotalCreateAccountCost() {
@@ -637,7 +637,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   public void saveTotalCreateWitnessFee(long value) {
     this.put(TOTAL_CREATE_WITNESS_COST,
-        new BytesCapsule(ByteArray.fromLong(value)));
+        new BytesWrapper(ByteArray.fromLong(value)));
   }
 
   public long getTotalCreateWitnessCost() {
@@ -650,7 +650,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveBlockFilledSlots(int[] blockFilledSlots) {
     logger.debug("blockFilledSlots:" + intArrayToString(blockFilledSlots));
     this.put(BLOCK_FILLED_SLOTS,
-        new BytesCapsule(ByteArray.fromString(intArrayToString(blockFilledSlots))));
+        new BytesWrapper(ByteArray.fromString(intArrayToString(blockFilledSlots))));
   }
 
   public int[] getBlockFilledSlots() {
@@ -671,7 +671,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveBlockFilledSlotsNumber(int blockFilledSlotsNumber) {
     logger.debug("blockFilledSlotsNumber:" + blockFilledSlotsNumber);
     this.put(BLOCK_FILLED_SLOTS_NUMBER,
-        new BytesCapsule(ByteArray.fromInt(blockFilledSlotsNumber)));
+        new BytesWrapper(ByteArray.fromInt(blockFilledSlotsNumber)));
   }
 
   public int getMaxVoteNumber() {
@@ -684,7 +684,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   public void saveMaxVoteNumber(int maxVoteNumber) {
     logger.debug("MAX_VOTE_NUMBER:" + maxVoteNumber);
     this.put(MAX_VOTE_NUMBER,
-        new BytesCapsule(ByteArray.fromInt(maxVoteNumber)));
+        new BytesWrapper(ByteArray.fromInt(maxVoteNumber)));
   }
 
   public void applyBlock(boolean fillBlock) {
@@ -701,7 +701,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
   }
 
   public void saveLatestSolidifiedBlockNum(long number) {
-    this.put(LATEST_SOLIDIFIED_BLOCK_NUM, new BytesCapsule(ByteArray.fromLong(number)));
+    this.put(LATEST_SOLIDIFIED_BLOCK_NUM, new BytesWrapper(ByteArray.fromLong(number)));
   }
 
 
@@ -753,7 +753,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
    */
   public void saveLatestBlockHeaderTimestamp(long t) {
     logger.info("update latest block header timestamp = {}", t);
-    this.put(LATEST_BLOCK_HEADER_TIMESTAMP, new BytesCapsule(ByteArray.fromLong(t)));
+    this.put(LATEST_BLOCK_HEADER_TIMESTAMP, new BytesWrapper(ByteArray.fromLong(t)));
   }
 
   /**
@@ -761,7 +761,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
    */
   public void saveLatestBlockHeaderNumber(long n) {
     logger.info("update latest block header number = {}", n);
-    this.put(LATEST_BLOCK_HEADER_NUMBER, new BytesCapsule(ByteArray.fromLong(n)));
+    this.put(LATEST_BLOCK_HEADER_NUMBER, new BytesWrapper(ByteArray.fromLong(n)));
   }
 
   /**
@@ -769,12 +769,12 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
    */
   public void saveLatestBlockHeaderHash(ByteString h) {
     logger.info("update latest block header id = {}", ByteArray.toHexString(h.toByteArray()));
-    this.put(LATEST_BLOCK_HEADER_HASH, new BytesCapsule(h.toByteArray()));
+    this.put(LATEST_BLOCK_HEADER_HASH, new BytesWrapper(h.toByteArray()));
   }
 
   public void saveStateFlag(int n) {
     logger.info("update state flag = {}", n);
-    this.put(STATE_FLAG, new BytesCapsule(ByteArray.fromInt(n)));
+    this.put(STATE_FLAG, new BytesWrapper(ByteArray.fromInt(n)));
   }
 
 
@@ -791,7 +791,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesCapsule> {
 
   private void saveNextMaintenanceTime(long nextMaintenanceTime) {
     this.put(NEXT_MAINTENANCE_TIME,
-        new BytesCapsule(ByteArray.fromLong(nextMaintenanceTime)));
+        new BytesWrapper(ByteArray.fromLong(nextMaintenanceTime)));
   }
 
 

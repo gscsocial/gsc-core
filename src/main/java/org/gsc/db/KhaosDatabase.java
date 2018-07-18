@@ -16,8 +16,8 @@ import javafx.util.Pair;
 import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.BlockCapsule.BlockId;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.core.exception.BadNumberBlockException;
 import org.gsc.core.exception.NonCommonBlockException;
 import org.gsc.core.exception.UnLinkedBlockException;
@@ -34,14 +34,14 @@ public class KhaosDatabase extends GscDatabase {
       return this.blk.getParentHash();
     }
 
-    public KhaosBlock(BlockCapsule blk) {
+    public KhaosBlock(BlockWrapper blk) {
       this.blk = blk;
       this.id = blk.getBlockId();
       this.num = blk.getNum();
     }
 
     @Getter
-    BlockCapsule blk;
+    BlockWrapper blk;
     Reference<KhaosBlock> parent = new WeakReference<>(null);
     BlockId id;
     Boolean invalid;
@@ -174,7 +174,7 @@ public class KhaosDatabase extends GscDatabase {
     return false;
   }
 
-  void start(BlockCapsule blk) {
+  void start(BlockWrapper blk) {
     this.head = new KhaosBlock(blk);
     miniStore.insert(this.head);
   }
@@ -209,7 +209,7 @@ public class KhaosDatabase extends GscDatabase {
   /**
    * Get the Block form KhoasDB, if it doesn't exist ,return null.
    */
-  public BlockCapsule getBlock(Sha256Hash hash) {
+  public BlockWrapper getBlock(Sha256Hash hash) {
     return Stream.of(miniStore.getByHash(hash), miniUnlinkedStore.getByHash(hash))
         .filter(Objects::nonNull)
         .map(block -> block.blk)
@@ -220,7 +220,7 @@ public class KhaosDatabase extends GscDatabase {
   /**
    * Push the block in the KhoasDB.
    */
-  public BlockCapsule push(BlockCapsule blk)
+  public BlockWrapper push(BlockWrapper blk)
       throws UnLinkedBlockException, BadNumberBlockException {
     KhaosBlock block = new KhaosBlock(blk);
     if (head != null && block.getParentHash() != Sha256Hash.ZERO_HASH) {
@@ -245,7 +245,7 @@ public class KhaosDatabase extends GscDatabase {
     return head.blk;
   }
 
-  public BlockCapsule getHead() {
+  public BlockWrapper getHead() {
     return head.blk;
   }
 
@@ -315,10 +315,10 @@ public class KhaosDatabase extends GscDatabase {
    * Find two block's most recent common parent block.
    */
   @Deprecated
-  public Pair<LinkedList<BlockCapsule>, LinkedList<BlockCapsule>> getBranch(
+  public Pair<LinkedList<BlockWrapper>, LinkedList<BlockWrapper>> getBranch(
       BlockId block1, BlockId block2) {
-    LinkedList<BlockCapsule> list1 = new LinkedList<>();
-    LinkedList<BlockCapsule> list2 = new LinkedList<>();
+    LinkedList<BlockWrapper> list1 = new LinkedList<>();
+    LinkedList<BlockWrapper> list2 = new LinkedList<>();
     KhaosBlock kblk1 = miniStore.getByHash(block1);
     KhaosBlock kblk2 = miniStore.getByHash(block2);
 
@@ -344,7 +344,7 @@ public class KhaosDatabase extends GscDatabase {
 
 
   // only for unittest
-  public BlockCapsule getParentBlock(Sha256Hash hash) {
+  public BlockWrapper getParentBlock(Sha256Hash hash) {
     return Stream.of(miniStore.getByHash(hash), miniUnlinkedStore.getByHash(hash))
         .filter(Objects::nonNull)
         .map(KhaosBlock::getParent)

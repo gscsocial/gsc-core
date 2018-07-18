@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.db.Manager;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Transaction.Contract;
@@ -24,16 +24,16 @@ public class OperatorFactory {
   /**
    * create actuator.
    */
-  public static List<Operator> createActuator(TransactionCapsule transactionCapsule,
+  public static List<Operator> createActuator(TransactionWrapper transactionWrapper,
       Manager manager) {
     List<Operator> actuatorList = Lists.newArrayList();
-    if (null == transactionCapsule || null == transactionCapsule.getInstance()) {
-      logger.info("transactionCapsule or Transaction is null");
+    if (null == transactionWrapper || null == transactionWrapper.getInstance()) {
+      logger.info("transactionWrapper or Transaction is null");
       return actuatorList;
     }
 
     Preconditions.checkNotNull(manager, "manager is null");
-    Protocol.Transaction.raw rawData = transactionCapsule.getInstance().getRawData();
+    Protocol.Transaction.raw rawData = transactionWrapper.getInstance().getRawData();
     rawData.getContractList()
         .forEach(contract -> actuatorList.add(getActuatorByContract(contract, manager)));
     return actuatorList;

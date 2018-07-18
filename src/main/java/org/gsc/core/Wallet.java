@@ -27,17 +27,14 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gsc.core.wrapper.*;
 import org.gsc.crypto.ECKey;
 import org.gsc.common.overlay.message.Message;
 import org.gsc.common.utils.Base58;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Utils;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.AssetIssueCapsule;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.TransactionCapsule;
-import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.db.AccountStore;
 import org.gsc.db.BandwidthProcessor;
 import org.gsc.db.Manager;
@@ -187,13 +184,13 @@ public class Wallet {
 
   public Account getAccount(Account account) {
     AccountStore accountStore = dbManager.getAccountStore();
-    AccountCapsule accountCapsule = accountStore.get(account.getAddress().toByteArray());
-    if (accountCapsule == null) {
+    AccountWrapper accountWrapper = accountStore.get(account.getAddress().toByteArray());
+    if (accountWrapper == null) {
       return null;
     }
     BandwidthProcessor processor = new BandwidthProcessor(dbManager);
-    processor.updateUsage(accountCapsule);
-    return accountCapsule.getInstance();
+    processor.updateUsage(accountWrapper);
+    return accountWrapper.getInstance();
   }
 
   /**
@@ -201,7 +198,7 @@ public class Wallet {
    */
   /*public Transaction createTransaction(byte[] address, String to, long amount) {
     long balance = getBalance(address);
-    return new TransactionCapsule(address, to, amount, balance, utxoStore).getInstance();
+    return new TransactionWrapper(address, to, amount, balance, utxoStore).getInstance();
   } */
 
   /**
@@ -210,7 +207,7 @@ public class Wallet {
   @Deprecated
   public Transaction createTransaction(TransferContract contract) {
     AccountStore accountStore = dbManager.getAccountStore();
-    return new TransactionCapsule(contract, accountStore).getInstance();
+    return new TransactionWrapper(contract, accountStore).getInstance();
   }
 
   /**
@@ -220,7 +217,7 @@ public class Wallet {
     GrpcAPI.Return.Builder builder = GrpcAPI.Return.newBuilder();
 
     try {
-      TransactionCapsule trx = new TransactionCapsule(signaturedTransaction);
+      TransactionWrapper gsc = new TransactionWrapper(signaturedTransaction);
       Message message = new TransactionMessage(signaturedTransaction);
 
       if (dbManager.isTooManyPending()) {
@@ -236,14 +233,14 @@ public class Wallet {
         return builder.setResult(false).setCode(response_code.SERVER_BUSY).build();
       }
 
-      if (dbManager.getTransactionIdCache().getIfPresent(trx.getTransactionId()) != null) {
+      if (dbManager.getTransactionIdCache().getIfPresent(gsc.getTransactionId()) != null) {
         logger.debug("This transaction has been processed, discard the transaction");
         return builder.setResult(false).setCode(response_code.DUP_TRANSACTION_ERROR).build();
       } else {
-        dbManager.getTransactionIdCache().put(trx.getTransactionId(), true);
+        dbManager.getTransactionIdCache().put(gsc.getTransactionId(), true);
       }
 
-      dbManager.pushTransactions(trx);
+      dbManager.pushTransactions(gsc);
       p2pNode.broadcast(message);
       return builder.setResult(true).setCode(response_code.SUCCESS).build();
     } catch (ValidateSignatureException e) {
@@ -294,11 +291,11 @@ public class Wallet {
     }
   }
 
-  public TransactionCapsule getTransactionSign(TransactionSign transactionSign) {
+  public TransactionWrapper getTransactionSign(TransactionSign transactionSign) {
     byte[] privateKey = transactionSign.getPrivateKey().toByteArray();
-    TransactionCapsule trx = new TransactionCapsule(transactionSign.getTransaction());
-    trx.sign(privateKey);
-    return trx;
+    TransactionWrapper gsc = new TransactionWrapper(transactionSign.getTransaction());
+    gsc.sign(privateKey);
+    return gsc;
   }
 
   public byte[] pass2Key(byte[] passPhrase){
@@ -312,7 +309,7 @@ public class Wallet {
   }
 
   public Block getNowBlock() {
-    List<BlockCapsule> blockList = dbManager.getBlockStore().getBlockByLatestNum(1);
+    List<BlockWrapper> blockList = dbManager.getBlockStore().getBlockByLatestNum(1);
     if (CollectionUtils.isEmpty(blockList)) {
       return null;
     } else {
@@ -331,8 +328,8 @@ public class Wallet {
 
   public WitnessList getWitnessList() {
     WitnessList.Builder builder = WitnessList.newBuilder();
-    List<WitnessCapsule> witnessCapsuleList = dbManager.getWitnessStore().getAllWitnesses();
-    witnessCapsuleList
+    List<WitnessWrapper> witnessWrapperList = dbManager.getWitnessStore().getAllWitnesses();
+    witnessWrapperList
         .forEach(witnessCapsule -> builder.addWitnesses(witnessCapsule.getInstance()));
     return builder.build();
   }
@@ -346,7 +343,7 @@ public class Wallet {
 
   public AssetIssueList getAssetIssueList(long offset, long limit) {
     AssetIssueList.Builder builder = AssetIssueList.newBuilder();
-    List<AssetIssueCapsule> assetIssueList = dbManager.getAssetIssueStore()
+    List<AssetIssueWrapper> assetIssueList = dbManager.getAssetIssueStore()
         .getAssetIssuesPaginated(offset, limit);
     if (null == assetIssueList || assetIssueList.size() == 0) {
       return null;
@@ -359,10 +356,10 @@ public class Wallet {
     if (accountAddress == null || accountAddress.size() == 0) {
       return null;
     }
-    List<AssetIssueCapsule> assetIssueCapsuleList = dbManager.getAssetIssueStore()
+    List<AssetIssueWrapper> assetIssueWrapperList = dbManager.getAssetIssueStore()
         .getAllAssetIssues();
     AssetIssueList.Builder builder = AssetIssueList.newBuilder();
-    assetIssueCapsuleList.stream()
+    assetIssueWrapperList.stream()
         .filter(assetIssueCapsule -> assetIssueCapsule.getOwnerAddress().equals(accountAddress))
         .forEach(issueCapsule -> {
           builder.addAssetIssue(issueCapsule.getInstance());
@@ -375,32 +372,32 @@ public class Wallet {
       return null;
     }
     AccountNetMessage.Builder builder = AccountNetMessage.newBuilder();
-    AccountCapsule accountCapsule = dbManager.getAccountStore().get(accountAddress.toByteArray());
-    if (accountCapsule == null) {
+    AccountWrapper accountWrapper = dbManager.getAccountStore().get(accountAddress.toByteArray());
+    if (accountWrapper == null) {
       return null;
     }
 
     BandwidthProcessor processor = new BandwidthProcessor(dbManager);
-    processor.updateUsage(accountCapsule);
+    processor.updateUsage(accountWrapper);
 
-    long netLimit = processor.calculateGlobalNetLimit(accountCapsule.getFrozenBalance());
+    long netLimit = processor.calculateGlobalNetLimit(accountWrapper.getFrozenBalance());
     long freeNetLimit = dbManager.getDynamicPropertiesStore().getFreeNetLimit();
     long totalNetLimit = dbManager.getDynamicPropertiesStore().getTotalNetLimit();
     long totalNetWeight = dbManager.getDynamicPropertiesStore().getTotalNetWeight();
 
     Map<String, Long> assetNetLimitMap = new HashMap<>();
-    accountCapsule.getAllFreeAssetNetUsage().keySet().forEach(asset -> {
+    accountWrapper.getAllFreeAssetNetUsage().keySet().forEach(asset -> {
       byte[] key = ByteArray.fromString(asset);
       assetNetLimitMap.put(asset, dbManager.getAssetIssueStore().get(key).getFreeAssetNetLimit());
     });
 
-    builder.setFreeNetUsed(accountCapsule.getFreeNetUsage())
+    builder.setFreeNetUsed(accountWrapper.getFreeNetUsage())
         .setFreeNetLimit(freeNetLimit)
-        .setNetUsed(accountCapsule.getNetUsage())
+        .setNetUsed(accountWrapper.getNetUsage())
         .setNetLimit(netLimit)
         .setTotalNetLimit(totalNetLimit)
         .setTotalNetWeight(totalNetWeight)
-        .putAllAssetNetUsed(accountCapsule.getAllFreeAssetNetUsage())
+        .putAllAssetNetUsed(accountWrapper.getAllFreeAssetNetUsage())
         .putAllAssetNetLimit(assetNetLimitMap);
     return builder.build();
   }
@@ -409,11 +406,11 @@ public class Wallet {
     if (assetName == null || assetName.size() == 0) {
       return null;
     }
-    List<AssetIssueCapsule> assetIssueCapsuleList = dbManager.getAssetIssueStore()
+    List<AssetIssueWrapper> assetIssueWrapperList = dbManager.getAssetIssueStore()
         .getAllAssetIssues();
-    for (AssetIssueCapsule assetIssueCapsule : assetIssueCapsuleList) {
-      if (assetName.equals(assetIssueCapsule.getName())) {
-        return assetIssueCapsule.getInstance();
+    for (AssetIssueWrapper assetIssueWrapper : assetIssueWrapperList) {
+      if (assetName.equals(assetIssueWrapper.getName())) {
+        return assetIssueWrapper.getInstance();
       }
     }
     return null;
@@ -464,15 +461,15 @@ public class Wallet {
     if (Objects.isNull(transactionId)) {
       return null;
     }
-    TransactionCapsule transactionCapsule = null;
+    TransactionWrapper transactionWrapper = null;
     try {
-      transactionCapsule = dbManager.getTransactionStore()
+      transactionWrapper = dbManager.getTransactionStore()
           .get(transactionId.toByteArray());
 
     } catch (BadItemException e) {
     }
-    if (transactionCapsule != null) {
-      return transactionCapsule.getInstance();
+    if (transactionWrapper != null) {
+      return transactionWrapper.getInstance();
     }
     return null;
   }

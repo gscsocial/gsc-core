@@ -17,12 +17,12 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.common.utils.Time;
 import org.gsc.core.exception.HeaderNotFound;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.VotesWrapper;
 import org.gsc.db.common.iterator.DBIterator;
 import org.joda.time.DateTime;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.VotesCapsule;
-import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.db.AccountStore;
 import org.gsc.db.Manager;
@@ -63,7 +63,7 @@ public class WitnessController {
     setCurrentShuffledWitnesses(witnessAddresses);
   }
 
-  public WitnessCapsule getWitnesseByAddress(ByteString address) {
+  public WitnessWrapper getWitnesseByAddress(ByteString address) {
     return this.manager.getWitnessStore().get(address.toByteArray());
   }
 
@@ -102,11 +102,11 @@ public class WitnessController {
     return (when - firstSlotTime) / ChainConstant.BLOCK_PRODUCED_INTERVAL + 1;
   }
 
-  public BlockCapsule getGenesisBlock() {
+  public BlockWrapper getGenesisBlock() {
     return manager.getGenesisBlock();
   }
 
-  public BlockCapsule getHead() throws HeaderNotFound {
+  public BlockWrapper getHead() throws HeaderNotFound {
     return manager.getHead();
   }
 
@@ -148,7 +148,7 @@ public class WitnessController {
   /**
    * validate witness schedule.
    */
-  public boolean validateWitnessSchedule(BlockCapsule block) {
+  public boolean validateWitnessSchedule(BlockWrapper block) {
 
     ByteString witnessAddress = block.getInstance().getBlockHeader().getRawData()
         .getWitnessAddress();
@@ -248,7 +248,7 @@ public class WitnessController {
     long sizeCount = 0;
     while (dbIterator.hasNext()) {
       Entry<byte[], byte[]> next = dbIterator.next();
-      VotesCapsule votes = new VotesCapsule(next.getValue());
+      VotesWrapper votes = new VotesWrapper(next.getValue());
 
 //      logger.info("there is account ,account address is {}",
 //          account.createReadableString());
@@ -311,24 +311,24 @@ public class WitnessController {
       });
 
       countWitness.forEach((address, voteCount) -> {
-        final WitnessCapsule witnessCapsule = witnessStore
+        final WitnessWrapper witnessWrapper = witnessStore
             .get(StringUtil.createDbKey(address));
-        if (null == witnessCapsule) {
-          logger.warn("witnessCapsule is null.address is {}",
+        if (null == witnessWrapper) {
+          logger.warn("witnessWrapper is null.address is {}",
               StringUtil.createReadableString(address));
           return;
         }
 
-        AccountCapsule witnessAccountCapsule = accountStore
+        AccountWrapper witnessAccountWrapper = accountStore
             .get(StringUtil.createDbKey(address));
-        if (witnessAccountCapsule == null) {
+        if (witnessAccountWrapper == null) {
           logger.warn(
               "witnessAccount[" + StringUtil.createReadableString(address) + "] not exists");
         } else {
-          witnessCapsule.setVoteCount(witnessCapsule.getVoteCount() + voteCount);
-          witnessStore.put(witnessCapsule.createDbKey(), witnessCapsule);
-          logger.info("address is {}  ,countVote is {}", witnessCapsule.createReadableString(),
-              witnessCapsule.getVoteCount());
+          witnessWrapper.setVoteCount(witnessWrapper.getVoteCount() + voteCount);
+          witnessStore.put(witnessWrapper.createDbKey(), witnessWrapper);
+          logger.info("address is {}  ,countVote is {}", witnessWrapper.createReadableString(),
+              witnessWrapper.getVoteCount());
         }
       });
 
@@ -348,15 +348,15 @@ public class WitnessController {
       List<ByteString> newWits = getActiveWitnesses();
       if (witnessSetChanged(currentWits, newWits)) {
         currentWits.forEach(address -> {
-          WitnessCapsule witnessCapsule = getWitnesseByAddress(address);
-          witnessCapsule.setIsJobs(false);
-          witnessStore.put(witnessCapsule.createDbKey(), witnessCapsule);
+          WitnessWrapper witnessWrapper = getWitnesseByAddress(address);
+          witnessWrapper.setIsJobs(false);
+          witnessStore.put(witnessWrapper.createDbKey(), witnessWrapper);
         });
 
         newWits.forEach(address -> {
-          WitnessCapsule witnessCapsule = getWitnesseByAddress(address);
-          witnessCapsule.setIsJobs(true);
-          witnessStore.put(witnessCapsule.createDbKey(), witnessCapsule);
+          WitnessWrapper witnessWrapper = getWitnesseByAddress(address);
+          witnessWrapper.setIsJobs(true);
+          witnessStore.put(witnessWrapper.createDbKey(), witnessWrapper);
         });
       }
 
@@ -385,11 +385,11 @@ public class WitnessController {
 
     List<ByteString> activeWitnesses = getActiveWitnesses();
     activeWitnesses.forEach(a -> {
-      WitnessCapsule witnessCapsule = manager.getWitnessStore().get(a.toByteArray());
-      builder.append("\n").append(" witness:").append(witnessCapsule.createReadableString())
+      WitnessWrapper witnessWrapper = manager.getWitnessStore().get(a.toByteArray());
+      builder.append("\n").append(" witness:").append(witnessWrapper.createReadableString())
           .append(",").
-          append("latestBlockNum:").append(witnessCapsule.getLatestBlockNum()).append(",").
-          append("LatestSlotNum:").append(witnessCapsule.getLatestSlotNum()).append(".");
+          append("latestBlockNum:").append(witnessWrapper.getLatestBlockNum()).append(",").
+          append("LatestSlotNum:").append(witnessWrapper.getLatestSlotNum()).append(".");
     });
     logger.debug(builder.toString());
   }
@@ -410,9 +410,9 @@ public class WitnessController {
     if (voteSum > 0) {
       for (ByteString b : list) {
         long pay = (long) (getWitnesseByAddress(b).getVoteCount() * ((double) totalPay / voteSum));
-        AccountCapsule accountCapsule = manager.getAccountStore().get(b.toByteArray());
-        accountCapsule.setAllowance(accountCapsule.getAllowance() + pay);
-        manager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+        AccountWrapper accountWrapper = manager.getAccountStore().get(b.toByteArray());
+        accountWrapper.setAllowance(accountWrapper.getAllowance() + pay);
+        manager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
       }
     }
 

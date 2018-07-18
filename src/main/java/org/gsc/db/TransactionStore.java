@@ -5,7 +5,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.db.common.iterator.TransactionIterator;
 import org.gsc.core.exception.BadItemException;
 import org.gsc.core.exception.StoreException;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class TransactionStore extends GscStoreWithRevoking<TransactionCapsule> {
+public class TransactionStore extends GscStoreWithRevoking<TransactionWrapper> {
 
   @Autowired
   private TransactionStore(@Value("trans") String dbName) {
@@ -23,9 +23,9 @@ public class TransactionStore extends GscStoreWithRevoking<TransactionCapsule> {
   }
 
   @Override
-  public TransactionCapsule get(byte[] key) throws BadItemException {
+  public TransactionWrapper get(byte[] key) throws BadItemException {
     byte[] value = dbSource.getData(key);
-    return ArrayUtils.isEmpty(value) ? null : new TransactionCapsule(value);
+    return ArrayUtils.isEmpty(value) ? null : new TransactionWrapper(value);
   }
 
   @Override
@@ -36,7 +36,7 @@ public class TransactionStore extends GscStoreWithRevoking<TransactionCapsule> {
   }
 
   @Override
-  public void put(byte[] key, TransactionCapsule item) {
+  public void put(byte[] key, TransactionWrapper item) {
     super.put(key, item);
     if (Objects.nonNull(indexHelper)) {
       indexHelper.update(item.getInstance());
@@ -51,7 +51,7 @@ public class TransactionStore extends GscStoreWithRevoking<TransactionCapsule> {
   }
 
   @Override
-  public Iterator<Entry<byte[], TransactionCapsule>> iterator() {
+  public Iterator<Entry<byte[], TransactionWrapper>> iterator() {
     return new TransactionIterator(dbSource.iterator());
   }
 
@@ -63,7 +63,7 @@ public class TransactionStore extends GscStoreWithRevoking<TransactionCapsule> {
 
   private void deleteIndex(byte[] key) {
     if (Objects.nonNull(indexHelper)) {
-      TransactionCapsule item;
+      TransactionWrapper item;
       try {
         item = get(key);
         if (Objects.nonNull(item)) {

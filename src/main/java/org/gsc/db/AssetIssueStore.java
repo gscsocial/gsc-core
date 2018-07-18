@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.core.wrapper.AssetIssueCapsule;
+import org.gsc.core.wrapper.AssetIssueWrapper;
 import org.gsc.config.Parameter.DatabaseConstants;
 import org.gsc.db.common.iterator.AssetIssueIterator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class AssetIssueStore extends GscStoreWithRevoking<AssetIssueCapsule> {
+public class AssetIssueStore extends GscStoreWithRevoking<AssetIssueWrapper> {
 
   @Autowired
   private AssetIssueStore(@Value("asset-issue") String dbName) {
@@ -24,9 +24,9 @@ public class AssetIssueStore extends GscStoreWithRevoking<AssetIssueCapsule> {
   }
 
   @Override
-  public AssetIssueCapsule get(byte[] key) {
+  public AssetIssueWrapper get(byte[] key) {
     byte[] value = dbSource.getData(key);
-    return ArrayUtils.isEmpty(value) ? null : new AssetIssueCapsule(value);
+    return ArrayUtils.isEmpty(value) ? null : new AssetIssueWrapper(value);
   }
 
   /**
@@ -41,7 +41,7 @@ public class AssetIssueStore extends GscStoreWithRevoking<AssetIssueCapsule> {
   }
 
   @Override
-  public void put(byte[] key, AssetIssueCapsule item) {
+  public void put(byte[] key, AssetIssueWrapper item) {
     super.put(key, item);
     if (Objects.nonNull(indexHelper)) {
       indexHelper.update(item.getInstance());
@@ -51,17 +51,17 @@ public class AssetIssueStore extends GscStoreWithRevoking<AssetIssueCapsule> {
   /**
    * get all asset issues.
    */
-  public List<AssetIssueCapsule> getAllAssetIssues() {
+  public List<AssetIssueWrapper> getAllAssetIssues() {
     return dbSource.allKeys().stream()
         .map(this::get)
         .collect(Collectors.toList());
   }
 
-  public List<AssetIssueCapsule> getAssetIssuesPaginated(long offset, long limit) {
+  public List<AssetIssueWrapper> getAssetIssuesPaginated(long offset, long limit) {
     if (limit < 0 || offset < 0) {
       return null;
     }
-    List<AssetIssueCapsule> assetIssueList = dbSource.allKeys().stream()
+    List<AssetIssueWrapper> assetIssueList = dbSource.allKeys().stream()
         .map(this::get)
         .collect(Collectors.toList());
     if (assetIssueList.size() <= offset) {
@@ -77,7 +77,7 @@ public class AssetIssueStore extends GscStoreWithRevoking<AssetIssueCapsule> {
   }
 
   @Override
-  public Iterator<Entry<byte[], AssetIssueCapsule>> iterator() {
+  public Iterator<Entry<byte[], AssetIssueWrapper>> iterator() {
     return new AssetIssueIterator(dbSource.iterator());
   }
 
@@ -89,7 +89,7 @@ public class AssetIssueStore extends GscStoreWithRevoking<AssetIssueCapsule> {
 
   private void deleteIndex(byte[] key) {
     if (Objects.nonNull(indexHelper)) {
-      AssetIssueCapsule item = get(key);
+      AssetIssueWrapper item = get(key);
       if (Objects.nonNull(item)) {
         indexHelper.remove(item.getInstance());
       }

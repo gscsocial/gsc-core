@@ -5,13 +5,13 @@ import com.google.protobuf.ByteString;
 import java.io.File;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.core.Constant;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.WitnessCapsule;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
@@ -67,16 +67,16 @@ public class AccountVoteWitnessTest {
 
   @Test
   public void testAccountVoteWitness() {
-    final List<AccountCapsule> accountCapsuleList = this.getAccountList();
-    final List<WitnessCapsule> witnessCapsuleList = this.getWitnessList();
-    accountCapsuleList.forEach(
+    final List<AccountWrapper> accountWrapperList = this.getAccountList();
+    final List<WitnessWrapper> witnessWrapperList = this.getWitnessList();
+    accountWrapperList.forEach(
         accountCapsule -> {
           dbManager
               .getAccountStore()
               .put(accountCapsule.getAddress().toByteArray(), accountCapsule);
           this.printAccount(accountCapsule.getAddress());
         });
-    witnessCapsuleList.forEach(
+    witnessWrapperList.forEach(
         witnessCapsule ->
             dbManager
                 .getWitnessStore()
@@ -92,53 +92,53 @@ public class AccountVoteWitnessTest {
   }
 
   private void printAccount(final ByteString address) {
-    final AccountCapsule accountCapsule = dbManager.getAccountStore().get(address.toByteArray());
-    if (null == accountCapsule) {
+    final AccountWrapper accountWrapper = dbManager.getAccountStore().get(address.toByteArray());
+    if (null == accountWrapper) {
       logger.info("address is {}  , account is null", address.toStringUtf8());
       return;
     }
     logger.info(
         "address is {}  ,countVoteSize is {}",
-        accountCapsule.getAddress().toStringUtf8(),
-        accountCapsule.getVotesList().size());
+        accountWrapper.getAddress().toStringUtf8(),
+        accountWrapper.getVotesList().size());
   }
 
   private void printWitness(final ByteString address) {
-    final WitnessCapsule witnessCapsule = dbManager.getWitnessStore().get(address.toByteArray());
-    if (null == witnessCapsule) {
+    final WitnessWrapper witnessWrapper = dbManager.getWitnessStore().get(address.toByteArray());
+    if (null == witnessWrapper) {
       logger.info("address is {}  , witness is null", address.toStringUtf8());
       return;
     }
     logger.info(
         "address is {}  ,countVote is {}",
-        witnessCapsule.getAddress().toStringUtf8(),
-        witnessCapsule.getVoteCount());
+        witnessWrapper.getAddress().toStringUtf8(),
+        witnessWrapper.getVoteCount());
   }
 
-  private List<AccountCapsule> getAccountList() {
-    final List<AccountCapsule> accountCapsuleList = Lists.newArrayList();
-    final AccountCapsule accountGsc =
-        new AccountCapsule(
+  private List<AccountWrapper> getAccountList() {
+    final List<AccountWrapper> accountWrapperList = Lists.newArrayList();
+    final AccountWrapper accountGsc =
+        new AccountWrapper(
             ByteString.copyFrom("00000000001".getBytes()),
             ByteString.copyFromUtf8("Gsc"),
             AccountType.Normal);
-    final AccountCapsule accountMarcus =
-        new AccountCapsule(
+    final AccountWrapper accountMarcus =
+        new AccountWrapper(
             ByteString.copyFrom("00000000002".getBytes()),
             ByteString.copyFromUtf8("Marcus"),
             AccountType.Normal);
-    final AccountCapsule accountOlivier =
-        new AccountCapsule(
+    final AccountWrapper accountOlivier =
+        new AccountWrapper(
             ByteString.copyFrom("00000000003".getBytes()),
             ByteString.copyFromUtf8("Olivier"),
             AccountType.Normal);
-    final AccountCapsule accountSasaXie =
-        new AccountCapsule(
+    final AccountWrapper accountSasaXie =
+        new AccountWrapper(
             ByteString.copyFrom("00000000004".getBytes()),
             ByteString.copyFromUtf8("SasaXie"),
             AccountType.Normal);
-    final AccountCapsule accountVivider =
-        new AccountCapsule(
+    final AccountWrapper accountVivider =
+        new AccountWrapper(
             ByteString.copyFrom("00000000005".getBytes()),
             ByteString.copyFromUtf8("Vivider"),
             AccountType.Normal);
@@ -161,28 +161,28 @@ public class AccountVoteWitnessTest {
     accountOlivier.addVotes(accountVivider.getAddress(), 100);
     // accountSasaXie addVotes
     // accountVivider addVotes
-    accountCapsuleList.add(accountGsc);
-    accountCapsuleList.add(accountMarcus);
-    accountCapsuleList.add(accountOlivier);
-    accountCapsuleList.add(accountSasaXie);
-    accountCapsuleList.add(accountVivider);
-    return accountCapsuleList;
+    accountWrapperList.add(accountGsc);
+    accountWrapperList.add(accountMarcus);
+    accountWrapperList.add(accountOlivier);
+    accountWrapperList.add(accountSasaXie);
+    accountWrapperList.add(accountVivider);
+    return accountWrapperList;
   }
 
-  private List<WitnessCapsule> getWitnessList() {
-    final List<WitnessCapsule> witnessCapsuleList = Lists.newArrayList();
-    final WitnessCapsule witnessGsc =
-        new WitnessCapsule(ByteString.copyFrom("00000000001".getBytes()), 0, "");
-    final WitnessCapsule witnessOlivier =
-        new WitnessCapsule(ByteString.copyFrom("00000000003".getBytes()), 100, "");
-    final WitnessCapsule witnessVivider =
-        new WitnessCapsule(ByteString.copyFrom("00000000005".getBytes()), 200, "");
-    final WitnessCapsule witnessSenaLiu =
-        new WitnessCapsule(ByteString.copyFrom("00000000006".getBytes()), 300, "");
-    witnessCapsuleList.add(witnessGsc);
-    witnessCapsuleList.add(witnessOlivier);
-    witnessCapsuleList.add(witnessVivider);
-    witnessCapsuleList.add(witnessSenaLiu);
-    return witnessCapsuleList;
+  private List<WitnessWrapper> getWitnessList() {
+    final List<WitnessWrapper> witnessWrapperList = Lists.newArrayList();
+    final WitnessWrapper witnessGsc =
+        new WitnessWrapper(ByteString.copyFrom("00000000001".getBytes()), 0, "");
+    final WitnessWrapper witnessOlivier =
+        new WitnessWrapper(ByteString.copyFrom("00000000003".getBytes()), 100, "");
+    final WitnessWrapper witnessVivider =
+        new WitnessWrapper(ByteString.copyFrom("00000000005".getBytes()), 200, "");
+    final WitnessWrapper witnessSenaLiu =
+        new WitnessWrapper(ByteString.copyFrom("00000000006".getBytes()), 300, "");
+    witnessWrapperList.add(witnessGsc);
+    witnessWrapperList.add(witnessOlivier);
+    witnessWrapperList.add(witnessVivider);
+    witnessWrapperList.add(witnessSenaLiu);
+    return witnessWrapperList;
   }
 }

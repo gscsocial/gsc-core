@@ -23,8 +23,8 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.BlockCapsule.BlockId;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.db.common.iterator.BlockIterator;
 import org.gsc.core.exception.BadItemException;
 import org.gsc.core.exception.ItemNotFoundException;
@@ -35,9 +35,9 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-public class BlockStore extends GscStoreWithRevoking<BlockCapsule> {
+public class BlockStore extends GscStoreWithRevoking<BlockWrapper> {
 
-  private BlockCapsule head;
+  private BlockWrapper head;
 
   @Autowired
   private BlockStore(@Value("block") String dbName) {
@@ -45,7 +45,7 @@ public class BlockStore extends GscStoreWithRevoking<BlockCapsule> {
   }
 
   @Override
-  public void put(byte[] key, BlockCapsule item) {
+  public void put(byte[] key, BlockWrapper item) {
     super.put(key, item);
     if (Objects.nonNull(indexHelper)) {
       indexHelper.update(item.getInstance());
@@ -53,20 +53,20 @@ public class BlockStore extends GscStoreWithRevoking<BlockCapsule> {
   }
 
   @Override
-  public BlockCapsule get(byte[] key) throws ItemNotFoundException, BadItemException {
+  public BlockWrapper get(byte[] key) throws ItemNotFoundException, BadItemException {
     byte[] value = dbSource.getData(key);
     if (ArrayUtils.isEmpty(value)) {
       throw new ItemNotFoundException();
     }
-    return new BlockCapsule(value);
+    return new BlockWrapper(value);
   }
 
-  public List<BlockCapsule> getLimitNumber(long startNumber, long limit) {
+  public List<BlockWrapper> getLimitNumber(long startNumber, long limit) {
     BlockId startBlockId = new BlockId(Sha256Hash.ZERO_HASH, startNumber);
     return dbSource.getValuesNext(startBlockId.getBytes(), limit)
         .stream().map(bytes -> {
           try {
-            return new BlockCapsule(bytes);
+            return new BlockWrapper(bytes);
           } catch (BadItemException e) {
             e.printStackTrace();
           }
@@ -76,12 +76,12 @@ public class BlockStore extends GscStoreWithRevoking<BlockCapsule> {
         .collect(Collectors.toList());
   }
 
-  public List<BlockCapsule> getBlockByLatestNum(long getNum) {
+  public List<BlockWrapper> getBlockByLatestNum(long getNum) {
 
     return dbSource.getlatestValues(getNum)
         .stream().map(bytes -> {
           try {
-            return new BlockCapsule(bytes);
+            return new BlockWrapper(bytes);
           } catch (BadItemException e) {
             e.printStackTrace();
           }
@@ -99,7 +99,7 @@ public class BlockStore extends GscStoreWithRevoking<BlockCapsule> {
   }
 
   @Override
-  public Iterator<Entry<byte[], BlockCapsule>> iterator() {
+  public Iterator<Entry<byte[], BlockWrapper>> iterator() {
     return new BlockIterator(dbSource.iterator());
   }
 
@@ -112,7 +112,7 @@ public class BlockStore extends GscStoreWithRevoking<BlockCapsule> {
   private void deleteIndex(byte[] key) {
     if (Objects.nonNull(indexHelper)) {
       try {
-        BlockCapsule item = get(key);
+        BlockWrapper item = get(key);
         indexHelper.remove(item.getInstance());
       } catch (StoreException e) {
         return;

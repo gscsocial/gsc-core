@@ -4,12 +4,10 @@ import com.google.common.cache.Cache;
 import java.io.File;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.MapUtils;
-import org.gsc.net.node.Item;
 import org.gsc.net.node.NodeDelegate;
 import org.gsc.net.node.NodeDelegateImpl;
 import org.gsc.net.node.NodeImpl;
@@ -22,21 +20,18 @@ import org.gsc.common.application.Application;
 import org.gsc.common.application.ApplicationFactory;
 import org.gsc.common.overlay.client.PeerClient;
 import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.common.overlay.message.Message;
 import org.gsc.common.overlay.server.Channel;
 import org.gsc.common.overlay.server.ChannelManager;
-import org.gsc.common.overlay.server.MessageQueue;
 import org.gsc.common.overlay.server.SyncPool;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.common.utils.ReflectUtils;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.wrapper.BlockCapsule;
+import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.ByteArrayWrapper;
 import org.gsc.db.Manager;
 import org.gsc.net.message.BlockMessage;
-import org.gsc.net.message.MessageTypes;
 import org.gsc.net.message.TransactionMessage;
 import org.gsc.net.peer.PeerConnection;
 import org.gsc.services.RpcApiService;
@@ -81,7 +76,7 @@ public class BroadTest {
 
   private Sha256Hash testBlockBroad() {
     Block block = Block.getDefaultInstance();
-    BlockMessage blockMessage = new BlockMessage(new BlockCapsule(block));
+    BlockMessage blockMessage = new BlockMessage(new BlockWrapper(block));
     node.broadcast(blockMessage);
     ConcurrentHashMap<Sha256Hash, InventoryType> advObjToSpread = ReflectUtils
         .getFieldValue(node, "advObjToSpread");

@@ -7,6 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.overlay.client.DatabaseGrpcClient;
 import org.gsc.core.Constant;
 import org.gsc.core.exception.AccountResourceInsufficientException;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.TransactionInfoWrapper;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.util.StringUtils;
@@ -15,9 +18,6 @@ import org.gsc.common.application.ApplicationFactory;
 import org.gsc.common.overlay.discover.DiscoverServer;
 import org.gsc.common.overlay.discover.node.NodeManager;
 import org.gsc.common.overlay.server.ChannelManager;
-import org.gsc.core.wrapper.BlockCapsule;
-import org.gsc.core.wrapper.TransactionCapsule;
-import org.gsc.core.wrapper.TransactionInfoCapsule;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
@@ -94,19 +94,19 @@ public class SolidityNode {
       if (lastSolidityBlockNum < remoteLastSolidityBlockNum) {
         Block block = databaseGrpcClient.getBlock(lastSolidityBlockNum + 1);
         try {
-          BlockCapsule blockCapsule = new BlockCapsule(block);
-          dbManager.pushBlock(blockCapsule);
-          for (TransactionCapsule trx : blockCapsule.getTransactions()) {
-            TransactionInfoCapsule ret;
+          BlockWrapper blockWrapper = new BlockWrapper(block);
+          dbManager.pushBlock(blockWrapper);
+          for (TransactionWrapper gsc : blockWrapper.getTransactions()) {
+            TransactionInfoWrapper ret;
             try {
-              ret = dbManager.getTransactionHistoryStore().get(trx.getTransactionId().getBytes());
+              ret = dbManager.getTransactionHistoryStore().get(gsc.getTransactionId().getBytes());
             } catch (BadItemException ex) {
               logger.warn("", ex);
               continue;
             }
-            ret.setBlockNumber(blockCapsule.getNum());
-            ret.setBlockTimeStamp(blockCapsule.getTimeStamp());
-            dbManager.getTransactionHistoryStore().put(trx.getTransactionId().getBytes(), ret);
+            ret.setBlockNumber(blockWrapper.getNum());
+            ret.setBlockTimeStamp(blockWrapper.getTimeStamp());
+            dbManager.getTransactionHistoryStore().put(gsc.getTransactionId().getBytes(), ret);
           }
           dbManager.getDynamicPropertiesStore()
               .saveLatestSolidifiedBlockNum(lastSolidityBlockNum + 1);

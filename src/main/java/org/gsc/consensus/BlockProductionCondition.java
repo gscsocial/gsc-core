@@ -1,4 +1,4 @@
-package org.gsc.core.witness;
+package org.gsc.consensus;
 
 public enum  BlockProductionCondition {
   PRODUCED,           // Successfully generated block

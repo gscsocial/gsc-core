@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.wrapper.TransactionCapsule;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.db.GscDatabase;
 import org.gsc.db.common.WrappedByteArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +21,7 @@ import org.gsc.protos.Protocol.Transaction;
 
 @Component
 @Slf4j
-public class TransactionIndex extends AbstractIndex<TransactionCapsule, Transaction> {
+public class TransactionIndex extends AbstractIndex<TransactionWrapper, Transaction> {
 
   public static SimpleAttribute<WrappedByteArray, String> Transaction_ID;
   public static Attribute<WrappedByteArray, String> OWNERS;
@@ -30,7 +30,7 @@ public class TransactionIndex extends AbstractIndex<TransactionCapsule, Transact
 
   @Autowired
   public TransactionIndex(
-      @Qualifier("transactionStore") final GscDatabase<TransactionCapsule> database) {
+      @Qualifier("transactionStore") final GscDatabase<TransactionWrapper> database) {
     super(database);
   }
 
@@ -47,18 +47,18 @@ public class TransactionIndex extends AbstractIndex<TransactionCapsule, Transact
   protected void setAttribute() {
     Transaction_ID =
         attribute("transaction id",
-            bytes -> new TransactionCapsule(getObject(bytes)).getTransactionId().toString());
+            bytes -> new TransactionWrapper(getObject(bytes)).getTransactionId().toString());
     OWNERS =
         attribute(String.class, "owner address",
             bytes -> getObject(bytes).getRawData().getContractList().stream()
-                .map(TransactionCapsule::getOwner)
+                .map(TransactionWrapper::getOwner)
                 .filter(Objects::nonNull)
                 .map(ByteArray::toHexString)
                 .collect(Collectors.toList()));
     TOS =
         attribute(String.class, "to address",
             bytes -> getObject(bytes).getRawData().getContractList().stream()
-                .map(TransactionCapsule::getToAddress)
+                .map(TransactionWrapper::getToAddress)
                 .filter(Objects::nonNull)
                 .map(ByteArray::toHexString)
                 .collect(Collectors.toList()));

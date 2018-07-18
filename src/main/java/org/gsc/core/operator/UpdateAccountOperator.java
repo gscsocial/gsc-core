@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
 import org.gsc.db.AccountIndexStore;
 import org.gsc.db.AccountStore;
@@ -24,7 +24,7 @@ public class UpdateAccountOperator extends AbstractOperator {
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     final AccountUpdateContract accountUpdateContract;
     final long fee = calcFee();
     try {
@@ -38,7 +38,7 @@ public class UpdateAccountOperator extends AbstractOperator {
     byte[] ownerAddress = accountUpdateContract.getOwnerAddress().toByteArray();
     AccountStore accountStore = dbManager.getAccountStore();
     AccountIndexStore accountIndexStore = dbManager.getAccountIndexStore();
-    AccountCapsule account = accountStore.get(ownerAddress);
+    AccountWrapper account = accountStore.get(ownerAddress);
 
     account.setAccountName(accountUpdateContract.getAccountName().toByteArray());
     accountStore.put(ownerAddress, account);
@@ -77,7 +77,7 @@ public class UpdateAccountOperator extends AbstractOperator {
       throw new ContractValidateException("Invalid ownerAddress");
     }
 
-    AccountCapsule account = dbManager.getAccountStore().get(ownerAddress);
+    AccountWrapper account = dbManager.getAccountStore().get(ownerAddress);
     if (account == null) {
       throw new ContractValidateException("Account has not existed");
     }

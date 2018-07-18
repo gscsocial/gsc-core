@@ -4,6 +4,7 @@ import com.google.protobuf.ByteString;
 import java.io.File;
 import java.util.Random;
 
+import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.db.AccountIndexStore;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -13,7 +14,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.protos.Protocol.AccountType;
@@ -32,10 +32,10 @@ public class AccountIndexStoreTest {
   private static final byte[] ACCOUNT_NAME_THREE = randomBytes(6);
   private static final byte[] ACCOUNT_NAME_FOUR = randomBytes(6);
   private static final byte[] ACCOUNT_NAME_FIVE = randomBytes(6);
-  private static AccountCapsule accountCapsule1;
-  private static AccountCapsule accountCapsule2;
-  private static AccountCapsule accountCapsule3;
-  private static AccountCapsule accountCapsule4;
+  private static AccountWrapper accountWrapper1;
+  private static AccountWrapper accountWrapper2;
+  private static AccountWrapper accountWrapper3;
+  private static AccountWrapper accountWrapper4;
 
   static {
     Args.setParam(new String[]{"--output-directory", dbPath},
@@ -53,18 +53,18 @@ public class AccountIndexStoreTest {
   @BeforeClass
   public static void init() {
     accountIndexStore = context.getBean(AccountIndexStore.class);
-    accountCapsule1 = new AccountCapsule(ByteString.copyFrom(ACCOUNT_ADDRESS_ONE),
+    accountWrapper1 = new AccountWrapper(ByteString.copyFrom(ACCOUNT_ADDRESS_ONE),
         ByteString.copyFrom(ACCOUNT_NAME_ONE), AccountType.Normal);
-    accountCapsule2 = new AccountCapsule(ByteString.copyFrom(ACCOUNT_ADDRESS_TWO),
+    accountWrapper2 = new AccountWrapper(ByteString.copyFrom(ACCOUNT_ADDRESS_TWO),
         ByteString.copyFrom(ACCOUNT_NAME_TWO), AccountType.Normal);
-    accountCapsule3 = new AccountCapsule(ByteString.copyFrom(ACCOUNT_ADDRESS_THREE),
+    accountWrapper3 = new AccountWrapper(ByteString.copyFrom(ACCOUNT_ADDRESS_THREE),
         ByteString.copyFrom(ACCOUNT_NAME_THREE), AccountType.Normal);
-    accountCapsule4 = new AccountCapsule(ByteString.copyFrom(ACCOUNT_ADDRESS_FOUR),
+    accountWrapper4 = new AccountWrapper(ByteString.copyFrom(ACCOUNT_ADDRESS_FOUR),
         ByteString.copyFrom(ACCOUNT_NAME_FOUR), AccountType.Normal);
-    accountIndexStore.put(accountCapsule1);
-    accountIndexStore.put(accountCapsule2);
-    accountIndexStore.put(accountCapsule3);
-    accountIndexStore.put(accountCapsule4);
+    accountIndexStore.put(accountWrapper1);
+    accountIndexStore.put(accountWrapper2);
+    accountIndexStore.put(accountWrapper3);
+    accountIndexStore.put(accountWrapper4);
   }
 
   @Test

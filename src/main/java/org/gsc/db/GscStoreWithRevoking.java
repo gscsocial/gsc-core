@@ -3,11 +3,11 @@ package org.gsc.db;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.core.wrapper.ProtoCapsule;
+import org.gsc.core.wrapper.ProtoWrapper;
 import org.gsc.db.AbstractRevokingStore.RevokingTuple;
 
 @Slf4j
-public abstract class GscStoreWithRevoking<T extends ProtoCapsule> extends GscDatabase<T> {
+public abstract class GscStoreWithRevoking<T extends ProtoWrapper> extends GscDatabase<T> {
 
   private RevokingDatabase revokingDatabase;
 

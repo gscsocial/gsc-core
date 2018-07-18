@@ -4,6 +4,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,8 +16,6 @@ import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.TransactionResultCapsule;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
@@ -57,8 +57,8 @@ public class UpdateAccountOperatorTest {
    */
   @Before
   public void createCapsule() {
-    AccountCapsule ownerCapsule =
-        new AccountCapsule(
+    AccountWrapper ownerCapsule =
+        new AccountWrapper(
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)),
             ByteString.EMPTY,
             AccountType.Normal);
@@ -92,16 +92,16 @@ public class UpdateAccountOperatorTest {
    */
   @Test
   public void rightUpdateAccount() {
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     UpdateAccountOperator actuator = new UpdateAccountOperator(
         getContract(ACCOUNT_NAME, OWNER_ADDRESS), dbManager);
     try {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      AccountCapsule accountCapsule = dbManager.getAccountStore()
+      AccountWrapper accountWrapper = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
-      Assert.assertEquals(ACCOUNT_NAME, accountCapsule.getAccountName().toStringUtf8());
+      Assert.assertEquals(ACCOUNT_NAME, accountWrapper.getAccountName().toStringUtf8());
       Assert.assertTrue(true);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
@@ -112,7 +112,7 @@ public class UpdateAccountOperatorTest {
 
   @Test
   public void invalidAddress() {
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     UpdateAccountOperator actuator = new UpdateAccountOperator(
         getContract(ACCOUNT_NAME, OWNER_ADDRESS_INVALIDATE), dbManager);
     try {
@@ -129,7 +129,7 @@ public class UpdateAccountOperatorTest {
 
   @Test
   public void noExitAccount() {
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     UpdateAccountOperator actuator = new UpdateAccountOperator(
         getContract(ACCOUNT_NAME, OWNER_ADDRESS_1), dbManager);
     try {
@@ -149,7 +149,7 @@ public class UpdateAccountOperatorTest {
    * Can update name only one time.
    */
   public void twiceUpdateAccount() {
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     UpdateAccountOperator actuator = new UpdateAccountOperator(
         getContract(ACCOUNT_NAME, OWNER_ADDRESS), dbManager);
     UpdateAccountOperator actuator1 = new UpdateAccountOperator(
@@ -158,9 +158,9 @@ public class UpdateAccountOperatorTest {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      AccountCapsule accountCapsule = dbManager.getAccountStore()
+      AccountWrapper accountWrapper = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
-      Assert.assertEquals(ACCOUNT_NAME, accountCapsule.getAccountName().toStringUtf8());
+      Assert.assertEquals(ACCOUNT_NAME, accountWrapper.getAccountName().toStringUtf8());
       Assert.assertTrue(true);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
@@ -175,9 +175,9 @@ public class UpdateAccountOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("This account name already exist", e.getMessage());
-      AccountCapsule accountCapsule = dbManager.getAccountStore()
+      AccountWrapper accountWrapper = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
-      Assert.assertEquals(ACCOUNT_NAME, accountCapsule.getAccountName().toStringUtf8());
+      Assert.assertEquals(ACCOUNT_NAME, accountWrapper.getAccountName().toStringUtf8());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -185,7 +185,7 @@ public class UpdateAccountOperatorTest {
 
   @Test
   public void nameAlreadyUsed() {
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     UpdateAccountOperator actuator = new UpdateAccountOperator(
         getContract(ACCOUNT_NAME, OWNER_ADDRESS), dbManager);
     UpdateAccountOperator actuator1 = new UpdateAccountOperator(
@@ -194,9 +194,9 @@ public class UpdateAccountOperatorTest {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      AccountCapsule accountCapsule = dbManager.getAccountStore()
+      AccountWrapper accountWrapper = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
-      Assert.assertEquals(ACCOUNT_NAME, accountCapsule.getAccountName().toStringUtf8());
+      Assert.assertEquals(ACCOUNT_NAME, accountWrapper.getAccountName().toStringUtf8());
       Assert.assertTrue(true);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
@@ -204,8 +204,8 @@ public class UpdateAccountOperatorTest {
       Assert.assertFalse(e instanceof ContractExeException);
     }
 
-    AccountCapsule ownerCapsule =
-        new AccountCapsule(
+    AccountWrapper ownerCapsule =
+        new AccountWrapper(
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_1)),
             ByteString.EMPTY,
             AccountType.Normal);
@@ -218,9 +218,9 @@ public class UpdateAccountOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("This name has existed", e.getMessage());
-      AccountCapsule accountCapsule = dbManager.getAccountStore()
+      AccountWrapper accountWrapper = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
-      Assert.assertEquals(ACCOUNT_NAME, accountCapsule.getAccountName().toStringUtf8());
+      Assert.assertEquals(ACCOUNT_NAME, accountWrapper.getAccountName().toStringUtf8());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -231,7 +231,7 @@ public class UpdateAccountOperatorTest {
    * Account name need 8 - 32 bytes.
    */
   public void invalidName() {
-    TransactionResultCapsule ret = new TransactionResultCapsule();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
     //Just OK 32 bytes is OK
     try {
       UpdateAccountOperator actuator = new UpdateAccountOperator(
@@ -239,10 +239,10 @@ public class UpdateAccountOperatorTest {
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      AccountCapsule accountCapsule = dbManager.getAccountStore()
+      AccountWrapper accountWrapper = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
       Assert.assertEquals("testname0123456789abcdefghijgklm",
-          accountCapsule.getAccountName().toStringUtf8());
+          accountWrapper.getAccountName().toStringUtf8());
       Assert.assertTrue(true);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
@@ -250,20 +250,20 @@ public class UpdateAccountOperatorTest {
       Assert.assertFalse(e instanceof ContractExeException);
     }
     //8 bytes is OK
-    AccountCapsule accountCapsule = dbManager.getAccountStore()
+    AccountWrapper accountWrapper = dbManager.getAccountStore()
         .get(ByteArray.fromHexString(OWNER_ADDRESS));
-    accountCapsule.setAccountName(ByteString.EMPTY.toByteArray());
-    dbManager.getAccountStore().put(accountCapsule.createDbKey(), accountCapsule);
+    accountWrapper.setAccountName(ByteString.EMPTY.toByteArray());
+    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     try {
       UpdateAccountOperator actuator = new UpdateAccountOperator(
           getContract("testname", OWNER_ADDRESS), dbManager);
       actuator.validate();
       actuator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      accountCapsule = dbManager.getAccountStore()
+      accountWrapper = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
       Assert.assertEquals("testname",
-          accountCapsule.getAccountName().toStringUtf8());
+          accountWrapper.getAccountName().toStringUtf8());
       Assert.assertTrue(true);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);

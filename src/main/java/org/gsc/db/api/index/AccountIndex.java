@@ -4,7 +4,7 @@ import com.googlecode.cqengine.attribute.SimpleAttribute;
 import com.googlecode.cqengine.persistence.disk.DiskPersistence;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.wrapper.AccountCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.db.GscDatabase;
 import org.gsc.db.common.WrappedByteArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +18,12 @@ import static com.googlecode.cqengine.query.QueryFactory.attribute;
 
 @Component
 @Slf4j
-public class AccountIndex extends AbstractIndex<AccountCapsule, Account> {
+public class AccountIndex extends AbstractIndex<AccountWrapper, Account> {
 
   public static SimpleAttribute<WrappedByteArray, String> Account_ADDRESS;
 
   @Autowired
-  public AccountIndex(@Qualifier("accountStore") final GscDatabase<AccountCapsule> database) {
+  public AccountIndex(@Qualifier("accountStore") final GscDatabase<AccountWrapper> database) {
     super(database);
   }
 

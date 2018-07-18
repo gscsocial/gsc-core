@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.TransactionResultCapsule;
-import org.gsc.core.wrapper.WitnessCapsule;
+import org.gsc.core.wrapper.TransactionResultWrapper;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
 import org.gsc.db.Manager;
 import org.gsc.protos.Contract.WitnessUpdateContract;
@@ -22,14 +22,14 @@ public class WitnessUpdateOperator extends AbstractOperator {
   }
 
   private void updateWitness(final WitnessUpdateContract contract) {
-    WitnessCapsule witnessCapsule = this.dbManager.getWitnessStore()
+    WitnessWrapper witnessWrapper = this.dbManager.getWitnessStore()
         .get(contract.getOwnerAddress().toByteArray());
-    witnessCapsule.setUrl(contract.getUpdateUrl().toStringUtf8());
-    this.dbManager.getWitnessStore().put(witnessCapsule.createDbKey(), witnessCapsule);
+    witnessWrapper.setUrl(contract.getUpdateUrl().toStringUtf8());
+    this.dbManager.getWitnessStore().put(witnessWrapper.createDbKey(), witnessWrapper);
   }
 
   @Override
-  public boolean execute(TransactionResultCapsule ret) throws ContractExeException {
+  public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     try {
       final WitnessUpdateContract witnessUpdateContract = this.contract

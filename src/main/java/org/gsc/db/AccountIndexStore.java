@@ -3,40 +3,40 @@ package org.gsc.db;
 import com.google.protobuf.ByteString;
 import java.util.Objects;
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.core.wrapper.AccountCapsule;
-import org.gsc.core.wrapper.BytesCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.BytesWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AccountIndexStore extends GscStoreWithRevoking<BytesCapsule> {
+public class AccountIndexStore extends GscStoreWithRevoking<BytesWrapper> {
 
   @Autowired
   public AccountIndexStore(@Value("account-index") String dbName) {
     super(dbName);
   }
 
-  public void put(AccountCapsule accountCapsule) {
-    put(accountCapsule.getAccountName().toByteArray(),
-        new BytesCapsule(accountCapsule.getAddress().toByteArray()));
+  public void put(AccountWrapper accountWrapper) {
+    put(accountWrapper.getAccountName().toByteArray(),
+        new BytesWrapper(accountWrapper.getAddress().toByteArray()));
   }
 
   public byte[] get(ByteString name) {
-    BytesCapsule bytesCapsule = get(name.toByteArray());
-    if (Objects.nonNull(bytesCapsule)) {
-      return bytesCapsule.getData();
+    BytesWrapper bytesWrapper = get(name.toByteArray());
+    if (Objects.nonNull(bytesWrapper)) {
+      return bytesWrapper.getData();
     }
     return null;
   }
 
   @Override
-  public BytesCapsule get(byte[] key) {
+  public BytesWrapper get(byte[] key) {
     byte[] value = dbSource.getData(key);
     if (ArrayUtils.isEmpty(value)) {
       return null;
     }
-    return new BytesCapsule(value);
+    return new BytesWrapper(value);
   }
 
   @Override

@@ -13,7 +13,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
-import org.gsc.core.wrapper.AccountCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.protos.Protocol.AccountType;
@@ -51,10 +51,10 @@ public class AccountStoreTest {
   @BeforeClass
   public static void init() {
     accountStore = context.getBean(AccountStore.class);
-    AccountCapsule accountCapsule = new AccountCapsule(ByteString.copyFrom(address),
+    AccountWrapper accountWrapper = new AccountWrapper(ByteString.copyFrom(address),
         ByteString.copyFrom(accountName),
         AccountType.forNumber(1));
-    accountStore.put(data, accountCapsule);
+    accountStore.put(data, accountWrapper);
   }
 
   @Test

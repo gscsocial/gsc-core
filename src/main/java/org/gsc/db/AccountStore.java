@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.core.wrapper.AccountCapsule;
+import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.db.common.iterator.AccountIterator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +18,7 @@ import org.gsc.core.Wallet;
 
 @Slf4j
 @Component
-public class AccountStore extends GscStoreWithRevoking<AccountCapsule> {
+public class AccountStore extends GscStoreWithRevoking<AccountWrapper> {
 
   private static Map<String, byte[]> assertsAddress = new HashMap<>(); // key = name , value = address
 
@@ -28,9 +28,9 @@ public class AccountStore extends GscStoreWithRevoking<AccountCapsule> {
   }
 
   @Override
-  public AccountCapsule get(byte[] key) {
+  public AccountWrapper get(byte[] key) {
     byte[] value = dbSource.getData(key);
-    return ArrayUtils.isEmpty(value) ? null : new AccountCapsule(value);
+    return ArrayUtils.isEmpty(value) ? null : new AccountWrapper(value);
   }
 
   /**
@@ -45,7 +45,7 @@ public class AccountStore extends GscStoreWithRevoking<AccountCapsule> {
   }
 
   @Override
-  public void put(byte[] key, AccountCapsule item) {
+  public void put(byte[] key, AccountWrapper item) {
     super.put(key, item);
     if (Objects.nonNull(indexHelper)) {
       indexHelper.update(item.getInstance());
@@ -55,27 +55,27 @@ public class AccountStore extends GscStoreWithRevoking<AccountCapsule> {
   /**
    * Max TRX account.
    */
-//  public AccountCapsule getSun() {
+//  public AccountWrapper getSun() {
 //    byte[] data = dbSource.getData(assertsAddress.get("Sun"));
-//    AccountCapsule accountCapsule = new AccountCapsule(data);
+//    AccountWrapper accountCapsule = new AccountWrapper(data);
 //    return accountCapsule;
 //  }
 
   /**
    * Min TRX account.
    */
-  public AccountCapsule getBlackhole() {
+  public AccountWrapper getBlackhole() {
     //byte[] data = dbSource.getData(assertsAddress.get("Blackhole"));
-    AccountCapsule accountCapsule = new AccountCapsule("TSJD5rdu6wZXP7F2m3a3tn8Co3JcMjtBip".getBytes());
-    return accountCapsule;
+    AccountWrapper accountWrapper = new AccountWrapper("TSJD5rdu6wZXP7F2m3a3tn8Co3JcMjtBip".getBytes());
+    return accountWrapper;
   }
 
   /**
    * Get foundation account info.
    */
-//  public AccountCapsule getZion() {
+//  public AccountWrapper getZion() {
 //    byte[] data = dbSource.getData(assertsAddress.get("Zion"));
-//    AccountCapsule accountCapsule = new AccountCapsule(data);
+//    AccountWrapper accountCapsule = new AccountWrapper(data);
 //    return accountCapsule;
 //  }
 
@@ -90,7 +90,7 @@ public class AccountStore extends GscStoreWithRevoking<AccountCapsule> {
   }
 
   @Override
-  public Iterator<Entry<byte[], AccountCapsule>> iterator() {
+  public Iterator<Entry<byte[], AccountWrapper>> iterator() {
     return new AccountIterator(dbSource.iterator());
   }
 
@@ -102,7 +102,7 @@ public class AccountStore extends GscStoreWithRevoking<AccountCapsule> {
 
   private void deleteIndex(byte[] key) {
     if (Objects.nonNull(indexHelper)) {
-      AccountCapsule item = get(key);
+      AccountWrapper item = get(key);
       if (Objects.nonNull(item)) {
         indexHelper.remove(item.getInstance());
       }
