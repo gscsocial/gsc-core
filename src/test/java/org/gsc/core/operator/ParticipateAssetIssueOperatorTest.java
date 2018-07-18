@@ -657,7 +657,7 @@ public class ParticipateAssetIssueOperatorTest {
   public void notEnoughTrxTest() {
     initAssetIssue(dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() - 1000,
         dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() + 1000);
-    // First, reduce the owner trx balance. Else can't complete this test case.
+    // First, reduce the owner gsc balance. Else can't complete this test case.
     AccountWrapper owner = dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
     owner.setBalance(100);
     dbManager.getAccountStore().put(owner.getAddress().toByteArray(), owner);
@@ -789,7 +789,7 @@ public class ParticipateAssetIssueOperatorTest {
   public void multiplyOverflowTest() {
     initAssetIssue(dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() - 1000,
         dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() + 1000);
-    // First, increase the owner trx balance. Else can't complete this test case.
+    // First, increase the owner gsc balance. Else can't complete this test case.
     AccountWrapper owner = dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
     owner.setBalance(100000000000000L);
     dbManager.getAccountStore().put(owner.getAddress().toByteArray(), owner);

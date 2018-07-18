@@ -809,7 +809,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesWrapper> {
     );
   }
 
-  //The unit is trx
+  //The unit is GSC
   public void addTotalNetWeight(long amount) {
     long totalNetWeight = getTotalNetWeight();
     totalNetWeight += amount;

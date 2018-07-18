@@ -115,7 +115,7 @@ public class VoteWitnessOperator extends AbstractOperator {
 
       long gscPower = accountWrapper.getGscPower();
 
-      sum = LongMath.checkedMultiply(sum, 1000000L); //trx -> drop. The vote count is based on TRX
+      sum = LongMath.checkedMultiply(sum, 1000000L); //gsc -> drop. The vote count is based on GSC
       if (sum > gscPower) {
         throw new ContractValidateException(
             "The total number of votes[" + sum + "] is greater than the gscPower[" + gscPower
