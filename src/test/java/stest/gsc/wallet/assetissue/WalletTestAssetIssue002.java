@@ -197,7 +197,7 @@ public class WalletTestAssetIssue002 {
       builder.setOwnerAddress(ByteString.copyFrom(address));
       builder.setName(ByteString.copyFrom(name.getBytes()));
       builder.setTotalSupply(totalSupply);
-      builder.setTrxNum(trxNum);
+      builder.setGscNum(trxNum);
       builder.setNum(icoNum);
       builder.setStartTime(startTime);
       builder.setEndTime(endTime);
@@ -213,7 +213,7 @@ public class WalletTestAssetIssue002 {
       builder.addFrozenSupply(0, frozenBuilder);
 
       Transaction transaction = blockingStubFull.createAssetIssue(builder.build());
-      if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+      if (transaction == null || transaction.getRawData().getContract() == null) {
         return false;
       }
       transaction = signTransaction(ecKey, transaction);
@@ -306,7 +306,7 @@ public class WalletTestAssetIssue002 {
 
     Contract.TransferAssetContract contract = builder.build();
     Transaction transaction = blockingStubFull.transferAsset(contract);
-    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+    if (transaction == null || transaction.getRawData().getContract() == null) {
       logger.info("transaction == null || transaction.getRawData().getContractCount() == 0");
       return false;
     }

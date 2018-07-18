@@ -269,7 +269,7 @@ public class WalletTestAssetIssue003 {
       builder.setOwnerAddress(ByteString.copyFrom(address));
       builder.setName(ByteString.copyFrom(name.getBytes()));
       builder.setTotalSupply(totalSupply);
-      builder.setTrxNum(trxNum);
+      builder.setGscNum(trxNum);
       builder.setNum(icoNum);
       builder.setStartTime(startTime);
       builder.setEndTime(endTime);
@@ -286,10 +286,10 @@ public class WalletTestAssetIssue003 {
       builder.addFrozenSupply(0, frozenBuilder);
 
       Transaction transaction = blockingStubFull.createAssetIssue(builder.build());
-      if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-        logger.info("transaction == null");
-        return false;
-      }
+//      if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+//        logger.info("transaction == null");
+//        return false;
+//      }
       transaction = signTransaction(ecKey, transaction);
       Return response = blockingStubFull.broadcastTransaction(transaction);
       if (response.getResult() == false) {
@@ -373,9 +373,9 @@ public class WalletTestAssetIssue003 {
 
     Contract.TransferAssetContract contract = builder.build();
     Transaction transaction = blockingStubFull.transferAsset(contract);
-    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-      return false;
-    }
+//    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+//      return false;
+//    }
     transaction = signTransaction(ecKey, transaction);
     Return response = blockingStubFull.broadcastTransaction(transaction);
     if (response.getResult() == false) {
@@ -409,9 +409,9 @@ public class WalletTestAssetIssue003 {
 
     Transaction transaction = blockingStubFull.unfreezeAsset(contract);
 
-    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-      return false;
-    }
+//    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+//      return false;
+//    }
 
     transaction = TransactionUtils.setTimestamp(transaction);
     transaction = TransactionUtils.sign(transaction, ecKey);

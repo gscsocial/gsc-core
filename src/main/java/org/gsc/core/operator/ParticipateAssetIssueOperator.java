@@ -62,7 +62,7 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
           this.dbManager.getAssetIssueStore()
               .get(participateAssetIssueContract.getAssetName().toByteArray());
       long exchangeAmount = Math.multiplyExact(cost, assetIssueWrapper.getNum());
-      exchangeAmount = Math.floorDiv(exchangeAmount, assetIssueWrapper.getTrxNum());
+      exchangeAmount = Math.floorDiv(exchangeAmount, assetIssueWrapper.getGscNum());
       ownerAccount.addAssetAmount(assetIssueWrapper.getName(), exchangeAmount);
 
       //add to to_address
@@ -76,7 +76,7 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
       //write to db
       dbManager.getAccountStore().put(ownerAddress, ownerAccount);
       dbManager.getAccountStore().put(toAddress, toAccount);
-      ret.setStatus(fee, Protocol.Transaction.Result.code.SUCESS);
+      ret.setStatus(fee, Protocol.Transaction.Result.code.SUCCESS);
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
       ret.setStatus(fee, code.FAILED);
@@ -164,10 +164,10 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
         throw new ContractValidateException("No longer valid period!");
       }
 
-      int trxNum = assetIssueWrapper.getTrxNum();
+      int gscNum = assetIssueWrapper.getGscNum();
       int num = assetIssueWrapper.getNum();
       long exchangeAmount = Math.multiplyExact(amount, num);
-      exchangeAmount = Math.floorDiv(exchangeAmount, trxNum);
+      exchangeAmount = Math.floorDiv(exchangeAmount, gscNum);
       if (exchangeAmount <= 0) {
         throw new ContractValidateException("Can not process the exchange!");
       }

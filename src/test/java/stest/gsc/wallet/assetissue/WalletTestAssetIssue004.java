@@ -103,7 +103,7 @@ public class WalletTestAssetIssue004 {
       if (queryAssetIssueByAccount.get().getAssetIssue(j).getTotalSupply() == totalSupply) {
         Assert.assertTrue(queryAssetIssueByAccount.isPresent());
         //Assert.assertTrue(queryAssetIssueByAccount.get().getAssetIssue(j).getDecayRatio() > 0);
-        Assert.assertTrue(queryAssetIssueByAccount.get().getAssetIssue(j).getTrxNum() > 0);
+        Assert.assertTrue(queryAssetIssueByAccount.get().getAssetIssue(j).getGscNum() > 0);
         Assert.assertTrue(queryAssetIssueByAccount.get().getAssetIssue(j).getVoteScore() > 0);
         Assert.assertFalse(queryAssetIssueByAccount.get().getAssetIssue(j).getUrl().isEmpty());
         logger.info("TestGetAssetIssueByAccount ok!");
@@ -155,7 +155,7 @@ public class WalletTestAssetIssue004 {
       builder.setOwnerAddress(ByteString.copyFrom(address));
       builder.setName(ByteString.copyFrom(name.getBytes()));
       builder.setTotalSupply(totalSupply);
-      builder.setTrxNum(trxNum);
+      builder.setGscNum(trxNum);
       builder.setNum(icoNum);
       builder.setStartTime(startTime);
       builder.setEndTime(endTime);
@@ -172,9 +172,9 @@ public class WalletTestAssetIssue004 {
       builder.addFrozenSupply(0, frozenBuilder);
 
       Transaction transaction = blockingStubFull.createAssetIssue(builder.build());
-      if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-        return false;
-      }
+//      if (transaction == null || transaction.getRawData().getContract().getContractCount() == 0) {
+//        return false;
+//      }
       transaction = signTransaction(ecKey, transaction);
       Return response = blockingStubFull.broadcastTransaction(transaction);
       if (response.getResult() == false) {
@@ -257,9 +257,9 @@ public class WalletTestAssetIssue004 {
 
     Contract.TransferAssetContract contract = builder.build();
     Transaction transaction = blockingStubFull.transferAsset(contract);
-    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-      return false;
-    }
+//    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+//      return false;
+//    }
     transaction = signTransaction(ecKey, transaction);
     Return response = blockingStubFull.broadcastTransaction(transaction);
     if (response.getResult() == false) {

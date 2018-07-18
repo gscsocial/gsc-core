@@ -158,7 +158,7 @@ public class ParticipateAssetIssueOperatorTest {
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(TO_ADDRESS)))
             .setName(ByteString.copyFrom(ByteArray.fromString(ASSET_NAME)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setTrxNum(GSC_NUM)
+            .setGscNum(GSC_NUM)
             .setNum(NUM)
             .setStartTime(startTimestmp)
             .setEndTime(endTimestmp)
@@ -181,7 +181,7 @@ public class ParticipateAssetIssueOperatorTest {
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(TO_ADDRESS)))
             .setName(ByteString.copyFrom(ByteArray.fromString(assetName)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setTrxNum(GSC_NUM)
+            .setGscNum(GSC_NUM)
             .setNum(NUM)
             .setStartTime(startTimestmp)
             .setEndTime(endTimestmp)
@@ -204,7 +204,7 @@ public class ParticipateAssetIssueOperatorTest {
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(owner)))
             .setName(ByteString.copyFrom(ByteArray.fromString(ASSET_NAME)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setTrxNum(GSC_NUM)
+            .setGscNum(GSC_NUM)
             .setNum(NUM)
             .setStartTime(startTimestmp)
             .setEndTime(endTimestmp)
@@ -231,7 +231,7 @@ public class ParticipateAssetIssueOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -610,7 +610,7 @@ public class ParticipateAssetIssueOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -635,7 +635,7 @@ public class ParticipateAssetIssueOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -837,7 +837,7 @@ public class ParticipateAssetIssueOperatorTest {
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(TO_ADDRESS)))
             .setName(ByteString.copyFrom(ByteArray.fromString(ASSET_NAME)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setTrxNum(100)
+            .setGscNum(100)
             .setNum(1)
             .setStartTime(dbManager.getHeadBlockTimeStamp() - 10000)
             .setEndTime(dbManager.getHeadBlockTimeStamp() + 11000000)

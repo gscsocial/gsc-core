@@ -68,8 +68,8 @@ public class AssetIssueWrapper implements ProtoWrapper<AssetIssueContract> {
     return this.assetIssueContract.getNum();
   }
 
-  public int getTrxNum() {
-    return this.assetIssueContract.getTrxNum();
+  public int getGscNum() {
+    return this.assetIssueContract.getGscNum();
   }
 
   public long getStartTime() {

@@ -110,7 +110,7 @@ public class TransferAssetOperatorTest {
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)))
             .setName(ByteString.copyFrom(ByteArray.fromString(ASSET_NAME)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setTrxNum(GSC_NUM)
+            .setGscNum(GSC_NUM)
             .setNum(NUM)
             .setStartTime(START_TIME)
             .setEndTime(END_TIME)
@@ -135,7 +135,7 @@ public class TransferAssetOperatorTest {
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)))
             .setName(ByteString.copyFrom(ByteArray.fromString(assetName)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setTrxNum(GSC_NUM)
+            .setGscNum(GSC_NUM)
             .setNum(NUM)
             .setStartTime(START_TIME)
             .setEndTime(END_TIME)
@@ -199,7 +199,7 @@ public class TransferAssetOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -225,7 +225,7 @@ public class TransferAssetOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -258,7 +258,7 @@ public class TransferAssetOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("Owner no asset!", e.getMessage());
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
       owner = dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
@@ -283,7 +283,7 @@ public class TransferAssetOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("assetBalance is not sufficient.".equals(e.getMessage()));
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -306,7 +306,7 @@ public class TransferAssetOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("Amount must greater than 0.".equals(e.getMessage()));
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -329,7 +329,7 @@ public class TransferAssetOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("Amount must greater than 0.".equals(e.getMessage()));
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS.getNumber());
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -353,7 +353,7 @@ public class TransferAssetOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("No asset !".equals(e.getMessage()));
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -520,7 +520,7 @@ public class TransferAssetOperatorTest {
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(ownerAsset_ADDRESS)))
             .setName(ByteString.copyFrom(ByteArray.fromString(ownerASSET_NAME)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setTrxNum(GSC_NUM)
+            .setGscNum(GSC_NUM)
             .setNum(NUM)
             .setStartTime(START_TIME)
             .setEndTime(END_TIME)

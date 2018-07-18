@@ -108,7 +108,7 @@ public class WalletTestAssetIssue009 {
     Assert.assertFalse(assetIssueByName.getUrl().isEmpty());
     Assert.assertFalse(assetIssueByName.getDescription().isEmpty());
     Assert.assertTrue(assetIssueByName.getTotalSupply() > 0);
-    Assert.assertTrue(assetIssueByName.getTrxNum() > 0);
+    Assert.assertTrue(assetIssueByName.getGscNum() > 0);
 
     logger.info("TestGetAssetIssueByNameFromSolidity");
   }*/
