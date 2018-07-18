@@ -49,7 +49,7 @@ public class WithdrawBalanceOperator extends AbstractOperator {
         .setLatestWithdrawTime(now)
         .build());
     dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
-    ret.setStatus(fee, code.SUCESS);
+    ret.setStatus(fee, code.SUCCESS);
 
     return true;
   }

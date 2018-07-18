@@ -6,7 +6,6 @@ package protocol;
 option java_package = "org.gsc.protos"; //Specify the name of the package that generated the Java file
 option java_outer_classname = "Discover"; //Specify the class name of the generated Java file
 
-
 message Endpoint {
   bytes address = 1;
   int32 port = 2;
@@ -14,24 +13,14 @@ message Endpoint {
 }
 
 message PingMessage {
-  Endpoint from = 1;
-  Endpoint to = 2;
-  int32 version = 3;
-  int64 timestamp = 4;
-  ////
-  int64 longitude = 5;
-  int64 latitude = 6;
-  int64 GKadFactor = 7;
+  int32 version = 1;
+  Endpoint from = 2;
+  Endpoint to = 3;
 }
 
 message PongMessage {
-  Endpoint from = 1;
-  int32 echo = 2;
-  int64 timestamp = 3;
-  ////
-  int64 longitude = 5;
-  int64 latitude = 6;
-  int64 GKadFactor = 7;
+  int32 echo = 1;
+  Endpoint from = 2;
 }
 
 message FindNeighbours {

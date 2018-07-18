@@ -41,7 +41,7 @@ public class TransferOperator extends AbstractOperator {
         dbManager.getAccountStore().put(toAddress, toAccount);
       }
       dbManager.adjustBalance(ownerAddress, -fee);
-      ret.setStatus(fee, code.SUCESS);
+      ret.setStatus(fee, code.SUCCESS);
       dbManager.adjustBalance(ownerAddress, -amount);
       dbManager.adjustBalance(toAddress, amount);
     } catch (BalanceInsufficientException e) {

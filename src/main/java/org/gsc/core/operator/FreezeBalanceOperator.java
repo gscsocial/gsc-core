@@ -66,7 +66,7 @@ public class FreezeBalanceOperator extends AbstractOperator {
     dbManager.getDynamicPropertiesStore()
         .addTotalNetWeight(freezeBalanceContract.getFrozenBalance() / 1000_000L);
 
-    ret.setStatus(fee, code.SUCESS);
+    ret.setStatus(fee, code.SUCCESS);
 
     return true;
   }

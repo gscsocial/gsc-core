@@ -212,7 +212,7 @@ public class WallettestP0002 {
       builder.addFrozenSupply(0, frozenBuilder);
 
       Protocol.Transaction transaction = blockingStubFull.createAssetIssue(builder.build());
-      if (transaction == null || transaction.getRawData().getContract() == null) {
+      if (transaction == null || transaction.getRawData().getContractCount() == 0) {
         return false;
       }
       transaction = signTransaction(ecKey, transaction);

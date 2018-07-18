@@ -72,7 +72,7 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
     dbManager.getVotesStore().put(ownerAddress, votesWrapper);
     dbManager.getDynamicPropertiesStore().addTotalNetWeight(-unfreezeBalance / 1000_000L);
 
-    ret.setStatus(fee, code.SUCESS);
+    ret.setStatus(fee, code.SUCCESS);
 
     return true;
   }

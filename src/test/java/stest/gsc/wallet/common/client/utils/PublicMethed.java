@@ -33,7 +33,7 @@ public class PublicMethed {
   //private WalletSolidityGrpc.WalletSolidityBlockingStub blockingStubSolidity = null;
 
   public static Boolean createAssetIssue(byte[] address, String name, Long totalSupply,
-      Integer gscNum, Integer icoNum, Long startTime, Long endTime, Integer voteScore,
+      Integer trxNum, Integer icoNum, Long startTime, Long endTime, Integer voteScore,
       String description, String url, Long freeAssetNetLimit, Long publicFreeAssetNetLimit,
       Long fronzenAmount, Long frozenDay, String priKey,
       WalletGrpc.WalletBlockingStub blockingStubFull) {
@@ -52,7 +52,7 @@ public class PublicMethed {
       builder.setOwnerAddress(ByteString.copyFrom(address));
       builder.setName(ByteString.copyFrom(name.getBytes()));
       builder.setTotalSupply(totalSupply);
-      builder.setGscNum(gscNum);
+      builder.setGscNum(trxNum);
       builder.setNum(icoNum);
       builder.setStartTime(startTime);
       builder.setEndTime(endTime);
@@ -70,7 +70,7 @@ public class PublicMethed {
       builder.addFrozenSupply(0, frozenBuilder);
 
       Protocol.Transaction transaction = blockingStubFull.createAssetIssue(builder.build());
-      if (transaction == null || transaction.getRawData().getContract() == null) {
+      if (transaction == null || transaction.getRawData().getContractCount() == 0) {
         logger.info("transaction == null");
         return false;
       }
@@ -240,7 +240,7 @@ public class PublicMethed {
     Contract.FreezeBalanceContract contract = builder.build();
     Protocol.Transaction transaction = blockingStubFull.freezeBalance(contract);
 
-    if (transaction == null || transaction.getRawData().getContract() == null) {
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
       logger.info("transaction = null");
       return false;
     }
@@ -294,7 +294,7 @@ public class PublicMethed {
 
     Contract.TransferContract contract = builder.build();
     Protocol.Transaction transaction = blockingStubFull.createTransaction(contract);
-    if (transaction == null || transaction.getRawData().getContract() == null) {
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
       return false;
     }
     transaction = signTransaction(ecKey, transaction);
@@ -330,7 +330,7 @@ public class PublicMethed {
         = builder.build();
     Protocol.Transaction transaction = blockingStubFull.updateAsset(contract);
 
-    if (transaction == null || transaction.getRawData().getContract() == null) {
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
       return false;
     }
 
@@ -367,8 +367,8 @@ public class PublicMethed {
 
     Contract.TransferAssetContract contract = builder.build();
     Protocol.Transaction transaction = blockingStubFull.transferAsset(contract);
-    if (transaction == null || transaction.getRawData().getContract() == null) {
-      logger.info("transaction == null || transaction.getRawData().getContract() == null");
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+      logger.info("transaction == null || transaction.getRawData().getContractCount() == 0");
       return false;
     }
     transaction = signTransaction(ecKey, transaction);
@@ -404,7 +404,7 @@ public class PublicMethed {
     Contract.AccountUpdateContract contract = builder.build();
     Protocol.Transaction transaction = blockingStubFull.updateAccount(contract);
 
-    if (transaction == null || transaction.getRawData().getContract() == null) {
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
       logger.info("Please check!!! transaction == null");
       return false;
     }
@@ -532,7 +532,7 @@ public class PublicMethed {
     builder.setAccountAddress(ByteString.copyFrom(newAddress));
     Contract.AccountCreateContract contract = builder.build();
     Transaction transaction = blockingStubFull.createAccount(contract);
-    if (transaction == null || transaction.getRawData().getContract() == null) {
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
       logger.info("transaction == null");
     }
     transaction = signTransaction(ecKey, transaction);

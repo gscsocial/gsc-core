@@ -174,7 +174,7 @@ public class WalletTestAssetIssue001 {
       builder.setFreeAssetNetLimit(20000);
       builder.setPublicFreeAssetNetLimit(20000);
       Transaction transaction = blockingStubFull.createAssetIssue(builder.build());
-      if (transaction == null || transaction.getRawData().getContract() == null) {
+      if (transaction == null || transaction.getRawData().getContractCount() == 0) {
         logger.info("transaction == null");
         return false;
       }
@@ -261,8 +261,8 @@ public class WalletTestAssetIssue001 {
 
     Contract.TransferAssetContract contract = builder.build();
     Transaction transaction = blockingStubFull.transferAsset(contract);
-    if (transaction == null || transaction.getRawData().getContract() == null) {
-      logger.info("transaction == null || transaction.getRawData().getContract() == null");
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+      logger.info("transaction == null || transaction.getRawData().getContractCount() == 0");
       return false;
     }
     transaction = signTransaction(ecKey, transaction);
@@ -299,7 +299,7 @@ public class WalletTestAssetIssue001 {
 
     Transaction transaction = blockingStubFull.unfreezeAsset(contract);
 
-    if (transaction == null || transaction.getRawData().getContract() == null) {
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
       return false;
     }
 

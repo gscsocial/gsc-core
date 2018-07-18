@@ -224,7 +224,7 @@ public class WalletTestAccount003 {
     builder.setUrl(ByteString.copyFrom(url));
     Contract.WitnessCreateContract contract = builder.build();
     Protocol.Transaction transaction = blockingStubFull.createWitness(contract);
-    if (transaction == null || transaction.getRawData().getContract() == null) {
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
       return false;
     }
     transaction = signTransaction(ecKey, transaction);
@@ -257,7 +257,7 @@ public class WalletTestAccount003 {
 
     Contract.TransferContract contract = builder.build();
     Protocol.Transaction transaction = blockingStubFull.createTransaction(contract);
-    if (transaction == null || transaction.getRawData().getContract() == null) {
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
       logger.info("transaction == null");
       return false;
     }
@@ -271,7 +271,7 @@ public class WalletTestAccount003 {
     }
   }
 
-  public Boolean createAssetIssue(byte[] address, String name, Long totalSupply, Integer gscNum,
+  public Boolean createAssetIssue(byte[] address, String name, Long totalSupply, Integer trxNum,
       Integer icoNum, Long startTime, Long endTime,
       Integer voteScore, String description, String url, String priKey) {
     ECKey temKey = null;
@@ -288,7 +288,7 @@ public class WalletTestAccount003 {
       builder.setOwnerAddress(ByteString.copyFrom(address));
       builder.setName(ByteString.copyFrom(name.getBytes()));
       builder.setTotalSupply(TotalSupply);
-      builder.setGscNum(gscNum);
+      builder.setGscNum(trxNum);
       builder.setNum(icoNum);
       builder.setStartTime(startTime);
       builder.setEndTime(endTime);
@@ -297,7 +297,7 @@ public class WalletTestAccount003 {
       builder.setUrl(ByteString.copyFrom(url.getBytes()));
 
       Protocol.Transaction transaction = blockingStubFull.createAssetIssue(builder.build());
-      if (transaction == null || transaction.getRawData().getContract() == null) {
+      if (transaction == null || transaction.getRawData().getContractCount() == 0) {
         logger.info("Please check!!! transaction == null");
         return false;
       }
@@ -399,7 +399,7 @@ public class WalletTestAccount003 {
     Contract.AccountUpdateContract contract = builder.build();
     Protocol.Transaction transaction = blockingStubFull.updateAccount(contract);
 
-    if (transaction == null || transaction.getRawData().getContract() == null) {
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
       logger.info("Please check!!! transaction == null");
       return false;
     }
@@ -437,7 +437,7 @@ public class WalletTestAccount003 {
 
     Protocol.Transaction transaction = blockingStubFull.unfreezeBalance(contract);
 
-    if (transaction == null || transaction.getRawData().getContract() == null) {
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
       return false;
     }
 
@@ -480,7 +480,7 @@ public class WalletTestAccount003 {
     Contract.VoteWitnessContract contract = builder.build();
 
     Protocol.Transaction transaction = blockingStubFull.voteWitnessAccount(contract);
-    if (transaction == null || transaction.getRawData().getContract() == null) {
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
       logger.info("transaction == null");
       return false;
     }
@@ -519,7 +519,7 @@ public class WalletTestAccount003 {
     Contract.FreezeBalanceContract contract = builder.build();
     Protocol.Transaction transaction = blockingStubFull.freezeBalance(contract);
 
-    if (transaction == null || transaction.getRawData().getContract() == null) {
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
       return false;
     }
 

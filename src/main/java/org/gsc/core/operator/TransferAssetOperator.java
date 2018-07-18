@@ -68,7 +68,7 @@ public class TransferAssetOperator extends AbstractOperator {
       toAccountWrapper.addAssetAmount(assetName, amount);
       accountStore.put(toAddress, toAccountWrapper);
 
-      ret.setStatus(fee, code.SUCESS);
+      ret.setStatus(fee, code.SUCCESS);
     } catch (InvalidProtocolBufferException e) {
       ret.setStatus(fee, code.FAILED);
       throw new ContractExeException(e.getMessage());

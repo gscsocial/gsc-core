@@ -51,7 +51,7 @@ public class UnfreezeAssetOperator extends AbstractOperator {
       accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
           .clearFrozenSupply().addAllFrozenSupply(frozenList).build());
       dbManager.getAccountStore().put(ownerAddress, accountWrapper);
-      ret.setStatus(fee, code.SUCESS);
+      ret.setStatus(fee, code.SUCCESS);
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
       ret.setStatus(fee, code.FAILED);
