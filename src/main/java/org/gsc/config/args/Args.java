@@ -303,6 +303,7 @@ public class Args {
   public static void setParam(final String[] args, final String confFileName) {
     JCommander.newBuilder().addObject(INSTANCE).build().parse(args);
     Config config = Configuration.getByFileName(INSTANCE.shellConfFileName, confFileName);
+    INSTANCE.solidityNode = config.getBoolean("node.type.isSolidity");
     if (StringUtils.isNoneBlank(INSTANCE.privateKey)) {
       INSTANCE.setLocalWitnesses(new LocalWitnesses(INSTANCE.privateKey));
       logger.debug("Got privateKey from cmd");
