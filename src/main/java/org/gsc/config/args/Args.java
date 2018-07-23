@@ -373,7 +373,7 @@ public class Args {
         .filter(seedNode -> 0 != seedNode.size())
         .orElse(config.getStringList("seed.peer.ip.list")));
 
-    if (config.hasPath("network.type") && "mainnet".equalsIgnoreCase(config.getString("net.type"))) {
+    if (config.hasPath("network.type") && "mainnet".equalsIgnoreCase(config.getString("network.type"))) {
       Wallet.setAddressPreFixByte(Constant.ADD_PRE_FIX_BYTE_MAINNET);
       Wallet.setAddressPreFixString(Constant.ADD_PRE_FIX_STRING_MAINNET);
     } else {
@@ -408,7 +408,7 @@ public class Args {
         config.hasPath("peer.discovery.persist") && config.getBoolean("peer.discovery.persist");
 
     INSTANCE.nodeConnectionTimeout =
-        config.hasPath("peer.connection.timeout") ? config.getInt("node.connection.timeout") * 1000
+        config.hasPath("peer.connection.timeout") ? config.getInt("peer.connection.timeout") * 1000
             : 0;
 
     INSTANCE.activeNodes = getNodes(config, "peer.active");

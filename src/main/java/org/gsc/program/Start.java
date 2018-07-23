@@ -63,11 +63,6 @@ public class Start {
         }
         if(cfgArgs.isSolidityNode()){ // solidity node needs not sync full data
             ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
-
-            if (cfgArgs.isHelp()) {
-                logger.info("Here is the help message.");
-                return;
-            }
             Application appT = ApplicationFactory.create(context);
             FullNode.shutdown(appT);
             RpcApiService rpcApiService = context.getBean(RpcApiService.class);
