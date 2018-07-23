@@ -1,8 +1,8 @@
-package org.gsc.common.backup;
+package org.gsc.common.discover;
 
-import static org.gsc.common.backup.BackupManager.BackupStatusEnum.INIT;
-import static org.gsc.common.backup.BackupManager.BackupStatusEnum.MASTER;
-import static org.gsc.common.backup.BackupManager.BackupStatusEnum.SLAVER;
+import static org.gsc.common.discover.DiscoverManager.BackupStatusEnum.INIT;
+import static org.gsc.common.discover.DiscoverManager.BackupStatusEnum.MASTER;
+import static org.gsc.common.discover.DiscoverManager.BackupStatusEnum.SLAVER;
 
 import io.netty.util.internal.ConcurrentSet;
 import java.net.InetSocketAddress;
@@ -23,9 +23,9 @@ import org.springframework.stereotype.Component;
 import org.gsc.config.args.Args;
 
 @Component
-public class BackupManager implements EventHandler {
+public class DiscoverManager implements EventHandler {
 
-  private static final Logger logger = LoggerFactory.getLogger("BackupManager");
+  private static final Logger logger = LoggerFactory.getLogger("DiscoverManager");
 
   private Args args = Args.getInstance();
 
@@ -58,7 +58,7 @@ public class BackupManager implements EventHandler {
   }
 
   public void setStatus(BackupStatusEnum status) {
-    logger.info("Change backup status to {}", status);
+    logger.info("Change discover status to {}", status);
     this.status = status;
   }
 

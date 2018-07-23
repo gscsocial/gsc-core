@@ -26,14 +26,11 @@ import stest.gsc.wallet.common.client.WalletClient;
 
 public class PublicMethed {
   Wallet wallet = new Wallet();
-  //Wallet.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
 
   private static final Logger logger = LoggerFactory.getLogger("TestLogger");
-  //private WalletGrpc.WalletBlockingStub blockingStubFull = null;
-  //private WalletSolidityGrpc.WalletSolidityBlockingStub blockingStubSolidity = null;
 
   public static Boolean createAssetIssue(byte[] address, String name, Long totalSupply,
-      Integer trxNum, Integer icoNum, Long startTime, Long endTime, Integer voteScore,
+      Integer gscNum, Integer icoNum, Long startTime, Long endTime, Integer voteScore,
       String description, String url, Long freeAssetNetLimit, Long publicFreeAssetNetLimit,
       Long fronzenAmount, Long frozenDay, String priKey,
       WalletGrpc.WalletBlockingStub blockingStubFull) {
@@ -46,13 +43,12 @@ public class PublicMethed {
       ex.printStackTrace();
     }
     ECKey ecKey = temKey;
-    //Protocol.Account search = queryAccount(ecKey, blockingStubFull);
     try {
       Contract.AssetIssueContract.Builder builder = Contract.AssetIssueContract.newBuilder();
       builder.setOwnerAddress(ByteString.copyFrom(address));
       builder.setName(ByteString.copyFrom(name.getBytes()));
       builder.setTotalSupply(totalSupply);
-      builder.setGscNum(trxNum);
+      builder.setGscNum(gscNum);
       builder.setNum(icoNum);
       builder.setStartTime(startTime);
       builder.setEndTime(endTime);
@@ -61,8 +57,6 @@ public class PublicMethed {
       builder.setUrl(ByteString.copyFrom(url.getBytes()));
       builder.setFreeAssetNetLimit(freeAssetNetLimit);
       builder.setPublicFreeAssetNetLimit(publicFreeAssetNetLimit);
-      //builder.setPublicFreeAssetNetUsage();
-      //builder.setPublicLatestFreeNetTime();
       Contract.AssetIssueContract.FrozenSupply.Builder frozenBuilder =
           Contract.AssetIssueContract.FrozenSupply.newBuilder();
       frozenBuilder.setFrozenAmount(fronzenAmount);
@@ -492,7 +486,7 @@ public class PublicMethed {
   byte ADD_PRE_FIX_BYTE_MAINNET = (byte) 0x41;   //41 + address
   byte ADD_PRE_FIX_BYTE_TESTNET = (byte) 0xa0;   //a0 + address
   byte[] preFix = new byte[1];
-  if (config.hasPath("net.type") && "mainnet".equalsIgnoreCase(config.getString("net.type"))) {
+  if (config.hasPath("network.type") && "mainnet".equalsIgnoreCase(config.getString("net.type"))) {
     WalletClient.setAddressPreFixByte(ADD_PRE_FIX_BYTE_MAINNET);
     preFix[0] = ADD_PRE_FIX_BYTE_MAINNET;
    }else {
