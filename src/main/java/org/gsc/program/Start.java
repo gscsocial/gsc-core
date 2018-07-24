@@ -37,6 +37,7 @@ public class Start {
         this.dbManager = dbManager;
     }
 
+
     private void initGrpcClient(String addr) {
         try {
             databaseGrpcClient = new DatabaseGrpcClient(addr);
@@ -46,19 +47,14 @@ public class Start {
         }
     }
 
-    private void shutdownGrpcClient() {
-        if (databaseGrpcClient != null) {
-            databaseGrpcClient.shutdown();
-        }
-    }
 
     public static void main(String [] args){
-        logger.info("GSC node running.");
+        logger.info("GSC node running...");
         Args.setParam(args, Constant.TESTNET_CONF);
         Args cfgArgs = Args.getInstance();
 
         if (cfgArgs.isHelp()) {
-            logger.info("Here is the help message.");
+            logger.info("This is the help message.");
             return;
         }
         if(cfgArgs.isSolidityNode()){ // solidity node needs not sync full data
@@ -102,6 +98,12 @@ public class Start {
             rpcApiService.blockUntilShutdown();
         }
 
+    }
+
+    private void shutdownGrpcClient() {
+        if (databaseGrpcClient != null) {
+            databaseGrpcClient.shutdown();
+        }
     }
 
     public static void shutdown(final Application app) {
@@ -166,7 +168,7 @@ public class Start {
                 break;
             }
         }
-        logger.info("Sync with trust node completed!!!");
+        logger.info("Sync with trust peer completed!!!");
     }
 
     private void start(Args cfgArgs) {
@@ -179,6 +181,5 @@ public class Start {
                 logger.error("Error in sync solidity block " + t.getMessage(), t);
             }
         }, 5000, 5000, TimeUnit.MILLISECONDS);
-        //new Thread(() -> syncLoop(cfgArgs), logger.getName()).start();
     }
 }
