@@ -26,9 +26,6 @@ import java.util.Map;
 import org.slf4j.LoggerFactory;
 import org.gsc.common.overlay.discover.node.Node;
 
-/**
- * Created by kest on 5/25/15.
- */
 public class NodeTable {
 
   static final org.slf4j.Logger logger = LoggerFactory.getLogger("NodeTable");

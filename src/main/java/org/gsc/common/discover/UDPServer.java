@@ -22,6 +22,8 @@ public class UDPServer {
 
   private static final org.slf4j.Logger logger = LoggerFactory.getLogger("UdpServer");
 
+  private volatile boolean shutdown = false;
+
   private Args args = Args.getInstance();
 
   private int port = args.getBackupPort();
@@ -29,8 +31,6 @@ public class UDPServer {
   private DiscoverManager discoverManager;
 
   private Channel channel;
-
-  private volatile boolean shutdown = false;
 
   @Autowired
   private WireTrafficStats stats;
@@ -46,7 +46,7 @@ public class UDPServer {
         try {
           start();
         } catch (Exception e) {
-          logger.error("Start udp server failed, {}", e);
+          logger.error("Startup udp server failed, {}", e);
         }
       }, "UdpServer").start();
     }
@@ -75,7 +75,7 @@ public class UDPServer {
 
         channel = b.bind(port).sync().channel();
 
-        logger.info("Backup server started, bind port {}", port);
+        logger.info("Discover server started, bind port {}", port);
 
         channel.closeFuture().sync();
         if (shutdown) {
