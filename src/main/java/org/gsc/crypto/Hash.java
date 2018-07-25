@@ -39,8 +39,8 @@ public class Hash {
   static {
     Security.addProvider(GscCastleProvider.getInstance());
     CRYPTO_PROVIDER = Security.getProvider("SC");
-    HASH_256_ALGORITHM_NAME = "TRON-KECCAK-256";
-    HASH_512_ALGORITHM_NAME = "TRON-KECCAK-512";
+    HASH_256_ALGORITHM_NAME = "GSC-KECCAK-256";
+    HASH_512_ALGORITHM_NAME = "GSC-KECCAK-512";
   }
 
   public static byte[] sha3(byte[] input) {

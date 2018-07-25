@@ -29,14 +29,6 @@ import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Custom storage configurations
- *
- * @author haoyouqiang
- * @version 1.0
- * @since 2018/5/25
- */
-
 public class Storage {
 
   /**
