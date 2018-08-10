@@ -39,7 +39,6 @@ public class FullNode {
     context.refresh();
     Application appT = ApplicationFactory.create(context);
     shutdown(appT);
-    //appT.init(cfgArgs);
 
     RpcApiService rpcApiService = context.getBean(RpcApiService.class);
     appT.addService(rpcApiService);

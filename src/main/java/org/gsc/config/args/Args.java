@@ -66,7 +66,7 @@ public class Args {
   private boolean witness = false;
 
   @Getter
-  @Parameter(description = "--seed-nodes")
+  @Parameter(description = "--seed-peer")
   private List<String> seedNodes = new ArrayList<>();
 
   @Parameter(names = {"-p", "--private-key"}, description = "private-key")
@@ -230,7 +230,7 @@ public class Args {
 
   @Getter
   @Setter
-  @Parameter(names = {"--trust-node"}, description = "Trust node addr")
+  @Parameter(names = {"--trust-peer"}, description = "Trust node addr")
   private String trustNodeAddr;
 
   @Getter
@@ -303,6 +303,7 @@ public class Args {
   public static void setParam(final String[] args, final String confFileName) {
     JCommander.newBuilder().addObject(INSTANCE).build().parse(args);
     Config config = Configuration.getByFileName(INSTANCE.shellConfFileName, confFileName);
+    INSTANCE.solidityNode = config.getBoolean("node.type.isSolidity");
     if (StringUtils.isNoneBlank(INSTANCE.privateKey)) {
       INSTANCE.setLocalWitnesses(new LocalWitnesses(INSTANCE.privateKey));
       logger.debug("Got privateKey from cmd");
@@ -370,9 +371,9 @@ public class Args {
     INSTANCE.seedNode = new SeedNode();
     INSTANCE.seedNode.setIpList(Optional.ofNullable(INSTANCE.seedNodes)
         .filter(seedNode -> 0 != seedNode.size())
-        .orElse(config.getStringList("seed.node.ip.list")));
+        .orElse(config.getStringList("seed.peer.ip.list")));
 
-    if (config.hasPath("net.type") && "mainnet".equalsIgnoreCase(config.getString("net.type"))) {
+    if (config.hasPath("network.type") && "mainnet".equalsIgnoreCase(config.getString("network.type"))) {
       Wallet.setAddressPreFixByte(Constant.ADD_PRE_FIX_BYTE_MAINNET);
       Wallet.setAddressPreFixString(Constant.ADD_PRE_FIX_STRING_MAINNET);
     } else {
@@ -401,99 +402,99 @@ public class Args {
         config.hasPath("block.needSyncCheck") && config.getBoolean("block.needSyncCheck");
 
     INSTANCE.nodeDiscoveryEnable =
-        config.hasPath("node.discovery.enable") && config.getBoolean("node.discovery.enable");
+        config.hasPath("peer.discovery.enable") && config.getBoolean("peer.discovery.enable");
 
     INSTANCE.nodeDiscoveryPersist =
-        config.hasPath("node.discovery.persist") && config.getBoolean("node.discovery.persist");
+        config.hasPath("peer.discovery.persist") && config.getBoolean("peer.discovery.persist");
 
     INSTANCE.nodeConnectionTimeout =
-        config.hasPath("node.connection.timeout") ? config.getInt("node.connection.timeout") * 1000
+        config.hasPath("peer.connection.timeout") ? config.getInt("peer.connection.timeout") * 1000
             : 0;
 
-    INSTANCE.activeNodes = getNodes(config, "node.active");
+    INSTANCE.activeNodes = getNodes(config, "peer.active");
 
-    INSTANCE.passiveNodes = getNodes(config, "node.passive");
+    INSTANCE.passiveNodes = getNodes(config, "peer.passive");
 
     INSTANCE.nodeChannelReadTimeout =
-        config.hasPath("node.channel.read.timeout") ? config.getInt("node.channel.read.timeout")
+        config.hasPath("peer.channel.read.timeout") ? config.getInt("peer.channel.read.timeout")
             : 0;
 
     INSTANCE.nodeMaxActiveNodes =
-        config.hasPath("node.maxActiveNodes") ? config.getInt("node.maxActiveNodes") : 30;
+        config.hasPath("peer.maxActiveNodes") ? config.getInt("peer.maxActiveNodes") : 30;
 
     INSTANCE.nodeMaxActiveNodesWithSameIp =
-        config.hasPath("node.maxActiveNodesWithSameIp") ? config.getInt("node.maxActiveNodesWithSameIp") : 2;
+        config.hasPath("peer.maxActiveNodesWithSameIp") ? config.getInt("peer.maxActiveNodesWithSameIp") : 2;
 
     INSTANCE.minParticipationRate =
-        config.hasPath("node.minParticipationRate") ? config.getInt("node.minParticipationRate")
+        config.hasPath("peer.minParticipationRate") ? config.getInt("peer.minParticipationRate")
             : 0;
 
     INSTANCE.nodeListenPort =
-        config.hasPath("node.listen.port") ? config.getInt("node.listen.port") : 0;
+        config.hasPath("peer.listen.port") ? config.getInt("peer.listen.port") : 0;
 
     bindIp(config);
     externalIp(config);
 
     INSTANCE.nodeDiscoveryPublicHomeNode =
-        config.hasPath("node.discovery.public.home.node") && config
-            .getBoolean("node.discovery.public.home.node");
+        config.hasPath("peer.discovery.public.home.node") && config
+            .getBoolean("peer.discovery.public.home.node");
 
     INSTANCE.nodeP2pPingInterval =
-        config.hasPath("node.p2p.pingInterval") ? config.getLong("node.p2p.pingInterval") : 0;
+        config.hasPath("peer.p2p.pingInterval") ? config.getLong("peer.p2p.pingInterval") : 0;
 //
 //    INSTANCE.syncNodeCount =
-//        config.hasPath("sync.node.count") ? config.getLong("sync.node.count") : 0;
+//        config.hasPath("sync.peer.count") ? config.getLong("sync.peer.count") : 0;
 
     INSTANCE.nodeP2pVersion =
-        config.hasPath("node.p2p.version") ? config.getInt("node.p2p.version") : 0;
+        config.hasPath("peer.p2p.version") ? config.getInt("peer.p2p.version") : 0;
 
     INSTANCE.rpcPort =
-        config.hasPath("node.rpc.port") ? config.getInt("node.rpc.port") : 50051;
+        config.hasPath("peer.rpc.port") ? config.getInt("peer.rpc.port") : 50051;
 
     INSTANCE.rpcThreadNum =
-        config.hasPath("node.rpc.thread") ? config.getInt("node.rpc.thread")
+        config.hasPath("peer.rpc.thread") ? config.getInt("peer.rpc.thread")
             : Runtime.getRuntime().availableProcessors() / 2;
 
     INSTANCE.maxConcurrentCallsPerConnection =
-        config.hasPath("node.rpc.maxConcurrentCallsPerConnection") ?
-            config.getInt("node.rpc.maxConcurrentCallsPerConnection") : Integer.MAX_VALUE;
+        config.hasPath("peer.rpc.maxConcurrentCallsPerConnection") ?
+            config.getInt("peer.rpc.maxConcurrentCallsPerConnection") : Integer.MAX_VALUE;
 
     INSTANCE.flowControlWindow = config.hasPath("node.rpc.flowControlWindow") ?
-        config.getInt("node.rpc.flowControlWindow")
+        config.getInt("peer.rpc.flowControlWindow")
         : NettyServerBuilder.DEFAULT_FLOW_CONTROL_WINDOW;
 
-    INSTANCE.maxConnectionIdleInMillis = config.hasPath("node.rpc.maxConnectionIdleInMillis") ?
-        config.getLong("node.rpc.maxConnectionIdleInMillis") : Long.MAX_VALUE;
+    INSTANCE.maxConnectionIdleInMillis = config.hasPath("peer.rpc.maxConnectionIdleInMillis") ?
+        config.getLong("peer.rpc.maxConnectionIdleInMillis") : Long.MAX_VALUE;
 
     INSTANCE.maxConnectionAgeInMillis = config.hasPath("node.rpc.maxConnectionAgeInMillis") ?
-        config.getLong("node.rpc.maxConnectionAgeInMillis") : Long.MAX_VALUE;
+        config.getLong("peer.rpc.maxConnectionAgeInMillis") : Long.MAX_VALUE;
 
     INSTANCE.maxMessageSize = config.hasPath("node.rpc.maxMessageSize") ?
-        config.getInt("node.rpc.maxMessageSize") : GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
+        config.getInt("peer.rpc.maxMessageSize") : GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
     INSTANCE.maxHeaderListSize = config.hasPath("node.rpc.maxHeaderListSize") ?
-        config.getInt("node.rpc.maxHeaderListSize") : GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE;
+        config.getInt("peer.rpc.maxHeaderListSize") : GrpcUtil.DEFAULT_MAX_HEADER_LIST_SIZE;
 
     INSTANCE.maintenanceTimeInterval =
         config.hasPath("block.maintenanceTimeInterval") ? config
             .getInt("block.maintenanceTimeInterval") : 21600000L;
 
-    INSTANCE.tcpNettyWorkThreadNum = config.hasPath("node.tcpNettyWorkThreadNum") ? config
-        .getInt("node.tcpNettyWorkThreadNum") : 0;
+    INSTANCE.tcpNettyWorkThreadNum = config.hasPath("peer.tcpNettyWorkThreadNum") ? config
+        .getInt("peer.tcpNettyWorkThreadNum") : 0;
 
-    INSTANCE.udpNettyWorkThreadNum = config.hasPath("node.udpNettyWorkThreadNum") ? config
-        .getInt("node.udpNettyWorkThreadNum") : 1;
+    INSTANCE.udpNettyWorkThreadNum = config.hasPath("peer.udpNettyWorkThreadNum") ? config
+        .getInt("peer.udpNettyWorkThreadNum") : 1;
 
     if (StringUtils.isEmpty(INSTANCE.trustNodeAddr)) {
       INSTANCE.trustNodeAddr =
-          config.hasPath("node.trustNode") ? config.getString("node.trustNode") : null;
+          config.hasPath("peer.trustPeer") ? config.getString("peer.trustPeer") : null;
     }
 
-    INSTANCE.validateSignThreadNum = config.hasPath("node.validateSignThreadNum") ? config
-        .getInt("node.validateSignThreadNum") : Runtime.getRuntime().availableProcessors() / 2;
+    INSTANCE.validateSignThreadNum = config.hasPath("peer.validateSignThreadNum") ? config
+        .getInt("peer.validateSignThreadNum") : Runtime.getRuntime().availableProcessors() / 2;
 
     INSTANCE.walletExtensionApi =
-        config.hasPath("node.walletExtensionApi") && config.getBoolean("node.walletExtensionApi");
+        config.hasPath("peer.walletExtensionApi") && config.getBoolean("peer.walletExtensionApi");
 
     initBackupProperty(config);
   }
@@ -613,7 +614,7 @@ public class Args {
   }
 
   private static void bindIp(final com.typesafe.config.Config config) {
-    if (!config.hasPath("node.discovery.bind.ip") || config.getString("node.discovery.bind.ip")
+    if (!config.hasPath("peer.discovery.bind.ip") || config.getString("peer.discovery.bind.ip")
         .trim().isEmpty()) {
       if (INSTANCE.nodeDiscoveryBindIp == null) {
         logger.info("Bind address wasn't set, Punching to identify it...");
@@ -626,13 +627,13 @@ public class Args {
         }
       }
     } else {
-      INSTANCE.nodeDiscoveryBindIp = config.getString("node.discovery.bind.ip").trim();
+      INSTANCE.nodeDiscoveryBindIp = config.getString("peer.discovery.bind.ip").trim();
     }
   }
 
   private static void externalIp(final com.typesafe.config.Config config) {
-    if (!config.hasPath("node.discovery.external.ip") || config
-        .getString("node.discovery.external.ip").trim().isEmpty()) {
+    if (!config.hasPath("peer.discovery.external.ip") || config
+        .getString("peer.discovery.external.ip").trim().isEmpty()) {
       if (INSTANCE.nodeExternalIp == null) {
         logger.info("External IP wasn't set, using checkip.amazonaws.com to identify it...");
         BufferedReader in = null;
@@ -666,7 +667,7 @@ public class Args {
         }
       }
     } else {
-      INSTANCE.nodeExternalIp = config.getString("node.discovery.external.ip").trim();
+      INSTANCE.nodeExternalIp = config.getString("peer.discovery.external.ip").trim();
     }
   }
 
@@ -679,11 +680,11 @@ public class Args {
   }
 
   private static void initBackupProperty(Config config) {
-    INSTANCE.backupPriority = config.hasPath("node.backup.priority")
-        ? config.getInt("node.backup.priority") : 0;
-    INSTANCE.backupPort = config.hasPath("node.backup.port")
-        ? config.getInt("node.backup.port") : 10001;
-    INSTANCE.backupMembers = config.hasPath("node.backup.members")
-        ? config.getStringList("node.backup.members") : new ArrayList<>();
+    INSTANCE.backupPriority = config.hasPath("peer.discover.priority")
+        ? config.getInt("peer.discover.priority") : 0;
+    INSTANCE.backupPort = config.hasPath("peer.discover.port")
+        ? config.getInt("peer.discover.port") : 10001;
+    INSTANCE.backupMembers = config.hasPath("peer.discover.members")
+        ? config.getStringList("peer.discover.members") : new ArrayList<>();
   }
 }

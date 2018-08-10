@@ -89,7 +89,6 @@ public class PeerClient {
 
         b.handler(gscChannelInitializer);
 
-        // Start the client.
         return b.connect();
     }
 

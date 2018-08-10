@@ -53,7 +53,7 @@ public class AccountStore extends GscStoreWithRevoking<AccountWrapper> {
   }
 
   /**
-   * Max TRX account.
+   * Max GSC account.
    */
 //  public AccountWrapper getSun() {
 //    byte[] data = dbSource.getData(assertsAddress.get("Sun"));
@@ -62,7 +62,7 @@ public class AccountStore extends GscStoreWithRevoking<AccountWrapper> {
 //  }
 
   /**
-   * Min TRX account.
+   * Min GSC account.
    */
   public AccountWrapper getBlackhole() {
     //byte[] data = dbSource.getData(assertsAddress.get("Blackhole"));

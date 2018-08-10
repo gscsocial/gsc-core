@@ -21,9 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Created by kest on 5/25/15.
- */
 public class NodeBucket {
 
   private final int depth;

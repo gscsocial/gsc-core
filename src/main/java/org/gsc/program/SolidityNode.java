@@ -176,13 +176,11 @@ public class SolidityNode {
     }
     Application appT = ApplicationFactory.create(context);
     FullNode.shutdown(appT);
-    //appT.init(cfgArgs);
     RpcApiService rpcApiService = context.getBean(RpcApiService.class);
     appT.addService(rpcApiService);
 
     appT.initServices(cfgArgs);
     appT.startServices();
-//    appT.startup();
 
     //Disable peer discovery for solidity node
     DiscoverServer discoverServer = context.getBean(DiscoverServer.class);

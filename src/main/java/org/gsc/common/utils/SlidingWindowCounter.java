@@ -3,9 +3,6 @@ package org.gsc.common.utils;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Created by olivier on 2018/06/01
- */
 class SlotBaseCounter {
   private int slotSize;
   private AtomicInteger[] slotCounter;
@@ -37,9 +34,6 @@ class SlotBaseCounter {
   }
 }
 
-/**
- * Created by olivier on 2018/06/01
- */
 public class SlidingWindowCounter {
   private volatile SlotBaseCounter slotBaseCounter;
   private volatile int windowSize;

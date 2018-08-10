@@ -1,4 +1,4 @@
-package org.gsc.common.backup;
+package org.gsc.common.discover;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -18,26 +18,26 @@ import org.gsc.common.overlay.server.WireTrafficStats;
 import org.gsc.config.args.Args;
 
 @Component
-public class BackupServer {
+public class UDPServer {
 
-  private static final org.slf4j.Logger logger = LoggerFactory.getLogger("BackupServer");
+  private static final org.slf4j.Logger logger = LoggerFactory.getLogger("UdpServer");
+
+  private volatile boolean shutdown = false;
 
   private Args args = Args.getInstance();
 
   private int port = args.getBackupPort();
 
-  private BackupManager backupManager;
+  private DiscoverManager discoverManager;
 
   private Channel channel;
-
-  private volatile boolean shutdown = false;
 
   @Autowired
   private WireTrafficStats stats;
 
   @Autowired
-  public BackupServer(final BackupManager backupManager) {
-    this.backupManager = backupManager;
+  public UDPServer(final DiscoverManager discoverManager) {
+    this.discoverManager = discoverManager;
   }
 
   public void initServer(){
@@ -46,9 +46,9 @@ public class BackupServer {
         try {
           start();
         } catch (Exception e) {
-          logger.error("Start backup server failed, {}", e);
+          logger.error("Startup udp server failed, {}", e);
         }
-      }, "BackupServer").start();
+      }, "UdpServer").start();
     }
   }
 
@@ -67,38 +67,38 @@ public class BackupServer {
                 ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
                 ch.pipeline().addLast(new ProtobufVarint32FrameDecoder());
                 ch.pipeline().addLast(new PacketDecoder());
-                MessageHandler messageHandler = new MessageHandler(ch, backupManager);
-                backupManager.setMessageHandler(messageHandler);
+                MessageHandler messageHandler = new MessageHandler(ch, discoverManager);
+                discoverManager.setMessageHandler(messageHandler);
                 ch.pipeline().addLast(messageHandler);
               }
             });
 
         channel = b.bind(port).sync().channel();
 
-        logger.info("Backup server started, bind port {}", port);
+        logger.info("Discover server started, bind port {}", port);
 
         channel.closeFuture().sync();
         if (shutdown) {
-          logger.info("Shutdown backup BackupServer");
+          logger.info("Shutdown discover UdpServer");
           break;
         }
-        logger.warn("Restart backup server ...");
+        logger.warn("Restart discover server ...");
       }
     } catch (Exception e) {
-      logger.error("Start backup server with port {} failed.", port, e);
+      logger.error("Start discover server with port {} failed.", port, e);
     } finally {
       group.shutdownGracefully().sync();
     }
   }
 
   public void close() {
-    logger.info("Closing backup server...");
+    logger.info("Closing discover server...");
     shutdown = true;
     if (channel != null) {
       try {
         channel.close().await(10, TimeUnit.SECONDS);
       } catch (Exception e) {
-        logger.warn("Closing backup server failed.", e);
+        logger.warn("Closing discover server failed.", e);
       }
     }
   }

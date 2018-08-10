@@ -76,16 +76,16 @@
   <logger name="FullNode" level="INFO"/>
   <logger name="PeerConnection" level="INFO"/>
   <logger name="TransactionUtil" level="INFO"/>
-  <logger name="TransactionVoteActuator" level="INFO"/>
+  <logger name="TransactionVoteOperator" level="INFO"/>
   <logger name="WitnessStore" level="INFO"/>
   <logger name="AssetIssueStore" level="INFO"/>
-  <logger name="ActuatorFactory" level="INFO"/>
+  <logger name="OperatorFactory" level="INFO"/>
   <logger name="ByteArray" level="INFO"/>
   <logger name="Args" level="INFO"/>
-  <logger name="WitnessCteateActuator" level="INFO"/>
-  <logger name="AssetIssueActuator" level="INFO"/>
-  <logger name="AccountCapsule" level="INFO"/>
-  <logger name="AssetIssueCapsule" level="INFO"/>
+  <logger name="WitnessCreateOperator" level="INFO"/>
+  <logger name="AssetIssueOperator" level="INFO"/>
+  <logger name="AccountWrapper" level="INFO"/>
+  <logger name="AssetIssueWrapper" level="INFO"/>
   <logger name="Manager" level="INFO"/>
   <logger name="Net" level="INFO"/>
 

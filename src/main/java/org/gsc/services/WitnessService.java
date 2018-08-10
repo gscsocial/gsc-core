@@ -9,9 +9,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.application.Application;
 import org.gsc.common.application.Service;
-import org.gsc.common.backup.BackupManager;
-import org.gsc.common.backup.BackupManager.BackupStatusEnum;
-import org.gsc.common.backup.BackupServer;
+import org.gsc.common.discover.DiscoverManager;
+import org.gsc.common.discover.DiscoverManager.BackupStatusEnum;
+import org.gsc.common.discover.UDPServer;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.crypto.ECKey;
@@ -51,9 +51,9 @@ public class WitnessService implements Service {
 
   private AnnotationConfigApplicationContext context;
 
-  private BackupManager backupManager;
+  private DiscoverManager discoverManager;
 
-  private BackupServer backupServer;
+  private UDPServer UDPServer;
 
   /**
    * Construction method.
@@ -61,8 +61,8 @@ public class WitnessService implements Service {
   public WitnessService(Application gscApp, AnnotationConfigApplicationContext context) {
     this.gscApp = gscApp;
     this.context = context;
-    backupManager = context.getBean(BackupManager.class);
-    backupServer = context.getBean(BackupServer.class);
+    discoverManager = context.getBean(DiscoverManager.class);
+    UDPServer = context.getBean(UDPServer.class);
     generateThread = new Thread(scheduleProductionLoop);
     controller = gscApp.getDbManager().getWitnessController();
     new Thread(()->{
@@ -71,7 +71,7 @@ public class WitnessService implements Service {
           Thread.sleep(100);
         }catch (Exception e){}
       }
-      backupServer.initServer();
+      UDPServer.initServer();
     }).start();
   }
 
@@ -136,7 +136,7 @@ public class WitnessService implements Service {
    */
   private BlockProductionCondition tryProduceBlock() throws InterruptedException {
     logger.info("Try Produce Block");
-    if (!backupManager.getStatus().equals(BackupStatusEnum.MASTER)){
+    if (!discoverManager.getStatus().equals(BackupStatusEnum.MASTER)){
       return BlockProductionCondition.BACKUP_STATUS_IS_NOT_MASTER;
     }
     long now = DateTime.now().getMillis() + 50L;

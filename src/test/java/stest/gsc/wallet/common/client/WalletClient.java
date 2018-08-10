@@ -109,7 +109,7 @@ public class WalletClient {
         if(config.hasPath(fullNodepathname)){
             fullNode = config.getStringList(fullNodepathname).get(0);
         }
-        if (config.hasPath("net.type") && "mainnet".equalsIgnoreCase(config.getString("net.type"))) {
+        if (config.hasPath("network.type") && "mainnet".equalsIgnoreCase(config.getString("net.type"))) {
             WalletClient.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
         } else {
             WalletClient.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE_TESTNET);
@@ -132,7 +132,7 @@ public class WalletClient {
         if (config.hasPath("fullnode.ip.list")) {
             fullNode = config.getStringList("fullnode.ip.list").get(0);
         }
-        if (config.hasPath("net.type") && "mainnet".equalsIgnoreCase(config.getString("net.type"))) {
+        if (config.hasPath("network.type") && "mainnet".equalsIgnoreCase(config.getString("net.type"))) {
             WalletClient.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
         } else {
             WalletClient.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE_TESTNET);
