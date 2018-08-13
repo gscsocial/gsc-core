@@ -33,6 +33,7 @@ src/main/protos
 
 # output directory
 /output-directory/
+/output-nodeImplTest/
 
 /output_manager/
 /output_witness/
