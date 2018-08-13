@@ -51,16 +51,6 @@ public class AccountStore extends GscStoreWithRevoking<AccountWrapper> {
       indexHelper.update(item.getInstance());
     }
   }
-
-  /**
-   * Max GSC account.
-   */
-//  public AccountWrapper getSun() {
-//    byte[] data = dbSource.getData(assertsAddress.get("Sun"));
-//    AccountWrapper accountCapsule = new AccountWrapper(data);
-//    return accountCapsule;
-//  }
-
   /**
    * Min GSC account.
    */
@@ -69,15 +59,6 @@ public class AccountStore extends GscStoreWithRevoking<AccountWrapper> {
     AccountWrapper accountWrapper = new AccountWrapper("TSJD5rdu6wZXP7F2m3a3tn8Co3JcMjtBip".getBytes());
     return accountWrapper;
   }
-
-  /**
-   * Get foundation account info.
-   */
-//  public AccountWrapper getZion() {
-//    byte[] data = dbSource.getData(assertsAddress.get("Zion"));
-//    AccountWrapper accountCapsule = new AccountWrapper(data);
-//    return accountCapsule;
-//  }
 
   public static void setAccount(com.typesafe.config.Config config) {
     List list = config.getObjectList("genesis.block.assets");
