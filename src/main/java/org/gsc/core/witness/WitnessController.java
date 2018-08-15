@@ -114,16 +114,10 @@ public class WitnessController {
     return manager.lastHeadBlockIsMaintenance();
   }
 
-  /**
-   * get absolute Slot At Time
-   */
   public long getAbSlotAtTime(long when) {
     return (when - getGenesisBlock().getTimeStamp()) / ChainConstant.BLOCK_PRODUCED_INTERVAL;
   }
 
-  /**
-   * get slot time.
-   */
   public long getSlotTime(long slotNum) {
     if (slotNum == 0) {
       return Time.getCurrentMillis();
@@ -215,30 +209,6 @@ public class WitnessController {
     return (manager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp() - getGenesisBlock()
         .getTimeStamp())
         / ChainConstant.BLOCK_PRODUCED_INTERVAL;
-  }
-
-  /**
-   * shuffle witnesses
-   */
-  public void updateWitnessSchedule() {
-//    if (CollectionUtils.isEmpty(getActiveWitnesses())) {
-//      throw new RuntimeException("Witnesses is empty");
-//    }
-//
-//    List<ByteString> currentWitsAddress = getCurrentShuffledWitnesses();
-//    // TODO  what if the number of witness is not same in different slot.
-//    long num = manager.getDynamicPropertiesStore().getLatestBlockHeaderNumber();
-//    long time = manager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp();
-//
-//    if (num != 0 && num % getActiveWitnesses().size() == 0) {
-//      logger.info("updateWitnessSchedule number:{},HeadBlockTimeStamp:{}", num, time);
-//      setCurrentShuffledWitnesses(new RandomGenerator<ByteString>()
-//          .shuffle(getActiveWitnesses(), time));
-//
-//      logger.info(
-//          "updateWitnessSchedule,before:{} ", getAddressStringList(currentWitsAddress)
-//              + ",\nafter:{} " + getAddressStringList(getCurrentShuffledWitnesses()));
-//    }
   }
 
   private Map<ByteString, Long> countVote(VotesStore votesStore) {
