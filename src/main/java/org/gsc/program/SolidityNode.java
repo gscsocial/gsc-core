@@ -66,21 +66,7 @@ public class SolidityNode {
   }
 
   private void syncLoop(Args args) {
-//    while (true) {
-//      try {
-//        initGrpcClient(args.getTrustNodeAddr());
-//        syncSolidityBlock();
-//        shutdownGrpcClient();
-//      } catch (Exception e) {
-//        logger.error("Error in sync solidity block " + e.getMessage(), e);
-//      }
-//      try {
-//        Thread.sleep(5000);
-//      } catch (InterruptedException e) {
-//        Thread.currentThread().interrupt();
-//        e.printStackTrace();
-//      }
-//    }
+    //TODO#
   }
 
   private void syncSolidityBlock() throws BadBlockException {
