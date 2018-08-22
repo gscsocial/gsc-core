@@ -56,7 +56,7 @@ public class AccountWrapperTest {
   public void addVotesTest() {
     //test addVote and getVotesList function
     ByteString voteAddress = ByteString.copyFrom(AccountWrapperTest.randomBytes(32));
-    long voteAdd = 10L;
+    long voteAdd = 15L;
     accountWrapperTest.addVotes(voteAddress, voteAdd);
     List<Vote> votesList = accountWrapperTest.getVotesList();
     for (Vote vote :
