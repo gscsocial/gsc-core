@@ -31,7 +31,7 @@ public class KeystoreFactory {
       logger.warn("Warning: PrivateKey length need 64 but " + priKey.length() + " !!");
       return false;
     }
-    //Other rule;
+    //Other rule, TODO#;
     return true;
   }
 
