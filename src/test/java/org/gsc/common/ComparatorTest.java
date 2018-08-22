@@ -32,7 +32,6 @@ public class ComparatorTest {
     list5.sort((o1, o2) -> -(o1 - o2));
     logger.info("list3:" + list3);
     logger.info("list4:" + list4);
-    logger.info("list5:" + list5);
     Assert.assertEquals(list3, list4);
     Assert.assertEquals(list3, list5);
   }
