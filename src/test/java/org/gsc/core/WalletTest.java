@@ -66,36 +66,43 @@ public class WalletTest {
   public static final String ACCOUNT_ADDRESS_THREE = "343434a9cf";
   public static final String ACCOUNT_ADDRESS_FOUR = "454545a9cf";
   public static final String ACCOUNT_ADDRESS_FIVE = "565656a9cf";
+  public static final String ACCOUNT_ADDRESS_SIX = "898989a9cf";
   private static Block block1;
   private static Block block2;
   private static Block block3;
   private static Block block4;
   private static Block block5;
+  private static Block block6;
   public static final long BLOCK_NUM_ONE = 1;
   public static final long BLOCK_NUM_TWO = 2;
   public static final long BLOCK_NUM_THREE = 3;
   public static final long BLOCK_NUM_FOUR = 4;
   public static final long BLOCK_NUM_FIVE = 5;
-  public static final long BLOCK_TIMESTAMP_ONE = DateTime.now().minusDays(4).getMillis();
-  public static final long BLOCK_TIMESTAMP_TWO = DateTime.now().minusDays(3).getMillis();
-  public static final long BLOCK_TIMESTAMP_THREE = DateTime.now().minusDays(2).getMillis();
-  public static final long BLOCK_TIMESTAMP_FOUR = DateTime.now().minusDays(1).getMillis();
-  public static final long BLOCK_TIMESTAMP_FIVE = DateTime.now().getMillis();
+  public static final long BLOCK_NUM_SIX = 6;
+  public static final long BLOCK_TIMESTAMP_ONE = DateTime.now().minusDays(5).getMillis();
+  public static final long BLOCK_TIMESTAMP_TWO = DateTime.now().minusDays(4).getMillis();
+  public static final long BLOCK_TIMESTAMP_THREE = DateTime.now().minusDays(3).getMillis();
+  public static final long BLOCK_TIMESTAMP_FOUR = DateTime.now().minusDays(2).getMillis();
+  public static final long BLOCK_TIMESTAMP_FIVE = DateTime.now().minusDays(1).getMillis();
+  public static final long BLOCK_TIMESTAMP_SIX = DateTime.now().getMillis();
   public static final long BLOCK_WITNESS_ONE = 12;
   public static final long BLOCK_WITNESS_TWO = 13;
   public static final long BLOCK_WITNESS_THREE = 14;
   public static final long BLOCK_WITNESS_FOUR = 15;
   public static final long BLOCK_WITNESS_FIVE = 16;
+  public static final long BLOCK_WITNESS_SIX = 17;
   private static Transaction transaction1;
   private static Transaction transaction2;
   private static Transaction transaction3;
   private static Transaction transaction4;
   private static Transaction transaction5;
-  public static final long TRANSACTION_TIMESTAMP_ONE = DateTime.now().minusDays(4).getMillis();
-  public static final long TRANSACTION_TIMESTAMP_TWO = DateTime.now().minusDays(3).getMillis();
-  public static final long TRANSACTION_TIMESTAMP_THREE = DateTime.now().minusDays(2).getMillis();
-  public static final long TRANSACTION_TIMESTAMP_FOUR = DateTime.now().minusDays(1).getMillis();
-  public static final long TRANSACTION_TIMESTAMP_FIVE = DateTime.now().getMillis();
+  private static Transaction transaction6;
+  public static final long TRANSACTION_TIMESTAMP_ONE = DateTime.now().minusDays(5).getMillis();
+  public static final long TRANSACTION_TIMESTAMP_TWO = DateTime.now().minusDays(4).getMillis();
+  public static final long TRANSACTION_TIMESTAMP_THREE = DateTime.now().minusDays(3).getMillis();
+  public static final long TRANSACTION_TIMESTAMP_FOUR = DateTime.now().minusDays(2).getMillis();
+  public static final long TRANSACTION_TIMESTAMP_FIVE = DateTime.now().minusDays(1).getMillis();
+  public static final long TRANSACTION_TIMESTAMP_SIX = DateTime.now().getMillis();
   private static AssetIssueWrapper Asset1;
 
   static {
@@ -133,9 +140,13 @@ public class WalletTest {
         TRANSACTION_TIMESTAMP_FOUR, BLOCK_NUM_FOUR);
     addTransactionToStore(transaction4);
     transaction5 = getBuildTransaction(
-        getBuildTransferContract(ACCOUNT_ADDRESS_FIVE, ACCOUNT_ADDRESS_ONE),
+        getBuildTransferContract(ACCOUNT_ADDRESS_FIVE, ACCOUNT_ADDRESS_SIX),
         TRANSACTION_TIMESTAMP_FIVE, BLOCK_NUM_FIVE);
     addTransactionToStore(transaction5);
+    transaction6 = getBuildTransaction(
+            getBuildTransferContract(ACCOUNT_ADDRESS_SIX , ACCOUNT_ADDRESS_ONE),
+            TRANSACTION_TIMESTAMP_SIX, BLOCK_NUM_SIX);
+    addTransactionToStore(transaction6);
   }
 
   private static void addTransactionToStore(Transaction transaction) {
@@ -179,6 +190,9 @@ public class WalletTest {
     block5 = getBuildBlock(BLOCK_TIMESTAMP_FIVE, BLOCK_NUM_FIVE, BLOCK_WITNESS_FIVE,
         ACCOUNT_ADDRESS_FIVE, transaction5, transaction3);
     addBlockToStore(block5);
+    block6 = getBuildBlock(BLOCK_TIMESTAMP_SIX, BLOCK_NUM_SIX, BLOCK_WITNESS_SIX,
+            ACCOUNT_ADDRESS_SIX, transaction6, transaction3);
+    addBlockToStore(block6);
   }
 
   private static void addBlockToStore(Block block) {
@@ -246,7 +260,7 @@ public class WalletTest {
 
   @Test
   public void ss() {
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
       ECKey ecKey = new ECKey(Utils.getRandom());
       System.out.println(i + 1);
       System.out.println("privateKey:" + ByteArray.toHexString(ecKey.getPrivKeyBytes()));
@@ -272,15 +286,18 @@ public class WalletTest {
     Assert.assertEquals("getBlockById4", block4, blockById);
     blockById = wallet
         .getBlockById(ByteString.copyFrom(new BlockWrapper(block5).getBlockId().getBytes()));
-    Assert.assertEquals("getBlockById5", block5, blockById);
+    Assert.assertEquals("getBlockById6", block5, blockById);
+    blockById = wallet
+            .getBlockById(ByteString.copyFrom(new BlockWrapper(block6).getBlockId().getBytes()));
+    Assert.assertEquals("getBlockById6", block6, blockById);
   }
 
   @Test
   public void getBlocksByLimit() {
-    BlockList blocksByLimit = wallet.getBlocksByLimitNext(3, 2);
-    Assert.assertTrue("getBlocksByLimit1", blocksByLimit.getBlockList().contains(block3));
-    Assert.assertTrue("getBlocksByLimit2", blocksByLimit.getBlockList().contains(block4));
-    blocksByLimit = wallet.getBlocksByLimitNext(0, 5);
+    BlockList blocksByLimit = wallet.getBlocksByLimitNext(4, 2);
+    Assert.assertTrue("getBlocksByLimit1", blocksByLimit.getBlockList().contains(block6));
+    Assert.assertTrue("getBlocksByLimit2", blocksByLimit.getBlockList().contains(block5));
+    blocksByLimit = wallet.getBlocksByLimitNext(0, 6);
     Assert.assertTrue("getBlocksByLimit3",
         blocksByLimit.getBlockList().contains(manager.getGenesisBlock().getInstance()));
     Assert.assertTrue("getBlocksByLimit4", blocksByLimit.getBlockList().contains(block1));
@@ -288,6 +305,7 @@ public class WalletTest {
     Assert.assertTrue("getBlocksByLimit6", blocksByLimit.getBlockList().contains(block3));
     Assert.assertTrue("getBlocksByLimit7", blocksByLimit.getBlockList().contains(block4));
     Assert.assertFalse("getBlocksByLimit8", blocksByLimit.getBlockList().contains(block5));
+    Assert.assertFalse("getBlocksByLimit9", blocksByLimit.getBlockList().contains(block6));
   }
 
   @Ignore
@@ -308,13 +326,16 @@ public class WalletTest {
     transactionById = wallet.getTransactionById(
         ByteString.copyFrom(new TransactionWrapper(transaction5).getTransactionId().getBytes()));
     Assert.assertEquals("getTransactionById5", transaction5, transactionById);
+    transactionById = wallet.getTransactionById(
+            ByteString.copyFrom(new TransactionWrapper(transaction6).getTransactionId().getBytes()));
+    Assert.assertEquals("getTransactionById6", transaction6, transactionById);
   }
 
   @Test
   public void getBlockByLatestNum() {
     BlockList blockByLatestNum = wallet.getBlockByLatestNum(2);
-    Assert.assertTrue("getBlockByLatestNum1", blockByLatestNum.getBlockList().contains(block5));
-    Assert.assertTrue("getBlockByLatestNum2", blockByLatestNum.getBlockList().contains(block4));
+    Assert.assertTrue("getBlockByLatestNum1", blockByLatestNum.getBlockList().contains(block6));
+    Assert.assertTrue("getBlockByLatestNum2", blockByLatestNum.getBlockList().contains(block5));
   }
 
   @Test
