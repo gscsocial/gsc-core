@@ -5,7 +5,7 @@ public interface Parameter {
   interface ChainConstant {
 
     long TRANSFER_FEE = 0; // free
-    long ASSET_ISSUE_FEE = 1024000000; // 1024 GSC 1024*10^6
+    long ASSET_ISSUE_FEE = 1000000000; // 1024 GSC 1024*10^6  adjust 1024 to 1000 modified by snow 8/28/2018
     long VOTE_WITNESS_FEE = 10000; // 10000 drop
     long CREATE_ACCOUNT_FEE = 10000; // 10000 drop
     long WITNESS_PAY_PER_BLOCK = 32000000;  // 32gsc

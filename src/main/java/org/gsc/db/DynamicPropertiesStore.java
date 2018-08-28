@@ -195,7 +195,7 @@ public class DynamicPropertiesStore extends GscStoreWithRevoking<BytesWrapper> {
     try {
       this.getAccountUpgradeCost();
     } catch (IllegalArgumentException e) {
-      this.saveAccountUpgradeCost(9_999_000_000L);
+      this.saveAccountUpgradeCost(10_000_000_000L);
     }
 
     try {
