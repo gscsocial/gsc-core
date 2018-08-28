@@ -109,7 +109,7 @@ public class WalletTestAssetIssue005 {
     Assert.assertFalse(assetIssueByName.getUrl().isEmpty());
     Assert.assertFalse(assetIssueByName.getDescription().isEmpty());
     Assert.assertTrue(assetIssueByName.getTotalSupply() > 0);
-    Assert.assertTrue(assetIssueByName.getGscNum() > 0);
+    Assert.assertTrue(assetIssueByName.getTrxNum() > 0);
 
     //Get asset issue by name failed when the name is not correct.There is no exception.
     String wrongName = name + "_wrong";
@@ -118,7 +118,7 @@ public class WalletTestAssetIssue005 {
     assetIssueByName = blockingStubFull.getAssetIssueByName(request);
 
     Assert.assertFalse(assetIssueByName.getTotalSupply() > 0);
-    Assert.assertFalse(assetIssueByName.getGscNum() > 0);
+    Assert.assertFalse(assetIssueByName.getTrxNum() > 0);
     Assert.assertTrue(assetIssueByName.getUrl().isEmpty());
     Assert.assertTrue(assetIssueByName.getDescription().isEmpty());
 
@@ -129,7 +129,7 @@ public class WalletTestAssetIssue005 {
     assetIssueByName = blockingStubFull.getAssetIssueByName(request);
 
     Assert.assertFalse(assetIssueByName.getTotalSupply() > 0);
-    Assert.assertFalse(assetIssueByName.getGscNum() > 0);
+    Assert.assertFalse(assetIssueByName.getTrxNum() > 0);
     Assert.assertTrue(assetIssueByName.getUrl().isEmpty());
     Assert.assertTrue(assetIssueByName.getDescription().isEmpty());
 
@@ -163,7 +163,7 @@ public class WalletTestAssetIssue005 {
       builder.setOwnerAddress(ByteString.copyFrom(address));
       builder.setName(ByteString.copyFrom(name.getBytes()));
       builder.setTotalSupply(totalSupply);
-      builder.setGscNum(trxNum);
+      builder.setTrxNum(trxNum);
       builder.setNum(icoNum);
       builder.setStartTime(startTime);
       builder.setEndTime(endTime);
