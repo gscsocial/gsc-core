@@ -160,7 +160,7 @@ public class AssetIssueOperator extends AbstractOperator {
       throw new ContractValidateException("TotalSupply must greater than 0!");
     }
 
-    if (assetIssueContract.getTrxNum() <= 0) {
+    if (assetIssueContract.getGscNum() <= 0) {
       throw new ContractValidateException("GscNum must greater than 0!");
     }
 
