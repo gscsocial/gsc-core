@@ -4,25 +4,25 @@
 .DS_Store
 
 # gradle
-.gradle
-build
+.gradle/
+build/
 
 # log
-logs
-consensus-logs
+logs/
+consensus-logs/
 
 # lombok
-out
+out/
 
 # levelDB
-tron-data
+tron-data/
 database*
 
 # database
-database
+database/
 
-# doc
-doc
+# docs
+docs/
 
 # gossip
 pernodedata.*
@@ -45,7 +45,7 @@ src/main/resources/META-INF/
 /.apt_generated/
 
 # output directory
-/output-directory/
+output-directory/
 
 /output_manager/
 /output_witness/
