@@ -1,6 +1,6 @@
 # Protobuf protocol
 
-## The protocol of TRON is defined by Google Protobuf and contains a range of layers, from account, block to transfer.
+## The protocol of GSC is defined by Google Protobuf and contains a range of layers, from account, block to transfer.
 
 + There are 3 types of account—basic account, asset release account and contract account, and attributes included in each account are name, types, address, balance and related asset.
 + A basic account is able to apply to be a validation node, which has several parameters, including extra attributes, public key, URL, voting statistics, history performance, etc.
@@ -209,7 +209,7 @@
      `owner_address`: the address for contract owner – e.g. “_0xu82h…7237_”.  
      `name`: the name for this contract – e.g. “Billscontract”.  
      `total_supply`: the maximum supply of this asset – e.g. _1000000000_.  
-     `trx_num`: the number of TRONIX – e.g._232241_.  
+     `trx_num`: the number of GSCIX – e.g._232241_.  
      `num`: number of corresponding asset.  
      `start_time`: the starting date of this contract – e.g._20170312_.  
      `end_time`: the expiring date of this contract – e.g. _20170512_.  
