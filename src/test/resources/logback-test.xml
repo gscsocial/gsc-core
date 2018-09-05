@@ -13,11 +13,11 @@
 
   <appender name="FILE"
     class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>./logs/tron-test.log</file>
+    <file>./logs/gsc-test.log</file>
     <rollingPolicy
       class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
       <!-- rollover daily -->
-      <fileNamePattern>./logs/tron-test-%d{yyyy-MM-dd}.%i.log.zip
+      <fileNamePattern>./logs/gsc-test-%d{yyyy-MM-dd}.%i.log.zip
       </fileNamePattern>
       <!-- each file should be at most 100MB, keep 60 days worth of history, but at most 20GB -->
       <maxFileSize>100MB</maxFileSize>

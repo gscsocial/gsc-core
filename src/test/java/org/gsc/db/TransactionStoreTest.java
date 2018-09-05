@@ -37,7 +37,7 @@ public class TransactionStoreTest {
   private static final byte[] key2 = TransactionStoreTest.randomBytes(21);
 
 
-  private static final String URL = "https://tron.network";
+  private static final String URL = "https://gscan.social";
 
   private static final String ACCOUNT_NAME = "ownerF";
   private static final String OWNER_ADDRESS =

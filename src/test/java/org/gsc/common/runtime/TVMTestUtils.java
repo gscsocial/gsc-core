@@ -27,7 +27,7 @@ import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.SmartContract;
 import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
-import stest.tron.wallet.common.client.WalletClient;
+import org.gsc.common.overlay.WalletClient;
 
 
 /**

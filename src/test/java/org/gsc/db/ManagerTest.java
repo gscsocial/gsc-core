@@ -179,15 +179,15 @@ public class ManagerTest {
     logger.info("------------");
     WitnessWrapper witnessCapsulef =
         new WitnessWrapper(
-            ByteString.copyFrom(ByteArray.fromHexString("0x0011")), "www.tron.net/first");
+            ByteString.copyFrom(ByteArray.fromHexString("0x0011")), "www.gsc.net/first");
     witnessCapsulef.setIsJobs(true);
     WitnessWrapper witnessCapsules =
         new WitnessWrapper(
-            ByteString.copyFrom(ByteArray.fromHexString("0x0012")), "www.tron.net/second");
+            ByteString.copyFrom(ByteArray.fromHexString("0x0012")), "www.gsc.net/second");
     witnessCapsules.setIsJobs(true);
     WitnessWrapper witnessCapsulet =
         new WitnessWrapper(
-            ByteString.copyFrom(ByteArray.fromHexString("0x0013")), "www.tron.net/three");
+            ByteString.copyFrom(ByteArray.fromHexString("0x0013")), "www.gsc.net/three");
     witnessCapsulet.setIsJobs(false);
 
     dbManager

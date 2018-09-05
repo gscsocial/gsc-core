@@ -45,7 +45,7 @@ public class AssetIssueOperatorTest {
   private static final int TRX_NUM = 10000;
   private static final int NUM = 100000;
   private static final String DESCRIPTION = "myCoin";
-  private static final String URL = "tron-my.com";
+  private static final String URL = "gsc.social";
   private static final String ASSET_NAME_SECOND = "asset_name2";
   private static long now = 0;
   private static long startTime = 0;

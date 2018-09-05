@@ -39,8 +39,8 @@ public class WitnessUpdateOperatorTest {
   private static final String OWNER_ADDRESS_NOT_WITNESS;
   private static final String OWNER_ADDRESS_NOT_WITNESS_ACCOUNT_NAME = "test_account1";
   private static final String OWNER_ADDRESS_NOTEXIST;
-  private static final String URL = "https://tron.network";
-  private static final String NewURL = "https://tron.org";
+  private static final String URL = "https://gscan.social";
+  private static final String NewURL = "https://gsc.social";
   private static final String OWNER_ADDRESS_INVALID = "aaaa";
 
   static {

@@ -43,7 +43,7 @@ public class VoteWitnessOperatorTest {
   private static final String OWNER_ADDRESS;
   private static final String WITNESS_NAME = "witness";
   private static final String WITNESS_ADDRESS;
-  private static final String URL = "https://tron.network";
+  private static final String URL = "https://gscan.social";
   private static final String ADDRESS_INVALID = "aaaa";
   private static final String WITNESS_ADDRESS_NOACCOUNT;
   private static final String OWNER_ADDRESS_NOACCOUNT;
@@ -468,14 +468,14 @@ public class VoteWitnessOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      fail("The total number of votes[" + 1000000 + "] is greater than the tronPower["
+      fail("The total number of votes[" + 1000000 + "] is greater than the gscPower["
           + balanceNotSufficientCapsule.getGSCPower() + "]");
     } catch (ContractValidateException e) {
       Assert.assertEquals(0, dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS_BALANCENOTSUFFICIENT)).getVotesList().size());
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert
-          .assertEquals("The total number of votes[" + 1000000 + "] is greater than the tronPower["
+          .assertEquals("The total number of votes[" + 1000000 + "] is greater than the gscPower["
               + balanceNotSufficientCapsule.getGSCPower() + "]", e.getMessage());
       witnessController.updateWitness();
       WitnessWrapper witnessCapsule = witnessController

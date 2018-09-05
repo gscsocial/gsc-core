@@ -117,72 +117,72 @@ public class AccountVoteWitnessTest {
 
   private List<AccountWrapper> getAccountList() {
     final List<AccountWrapper> accountWrapperList = Lists.newArrayList();
-    final AccountWrapper accountTron =
+    final AccountWrapper account =
         new AccountWrapper(
             ByteString.copyFrom("00000000001".getBytes()),
-            ByteString.copyFromUtf8("Tron"),
+            ByteString.copyFromUtf8("1"),
             AccountType.Normal);
-    final AccountWrapper accountMarcus =
+    final AccountWrapper account1 =
         new AccountWrapper(
             ByteString.copyFrom("00000000002".getBytes()),
-            ByteString.copyFromUtf8("Marcus"),
+            ByteString.copyFromUtf8("2"),
             AccountType.Normal);
-    final AccountWrapper accountOlivier =
+    final AccountWrapper account2 =
         new AccountWrapper(
             ByteString.copyFrom("00000000003".getBytes()),
-            ByteString.copyFromUtf8("Olivier"),
+            ByteString.copyFromUtf8("3"),
             AccountType.Normal);
-    final AccountWrapper accountSasaXie =
+    final AccountWrapper account3 =
         new AccountWrapper(
             ByteString.copyFrom("00000000004".getBytes()),
-            ByteString.copyFromUtf8("SasaXie"),
+            ByteString.copyFromUtf8("4"),
             AccountType.Normal);
-    final AccountWrapper accountVivider =
+    final AccountWrapper account4 =
         new AccountWrapper(
             ByteString.copyFrom("00000000005".getBytes()),
-            ByteString.copyFromUtf8("Vivider"),
+            ByteString.copyFromUtf8("5"),
             AccountType.Normal);
-    // accountTron addVotes
-    accountTron.addVotes(accountMarcus.getAddress(), 100);
-    accountTron.addVotes(accountOlivier.getAddress(), 100);
-    accountTron.addVotes(accountSasaXie.getAddress(), 100);
-    accountTron.addVotes(accountVivider.getAddress(), 100);
+    // account addVotes
+    account.addVotes(account1.getAddress(), 100);
+    account.addVotes(account2.getAddress(), 100);
+    account.addVotes(account3.getAddress(), 100);
+    account.addVotes(account4.getAddress(), 100);
 
-    // accountMarcus addVotes
-    accountMarcus.addVotes(accountTron.getAddress(), 100);
-    accountMarcus.addVotes(accountOlivier.getAddress(), 100);
-    accountMarcus.addVotes(accountSasaXie.getAddress(), 100);
-    accountMarcus.addVotes(ByteString.copyFrom("00000000006".getBytes()), 100);
-    accountMarcus.addVotes(ByteString.copyFrom("00000000007".getBytes()), 100);
-    // accountOlivier addVotes
-    accountOlivier.addVotes(accountTron.getAddress(), 100);
-    accountOlivier.addVotes(accountMarcus.getAddress(), 100);
-    accountOlivier.addVotes(accountSasaXie.getAddress(), 100);
-    accountOlivier.addVotes(accountVivider.getAddress(), 100);
-    // accountSasaXie addVotes
-    // accountVivider addVotes
-    accountWrapperList.add(accountTron);
-    accountWrapperList.add(accountMarcus);
-    accountWrapperList.add(accountOlivier);
-    accountWrapperList.add(accountSasaXie);
-    accountWrapperList.add(accountVivider);
+    // account1 addVotes
+    account1.addVotes(account.getAddress(), 100);
+    account1.addVotes(account2.getAddress(), 100);
+    account1.addVotes(account3.getAddress(), 100);
+    account1.addVotes(ByteString.copyFrom("00000000006".getBytes()), 100);
+    account1.addVotes(ByteString.copyFrom("00000000007".getBytes()), 100);
+    // account2 addVotes
+    account2.addVotes(account.getAddress(), 100);
+    account2.addVotes(account1.getAddress(), 100);
+    account2.addVotes(account3.getAddress(), 100);
+    account2.addVotes(account4.getAddress(), 100);
+    // account3 addVotes
+    // account4 addVotes
+    accountWrapperList.add(account);
+    accountWrapperList.add(account1);
+    accountWrapperList.add(account2);
+    accountWrapperList.add(account3);
+    accountWrapperList.add(account4);
     return accountWrapperList;
   }
 
   private List<WitnessWrapper> getWitnessList() {
     final List<WitnessWrapper> witnessCapsuleList = Lists.newArrayList();
-    final WitnessWrapper witnessTron =
+    final WitnessWrapper witness1 =
         new WitnessWrapper(ByteString.copyFrom("00000000001".getBytes()), 0, "");
-    final WitnessWrapper witnessOlivier =
+    final WitnessWrapper witness2 =
         new WitnessWrapper(ByteString.copyFrom("00000000003".getBytes()), 100, "");
-    final WitnessWrapper witnessVivider =
+    final WitnessWrapper witness3 =
         new WitnessWrapper(ByteString.copyFrom("00000000005".getBytes()), 200, "");
-    final WitnessWrapper witnessSenaLiu =
+    final WitnessWrapper witness4 =
         new WitnessWrapper(ByteString.copyFrom("00000000006".getBytes()), 300, "");
-    witnessCapsuleList.add(witnessTron);
-    witnessCapsuleList.add(witnessOlivier);
-    witnessCapsuleList.add(witnessVivider);
-    witnessCapsuleList.add(witnessSenaLiu);
+    witnessCapsuleList.add(witness1);
+    witnessCapsuleList.add(witness2);
+    witnessCapsuleList.add(witness3);
+    witnessCapsuleList.add(witness4);
     return witnessCapsuleList;
   }
 }

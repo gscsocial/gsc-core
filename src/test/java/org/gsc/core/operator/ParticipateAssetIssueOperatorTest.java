@@ -48,7 +48,7 @@ public class ParticipateAssetIssueOperatorTest {
   private static final int NUM = 2147483647;
   private static final int VOTE_SCORE = 2;
   private static final String DESCRIPTION = "TRX";
-  private static final String URL = "https://tron.network";
+  private static final String URL = "https://gscan.social";
 
   static {
     Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);

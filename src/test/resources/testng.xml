@@ -3,15 +3,15 @@
 
 <suite name="Wallet case">
   <listeners>
-    <listener class-name="stest.tron.wallet.common.client.utils.RetryListener"/>
+    <listener class-name="org.gsc.common.overlay.util.RetryListener"/>
   </listeners>
     <test name="Debug case" preserve-order="true">
                 <packages>
-                    <package name="stest.tron.wallet.*">
+                    <package name="org.gsc.wallet.*">
                     </package>
                 </packages>
 <!--        <classes>
-            <class name="stest.tron.wallet.onlinestress.TestNetErc721Cat"/>
+            <class name="org.gsc.wallet.onlinestress.TestNetErc721Cat"/>
         </classes>-->
     </test>
 </suite>
