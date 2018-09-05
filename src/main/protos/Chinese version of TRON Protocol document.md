@@ -1,6 +1,6 @@
-# TRON protobuf protocol
+# GSC protobuf protocol
 
-## TRON使用Google protobuf协议，协议内容涉及到账户，区块，传输多个层面。
+## GSC使用Google protobuf协议，协议内容涉及到账户，区块，传输多个层面。
 
 +	账户有基本账户、资产发布账户和合约账户三种类型。一个账户包含：账户名称，账户类型，地址，余额，投票，其他资产6种属性。
 +	更进一步的，基本账户可以申请成为验证节点，验证节点具有额外的属性，投票统计数目，公钥，URL，以及历史表现等参数。
@@ -16,9 +16,9 @@
    一个`Account`包含7种参数：  
    `account_name`：该账户的名称——比如： ”_SicCongsAccount_”。  
    `type`:该账户的类型——比如：  _0_ 代表的账户类型是`Normal`。  
-   `balance`:该账户的TRX余额——比如：_4213312_。  
+   `balance`:该账户的GSC余额——比如：_4213312_。  
    `votes`:账户所得投票数——比如：_{(“0x1b7w…9xj3”,323),(“0x8djq…j12m”,88),…,(“0x82nd…mx6i”,10001)}_。  
-   `asset`：除TRX以外账户上的其他资产——比如：_{<”WishToken”,66666>,<”Dogie”,233>}_。
+   `asset`：除GSC以外账户上的其他资产——比如：_{<”WishToken”,66666>,<”Dogie”,233>}_。
    `latest_operation_time`: 该账户的最新活跃时间。
    
     // Account 
@@ -136,7 +136,7 @@
      }
      
    `TransferContract`包含3种参数：  
-   `amount`：TRX数量——比如：_12534_。  
+   `amount`：GSC数量——比如：_12534_。  
    `to_address`： 接收方地址——比如：_“0xu82h…7237”_。  
    `owner_address`：合约持有人地址——比如：_“0xu82h…7237”_。
 
@@ -214,7 +214,7 @@
    `start_time`：开始时间——比如：_20170312_。  
    `end_time`：结束时间——比如：_20170512_。  
    `vote_score`：合约的评分——比如：_12343_。  
-   `description`：合约的描述——比如：_”trondada”_。  
+   `description`：合约的描述——比如：_”GSCdada”_。  
    `url`：合约的url地址链接。
 
     message AssetIssueContract {   
