@@ -32,8 +32,6 @@ shareddata.*
 # protobuf generated classes
 src/main/gen
 
-src/main/java/org/gsc/core/bftconsensus
-src/test/java/org/gsc/consensus2
 src/test/java/org/gsc/wallet/onlineStress
 src/test/java/org/gsc/wallet/wallettestp0
 src/main/java/META-INF/
