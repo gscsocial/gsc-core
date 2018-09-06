@@ -56,7 +56,6 @@
   <logger name="DB" level="INFO"/>
   <logger name="Command" level="INFO"/>
   <logger name="UTXOSet" level="INFO"/>
-  <logger name="UTXOStore" level="INFO"/>
   <logger name="TransactionMessageHandler" level="INFO"/>
   <logger name="BlockMessageHandler" level="INFO"/>
   <logger name="BlockStores" level="INFO"/>
