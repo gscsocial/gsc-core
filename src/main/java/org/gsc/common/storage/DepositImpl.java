@@ -1,12 +1,12 @@
 package org.gsc.common.storage;
 
-import static org.gsc.common.runtime.utils.MUtil.convertTogscAddress;
+import static org.gsc.runtime.utils.MUtil.convertTogscAddress;
 
 import com.google.protobuf.ByteString;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicLong;
-import org.gsc.common.runtime.vm.DataWord;
-import org.gsc.common.runtime.vm.program.Storage;
+import org.gsc.runtime.vm.DataWord;
+import org.gsc.runtime.vm.program.Storage;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.BlockWrapper;

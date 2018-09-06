@@ -19,7 +19,7 @@ import java.util.Arrays;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.runtime.vm.DataWord;
+import org.gsc.runtime.vm.DataWord;
 import org.gsc.common.utils.Sha256Hash;
 
 

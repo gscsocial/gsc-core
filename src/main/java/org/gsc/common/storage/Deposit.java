@@ -1,7 +1,7 @@
 package org.gsc.common.storage;
 
-import org.gsc.common.runtime.vm.DataWord;
-import org.gsc.common.runtime.vm.program.Storage;
+import org.gsc.runtime.vm.DataWord;
+import org.gsc.runtime.vm.program.Storage;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.ContractWrapper;
