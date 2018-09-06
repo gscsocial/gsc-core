@@ -1,4 +1,4 @@
-package org.gsc.common.runtime.vm;
+package org.gsc.runtime.vm;
 
 
 import static junit.framework.TestCase.fail;
@@ -24,7 +24,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spongycastle.util.Arrays;
 import org.spongycastle.util.encoders.Hex;
-import org.gsc.common.runtime.vm.PrecompiledContracts.PrecompiledContract;
+import org.gsc.runtime.vm.PrecompiledContracts.PrecompiledContract;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.ByteUtil;
 import org.gsc.common.utils.FileUtil;

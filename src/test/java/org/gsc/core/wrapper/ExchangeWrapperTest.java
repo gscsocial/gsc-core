@@ -70,7 +70,7 @@ public class ExchangeWrapperTest {
    * create temp Capsule test need.
    */
   @Before
-  public void createExchangeCapsule() {
+  public void createExchangeWapper() {
     dbManager.getDynamicPropertiesStore().saveLatestBlockHeaderTimestamp(0);
 
     long now = dbManager.getHeadBlockTimeStamp();

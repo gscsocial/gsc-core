@@ -1,4 +1,4 @@
-package org.gsc.wallet.wallettestp0;
+package org.gsc.wallet.wallettestp;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;

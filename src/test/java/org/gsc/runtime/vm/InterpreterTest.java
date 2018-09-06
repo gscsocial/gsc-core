@@ -13,16 +13,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.gsc.common.runtime.vm;
+package org.gsc.runtime.vm;
 
 import static org.junit.Assert.assertTrue;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.gsc.protos.Protocol.Transaction;
-import org.gsc.common.runtime.vm.program.InternalTransaction;
-import org.gsc.common.runtime.vm.program.Program;
-import org.gsc.common.runtime.vm.program.invoke.ProgramInvokeMockImpl;
+import org.gsc.runtime.vm.program.InternalTransaction;
+import org.gsc.runtime.vm.program.Program;
+import org.gsc.runtime.vm.program.invoke.ProgramInvokeMockImpl;
 
 @Slf4j
 public class InterpreterTest {

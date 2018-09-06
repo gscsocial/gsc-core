@@ -1,4 +1,4 @@
-package org.gsc.common.runtime;
+package org.gsc.runtime;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -12,7 +12,7 @@ import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.crypto.Hash;
 import org.spongycastle.util.encoders.Hex;
-import org.gsc.common.runtime.vm.program.invoke.ProgramInvokeFactoryImpl;
+import org.gsc.runtime.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.gsc.common.storage.DepositImpl;
 import org.gsc.core.Wallet;
 import org.gsc.db.TransactionTrace;

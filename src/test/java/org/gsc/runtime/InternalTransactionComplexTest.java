@@ -1,4 +1,4 @@
-package org.gsc.common.runtime;
+package org.gsc.runtime;
 
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 import org.testng.Assert;
-import org.gsc.common.runtime.vm.DataWord;
+import org.gsc.runtime.vm.DataWord;
 import org.gsc.common.storage.DepositImpl;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;

@@ -1,4 +1,4 @@
-package org.gsc.common.runtime;
+package org.gsc.runtime;
 
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
