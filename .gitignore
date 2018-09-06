@@ -15,7 +15,7 @@ consensus-logs/
 out/
 
 # levelDB
-tron-data/
+gsc-data/
 database*
 
 # database
@@ -32,8 +32,10 @@ shareddata.*
 # protobuf generated classes
 src/main/gen
 
-src/main/java/org/tron/core/bftconsensus
-src/test/java/org/tron/consensus2
+src/main/java/org/gsc/core/bftconsensus
+src/test/java/org/gsc/consensus2
+src/test/java/org/gsc/wallet/onlineStress
+src/test/java/org/gsc/wallet/wallettestp0
 src/main/java/META-INF/
 src/main/resources/META-INF/
 /bin/
