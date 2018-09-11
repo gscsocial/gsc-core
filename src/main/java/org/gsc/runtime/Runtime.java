@@ -95,7 +95,7 @@ public class Runtime {
   /**
    * For blockCap's trx run
    */
-  public Runtime(TransactionTrace trace, BlockWrapper block, Deposit deosit,
+  public Runtime(TransactionTrace trace, BlockWrapper block, Deposit deposit,
                  ProgramInvokeFactory programInvokeFactory) {
     this.trace = trace;
     this.trx = trace.getTrx().getInstance();
@@ -107,7 +107,7 @@ public class Runtime {
       this.blockCap = new BlockWrapper(Block.newBuilder().build());
       this.executorType = ET_PRE_TYPE;
     }
-    this.deposit = deosit;
+    this.deposit = deposit;
     this.programInvokeFactory = programInvokeFactory;
     this.energyProcessor = new EnergyProcessor(deposit.getDbManager());
     this.storageMarket = new StorageMarket(deposit.getDbManager());
