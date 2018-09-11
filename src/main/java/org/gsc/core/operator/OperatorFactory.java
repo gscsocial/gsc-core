@@ -24,16 +24,16 @@ public class OperatorFactory {
   /**
    * create actuator.
    */
-  public static List<Operator> createActuator(TransactionWrapper transactionCapsule,
+  public static List<Operator> createActuator(TransactionWrapper transactionWrapper,
                                               Manager manager) {
     List<Operator> operatorList = Lists.newArrayList();
-    if (null == transactionCapsule || null == transactionCapsule.getInstance()) {
+    if (null == transactionWrapper || null == transactionWrapper.getInstance()) {
       logger.info("transactionCapsule or Transaction is null");
       return operatorList;
     }
 
     Preconditions.checkNotNull(manager, "manager is null");
-    Protocol.Transaction.raw rawData = transactionCapsule.getInstance().getRawData();
+    Protocol.Transaction.raw rawData = transactionWrapper.getInstance().getRawData();
     rawData.getContractList()
         .forEach(contract -> operatorList.add(getActuatorByContract(contract, manager)));
     return operatorList;

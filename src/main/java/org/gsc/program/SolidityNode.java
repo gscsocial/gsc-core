@@ -155,7 +155,6 @@ public class SolidityNode {
         } catch (UnsupportVMException e) {
           throw new BadBlockException(e.getMessage());
         }
-
       } else {
         break;
       }
@@ -181,7 +180,7 @@ public class SolidityNode {
    */
   public static void main(String[] args) throws InterruptedException {
     logger.info("Solidity node running.");
-    Args.setParam(args, Constant.TESTNET_CONF);
+    Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
     Args cfgArgs = Args.getInstance();
 
     if (StringUtils.isEmpty(cfgArgs.getTrustNodeAddr())) {

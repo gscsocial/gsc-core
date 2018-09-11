@@ -33,7 +33,7 @@ shareddata.*
 src/main/gen
 
 src/test/java/org/gsc/wallet/onlineStress
-src/test/java/org/gsc/wallet/wallettestp0
+src/test/java/org/gsc/wallet/wallettestp
 src/main/java/META-INF/
 src/main/resources/META-INF/
 /bin/
@@ -46,6 +46,7 @@ src/main/resources/META-INF/
 
 # output directory
 output-directory/
+/output_InheritanceTest/
 
 /output_manager/
 /output_witness/

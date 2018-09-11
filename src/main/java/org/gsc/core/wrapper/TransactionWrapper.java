@@ -215,9 +215,17 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
   }
 
   public TransactionWrapper(com.google.protobuf.Message message, ContractType contractType) {
-    Transaction.raw.Builder transactionBuilder = Transaction.raw.newBuilder().addContract(
-        Transaction.Contract.newBuilder().setType(contractType).setParameter(
-            Any.pack(message)).build());
+
+    Transaction.raw.Builder transactionBuilder = Transaction.raw.newBuilder().addContract
+            (
+        Transaction.Contract.newBuilder().setType(contractType).setParameter(Any.pack(message))
+                .build()
+    );
+
+    //Transaction.raw.Builder transactionBuilder2 = Transaction.raw.newBuilder().addContract(
+     //       Transaction.Contract.newBuilder().setType(ContractType.CreateSmartContract).setParameter(Any.pack(message)).build()
+    //);
+    //transaction = Transaction.newBuilder().setRawData(transactionBuilder2.build()).build();
     transaction = Transaction.newBuilder().setRawData(transactionBuilder.build()).build();
   }
 

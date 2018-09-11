@@ -57,12 +57,12 @@ public class TriggerSmartContractServlet extends HttpServlet {
           .collect(Collectors.joining(System.lineSeparator()));
       JsonFormat.merge(contract, build);
       JSONObject jsonObject = JSONObject.parseObject(contract);
-      String selector = jsonObject.getString("function_selector");
-      String parameter = jsonObject.getString("parameter");
+      String selector = jsonObject.getString("function_selector");//
+      String parameter = jsonObject.getString("parameter");//
       String data = parseMethod(selector, parameter);
       build.setData(ByteString.copyFrom(ByteArray.fromHexString(data)));
 
-      long feeLimit = jsonObject.getLongValue("fee_limit");
+      long feeLimit = jsonObject.getLongValue("fee_limit");//
 
       TransactionWrapper trxCap = wallet
           .createTransactionCapsule(build.build(), ContractType.TriggerSmartContract);

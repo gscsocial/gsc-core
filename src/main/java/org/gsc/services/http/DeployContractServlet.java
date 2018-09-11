@@ -37,10 +37,10 @@ public class DeployContractServlet extends HttpServlet {
           .collect(Collectors.joining(System.lineSeparator()));
       CreateSmartContract.Builder build = CreateSmartContract.newBuilder();
       JSONObject jsonObject = JSONObject.parseObject(contract);
-      byte[] ownerAddress = ByteArray.fromHexString(jsonObject.getString("owner_address"));
+      byte[] ownerAddress = ByteArray.fromHexString(jsonObject.getString("owner_address")); //
       build.setOwnerAddress(ByteString.copyFrom(ownerAddress));
 
-      String abi = jsonObject.getString("abi");
+      String abi = jsonObject.getString("abi");//
       StringBuffer abiSB = new StringBuffer("{");
       abiSB.append("\"entrys\":");
       abiSB.append(abi);
@@ -48,21 +48,21 @@ public class DeployContractServlet extends HttpServlet {
       ABI.Builder abiBuilder = ABI.newBuilder();
       JsonFormat.merge(abiSB.toString(), abiBuilder);
 
-      long feeLimit = jsonObject.getLongValue("fee_limit");
+      long feeLimit = jsonObject.getLongValue("fee_limit");//
 
       SmartContract.Builder smartBuilder = SmartContract.newBuilder();
       smartBuilder.setAbi(abiBuilder)
-          .setCallValue(jsonObject.getLongValue("call_value"))
-          .setConsumeUserResourcePercent(jsonObject.getLongValue("consume_user_resource_percent"));
+          .setCallValue(jsonObject.getLongValue("call_value"))//
+          .setConsumeUserResourcePercent(jsonObject.getLongValue("consume_user_resource_percent"));//
       if (!ArrayUtils.isEmpty(ownerAddress)) {
         smartBuilder.setOriginAddress(ByteString.copyFrom(ownerAddress));
       }
 
-      byte[] byteCode = ByteArray.fromHexString(jsonObject.getString("bytecode"));
+      byte[] byteCode = ByteArray.fromHexString(jsonObject.getString("bytecode"));//
       if (!ArrayUtils.isEmpty(byteCode)) {
         smartBuilder.setBytecode(ByteString.copyFrom(byteCode));
       }
-      String name = jsonObject.getString("name");
+      String name = jsonObject.getString("name");//
       if (!Strings.isNullOrEmpty(name)) {
         smartBuilder.setName(name);
       }

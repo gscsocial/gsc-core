@@ -1,6 +1,5 @@
 package org.gsc.runtime;
 
-import java.io.File;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.application.GSCApplicationContext;
 import org.gsc.config.DefaultConfig;
@@ -11,7 +10,6 @@ import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 import org.testng.Assert;
 import org.gsc.common.storage.DepositImpl;
-import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
 import org.gsc.db.Manager;
@@ -70,6 +68,9 @@ public class InheritanceTest {
       throws ContractExeException, ReceiptCheckErrException, TransactionTraceException, ContractValidateException {
     String contractName = "barContract";
     byte[] callerAddress = Hex.decode(OWNER_ADDRESS);
+    System.out.println("-------------------------------------------------------------------");
+    System.out.println(OWNER_ADDRESS);
+    System.out.println(Hex.decode(OWNER_ADDRESS).toString());
     String ABI = "[{\"constant\":false,\"inputs\":[],\"name\":\"getName\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],"
         + "\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],"
         + "\"name\":\"getId\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\","
@@ -89,9 +90,8 @@ public class InheritanceTest {
     long fee = 100000000;
     long consumeUserResourcePercent = 0;
 
-    byte[] contractAddress = TVMTestUtils.deployContractWholeProcessReturnContractAddress(
+     byte[] contractAddress = TVMTestUtils.deployContractWholeProcessReturnContractAddress(
         contractName,callerAddress,ABI,code,value,fee,consumeUserResourcePercent,null,deposit,null);
-
 
     /* =================================== CALL getName() return child value =================================== */
     byte[] triggerData1 = TVMTestUtils.parseABI("getName()","");
@@ -130,12 +130,13 @@ public class InheritanceTest {
   @AfterClass
   public static void destroy() {
     Args.clearParam();
+    /*
     if (FileUtil.deleteDir(new File(dbPath))) {
       logger.info("Release resources successful.");
     } else {
       logger.info("Release resources failure.");
     }
+    */
     context.destroy();
   }
-
 }

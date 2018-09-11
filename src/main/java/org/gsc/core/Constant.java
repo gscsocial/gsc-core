@@ -30,13 +30,15 @@ public class Constant {
   //config for testnet, mainnet, beta
   public static final String TESTNET_CONF = "config.conf";
 
+  public static final String LOCAL_TESTNET_CONF = "config-localtest.conf";
+  public static final String TEST_NET_CONF = "config-test-net.conf";
   //config for junit test
   public static final String TEST_CONF = "config-test.conf";
 
   public static final String DATABASE_DIR = "storage.directory";
 
-  public static final byte ADD_PRE_FIX_BYTE_MAINNET = (byte) 0x26;   //26 + address
-  public static final String ADD_PRE_FIX_STRING_MAINNET = "26";
+  public static final byte ADD_PRE_FIX_BYTE_MAINNET = (byte) 0x41;   //26 + address
+  public static final String ADD_PRE_FIX_STRING_MAINNET = "41";
   public static final byte ADD_PRE_FIX_BYTE_TESTNET = (byte) 0xa0;   //a0 + address
   public static final String ADD_PRE_FIX_STRING_TESTNET = "a0";
   public static final int ADDRESS_SIZE = 42;

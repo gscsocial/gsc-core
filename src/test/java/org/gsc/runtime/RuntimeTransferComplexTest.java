@@ -146,6 +146,7 @@ public class RuntimeTransferComplexTest {
 
 
     String selectorStr = "transferTo(address)";
+    //System.out.println(transferTo(address));
     String params = "000000000000000000000000548794500882809695a8a687866e76d4271a1abc"; //TRANSFER_TO
     byte[] triggerData = TVMTestUtils.parseABI(selectorStr,params);
 

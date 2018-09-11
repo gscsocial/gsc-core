@@ -58,6 +58,13 @@ public class TVMTestUtils {
     return processTransactionAndReturnRuntime(trx, deposit, block);
   }
 
+  public static CreateSmartContract generateDeploySmartContract(String contractName, byte[] callerAddress, String code,
+                                                          String ABI, long value, long feeLimit,
+                                                          long consumeUserResourcePercent, String libraryAddressPair){
+    CreateSmartContract contract = buildCreateSmartContract(contractName, callerAddress, ABI, code,value,
+            consumeUserResourcePercent, libraryAddressPair);
+    return contract;
+  }
   /**
    * return generated smart contract Transaction, just before we use it to broadcast and push
    * transaction
@@ -69,14 +76,18 @@ public class TVMTestUtils {
 
     CreateSmartContract contract = buildCreateSmartContract(contractName, callerAddress, ABI, code,
         value, consumeUserResourcePercent, libraryAddressPair);
+
     TransactionWrapper trxCapWithoutFeeLimit = new TransactionWrapper(contract,
         ContractType.CreateSmartContract);
+
     Transaction.Builder transactionBuilder = trxCapWithoutFeeLimit.getInstance().toBuilder();
     Transaction.raw.Builder rawBuilder = trxCapWithoutFeeLimit.getInstance().getRawData()
         .toBuilder();
+
     rawBuilder.setFeeLimit(feeLimit);
     transactionBuilder.setRawData(rawBuilder);
     Transaction trx = transactionBuilder.build();
+
     return trx;
   }
 
@@ -107,6 +118,7 @@ public class TVMTestUtils {
       String ABI, String code, long value, long feeLimit, long consumeUserResourcePercent,
       String libraryAddressPair, DepositImpl deposit, Block block)
       throws ContractExeException, ReceiptCheckErrException, TransactionTraceException, ContractValidateException {
+
     Transaction trx = generateDeploySmartContractAndGetTransaction(contractName, callerAddress, ABI,
         code, value, feeLimit, consumeUserResourcePercent, libraryAddressPair);
 
@@ -134,15 +146,12 @@ public class TVMTestUtils {
     TransactionTrace trace = new TransactionTrace(trxCap, deposit.getDbManager());
     Runtime runtime = new Runtime(trace, new BlockWrapper(block), deposit,
         new ProgramInvokeFactoryImpl());
-
     // init
     trace.init();
     //exec
     trace.exec(runtime);
-
     return new TVMTestResult(runtime, trace.getReceipt(), null);
   }
-
 
   /**
    * create the Contract Instance for smart contract.
@@ -151,6 +160,7 @@ public class TVMTestUtils {
       byte[] address,
       String ABI, String code, long value, long consumeUserResourcePercent,
       String libraryAddressPair) {
+
     SmartContract.ABI abi = jsonStr2ABI(ABI);
     if (abi == null) {
       logger.error("abi is null");
