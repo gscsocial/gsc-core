@@ -166,7 +166,6 @@ public class Runtime {
 
   public BigInteger getBlockCPULeftInUs() {
 
-    // insure blockCap is not null
     BigInteger curBlockHaveElapsedCPUInUs =
         BigInteger.valueOf(
             1000 * (DateTime.now().getMillis() - blockCap.getInstance().getBlockHeader()

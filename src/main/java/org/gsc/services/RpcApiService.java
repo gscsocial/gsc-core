@@ -1277,7 +1277,23 @@ public class RpcApiService implements Service {
     @Override
     public void deployContract(org.gsc.protos.Contract.CreateSmartContract request,
         io.grpc.stub.StreamObserver<TransactionExtention> responseObserver) {
-      createTransactionExtention(request, ContractType.CreateSmartContract, responseObserver);
+      //createTransactionExtention(request, ContractType.CreateSmartContract, responseObserver);
+      TransactionExtention.Builder trxExtBuilder = TransactionExtention.newBuilder();
+      Return.Builder retBuilder = Return.newBuilder();
+      try {
+        TransactionWrapper trx = createTransactionCapsule(request, ContractType.CreateSmartContract);
+        trxExtBuilder.setTransaction(trx.getInstance());
+        trxExtBuilder.setTxid(trx.getTransactionId().getByteString());
+        retBuilder.setResult(true).setCode(response_code.SUCCESS);
+      } catch (ContractValidateException e) {
+        retBuilder.setResult(false).setCode(response_code.CONTRACT_VALIDATE_ERROR)
+                .setMessage(ByteString.copyFromUtf8("contract validate error : " + e.getMessage()));
+        logger.debug("ContractValidateException: {}", e.getMessage());
+      } catch (Exception e) {
+        retBuilder.setResult(false).setCode(response_code.OTHER_ERROR)
+                .setMessage(ByteString.copyFromUtf8(e.getClass() + " : " + e.getMessage()));
+        logger.info("exception caught" + e.getMessage());
+      }
     }
 
     public void totalTransaction(EmptyMessage request,
