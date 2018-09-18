@@ -145,10 +145,10 @@ public class WitnessService implements Service {
     }
     long now = DateTime.now().getMillis() + 50L;
     if (this.needSyncCheck) {
-      long nexSlotTime = controller.getSlotTime(1);
-      if (nexSlotTime > now) { // check sync during first loop
+      long nextSlotTime = controller.getSlotTime(1);
+      if (nextSlotTime > now) { // check sync during first loop
         needSyncCheck = false;
-        Thread.sleep(nexSlotTime - now); //Processing Time Drift later
+        Thread.sleep(nextSlotTime - now); //Processing Time Drift later
         now = DateTime.now().getMillis();
       } else {
         logger.debug("Not sync ,now:{},headBlockTime:{},headBlockNumber:{},headBlockId:{}",
