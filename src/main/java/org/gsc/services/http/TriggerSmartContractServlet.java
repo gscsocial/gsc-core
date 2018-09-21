@@ -54,9 +54,9 @@ public class TriggerSmartContractServlet extends HttpServlet {
    *    bytes data = 4;
    *  }
    *
-   * owner_address：合约持有人地址  如： “0x58jk…27x6”。
+   * owner_address：合约持有人地址 
    * contract_address： 合约地址。
-   * call_value：TRX的值。
+   * call_value：值。
    * data：操作参数。
    *
    * {
