@@ -7,16 +7,25 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyPairGenerator;
 import java.security.Security;
 import java.security.SignatureException;
 import java.util.Arrays;
 
+import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.utils.ByteArray;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 import org.gsc.core.Wallet;
+import org.iq80.leveldb.DB;
+import org.iq80.leveldb.DBIterator;
+import org.iq80.leveldb.Options;
+import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 
 @Slf4j
 public class ECKeyTest {
@@ -48,6 +57,9 @@ public class ECKeyTest {
   @Test
   public void testFromPrivateKey() {
     ECKey key = ECKey.fromPrivate(privateKey);
+    WitnessWrapper witnessCapsule = new WitnessWrapper(ByteString.copyFrom(key.getAddress()));
+    ByteString address = witnessCapsule.getAddress();
+    String addressString = Wallet.encode58Check(address.toByteArray());
     assertTrue(key.isPubKeyCanonical());
     assertTrue(key.hasPrivKey());
     assertArrayEquals(pubKey, key.getPubKey());
@@ -211,5 +223,39 @@ public class ECKeyTest {
     ECKey key = ECKey.fromPublicOnly(pubKey);
 
     assertEquals(key, ECKey.fromNodeId(key.getNodeId()));
+  }
+  @Test
+  public void achieveDBData() throws IOException {
+
+    // deposit.getDbManager();0x0000000000000000000000000000000000000000000000000000000000000000
+    //BlockWrapper.BlockId blockId = dbManager.getHeadBlockId();
+    Options options = new Options();
+    options.createIfMissing(true);
+    DB db = null;
+    try {
+      // db = factory.open(new File("/home/kay/workspace/mico/gsc/gsc-core/output-directory/database/contract"), options);
+      db = factory.open(new File("/Users/mico/run_path/FullNode-vm/output-directory/database/witness"), options);
+
+      logger.info("---------------------------------------------");
+      System.out.println();
+      DBIterator iterator = db.iterator();
+      iterator.seekToFirst();
+      int count = 0;
+      while (iterator.hasNext()){
+        count++;
+        String key = ByteArray.toHexString(iterator.peekNext().getKey());
+        String value = ByteArray.toHexString(iterator.peekNext().getValue());
+        System.out.println("key:" + key+ ", value:" + value);
+        iterator.next();
+      }
+      iterator.close();
+      System.out.println("Num: " + count);
+      System.out.println();
+      logger.info("---------------------------------------------");
+
+      db.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 }

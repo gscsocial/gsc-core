@@ -187,7 +187,7 @@ public class WitnessService implements Service {
           this.gscApp.getDbManager().getDynamicPropertiesStore().getLatestBlockHeaderHash());
       return BlockProductionCondition.NOT_TIME_YET;
     }
-    //check time now and lastest time on block
+    //check time now and latest time on block
     if (now < controller.getManager().getDynamicPropertiesStore().getLatestBlockHeaderTimestamp()) {
       logger.warn("have a timestamp:{} less than or equal to the previous block:{}",
           new DateTime(now), new DateTime(
