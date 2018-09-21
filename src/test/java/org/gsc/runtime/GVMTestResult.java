@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gsc.core.wrapper.ReceiptWrapper;
 
 @Slf4j
-public class TVMTestResult {
+public class GVMTestResult {
 
   private Runtime runtime;
   private ReceiptWrapper receipt;
@@ -14,7 +14,7 @@ public class TVMTestResult {
     return contractAddress;
   }
 
-  public TVMTestResult setContractAddress(byte[] contractAddress) {
+  public GVMTestResult setContractAddress(byte[] contractAddress) {
     this.contractAddress = contractAddress;
     return this;
   }
@@ -23,7 +23,7 @@ public class TVMTestResult {
     return runtime;
   }
 
-  public TVMTestResult setRuntime(Runtime runtime) {
+  public GVMTestResult setRuntime(Runtime runtime) {
     this.runtime = runtime;
     return this;
   }
@@ -32,12 +32,12 @@ public class TVMTestResult {
     return receipt;
   }
 
-  public TVMTestResult setReceipt(ReceiptWrapper receipt) {
+  public GVMTestResult setReceipt(ReceiptWrapper receipt) {
     this.receipt = receipt;
     return this;
   }
 
-  public TVMTestResult(Runtime runtime, ReceiptWrapper receipt, byte[] contractAddress) {
+  public GVMTestResult(Runtime runtime, ReceiptWrapper receipt, byte[] contractAddress) {
     this.runtime = runtime;
     this.receipt = receipt;
     this.contractAddress = contractAddress;

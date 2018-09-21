@@ -144,11 +144,11 @@ public class WitnessService implements Service {
       return BlockProductionCondition.BACKUP_STATUS_IS_NOT_MASTER;
     }
     long now = DateTime.now().getMillis() + 50L;
-    if (this.needSyncCheck) {
-      long nexSlotTime = controller.getSlotTime(1);
-      if (nexSlotTime > now) { // check sync during first loop
+    if (this.needSyncCheck) { // check node has full sync
+      long nextSlotTime = controller.getSlotTime(1);
+      if (nextSlotTime > now) { // check sync during first loop
         needSyncCheck = false;
-        Thread.sleep(nexSlotTime - now); //Processing Time Drift later
+        Thread.sleep(nextSlotTime - now); //Processing Time Drift later
         now = DateTime.now().getMillis();
       } else {
         logger.debug("Not sync ,now:{},headBlockTime:{},headBlockNumber:{},headBlockId:{}",
@@ -161,7 +161,7 @@ public class WitnessService implements Service {
       }
     }
 
-    final int participation = this.controller.calculateParticipationRate();
+    final int participation = this.controller.calculateParticipationRate(); //check node could participate or not
     if (participation < MIN_PARTICIPATION_RATE) {
       logger.warn(
           "Participation[" + participation + "] <  MIN_PARTICIPATION_RATE[" + MIN_PARTICIPATION_RATE
@@ -177,7 +177,7 @@ public class WitnessService implements Service {
     long slot = controller.getSlotAtTime(now);
     logger.debug("Slot:" + slot);
 
-    if (slot == 0) {
+    if (slot == 0) { //check until time or not
       logger.info("Not time yet,now:{},headBlockTime:{},headBlockNumber:{},headBlockId:{}",
           new DateTime(now),
           new DateTime(
@@ -187,7 +187,7 @@ public class WitnessService implements Service {
           this.gscApp.getDbManager().getDynamicPropertiesStore().getLatestBlockHeaderHash());
       return BlockProductionCondition.NOT_TIME_YET;
     }
-
+    //check time now and latest time on block
     if (now < controller.getManager().getDynamicPropertiesStore().getLatestBlockHeaderTimestamp()) {
       logger.warn("have a timestamp:{} less than or equal to the previous block:{}",
           new DateTime(now), new DateTime(
@@ -196,6 +196,7 @@ public class WitnessService implements Service {
       return BlockProductionCondition.EXCEPTION_PRODUCING_BLOCK;
     }
 
+     // check if belongs witness active list
     if (!controller.activeWitnessesContain(this.getLocalWitnessStateMap().keySet())) {
       logger.info("Unelected. Elected Witnesses: {}",
           StringUtil.getAddressStringList(controller.getActiveWitnesses()));

@@ -12,8 +12,8 @@ import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.testng.Assert;
-import org.gsc.runtime.TVMTestResult;
-import org.gsc.runtime.TVMTestUtils;
+import org.gsc.runtime.GVMTestResult;
+import org.gsc.runtime.GVMTestUtils;
 import org.gsc.runtime.vm.program.Program.IllegalOperationException;
 import org.gsc.common.storage.DepositImpl;
 import org.gsc.common.utils.FileUtil;
@@ -114,14 +114,14 @@ public class CPUEnergyWhenAssertStyleTest {
     long value = 0;
     long feeLimit = 20000000000000L; // sun
     long consumeUserResourcePercent = 100;
-    TVMTestResult result = deployWhenAssertStyleTestContract(value, feeLimit,
+    GVMTestResult result = deployWhenAssertStyleTestContract(value, feeLimit,
         consumeUserResourcePercent);
     Assert.assertEquals(result.getReceipt().getEnergyUsageTotal(), 135);
     byte[] contractAddress = result.getContractAddress();
 
     /* =================================== CALL testOutOfIndex() =================================== */
-    byte[] triggerData = TVMTestUtils.parseABI("testOutOfIndex()", null);
-    result = TVMTestUtils
+    byte[] triggerData = GVMTestUtils.parseABI("testOutOfIndex()", null);
+    result = GVMTestUtils
         .triggerContractAndReturnTVMTestResult(Hex.decode(OWNER_ADDRESS),
             contractAddress, triggerData, 0, feeLimit, deposit, null);
 
@@ -131,8 +131,8 @@ public class CPUEnergyWhenAssertStyleTest {
         result.getRuntime().getResult().getException() instanceof IllegalOperationException);
 
     /* =================================== CALL testbytesN() =================================== */
-    triggerData = TVMTestUtils.parseABI("testbytesN()", null);
-    result = TVMTestUtils
+    triggerData = GVMTestUtils.parseABI("testbytesN()", null);
+    result = GVMTestUtils
         .triggerContractAndReturnTVMTestResult(Hex.decode(OWNER_ADDRESS),
             contractAddress, triggerData, 0, feeLimit, deposit, null);
     Assert.assertEquals(result.getReceipt().getEnergyUsageTotal(), 200000000000L);
@@ -141,8 +141,8 @@ public class CPUEnergyWhenAssertStyleTest {
         result.getRuntime().getResult().getException() instanceof IllegalOperationException);
 
     /* =================================== CALL testDivZero() =================================== */
-    triggerData = TVMTestUtils.parseABI("testDivZero()", null);
-    result = TVMTestUtils
+    triggerData = GVMTestUtils.parseABI("testDivZero()", null);
+    result = GVMTestUtils
         .triggerContractAndReturnTVMTestResult(Hex.decode(OWNER_ADDRESS),
             contractAddress, triggerData, 0, feeLimit, deposit, null);
     Assert.assertEquals(result.getReceipt().getEnergyUsageTotal(), 200000000000L);
@@ -151,8 +151,8 @@ public class CPUEnergyWhenAssertStyleTest {
         result.getRuntime().getResult().getException() instanceof IllegalOperationException);
 
     /* =================================== CALL testShiftByNegative() =================================== */
-    triggerData = TVMTestUtils.parseABI("testShiftByNegative()", null);
-    result = TVMTestUtils
+    triggerData = GVMTestUtils.parseABI("testShiftByNegative()", null);
+    result = GVMTestUtils
         .triggerContractAndReturnTVMTestResult(Hex.decode(OWNER_ADDRESS),
             contractAddress, triggerData, 0, feeLimit, deposit, null);
     Assert.assertEquals(result.getReceipt().getEnergyUsageTotal(), 200000000000L);
@@ -161,8 +161,8 @@ public class CPUEnergyWhenAssertStyleTest {
         result.getRuntime().getResult().getException() instanceof IllegalOperationException);
 
     /* =================================== CALL testEnumType() =================================== */
-    triggerData = TVMTestUtils.parseABI("testEnumType()", null);
-    result = TVMTestUtils
+    triggerData = GVMTestUtils.parseABI("testEnumType()", null);
+    result = GVMTestUtils
         .triggerContractAndReturnTVMTestResult(Hex.decode(OWNER_ADDRESS),
             contractAddress, triggerData, 0, feeLimit, deposit, null);
     Assert.assertEquals(result.getReceipt().getEnergyUsageTotal(), 200000000000L);
@@ -171,8 +171,8 @@ public class CPUEnergyWhenAssertStyleTest {
         result.getRuntime().getResult().getException() instanceof IllegalOperationException);
 
     /* =================================== CALL testFunctionPointer() =================================== */
-    triggerData = TVMTestUtils.parseABI("testFunctionPointer()", null);
-    result = TVMTestUtils
+    triggerData = GVMTestUtils.parseABI("testFunctionPointer()", null);
+    result = GVMTestUtils
         .triggerContractAndReturnTVMTestResult(Hex.decode(OWNER_ADDRESS),
             contractAddress, triggerData, 0, feeLimit, deposit, null);
     Assert.assertEquals(result.getReceipt().getEnergyUsageTotal(), 200000000000L);
@@ -181,8 +181,8 @@ public class CPUEnergyWhenAssertStyleTest {
         result.getRuntime().getResult().getException() instanceof IllegalOperationException);
 
     /* =================================== CALL testAssert() =================================== */
-    triggerData = TVMTestUtils.parseABI("testAssert()", null);
-    result = TVMTestUtils
+    triggerData = GVMTestUtils.parseABI("testAssert()", null);
+    result = GVMTestUtils
         .triggerContractAndReturnTVMTestResult(Hex.decode(OWNER_ADDRESS),
             contractAddress, triggerData, 0, feeLimit, deposit, null);
     Assert.assertEquals(result.getReceipt().getEnergyUsageTotal(), 200000000000L);
@@ -192,8 +192,8 @@ public class CPUEnergyWhenAssertStyleTest {
 
   }
 
-  public TVMTestResult deployWhenAssertStyleTestContract(long value, long feeLimit,
-      long consumeUserResourcePercent)
+  public GVMTestResult deployWhenAssertStyleTestContract(long value, long feeLimit,
+                                                         long consumeUserResourcePercent)
       throws ContractExeException, ReceiptCheckErrException, TransactionTraceException, ContractValidateException {
     String contractName = "test";
     byte[] address = Hex.decode(OWNER_ADDRESS);
@@ -201,7 +201,7 @@ public class CPUEnergyWhenAssertStyleTest {
     String code = "608060405234801561001057600080fd5b506101d7806100206000396000f3006080604052600436106100825763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416631e76e10781146100875780632b813bc01461009e5780635a43cddc146100b35780639a4e1fa0146100c8578063b87d948d146100dd578063e88e362a146100f2578063e9ad8ee714610107575b600080fd5b34801561009357600080fd5b5061009c61011c565b005b3480156100aa57600080fd5b5061009c610138565b3480156100bf57600080fd5b5061009c61013a565b3480156100d457600080fd5b5061009c610140565b3480156100e957600080fd5b5061009c610183565b3480156100fe57600080fd5b5061009c61018b565b34801561011357600080fd5b5061009c610196565b7201234500000000000000000000000000000000601460008282fe5bfe5b6000600afe5b60408051600a80825261016082019092526060916020820161014080388339019050509050600a81600a81518110151561017657fe5b6020908102909101015250565b60008080600afe5b600919600081610400fe5b6101386101a760018263ffffffff16565b50505600a165627a7a72305820155b43453889c7c579af81c62359ac291bb44abe0ab5c6772971f69745a4cfc20029";
     String libraryAddressPair = null;
 
-    return TVMTestUtils
+    return GVMTestUtils
         .deployContractAndReturnTVMTestResult(contractName, address, ABI, code,
             value,
             feeLimit, consumeUserResourcePercent, libraryAddressPair,

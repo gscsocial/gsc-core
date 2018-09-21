@@ -36,10 +36,8 @@ public class VM {
   private static BigInteger MEM_LIMIT = BigInteger.valueOf(3 * 1024 * 1024);
 
 
-  /* Keeps track of the number of steps performed in this VM */
+  /* Keeps track of the number of steps that performed in this VM */
   private int vmCounter = 0;
-  private boolean vmTrace;
-  // private long dumpBlock;
 
   private final SystemProperties config;
 
@@ -50,8 +48,6 @@ public class VM {
   @Autowired
   public VM(SystemProperties config) {
     this.config = config;
-    // vmTrace = config.vmTrace();
-    // dumpBlock = config.dumpBlock();
   }
 
   private void checkMemorySize(OpCode op, BigInteger newMemSize) {

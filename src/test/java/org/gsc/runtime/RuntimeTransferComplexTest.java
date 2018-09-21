@@ -74,10 +74,10 @@ public class RuntimeTransferComplexTest {
     long consumeUserResourcePercent = 0;
 
 
-    Transaction trx = TVMTestUtils.generateDeploySmartContractAndGetTransaction(
+    Transaction trx = GVMTestUtils.generateDeploySmartContractAndGetTransaction(
         contractName,address,ABI,code,value,fee,consumeUserResourcePercent,null);
     byte[] contractAddress = Wallet.generateContractAddress(trx);
-    runtime = TVMTestUtils.processTransactionAndReturnRuntime(trx, deposit, null);
+    runtime = GVMTestUtils.processTransactionAndReturnRuntime(trx, deposit, null);
     Assert.assertNull(runtime.getRuntimeError());
     Assert.assertEquals(dbManager.getAccountStore().get(contractAddress).getBalance(),100);
   }
@@ -104,10 +104,10 @@ public class RuntimeTransferComplexTest {
     long consumeUserResourcePercent = 0;
 
 
-    Transaction trx = TVMTestUtils.generateDeploySmartContractAndGetTransaction(
+    Transaction trx = GVMTestUtils.generateDeploySmartContractAndGetTransaction(
         contractName,address,ABI,code,value,fee,consumeUserResourcePercent,null);
     byte[] contractAddress = Wallet.generateContractAddress(trx);
-    runtime = TVMTestUtils.processTransactionAndReturnRuntime(trx, deposit, null);
+    runtime = GVMTestUtils.processTransactionAndReturnRuntime(trx, deposit, null);
     Assert.assertNotNull(runtime.getRuntimeError().contains("REVERT"));
     Assert.assertNull(dbManager.getAccountStore().get(contractAddress));
   }
@@ -140,7 +140,7 @@ public class RuntimeTransferComplexTest {
     long feeLimit = 100000000;
     long consumeUserResourcePercent = 0;
 
-    byte[] contractAddress = TVMTestUtils.deployContractWholeProcessReturnContractAddress(contractName,address,ABI,code,value,feeLimit,consumeUserResourcePercent,null,
+    byte[] contractAddress = GVMTestUtils.deployContractWholeProcessReturnContractAddress(contractName,address,ABI,code,value,feeLimit,consumeUserResourcePercent,null,
         deposit,null);
 
 
@@ -148,12 +148,12 @@ public class RuntimeTransferComplexTest {
     String selectorStr = "transferTo(address)";
     //System.out.println(transferTo(address));
     String params = "000000000000000000000000548794500882809695a8a687866e76d4271a1abc"; //TRANSFER_TO
-    byte[] triggerData = TVMTestUtils.parseABI(selectorStr,params);
+    byte[] triggerData = GVMTestUtils.parseABI(selectorStr,params);
 
     long triggerCallValue =100;
 
-    Transaction transaction = TVMTestUtils.generateTriggerSmartContractAndGetTransaction(address,contractAddress,triggerData,triggerCallValue,feeLimit);
-    runtime = TVMTestUtils.processTransactionAndReturnRuntime(transaction, deposit, null);
+    Transaction transaction = GVMTestUtils.generateTriggerSmartContractAndGetTransaction(address,contractAddress,triggerData,triggerCallValue,feeLimit);
+    runtime = GVMTestUtils.processTransactionAndReturnRuntime(transaction, deposit, null);
     Assert.assertNull(runtime.getRuntimeError());
     Assert.assertEquals(dbManager.getAccountStore().get(contractAddress).getBalance(),100 - 5);
     Assert.assertEquals(dbManager.getAccountStore().get(Hex.decode(TRANSFER_TO)).getBalance(),10 + 5);

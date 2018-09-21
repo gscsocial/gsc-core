@@ -33,7 +33,7 @@ public class InternalTransactionComplexTest {
   private static final String OWNER_ADDRESS;
 
   static {
-    Args.setParam(new String[]{"--output-directory", dbPath, "--debug", "--support-constant"},
+    Args.setParam(new String[]{"--output-directory" , dbPath, "--debug", "--support-constant"},
         Constant.TEST_CONF);
     context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS = Wallet.getAddressPreFixString() + "abd4b9367799eaa3197fecb144eb71de1e049abc";
@@ -77,15 +77,15 @@ public class InternalTransactionComplexTest {
     byte[] callerContractAddress = deployCallerContractAndGetItsAddress(calledContractAddress);
 
     /* =================================== CALL makeTheCall =================================== */
-    byte[] triggerData1 = TVMTestUtils.parseABI("makeTheCall()", "");
-    runtime = TVMTestUtils
+    byte[] triggerData1 = GVMTestUtils.parseABI("makeTheCall()", "");
+    runtime = GVMTestUtils
         .triggerContractWholeProcessReturnContractAddress(Hex.decode(OWNER_ADDRESS),
             callerContractAddress, triggerData1,
             0, 100000000, deposit, null);
 
     /* =================================== CALL testCallbackReturns_ to check data =================================== */
-    byte[] triggerData2 = TVMTestUtils.parseABI("testCallbackReturns_()", "");
-    runtime = TVMTestUtils
+    byte[] triggerData2 = GVMTestUtils.parseABI("testCallbackReturns_()", "");
+    runtime = GVMTestUtils
         .triggerContractWholeProcessReturnContractAddress(Hex.decode(OWNER_ADDRESS),
             callerContractAddress, triggerData2,
             0, 100000000, deposit, null);
@@ -119,7 +119,7 @@ public class InternalTransactionComplexTest {
     long feeLimit = 1000000000;
     long consumeUserResourcePercent = 0;
 
-    return TVMTestUtils
+    return GVMTestUtils
         .deployContractWholeProcessReturnContractAddress(contractName, address, ABI, code, value,
             feeLimit, consumeUserResourcePercent, null,
             deposit, null);
@@ -153,7 +153,7 @@ public class InternalTransactionComplexTest {
     long feeLimit = 1000000000;
     long consumeUserResourcePercent = 0;
 
-    return TVMTestUtils
+    return GVMTestUtils
         .deployContractWholeProcessReturnContractAddress(contractName, address, ABI, code, value,
             feeLimit, consumeUserResourcePercent, null,
             deposit, null);

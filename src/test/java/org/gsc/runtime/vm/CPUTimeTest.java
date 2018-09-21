@@ -11,8 +11,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 import org.testng.Assert;
-import org.gsc.runtime.TVMTestResult;
-import org.gsc.runtime.TVMTestUtils;
+import org.gsc.runtime.GVMTestResult;
+import org.gsc.runtime.GVMTestUtils;
 import org.gsc.runtime.vm.program.Program.OutOfResourceException;
 import org.gsc.common.storage.DepositImpl;
 import org.gsc.common.utils.FileUtil;
@@ -81,7 +81,7 @@ public class CPUTimeTest {
     long value = 0;
     long feeLimit = 20000000000000L;
     long consumeUserResourcePercent = 0;
-    TVMTestResult result = deployEndlessLoopContract(value, feeLimit,
+    GVMTestResult result = deployEndlessLoopContract(value, feeLimit,
         consumeUserResourcePercent);
     Assert.assertEquals(result.getReceipt().getEnergyUsage(), 0);
     Assert.assertEquals(result.getReceipt().getEnergyUsageTotal(), 5107);
@@ -91,17 +91,17 @@ public class CPUTimeTest {
 
     /* =================================== CALL setVote(uint256) =================================== */
     String params = "0000000000000000000000000000000000000000000000000000000000000003";
-    byte[] triggerData = TVMTestUtils.parseABI("setVote(uint256)", params);
+    byte[] triggerData = GVMTestUtils.parseABI("setVote(uint256)", params);
     boolean haveException = false;
-    result = TVMTestUtils
+    result = GVMTestUtils
         .triggerContractAndReturnTVMTestResult(Hex.decode(OWNER_ADDRESS), contractAddress,
             triggerData, value, feeLimit, deposit, null);
     Exception exception = result.getRuntime().getResult().getException();
     Assert.assertTrue(exception instanceof OutOfResourceException);
   }
 
-  public TVMTestResult deployEndlessLoopContract(long value, long feeLimit,
-      long consumeUserResourcePercent)
+  public GVMTestResult deployEndlessLoopContract(long value, long feeLimit,
+                                                 long consumeUserResourcePercent)
       throws ContractExeException, ReceiptCheckErrException, TransactionTraceException, ContractValidateException {
     String contractName = "EndlessLoopContract";
     byte[] address = Hex.decode(OWNER_ADDRESS);
@@ -109,7 +109,7 @@ public class CPUTimeTest {
     String code = "608060405234801561001057600080fd5b506000808190555060fa806100266000396000f3006080604052600436106049576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680630242f35114604e578063230796ae146076575b600080fd5b348015605957600080fd5b50606060a0565b6040518082815260200191505060405180910390f35b348015608157600080fd5b50609e6004803603810190808035906020019092919050505060a9565b005b60008054905090565b806000819055505b60011560cb576001600080828254019250508190555060b1565b505600a165627a7a72305820290a38c9bbafccaf6c7f752ab56d229e354da767efb72715ee9fdb653b9f4b6c0029";
     String libraryAddressPair = null;
 
-    return TVMTestUtils
+    return GVMTestUtils
         .deployContractAndReturnTVMTestResult(contractName, address, ABI, code,
             value,
             feeLimit, consumeUserResourcePercent, libraryAddressPair,
