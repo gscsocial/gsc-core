@@ -46,6 +46,31 @@ public class TriggerSmartContractServlet extends HttpServlet {
     return result;
   }
 
+  /**
+   * message TriggerSmartContract {
+   *    bytes owner_address = 1;
+   *    bytes contract_address = 2;
+   *    int64 call_value = 3;
+   *    bytes data = 4;
+   *  }
+   *
+   * owner_address：合约持有人地址  如： “0x58jk…27x6”。
+   * contract_address： 合约地址。
+   * call_value：TRX的值。
+   * data：操作参数。
+   *
+   * {
+   * 	"owner_address": "abd4b9367799eaa3197fecb144eb71de1e049abc",
+   * 	"contract_address": "410019eb34f17c56bf2aaf71cfe5ab7362232147ba",
+   * 	"call_value": 20000000,
+   * 	"data": "",
+   *
+   * 	"function_selector": "getName()",
+   * 	"parameter": "",
+   * 	"fee_limit": 10000000
+   * }
+   *
+   */
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
       throws IOException {
     TriggerSmartContract.Builder build = TriggerSmartContract.newBuilder();
@@ -55,15 +80,18 @@ public class TriggerSmartContractServlet extends HttpServlet {
     try {
       String contract = request.getReader().lines()
           .collect(Collectors.joining(System.lineSeparator()));
+
       JsonFormat.merge(contract, build);
       JSONObject jsonObject = JSONObject.parseObject(contract);
+      System.out.println(jsonObject.toString());
       String selector = jsonObject.getString("function_selector");//
       String parameter = jsonObject.getString("parameter");//
       String data = parseMethod(selector, parameter);
+      System.out.println(data);
       build.setData(ByteString.copyFrom(ByteArray.fromHexString(data)));
-
+      System.out.println("4");
       long feeLimit = jsonObject.getLongValue("fee_limit");//
-
+      System.out.println("5");
       TransactionWrapper trxCap = wallet
           .createTransactionCapsule(build.build(), ContractType.TriggerSmartContract);
 

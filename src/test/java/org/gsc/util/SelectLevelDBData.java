@@ -1,6 +1,7 @@
-package org.gsc.db;
+package org.gsc.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.utils.ByteArray;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
@@ -16,26 +17,29 @@ public class SelectLevelDBData {
     @Test
     public void achieveDBData() {
 
-       // deposit.getDbManager();
-        //BlockWrapper.BlockId blockId = dbManager.getHeadBlockId();
-
         Options options = new Options();
         options.createIfMissing(true);
         DB db = null;
         try {
-            //db = factory.open(new File("/home/kay/workspace/mico/gsc/gsc-core/output-directory/database/contract"), options);
-            db = factory.open(new File("/home/kay/workspace/mico/gsc/gsc-core/output_InheritanceTest/database/contract"), options);
+            // account  contract  block
+             db = factory.open(new File("/home/kay/workspace/mico/gsc/gsc-core/output-directory/database/account"), options);
+            //db = factory.open(new File("/home/kay/Desktop/gsc_core_main/output-directory/database/account"), options);
 
             logger.info("---------------------------------------------");
+            System.out.println();
             DBIterator iterator = db.iterator();
             iterator.seekToFirst();
+            int count = 0;
             while (iterator.hasNext()){
-                String key = asString(iterator.peekNext().getKey());
-                String value = asString(iterator.peekNext().getValue());
-                System.out.println("key:" + key.getBytes("utf-8").toString() + ", value:" + value);
+                count++;
+                String key = ByteArray.toHexString(iterator.peekNext().getKey());
+                String value = ByteArray.toHexString(iterator.peekNext().getValue());
+                System.out.println("key:" + key+ ", value:" + value);
                 iterator.next();
             }
             iterator.close();
+            System.out.println("Num: " + count);
+            System.out.println();
             logger.info("---------------------------------------------");
 
             db.close();
