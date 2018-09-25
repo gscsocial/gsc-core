@@ -114,24 +114,6 @@ public class WitnessService implements Service {
       };
 
   /**
-   * Loop to generate blocks
-   */
-  private void blockProductionLoop() throws InterruptedException {
-    BlockProductionCondition result = this.tryProduceBlock();
-
-    if (result == null) {
-      logger.warn("Result is null");
-      return;
-    }
-
-    if (result.ordinal() <= NOT_MY_TURN.ordinal()) {
-      logger.debug(result.toString());
-    } else {
-      logger.info(result.toString());
-    }
-  }
-
-  /**
    * Generate and broadcast blocks
    */
   private BlockProductionCondition tryProduceBlock() throws InterruptedException {
@@ -250,7 +232,23 @@ public class WitnessService implements Service {
     }
 
   }
+  /**
+   * Loop to generate blocks
+   */
+  private void blockProductionLoop() throws InterruptedException {
+    BlockProductionCondition result = this.tryProduceBlock();
 
+    if (result == null) {
+      logger.warn("Result is null");
+      return;
+    }
+
+    if (result.ordinal() <= NOT_MY_TURN.ordinal()) {
+      logger.debug(result.toString());
+    } else {
+      logger.info(result.toString());
+    }
+  }
   private void broadcastBlock(BlockWrapper block) {
     try {
       gscApp.getP2pNode().broadcast(new BlockMessage(block.getData()));
