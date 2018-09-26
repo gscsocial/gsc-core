@@ -34,18 +34,17 @@ public class CPUEnergyTest {
   private String dbPath = "output_CPUEnergyTest";
   private String OWNER_ADDRESS;
 
-
   /**
    * Init data.
    */
   @Before
-  public void init() {
+  public void init(){
     Args.setParam(new String[]{"--output-directory", dbPath, "--debug"}, Constant.TEST_CONF);
     context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS = Wallet.getAddressPreFixString() + "abd4b9367799eaa3197fecb144eb71de1e049abc";
     dbManager = context.getBean(Manager.class);
     deposit = DepositImpl.createRoot(dbManager);
-    deposit.createAccount(Hex.decode(OWNER_ADDRESS), AccountType.Normal);
+    deposit.createAccount(Hex.decode(OWNER_ADDRESS),AccountType.Normal);
     deposit.addBalance(Hex.decode(OWNER_ADDRESS), 30000000000000L);
   }
 

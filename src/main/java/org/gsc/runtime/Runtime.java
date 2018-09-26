@@ -121,7 +121,7 @@ public class Runtime {
         trxType = TRX_CONTRACT_CREATION_TYPE;
         break;
       default:
-        trxType = TRX_PRECOMPILED_TYPE;
+        trxType = TRX_PRECOMPILED_TYPE; // precompiled contract.
     }
   }
 
@@ -372,7 +372,6 @@ public class Runtime {
     if (callValue > 0) {
       transfer(this.deposit, callerAddress, contractAddress, callValue);
     }
-
   }
 
   /**

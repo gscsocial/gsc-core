@@ -290,7 +290,6 @@ public class WitnessService implements Service {
       this.privateKeyMap.put(witnessCapsule.getAddress(), privateKey);
       this.localWitnessStateMap.put(witnessCapsule.getAddress(), witnessCapsule);
     });
-
   }
 
   @Override

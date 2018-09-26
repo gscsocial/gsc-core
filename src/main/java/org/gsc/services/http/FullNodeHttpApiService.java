@@ -18,7 +18,7 @@ public class FullNodeHttpApiService implements Service {
   private Server server;
 
   @Autowired
-  private GetAccountServlet accountServlet;
+  private GetAccountServlet accountServlet; // OK
   @Autowired
   private TransferServlet transferServlet;
   @Autowired
@@ -52,47 +52,49 @@ public class FullNodeHttpApiService implements Service {
   @Autowired
   private UpdateAssetServlet updateAssetServlet;
   @Autowired
-  private ListNodesServlet listNodesServlet;
+  private ListNodesServlet listNodesServlet; // OK
   @Autowired
   private GetAssetIssueByAccountServlet getAssetIssueByAccountServlet;
   @Autowired
-  private GetAccountNetServlet getAccountNetServlet;
+  private GetAccountNetServlet getAccountNetServlet; // OK
   @Autowired
   private GetAssetIssueByNameServlet getAssetIssueByNameServlet;
   @Autowired
-  private GetNowBlockServlet getNowBlockServlet;
+  private GetNowBlockServlet getNowBlockServlet; // OK
   @Autowired
   private GetBlockByNumServlet getBlockByNumServlet;
   @Autowired
-  private GetBlockByIdServlet getBlockByIdServlet;
+  private GetBlockByIdServlet getBlockByIdServlet; // OK
   @Autowired
   private GetBlockByLimitNextServlet getBlockByLimitNextServlet;
   @Autowired
-  private GetBlockByLatestNumServlet getBlockByLatestNumServlet;
+  private GetBlockByLatestNumServlet getBlockByLatestNumServlet; // OK
   @Autowired
   private GetTransactionByIdServlet getTransactionByIdServlet;
   @Autowired
   private ListWitnessesServlet listWitnessesServlet;
   @Autowired
-  private GetAssetIssueListServlet getAssetIssueListServlet;
+  private GetAssetIssueListServlet getAssetIssueListServlet; // ?
   @Autowired
   private GetPaginatedAssetIssueListServlet getPaginatedAssetIssueListServlet;
   @Autowired
-  private TotalTransactionServlet totalTransactionServlet;
+  private TotalTransactionServlet totalTransactionServlet; // ?
   @Autowired
-  private GetNextMaintenanceTimeServlet getNextMaintenanceTimeServlet;
+  private GetNextMaintenanceTimeServlet getNextMaintenanceTimeServlet; // OK
   @Autowired
-  private EasyTransferServlet easyTransferServlet;
+  private EasyTransferServlet easyTransferServlet; // ?
   @Autowired
   private EasyTransferByPrivateServlet easyTransferByPrivateServlet;
   @Autowired
-  private CreateAddressServlet createAddressServlet;
+  private CreateAddressServlet createAddressServlet; // OK
   @Autowired
   private GenerateAddressServlet generateAddressServlet;
   @Autowired
   private ValidateAddressServlet validateAddressServlet;
   @Autowired
   private DeployContractServlet deployContractServlet;
+  @Autowired
+  private DeployContractServlet2 deployContractServlet2;
   @Autowired
   private TriggerSmartContractServlet triggerSmartContractServlet;
   @Autowired
@@ -116,7 +118,7 @@ public class FullNodeHttpApiService implements Service {
       context.setContextPath("/wallet/");
       server.setHandler(context);
       context.addServlet(new ServletHolder(accountServlet), "/getaccount");
-      context.addServlet(new ServletHolder(transferServlet), "/createtransaction");
+      context.addServlet(new ServletHolder(transferServlet), "/createtransfertransaction");
       context.addServlet(new ServletHolder(broadcastServlet), "/broadcasttransaction");
       context.addServlet(new ServletHolder(transactionSignServlet), "/gettransactionsign");
       context.addServlet(new ServletHolder(updateAccountServlet), "/updateaccount");
@@ -136,7 +138,7 @@ public class FullNodeHttpApiService implements Service {
       context
           .addServlet(new ServletHolder(getAssetIssueByAccountServlet), "/getassetissuebyaccount");
       context.addServlet(new ServletHolder(getAccountNetServlet), "/getaccountnet");
-      context.addServlet(new ServletHolder(getAssetIssueByNameServlet), "/getassetissuebyname");
+      context.addServlet(new ServletHolder(getAssetIssueByNameServlet), "/getassetissuebyname"); //
       context.addServlet(new ServletHolder(getNowBlockServlet), "/getnowblock");
       context.addServlet(new ServletHolder(getBlockByNumServlet), "/getblockbynum");
       context.addServlet(new ServletHolder(getBlockByIdServlet), "/getblockbyid");
@@ -156,6 +158,7 @@ public class FullNodeHttpApiService implements Service {
       context.addServlet(new ServletHolder(generateAddressServlet), "/generateaddress");
       context.addServlet(new ServletHolder(validateAddressServlet), "/validateaddress");
       context.addServlet(new ServletHolder(deployContractServlet), "/deploycontract");
+      context.addServlet(new ServletHolder(deployContractServlet2), "/deploycontract2");
       context.addServlet(new ServletHolder(triggerSmartContractServlet), "/triggersmartcontract");
       context.addServlet(new ServletHolder(getContractServlet), "/getcontract");
       server.start();

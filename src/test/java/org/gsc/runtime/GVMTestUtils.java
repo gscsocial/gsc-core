@@ -36,7 +36,7 @@ import org.gsc.common.overlay.WalletClient;
  * commands.
  */
 @Slf4j
-public class GVMTestUtils {
+public class TVMTestUtils {
 
   public static byte[] deployContractWholeProcessReturnContractAddress(String contractName,
       byte[] callerAddress,
@@ -58,6 +58,13 @@ public class GVMTestUtils {
     return processTransactionAndReturnRuntime(trx, deposit, block);
   }
 
+  public static CreateSmartContract generateDeploySmartContract(String contractName, byte[] callerAddress, String code,
+                                                          String ABI, long value, long feeLimit,
+                                                          long consumeUserResourcePercent, String libraryAddressPair){
+    CreateSmartContract contract = buildCreateSmartContract(contractName, callerAddress, ABI, code,value,
+            consumeUserResourcePercent, libraryAddressPair);
+    return contract;
+  }
   /**
    * return generated smart contract Transaction, just before we use it to broadcast and push
    * transaction
@@ -69,14 +76,18 @@ public class GVMTestUtils {
 
     CreateSmartContract contract = buildCreateSmartContract(contractName, callerAddress, ABI, code,
         value, consumeUserResourcePercent, libraryAddressPair);
+
     TransactionWrapper trxCapWithoutFeeLimit = new TransactionWrapper(contract,
         ContractType.CreateSmartContract);
+
     Transaction.Builder transactionBuilder = trxCapWithoutFeeLimit.getInstance().toBuilder();
     Transaction.raw.Builder rawBuilder = trxCapWithoutFeeLimit.getInstance().getRawData()
         .toBuilder();
+
     rawBuilder.setFeeLimit(feeLimit);
     transactionBuilder.setRawData(rawBuilder);
     Transaction trx = transactionBuilder.build();
+
     return trx;
   }
 
@@ -102,11 +113,12 @@ public class GVMTestUtils {
   }
 
 
-  public static GVMTestResult deployContractAndReturnTVMTestResult(String contractName,
-                                                                   byte[] callerAddress,
-                                                                   String ABI, String code, long value, long feeLimit, long consumeUserResourcePercent,
-                                                                   String libraryAddressPair, DepositImpl deposit, Block block)
+  public static TVMTestResult deployContractAndReturnTVMTestResult(String contractName,
+      byte[] callerAddress,
+      String ABI, String code, long value, long feeLimit, long consumeUserResourcePercent,
+      String libraryAddressPair, DepositImpl deposit, Block block)
       throws ContractExeException, ReceiptCheckErrException, TransactionTraceException, ContractValidateException {
+
     Transaction trx = generateDeploySmartContractAndGetTransaction(contractName, callerAddress, ABI,
         code, value, feeLimit, consumeUserResourcePercent, libraryAddressPair);
 
@@ -116,9 +128,9 @@ public class GVMTestUtils {
         .setContractAddress(Wallet.generateContractAddress(trx));
   }
 
-  public static GVMTestResult triggerContractAndReturnTVMTestResult(byte[] callerAddress,
-                                                                    byte[] contractAddress, byte[] data, long callValue, long feeLimit, DepositImpl deposit,
-                                                                    Block block)
+  public static TVMTestResult triggerContractAndReturnTVMTestResult(byte[] callerAddress,
+      byte[] contractAddress, byte[] data, long callValue, long feeLimit, DepositImpl deposit,
+      Block block)
       throws ContractExeException, ReceiptCheckErrException, TransactionTraceException, ContractValidateException {
     Transaction trx = generateTriggerSmartContractAndGetTransaction(callerAddress, contractAddress,
         data, callValue, feeLimit);
@@ -127,22 +139,19 @@ public class GVMTestUtils {
   }
 
 
-  public static GVMTestResult processTransactionAndReturnTVMTestResult(Transaction trx,
-                                                                       DepositImpl deposit, Block block)
+  public static TVMTestResult processTransactionAndReturnTVMTestResult(Transaction trx,
+      DepositImpl deposit, Block block)
       throws TransactionTraceException, ContractExeException, ContractValidateException, ReceiptCheckErrException {
     TransactionWrapper trxCap = new TransactionWrapper(trx);
     TransactionTrace trace = new TransactionTrace(trxCap, deposit.getDbManager());
     Runtime runtime = new Runtime(trace, new BlockWrapper(block), deposit,
         new ProgramInvokeFactoryImpl());
-
     // init
     trace.init();
     //exec
     trace.exec(runtime);
-
-    return new GVMTestResult(runtime, trace.getReceipt(), null);
+    return new TVMTestResult(runtime, trace.getReceipt(), null);
   }
-
 
   /**
    * create the Contract Instance for smart contract.
@@ -151,6 +160,7 @@ public class GVMTestUtils {
       byte[] address,
       String ABI, String code, long value, long consumeUserResourcePercent,
       String libraryAddressPair) {
+
     SmartContract.ABI abi = jsonStr2ABI(ABI);
     if (abi == null) {
       logger.error("abi is null");

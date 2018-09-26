@@ -13,6 +13,17 @@ import org.gsc.protos.Contract.TransferContract;
 import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
 
+/**
+ * message TransferContract {
+ *    bytes owner_address = 1;
+ *    bytes to_address = 2;
+ *    int64 amount = 3;
+ *  }
+ *
+ * owner_address：合约持有人地址  如： “0x58jk…27x6”。
+ * to_address： 目标账户地址。
+ * amount：转账金额。
+ */
 
 @Component
 @Slf4j

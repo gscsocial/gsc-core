@@ -20,7 +20,10 @@ public class FullNode {
    */
   public static void main(String[] args) throws InterruptedException {
     logger.info("Full node running.");
-    Args.setParam(args, Constant.TESTNET_CONF);
+    //LOCAL_TESTNET_CONF
+    //Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
+    Args.setParam(args, Constant.TEST_NET_CONF);
+    //Args.setParam(args, Constant.TESTNET_CONF);
     Args cfgArgs = Args.getInstance();
 
     if (cfgArgs.isHelp()) {
@@ -34,6 +37,9 @@ public class FullNode {
       logger.info("not in debug mode, it will check energy time");
     }
 
+    /**
+     *
+     */
     DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
     beanFactory.setAllowCircularReferences(false);
     GSCApplicationContext context =

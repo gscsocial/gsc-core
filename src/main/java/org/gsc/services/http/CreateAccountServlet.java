@@ -2,6 +2,7 @@ package org.gsc.services.http;
 
 import java.io.IOException;
 import java.util.stream.Collectors;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,6 +21,11 @@ public class CreateAccountServlet extends HttpServlet {
 
   @Autowired
   private Wallet wallet;
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    this.doPost(req, resp);
+  }
 
   protected void doPost(HttpServletRequest request, HttpServletResponse response) {
     try {
