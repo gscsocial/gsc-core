@@ -226,30 +226,6 @@ public class WitnessController {
         / ChainConstant.BLOCK_PRODUCED_INTERVAL;
   }
 
-  /**
-   * shuffle witnesses
-   */
-  public void updateWitnessSchedule() {
-//    if (CollectionUtils.isEmpty(getActiveWitnesses())) {
-//      throw new RuntimeException("Witnesses is empty");
-//    }
-//
-//    List<ByteString> currentWitsAddress = getCurrentShuffledWitnesses();
-//    // TODO  what if the number of witness is not same in different slot.
-//    long num = manager.getDynamicPropertiesStore().getLatestBlockHeaderNumber();
-//    long time = manager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp();
-//
-//    if (num != 0 && num % getActiveWitnesses().isEmpty()) {
-//      logger.info("updateWitnessSchedule number:{},HeadBlockTimeStamp:{}", num, time);
-//      setCurrentShuffledWitnesses(new RandomGenerator<ByteString>()
-//          .shuffle(getActiveWitnesses(), time));
-//
-//      logger.info(
-//          "updateWitnessSchedule,before:{} ", getAddressStringList(currentWitsAddress)
-//              + ",\nafter:{} " + getAddressStringList(getCurrentShuffledWitnesses()));
-//    }
-  }
-
   private Map<ByteString, Long> countVote(VotesStore votesStore) {
     final Map<ByteString, Long> countWitness = Maps.newHashMap();
     Iterator<Map.Entry<byte[], VotesWrapper>> dbIterator = votesStore.iterator();

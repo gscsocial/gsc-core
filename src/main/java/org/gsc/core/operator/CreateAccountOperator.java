@@ -94,10 +94,6 @@ public class CreateAccountOperator extends AbstractOperator {
       throw new ContractValidateException("Invalid account address");
     }
 
-//    if (contract.getType() == null) {
-//      throw new ContractValidateException("Type is null");
-//    }
-
     if (dbManager.getAccountStore().has(accountAddress)) {
       throw new ContractValidateException("Account has existed");
     }
