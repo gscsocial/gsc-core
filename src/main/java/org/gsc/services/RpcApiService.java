@@ -1287,41 +1287,39 @@ public class RpcApiService implements Service {
             responseObserver.onCompleted();
         }
 
-    /*
     @Override
     public void deployContract(org.gsc.protos.Contract.CreateSmartContract request,
         io.grpc.stub.StreamObserver<TransactionExtention> responseObserver) {
       createTransactionExtention(request, ContractType.CreateSmartContract, responseObserver);
     }
 
-    */
 
-        public void deployContract(org.gsc.protos.Contract.CreateSmartContract request,
-                                   io.grpc.stub.StreamObserver<TransactionExtention> responseObserver,
-                                   DepositImpl deposit, BlockWrapper block) {
-            TransactionExtention.Builder trxExtBuilder = TransactionExtention.newBuilder();
-            Return.Builder retBuilder = Return.newBuilder();
-            try {
-                TransactionWrapper trxCap = new TransactionWrapper(request,
-                        ContractType.CreateSmartContract);
-
-                Transaction trx = wallet.deployContract(request, trxCap, deposit, block, trxExtBuilder, retBuilder);
-
-                trxExtBuilder.setTransaction(trx);
-                trxExtBuilder.setTxid(trxCap.getTransactionId().getByteString());
-
-                retBuilder.setResult(true).setCode(response_code.SUCCESS);
-                trxExtBuilder.setResult(retBuilder);
-            } catch (Exception e) {
-                retBuilder.setResult(false).setCode(response_code.OTHER_ERROR)
-                        .setMessage(ByteString.copyFromUtf8(e.getClass() + " : " + e.getMessage()));
-                trxExtBuilder.setResult(retBuilder);
-                logger.warn("exception caught" + e.getMessage(), e);
-            } finally {
-                responseObserver.onNext(trxExtBuilder.build());
-                responseObserver.onCompleted();
-            }
-        }
+//        public void deployContract(org.gsc.protos.Contract.CreateSmartContract request,
+//                                   io.grpc.stub.StreamObserver<TransactionExtention> responseObserver,
+//                                   DepositImpl deposit, BlockWrapper block) {
+//            TransactionExtention.Builder trxExtBuilder = TransactionExtention.newBuilder();
+//            Return.Builder retBuilder = Return.newBuilder();
+//            try {
+//                TransactionWrapper trxCap = new TransactionWrapper(request,
+//                        ContractType.CreateSmartContract);
+//
+//                Transaction trx = wallet.deployContract(request, trxCap, deposit, block, trxExtBuilder, retBuilder);
+//
+//                trxExtBuilder.setTransaction(trx);
+//                trxExtBuilder.setTxid(trxCap.getTransactionId().getByteString());
+//
+//                retBuilder.setResult(true).setCode(response_code.SUCCESS);
+//                trxExtBuilder.setResult(retBuilder);
+//            } catch (Exception e) {
+//                retBuilder.setResult(false).setCode(response_code.OTHER_ERROR)
+//                        .setMessage(ByteString.copyFromUtf8(e.getClass() + " : " + e.getMessage()));
+//                trxExtBuilder.setResult(retBuilder);
+//                logger.warn("exception caught" + e.getMessage(), e);
+//            } finally {
+//                responseObserver.onNext(trxExtBuilder.build());
+//                responseObserver.onCompleted();
+//            }
+//        }
 
         public void totalTransaction(EmptyMessage request,
                                      StreamObserver<NumberMessage> responseObserver) {
