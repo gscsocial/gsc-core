@@ -1287,25 +1287,22 @@ public class RpcApiService implements Service {
             responseObserver.onCompleted();
         }
 
-    /*
-    @Override
-    public void deployContract(org.gsc.protos.Contract.CreateSmartContract request,
-        io.grpc.stub.StreamObserver<TransactionExtention> responseObserver) {
-      createTransactionExtention(request, ContractType.CreateSmartContract, responseObserver);
-    }
-
-    */
-
+        @Override
         public void deployContract(org.gsc.protos.Contract.CreateSmartContract request,
-                                   io.grpc.stub.StreamObserver<TransactionExtention> responseObserver,
-                                   DepositImpl deposit, BlockWrapper block) {
+                                   io.grpc.stub.StreamObserver<TransactionExtention> responseObserver) {
+            createTransactionExtention(request, ContractType.CreateSmartContract, responseObserver);
+        }
+
+        public void deployContract1(org.gsc.protos.Contract.CreateSmartContract request,
+                                    io.grpc.stub.StreamObserver<TransactionExtention> responseObserver,
+                                    DepositImpl deposit, BlockWrapper block) {
             TransactionExtention.Builder trxExtBuilder = TransactionExtention.newBuilder();
             Return.Builder retBuilder = Return.newBuilder();
             try {
                 TransactionWrapper trxCap = new TransactionWrapper(request,
                         ContractType.CreateSmartContract);
 
-                Transaction trx = wallet.deployContract(request, trxCap, deposit, block, trxExtBuilder, retBuilder);
+                Transaction trx = wallet.deployContract1(request, trxCap, deposit, block, trxExtBuilder, retBuilder);
 
                 trxExtBuilder.setTransaction(trx);
                 trxExtBuilder.setTxid(trxCap.getTransactionId().getByteString());
