@@ -20,18 +20,26 @@ package org.gsc.core;
 
 import com.google.common.primitives.Longs;
 import com.google.protobuf.ByteString;
+
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gsc.core.exception.*;
 import org.gsc.core.operator.Operator;
 import org.gsc.core.operator.OperatorFactory;
 import org.gsc.core.wrapper.*;
+import org.gsc.db.*;
+import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -67,24 +75,6 @@ import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.Parameter.ChainParameters;
 import org.gsc.config.args.Args;
-import org.gsc.db.AccountIdIndexStore;
-import org.gsc.db.AccountStore;
-import org.gsc.db.BandwidthProcessor;
-import org.gsc.db.ContractStore;
-import org.gsc.db.DynamicPropertiesStore;
-import org.gsc.db.EnergyProcessor;
-import org.gsc.db.Manager;
-import org.gsc.db.PendingManager;
-import org.gsc.core.exception.AccountResourceInsufficientException;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
-import org.gsc.core.exception.DupTransactionException;
-import org.gsc.core.exception.HeaderNotFound;
-import org.gsc.core.exception.StoreException;
-import org.gsc.core.exception.TaposException;
-import org.gsc.core.exception.TooBigTransactionException;
-import org.gsc.core.exception.TransactionExpirationException;
-import org.gsc.core.exception.ValidateSignatureException;
 import org.gsc.net.message.TransactionMessage;
 import org.gsc.net.node.NodeImpl;
 import org.gsc.protos.Contract.AssetIssueContract;
@@ -848,7 +838,57 @@ public class Wallet {
 
     // do nothing, so can add some useful function later
     // trxcap contract para cacheUnpackValue has value
+
     return trxCap.getInstance();
+  }
+
+  public Transaction deployContract1(CreateSmartContract createSmartContract,
+                                    TransactionWrapper trxCap, DepositImpl deposit,
+                                    BlockWrapper block, Builder builder,Return.Builder retBuilder)
+          throws TransactionTraceException, ContractValidateException, ContractExeException {
+
+    // do nothing, so can add some useful function later
+    // trxcap contract para cacheUnpackValue has value
+
+    Transaction.Builder transactionBuilder = trxCap.getInstance().toBuilder();
+    Transaction.raw.Builder rawBuilder = trxCap.getInstance().getRawData()
+            .toBuilder();
+
+    //rawBuilder.setFeeLimit(feeLimit);
+    rawBuilder.setFeeLimit(10000000L);
+
+    transactionBuilder.setRawData(rawBuilder);
+    Transaction trx = transactionBuilder.build();
+
+    TransactionWrapper transactionWrapper = new TransactionWrapper(trx);
+    TransactionTrace trace = new TransactionTrace(transactionWrapper, deposit.getDbManager());
+
+    Runtime runtime = new Runtime(trace, block, deposit,
+            new ProgramInvokeFactoryImpl());
+    runtime.execute();
+    runtime.go();
+    runtime.finalization();
+    // init
+    //trace.init();
+    //exec
+    //trace.exec(runtime);
+
+    if (runtime.getResult().getException() != null) {
+//          runtime.getResult().getException().printStackTrace();
+      throw new RuntimeException("Runtime exe failed!");
+    }
+
+    ProgramResult result = runtime.getResult();
+    TransactionResultWrapper ret = new TransactionResultWrapper();
+
+    builder.addConstantResult(ByteString.copyFrom(result.getHReturn()));
+    ret.setStatus(0, code.SUCESS);
+    if (StringUtils.isNoneEmpty(runtime.getRuntimeError())) {
+      ret.setStatus(0, code.FAILED);
+      retBuilder.setMessage(ByteString.copyFromUtf8(runtime.getRuntimeError())).build();
+    }
+    transactionWrapper.setResult(ret);
+    return transactionWrapper.getInstance();
   }
 
   public Transaction triggerContract(TriggerSmartContract triggerSmartContract,
@@ -972,6 +1012,43 @@ public class Wallet {
     }
 
     return false;
+  }
+
+  public static CreateSmartContract createSmartContract(String contractName, byte[] address,ABI.Builder abiBuilder,
+                                                        byte[] byteCode, long value,long consumeUserResourcePercent) {
+
+    SmartContract.Builder builder = SmartContract.newBuilder();
+    builder.setName(contractName);
+    builder.setOriginAddress(ByteString.copyFrom(address));
+    builder.setAbi(abiBuilder);
+    builder.setConsumeUserResourcePercent(consumeUserResourcePercent);
+
+    if (value != 0) {
+      builder.setCallValue(value);
+    }
+    if (!ArrayUtils.isEmpty(byteCode)) {
+      builder.setBytecode(ByteString.copyFrom(byteCode));
+    }
+
+    return CreateSmartContract.newBuilder().setOwnerAddress(ByteString.copyFrom(address)).
+            setNewContract(builder.build()).build();
+  }
+
+  public static Runtime processTransactionAndReturnRuntime(Transaction trx,
+                                                           DepositImpl deposit, BlockWrapper block)
+          throws TransactionTraceException, ContractExeException, ContractValidateException, ReceiptCheckErrException {
+
+    TransactionWrapper trxCap = new TransactionWrapper(trx);
+    TransactionTrace trace = new TransactionTrace(trxCap, deposit.getDbManager());
+    Runtime runtime = new Runtime(trace, block, deposit,
+            new ProgramInvokeFactoryImpl());
+
+    // init
+    trace.init();
+    //exec
+    trace.exec(runtime);
+
+    return runtime;
   }
 
 }
