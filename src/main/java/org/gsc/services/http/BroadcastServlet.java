@@ -32,7 +32,7 @@ public class BroadcastServlet extends HttpServlet {
                     .collect(Collectors.joining(System.lineSeparator()));
             Protocol.Transaction transaction = Util.packTransaction(input);
 
-            // /*
+             /*
 
             //transaction = sign(transaction, );
             String privStr = "da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0";
@@ -52,9 +52,9 @@ public class BroadcastServlet extends HttpServlet {
             System.out.println(tbs.toString());
 
             GrpcAPI.Return retur = wallet.broadcastTransaction(tbs.build());
-            // */
+            */
 
-            //GrpcAPI.Return retur = wallet.broadcastTransaction(transaction);
+            GrpcAPI.Return retur = wallet.broadcastTransaction(transaction);
             response.getWriter().println(JsonFormat.printToString(retur));
         } catch (Exception e) {
             logger.debug("Exception: {}", e.getMessage());
