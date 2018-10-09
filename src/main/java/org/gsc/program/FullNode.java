@@ -22,7 +22,7 @@ public class FullNode {
     logger.info("Full node running.");
     //LOCAL_TESTNET_CONF
     //Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
-    Args.setParam(args, Constant.TEST_NET_CONF);
+    Args.setParam(args, Constant.TESTNET_CONF);
     //Args.setParam(args, Constant.TESTNET_CONF);
     Args cfgArgs = Args.getInstance();
 
