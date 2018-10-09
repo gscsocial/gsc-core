@@ -16,7 +16,6 @@
 package org.gsc.core.wrapper;
 
 import static org.gsc.protos.Contract.AssetIssueContract;
-import static org.gsc.protos.Contract.DeployContract;
 import static org.gsc.protos.Contract.VoteAssetContract;
 import static org.gsc.protos.Contract.VoteWitnessContract;
 import static org.gsc.protos.Contract.WitnessCreateContract;
@@ -51,6 +50,7 @@ import org.gsc.protos.Contract.UpdateAssetContract;
 import org.gsc.protos.Contract.WithdrawBalanceContract;
 import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
+import org.spongycastle.util.encoders.Hex;
 
 @Slf4j
 public class TransactionWrapper implements ProtoWrapper<Transaction> {
@@ -253,9 +253,6 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
         case AssetIssueContract:
           owner = contractParameter.unpack(AssetIssueContract.class).getOwnerAddress();
           break;
-        case DeployContract:
-          owner = contractParameter.unpack(DeployContract.class).getOwnerAddress();
-          break;
         case WitnessUpdateContract:
           owner = contractParameter.unpack(WitnessUpdateContract.class).getOwnerAddress();
           break;
@@ -350,6 +347,7 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
         byte[] owner = getOwner(contract);
         byte[] address = ECKey.signatureToAddress(getRawHash().getBytes(),
             getBase64FromByteString(this.transaction.getSignature(i)));
+        logger.info("check sig owner={} address={}",Hex.toHexString(owner),Hex.toHexString(address));
         if (!Arrays.equals(owner, address)) {
           isVerified = false;
           throw new ValidateSignatureException("sig error");
