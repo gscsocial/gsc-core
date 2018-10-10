@@ -305,7 +305,7 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
     try {
       this.getCreateAccountFee();
     } catch (IllegalArgumentException e) {
-      this.saveCreateAccountFee(100_000L); // 0.1TRX
+      this.saveCreateAccountFee(100_000L); // 0.1GSC
     }
 
     try {
@@ -329,7 +329,7 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
     try {
       this.getAssetIssueFee();
     } catch (IllegalArgumentException e) {
-      this.saveAssetIssueFee(1024000000L);
+      this.saveAssetIssueFee(1000000000L);//adjust 1024 to 1000
     }
 
     try {
