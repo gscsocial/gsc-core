@@ -490,7 +490,6 @@ public class Manager {
       throw new ValidateSignatureException("trans sig validate failed");
     }
 
-    //validateFreq(trx);
     synchronized (this) {
       if (!dialog.valid()) {
         dialog.setValue(revokingStore.buildDialog());
