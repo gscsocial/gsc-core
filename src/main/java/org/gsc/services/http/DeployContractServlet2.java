@@ -93,36 +93,36 @@ public class DeployContractServlet2 extends HttpServlet {
             deposit.addBalance(Hex.decode(ownerAddress), 100000000);
 
             byte[] callerAddress = Hex.decode(ownerAddress);
-            CreateSmartContract createSmartContract = wallet.createSmartContract(contractName, callerAddress, abiBuilder, byteCode,
-                    value, consumeUserResourcePercent);
-
-            // logger.info(contract.toString());
-            TransactionWrapper trxCapWithoutFeeLimit = new TransactionWrapper(createSmartContract,
-                    ContractType.CreateSmartContract);
-
-            Transaction.Builder transactionBuilder = trxCapWithoutFeeLimit.getInstance().toBuilder();
-            Transaction.raw.Builder rawBuilder = trxCapWithoutFeeLimit.getInstance().getRawData()
-                    .toBuilder();
-
-            rawBuilder.setFeeLimit(feeLimit);
-            transactionBuilder.setRawData(rawBuilder);
-            Transaction trx = transactionBuilder.build();
-            // logger.info(trx.toString());
-            // logger.info("3---------------------+++++++++++++--------------------------------------------------");
-
-            // logger.info("6---------------------+++++++++++++--------------------------------------------------");
-            Runtime runtime = wallet.processTransactionAndReturnRuntime(trx, deposit, null);
-            // logger.info("runtime.getResult-----------------" + runtime.getResult().toString());
+//            CreateSmartContract createSmartContract = wallet.createSmartContract(contractName, callerAddress, abiBuilder, byteCode,
+//                    value, consumeUserResourcePercent);
+//
+//            // logger.info(contract.toString());
+//            TransactionWrapper trxCapWithoutFeeLimit = new TransactionWrapper(createSmartContract,
+//                    ContractType.CreateSmartContract);
+//
+//            Transaction.Builder transactionBuilder = trxCapWithoutFeeLimit.getInstance().toBuilder();
+//            Transaction.raw.Builder rawBuilder = trxCapWithoutFeeLimit.getInstance().getRawData()
+//                    .toBuilder();
+//
+//            rawBuilder.setFeeLimit(feeLimit);
+//            transactionBuilder.setRawData(rawBuilder);
+//            Transaction trx = transactionBuilder.build();
+//            // logger.info(trx.toString());
+//            // logger.info("3---------------------+++++++++++++--------------------------------------------------");
+//
+//            // logger.info("6---------------------+++++++++++++--------------------------------------------------");
+//            Runtime runtime = wallet.processTransactionAndReturnRuntime(trx, deposit, null);
+//            // logger.info("runtime.getResult-----------------" + runtime.getResult().toString());
             // Wallet.generateContractAddress(trx);
             // response.getWriter().println(Wallet.generateContractAddress(trx));
 
 
             // logger.info("runtime.getResult().getHReturn())" + Hex.toHexString(runtime.getResult().getHReturn()).toString());
-            System.out.println(Util.printTransaction(trx));
-            System.out.println("-----------------------------------------------------------------------------------------");
-            Map trxMap = JSON.parseObject(Util.printTransaction(trx));
-            System.out.println("contract_address: " + trxMap.get("contract_address"));
-            response.getWriter().println(Util.printTransaction(trx));
+//            System.out.println(Util.printTransaction(trx));
+//            System.out.println("-----------------------------------------------------------------------------------------");
+//            Map trxMap = JSON.parseObject(Util.printTransaction(trx));
+//            System.out.println("contract_address: " + trxMap.get("contract_address"));
+//            response.getWriter().println(Util.printTransaction(trx));
 
         } catch (Exception e) {
             logger.debug("Exception: {}", e.getMessage());

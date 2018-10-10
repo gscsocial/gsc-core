@@ -31,6 +31,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.spongycastle.util.encoders.Hex;
 import org.springframework.util.StringUtils;
 import org.gsc.crypto.ECKey;
 import org.gsc.crypto.ECKey.ECDSASignature;
@@ -466,6 +467,7 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
         byte[] owner = getOwner(contract);
         byte[] address = ECKey.signatureToAddress(getRawHash().getBytes(),
             getBase64FromByteString(this.transaction.getSignature(i)));
+        logger.info("check sig owner={} address={}",Hex.toHexString(owner),Hex.toHexString(address));
         if (!Arrays.equals(owner, address)) {
           isVerified = false;
           throw new ValidateSignatureException("sig error");

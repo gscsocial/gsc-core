@@ -38,8 +38,8 @@ public final class GSCCastleProvider {
       Provider p = Security.getProvider("SC");
 
       INSTANCE = (p != null) ? p : new BouncyCastleProvider();
-      INSTANCE.put("MessageDigest.gsc-KECCAK-256", Keccak256.class.getName());
-      INSTANCE.put("MessageDigest.gsc-KECCAK-512", Keccak512.class.getName());
+      INSTANCE.put("MessageDigest.GSC-KECCAK-256", Keccak256.class.getName());
+      INSTANCE.put("MessageDigest.GSC-KECCAK-512", Keccak512.class.getName());
     }
   }
 }

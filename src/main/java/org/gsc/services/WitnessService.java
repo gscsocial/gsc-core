@@ -161,18 +161,18 @@ public class WitnessService implements Service {
       }
     }
 
-    final int participation = this.controller.calculateParticipationRate(); //check node could participate or not
-    if (participation < MIN_PARTICIPATION_RATE) {
-      logger.warn(
-          "Participation[" + participation + "] <  MIN_PARTICIPATION_RATE[" + MIN_PARTICIPATION_RATE
-              + "]");
-
-      if (logger.isDebugEnabled()) {
-        this.controller.dumpParticipationLog();
-      }
-
-      return BlockProductionCondition.LOW_PARTICIPATION;
-    }
+//    final int participation = this.controller.calculateParticipationRate(); //check node could participate or not
+//    if (participation < MIN_PARTICIPATION_RATE) {
+//      logger.warn(
+//          "Participation[" + participation + "] <  MIN_PARTICIPATION_RATE[" + MIN_PARTICIPATION_RATE
+//              + "]");
+//
+//      if (logger.isDebugEnabled()) {
+//        this.controller.dumpParticipationLog();
+//      }
+//
+//      return BlockProductionCondition.LOW_PARTICIPATION;
+//    }
 
     long slot = controller.getSlotAtTime(now);
     logger.debug("Slot:" + slot);
