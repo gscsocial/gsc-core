@@ -43,10 +43,17 @@ GSC (Global Social Chain) is the world's first new generation of social networki
 ```bash
 ./gradlew run -Pwitness
 ```
+
  
 ## Links
+* [Website](http://gsc.social/)
 
-* [Telegram](https://t.me/gscofficial)
+* [Telegram English](https://t.me/gscofficial)
+* [Telegram Indonesia](https://t.me/gscofficial_id)
+* [Telegram Japanese](https://t.me/gscofficial_jp)
+* [Telegram Chinese](https://t.me/gscofficial_cn)
+* [Telegram Italian](https://t.me/gscofficial_it)
+* [Telegram Indian](https://t.me/gscofficial_in)
 * [Twitter](https://twitter.com/gsc_socialchain)
 * [Facebook](https://www.facebook.com/GSCCoin/)
 * [Github](https://github.com/gscsocial)
