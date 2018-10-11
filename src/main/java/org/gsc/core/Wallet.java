@@ -79,8 +79,8 @@ public class Wallet {
   private NodeImpl p2pNode;
   @Autowired
   private Manager dbManager;
-  private static String addressPreFixString = Constant.ADD_PRE_FIX_STRING_TESTNET;  //default testnet
-  private static byte addressPreFixByte = Constant.ADD_PRE_FIX_BYTE_TESTNET;
+  private static String addressPreFixString = Constant.ADD_PRE_FIX_STRING_MAINNET;  //default testnet
+  private static byte addressPreFixByte = Constant.ADD_PRE_FIX_BYTE_MAINNET;
 
   /**
    * Creates a new Wallet with a random ECKey.

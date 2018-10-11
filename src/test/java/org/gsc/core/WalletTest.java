@@ -99,7 +99,7 @@ public class WalletTest {
   private static AssetIssueWrapper Asset1;
 
   static {
-    Args.setParam(new String[]{"-d", dbPath}, Constant.TEST_CONF);
+    Args.setParam(new String[]{"-d", dbPath}, Constant.TESTNET_CONF);
     context = new AnnotationConfigApplicationContext(DefaultConfig.class);
   }
 

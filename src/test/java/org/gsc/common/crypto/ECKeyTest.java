@@ -3,6 +3,7 @@ package org.gsc.common.crypto;
 import static org.junit.Assert.assertEquals;
 
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.utils.Utils;
 import org.gsc.crypto.ECKey;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
@@ -19,5 +20,10 @@ public class ECKeyTest {
 
     assertEquals(Wallet.getAddressPreFixString() + "125b6c87b3d67114b3873977888c34582f27bbb0",
         ByteArray.toHexString(key.getAddress()));
+
+    ECKey ecKey = new ECKey(Utils.getRandom());
+    logger.info(ByteArray.toHexString(ecKey
+            .getAddress()));
+
   }
 }
