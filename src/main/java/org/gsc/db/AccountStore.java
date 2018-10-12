@@ -30,25 +30,12 @@ public class AccountStore extends GSCStoreWithRevoking<AccountWrapper> {
   }
 
   /**
-   * Max TRX account.
-   */
-  public AccountWrapper getSun() {
-    return getUnchecked(assertsAddress.get("Sun"));
-  }
-
-  /**
-   * Min TRX account.
+   * Min GSC account.
    */
   public AccountWrapper getBlackhole() {
     return getUnchecked(assertsAddress.get("Blackhole"));
   }
 
-  /**
-   * Get foundation account info.
-   */
-  public AccountWrapper getZion() {
-    return getUnchecked(assertsAddress.get("Zion"));
-  }
 
   /**
    * List<ConfigObject> list = config.getObjectList("genesis.block.assets");
