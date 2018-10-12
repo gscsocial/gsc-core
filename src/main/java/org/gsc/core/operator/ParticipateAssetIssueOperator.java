@@ -61,7 +61,7 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
           this.dbManager.getAssetIssueStore()
               .get(participateAssetIssueContract.getAssetName().toByteArray());
       long exchangeAmount = Math.multiplyExact(cost, assetIssueWrapper.getNum());
-      exchangeAmount = Math.floorDiv(exchangeAmount, assetIssueWrapper.getTrxNum());
+      exchangeAmount = Math.floorDiv(exchangeAmount, assetIssueWrapper.getGscNum());
       ownerAccount.addAssetAmount(assetIssueWrapper.createDbKey(), exchangeAmount);
 
       //add to to_address
@@ -163,7 +163,7 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
         throw new ContractValidateException("No longer valid period!");
       }
 
-      int trxNum = assetIssueWrapper.getTrxNum();
+      int trxNum = assetIssueWrapper.getGscNum();
       int num = assetIssueWrapper.getNum();
       long exchangeAmount = Math.multiplyExact(amount, num);
       exchangeAmount = Math.floorDiv(exchangeAmount, trxNum);

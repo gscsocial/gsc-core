@@ -98,7 +98,7 @@ message AssetIssueContract {
   bytes abbr = 3;
   int64 total_supply = 4;
   repeated FrozenSupply frozen_supply = 5;
-  int32 trx_num = 6;
+  int32 gsc_num = 6;
   int32 num = 8;
   int64 start_time = 9;
   int64 end_time = 10;
@@ -185,7 +185,7 @@ message TriggerSmartContract {
 
 message BuyStorageContract {
   bytes owner_address = 1;
-  int64 quant = 2; // trx quantity for buy storage (sun)
+  int64 quant = 2; // gsc quantity for buy storage (sun)
 }
 
 message BuyStorageBytesContract {
