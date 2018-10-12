@@ -33,7 +33,7 @@ message Vote {
 message Account {
   // frozen balance
   message Frozen {
-    // the frozen trx balance
+    // the frozen gsc balance
     int64 frozen_balance = 1;
     // the expire time
     int64 expire_time = 2;
@@ -43,7 +43,7 @@ message Account {
   AccountType type = 2;
   // the create address
   bytes address = 3;
-  // the trx balance
+  // the gsc balance
   int64 balance = 4;
   // the votes
   repeated Vote votes = 5;
