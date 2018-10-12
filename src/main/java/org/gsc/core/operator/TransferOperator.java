@@ -94,7 +94,7 @@ public class TransferOperator extends AbstractOperator {
     }
 
     if (Arrays.equals(toAddress, ownerAddress)) {
-      throw new ContractValidateException("Cannot transfer trx to yourself.");
+      throw new ContractValidateException("Cannot transfer gsc to yourself.");
     }
 
     AccountWrapper ownerAccount = dbManager.getAccountStore().get(ownerAddress);

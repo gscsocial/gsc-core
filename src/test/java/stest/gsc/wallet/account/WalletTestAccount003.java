@@ -165,7 +165,7 @@ public class WalletTestAccount003 {
   }
 
   @Test
-  public void testNoBalanceTransferTrx() {
+  public void testNoBalanceTransferGsc() {
     //Send Coin failed when there is no enough balance.
     Assert.assertFalse(sendCoin(toAddress, 100000000000000000L, lowBalAddress, lowBalTest));
   }
@@ -271,7 +271,7 @@ public class WalletTestAccount003 {
     }
   }
 
-  public Boolean createAssetIssue(byte[] address, String name, Long totalSupply, Integer trxNum,
+  public Boolean createAssetIssue(byte[] address, String name, Long totalSupply, Integer gscNum,
       Integer icoNum, Long startTime, Long endTime,
       Integer voteScore, String description, String url, String priKey) {
     ECKey temKey = null;
@@ -288,7 +288,7 @@ public class WalletTestAccount003 {
       builder.setOwnerAddress(ByteString.copyFrom(address));
       builder.setName(ByteString.copyFrom(name.getBytes()));
       builder.setTotalSupply(TotalSupply);
-      builder.setGscNum(trxNum);
+      builder.setGscNum(gscNum);
       builder.setNum(icoNum);
       builder.setStartTime(startTime);
       builder.setEndTime(endTime);

@@ -82,7 +82,7 @@ public class WalletTestAccount004 {
   public void testFreezeBalance() {
     //Freeze failed when freeze amount is large than currently balance.
     Assert.assertFalse(freezeBalance(fromAddress, 9000000000000000000L, 3L, testKey002));
-    //Freeze failed when freeze amount less than 1Trx
+    //Freeze failed when freeze amount less than 1gsc
     Assert.assertFalse(freezeBalance(fromAddress, 999999L, 3L, testKey002));
     //Freeze failed when freeze duration isn't 3 days.
     Assert.assertFalse(freezeBalance(fromAddress, 1000000L, 2L, testKey002));

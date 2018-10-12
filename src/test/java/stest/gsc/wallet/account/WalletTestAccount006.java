@@ -99,7 +99,7 @@ public class WalletTestAccount006 {
   @Test(enabled = true)
   public void testUseFreeNet() {
 
-    //Transfer some TRX to other to test free net cost.
+    //Transfer some gsc to other to test free net cost.
     Assert.assertTrue(PublicMethed.sendcoin(fromAddress,1L,account006Address,
         account006Key,blockingStubFull));
     ByteString addressBs = ByteString.copyFrom(account006Address);

@@ -82,7 +82,7 @@ public class WallettestP0003 {
     HashMap<String, String> veryLargeMap = new HashMap<String, String>();
     veryLargeMap.put(voteStr, "1000000000");
 
-    //Freeze 10Trx
+    //Freeze 10gsc
     Assert.assertTrue(PublicMethed.freezeBalance(fromAddress, 10000000L, 3L,
         testKey002,blockingStubFull));
 

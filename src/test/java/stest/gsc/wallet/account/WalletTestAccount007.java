@@ -96,7 +96,7 @@ public class WalletTestAccount007 {
     //When creator has no bandwidth, he can't use the free net.
     Assert.assertTrue(afterFreeNet == beforeFreeNet);
 
-    //When the creator has no bandwidth, create a new account should spend 0.1TRX.
+    //When the creator has no bandwidth, create a new account should spend 0.1Gsc.
     Assert.assertTrue(beforeBalance - afterBalance == 100000);
   }
 
