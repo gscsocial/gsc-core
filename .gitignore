@@ -23,6 +23,8 @@ doc
 src/main/gen
 src/main/protos
 
+/gradle/
+
 /bin/
 
 # Eclipse IDE specific files and folders
