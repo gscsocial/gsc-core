@@ -14,7 +14,7 @@ logs
 out
 
 # levelDB
-database*
+database/*
 
 # doc
 doc
