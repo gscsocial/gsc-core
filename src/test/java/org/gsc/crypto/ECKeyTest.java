@@ -30,7 +30,7 @@ import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 @Slf4j
 public class ECKeyTest {
 
-  private String privString = "367fb555e8b57a016c3c3453ee67ff053decbd793c38eb55ff91b18b6d8b50c3";
+  private String privString = "cd00ca55cae049f8274b4b634190b3c31b7fe111b6f090fc0bb9c33f264af9b9";
   private BigInteger privateKey = new BigInteger(privString, 16);
 
   private String pubString = "040947751e3022ecf3016be03ec77ab0ce3c2662b4843898cb068d74f698ccc8ad75aa17564ae80a20bb044ee7a6d903e8e8df624b089c95d66a0570f051e5a05b";
@@ -46,13 +46,17 @@ public class ECKeyTest {
 
   @Test
   public void testECKey() {
-    ECKey key = new ECKey();
+    ECKey key = ECKey.fromPrivate(privateKey);
     assertTrue(key.isPubKeyCanonical());
     assertNotNull(key.getPubKey());
     assertNotNull(key.getPrivKeyBytes());
     logger.info(Hex.toHexString(key.getPrivKeyBytes()) + " :Generated privkey");
     logger.info(Hex.toHexString(key.getPubKey()) + " :Generated pubkey");
     logger.info(Hex.toHexString(key.getAddress()));
+    WitnessWrapper witnessCapsule = new WitnessWrapper(ByteString.copyFrom(key.getAddress()));
+    ByteString address = witnessCapsule.getAddress();
+    String addressString = Wallet.encode58Check(address.toByteArray());
+    logger.info(addressString);
   }
 
   @Test

@@ -123,9 +123,6 @@ public class EnergyProcessorTest {
         .get(ByteArray.fromHexString(CONTRACT_PROVIDER_ADDRESS));
 
     Assert.assertEquals(1526647838000L, ownerCapsuleNew.getLatestOperationTime());
-    Assert.assertEquals(1526647838000L,
-        ownerCapsuleNew.getAccountResource().getLatestConsumeTimeForEnergy());
-    Assert.assertEquals(10000L, ownerCapsuleNew.getAccountResource().getEnergyUsage());
 
   }
 
