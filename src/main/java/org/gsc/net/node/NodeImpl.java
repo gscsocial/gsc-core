@@ -339,7 +339,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
       type = InventoryType.BLOCK;
     } else if (msg instanceof TransactionMessage) {
       TrxCache.put(msg.getMessageId(), (TransactionMessage) msg);
-      type = InventoryType.TRX;
+      type = InventoryType.GSC;
     } else {
       return;
     }
@@ -518,7 +518,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
       advObjToSpread.clear();
     }
     for (InventoryType type : spread.values()) {
-      if (type == InventoryType.TRX) {
+      if (type == InventoryType.GSC) {
         trxCount.add();
       }
     }
@@ -638,7 +638,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
 
   private void onHandleInventoryMessage(PeerConnection peer, InventoryMessage msg) {
     for (Sha256Hash id : msg.getHashList()) {
-      if (msg.getInventoryType().equals(InventoryType.TRX) && TrxCache.getIfPresent(id) != null) {
+      if (msg.getInventoryType().equals(InventoryType.GSC) && TrxCache.getIfPresent(id) != null) {
         logger.info("{} {} from peer {} Already exist.", msg.getInventoryType(), id,
             peer.getNode().getHost());
         continue;
@@ -659,7 +659,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
           && !peer.isNeedSyncFromUs()) {
 
         //avoid TRX flood attack here.
-        if (msg.getInventoryType().equals(InventoryType.TRX)
+        if (msg.getInventoryType().equals(InventoryType.GSC)
             && (peer.isAdvInvFull()
             || isFlooded())) {
           logger.warn("A peer is flooding us, stop handle inv, the peer is: " + peer);
@@ -850,7 +850,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
 
   private void onHandleTransactionMessage(PeerConnection peer, TransactionMessage trxMsg) {
     try {
-      Item item = new Item(trxMsg.getMessageId(), InventoryType.TRX);
+      Item item = new Item(trxMsg.getMessageId(), InventoryType.GSC);
       if (!peer.getAdvObjWeRequested().containsKey(item)) {
         throw new TraitorPeerException("We don't send fetch request to" + peer);
       }
