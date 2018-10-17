@@ -7,6 +7,12 @@
 .gradle/
 build/
 
+Protobuf协议
+CONTRIBUTING
+Protobuf_Protocol
+.travis
+.gitignore
+
 # log
 logs/
 consensus-logs/
