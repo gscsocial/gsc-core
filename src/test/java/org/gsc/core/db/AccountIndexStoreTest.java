@@ -5,7 +5,6 @@ import java.io.File;
 import java.util.Random;
 
 import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.db.AccountIndexStore;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;

@@ -100,9 +100,9 @@ public class SolidityNode {
 //
 //      }
       long lastSolidityBlockNum = dbManager.getDynamicPropertiesStore()
-          .getLatestSolidifiedBlockNum();
+              .getLatestSolidifiedBlockNum();
       logger.info("sync solidity block, lastSolidityBlockNum:{}, remoteLastSolidityBlockNum:{}",
-          lastSolidityBlockNum, remoteLastSolidityBlockNum);
+              lastSolidityBlockNum, remoteLastSolidityBlockNum);
       if (lastSolidityBlockNum < remoteLastSolidityBlockNum) {
         Block block = databaseGrpcClient.getBlock(lastSolidityBlockNum + 1);
         try {
@@ -121,7 +121,7 @@ public class SolidityNode {
             dbManager.getTransactionHistoryStore().put(trx.getTransactionId().getBytes(), ret);
           }
           dbManager.getDynamicPropertiesStore()
-              .saveLatestSolidifiedBlockNum(lastSolidityBlockNum + 1);
+                  .saveLatestSolidifiedBlockNum(lastSolidityBlockNum + 1);
         } catch (AccountResourceInsufficientException e) {
           throw new BadBlockException("validate AccountResource exception");
         } catch (ValidateScheduleException e) {
@@ -180,7 +180,7 @@ public class SolidityNode {
    */
   public static void main(String[] args) throws InterruptedException {
     logger.info("Solidity node running.");
-    Args.setParam(args, Constant.TESTNET_CONF);
+    Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
     Args cfgArgs = Args.getInstance();
 
     if (StringUtils.isEmpty(cfgArgs.getTrustNodeAddr())) {
