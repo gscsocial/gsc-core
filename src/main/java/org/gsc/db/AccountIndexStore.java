@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AccountIndexStore extends GscStoreWithRevoking<BytesWrapper> {
+public class AccountIndexStore extends GSCStoreWithRevoking<BytesWrapper> {
 
   @Autowired
   public AccountIndexStore(@Value("account-index") String dbName) {
@@ -32,7 +32,7 @@ public class AccountIndexStore extends GscStoreWithRevoking<BytesWrapper> {
 
   @Override
   public BytesWrapper get(byte[] key) {
-    byte[] value = dbSource.getData(key);
+    byte[] value = revokingDB.getUnchecked(key);
     if (ArrayUtils.isEmpty(value)) {
       return null;
     }
@@ -41,7 +41,7 @@ public class AccountIndexStore extends GscStoreWithRevoking<BytesWrapper> {
 
   @Override
   public boolean has(byte[] key) {
-    byte[] value = dbSource.getData(key);
+    byte[] value = revokingDB.getUnchecked(key);
     if (ArrayUtils.isEmpty(value)) {
       return false;
     }
