@@ -3,7 +3,7 @@ package org.gsc.common.net.udp.message.backup;
 import static org.gsc.common.net.udp.message.UdpMessageTypeEnum.BACKUP_KEEP_ALIVE;
 
 import org.gsc.common.net.udp.message.Message;
-import org.gsc.common.net.udp.message.Message;
+import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.protos.Discover;
 
 public class KeepAliveMessage extends Message {
@@ -30,7 +30,7 @@ public class KeepAliveMessage extends Message {
   }
 
   @Override
-  public byte[] getNodeId() {
+  public Node getFrom() {
     return null;
   }
 }

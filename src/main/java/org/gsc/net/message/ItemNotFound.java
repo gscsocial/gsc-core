@@ -2,7 +2,7 @@ package org.gsc.net.message;
 
 import org.gsc.protos.Protocol;
 
-public class ItemNotFound extends GscMessage {
+public class ItemNotFound extends GSCMessage {
 
   private org.gsc.protos.Protocol.Items notFound;
 

@@ -1,18 +1,16 @@
 package org.gsc.db;
 
+import org.gsc.core.db2.common.IRevokingDB;
+import org.gsc.core.db2.core.ISession;
 import org.gsc.core.exception.RevokingStoreIllegalStateException;
 
 public interface RevokingDatabase {
 
-  AbstractRevokingStore.Dialog buildDialog();
+  ISession buildSession();
 
-  AbstractRevokingStore.Dialog buildDialog(boolean forceEnable);
+  ISession buildSession(boolean forceEnable);
 
-  void onCreate(AbstractRevokingStore.RevokingTuple tuple, byte[] value);
-
-  void onModify(AbstractRevokingStore.RevokingTuple tuple, byte[] value);
-
-  void onRemove(AbstractRevokingStore.RevokingTuple tuple, byte[] value);
+  void add(IRevokingDB revokingDB);
 
   void merge() throws RevokingStoreIllegalStateException;
 
@@ -22,11 +20,13 @@ public interface RevokingDatabase {
 
   void pop() throws RevokingStoreIllegalStateException;
 
-  AbstractRevokingStore.RevokingState head();
-
   void enable();
 
   int size();
+
+  void check();
+
+  void setMaxSize(int maxSize);
 
   void disable();
 

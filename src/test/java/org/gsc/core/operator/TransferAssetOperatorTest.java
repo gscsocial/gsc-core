@@ -1,10 +1,10 @@
 /*
- * java-gsc is free software: you can redistribute it and/or modify
+ * gsc-core is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * java-gsc is distributed in the hope that it will be useful,
+ * gsc-core is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,21 +21,21 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
 import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.AssetIssueWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AssetIssueWrapper;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
@@ -47,32 +47,32 @@ import org.gsc.protos.Protocol.Transaction.Result.code;
 @Slf4j
 public class TransferAssetOperatorTest {
 
-  private static AnnotationConfigApplicationContext context;
+  private static GSCApplicationContext context;
   private static Manager dbManager;
   private static Any contract;
   private static final String dbPath = "output_transferasset_test";
-  private static final String ASSET_NAME = "gsc";
+  private static final String ASSET_NAME = "trx";
   private static final String OWNER_ADDRESS;
   private static final String TO_ADDRESS;
   private static final String NOT_EXIT_ADDRESS;
   private static final long OWNER_ASSET_BALANCE = 99999;
   private static final String ownerAsset_ADDRESS;
-  private static final String ownerASSET_NAME = "gsctest";
+  private static final String ownerASSET_NAME = "trxtest";
   private static final long OWNER_ASSET_Test_BALANCE = 99999;
-  private static final String OWNER_ADDRESS_INVALIDATE = "cccc";
-  private static final String TO_ADDRESS_INVALIDATE = "dddd";
+  private static final String OWNER_ADDRESS_INVALID = "cccc";
+  private static final String TO_ADDRESS_INVALID = "dddd";
   private static final long TOTAL_SUPPLY = 10L;
-  private static final int GSC_NUM = 10;
+  private static final int TRX_NUM = 10;
   private static final int NUM = 1;
   private static final long START_TIME = 1;
   private static final long END_TIME = 2;
   private static final int VOTE_SCORE = 2;
-  private static final String DESCRIPTION = "GSC";
-  private static final String URL = "https://gsc.network";
+  private static final String DESCRIPTION = "TRX";
+  private static final String URL = "https://gscan.social";
 
   static {
     Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
-    context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS = Wallet.getAddressPreFixString() + "abd4b9367799eaa3197fecb144eb71de1e049150";
     TO_ADDRESS = Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a146a";
     NOT_EXIT_ADDRESS = Wallet.getAddressPreFixString() + "B56446E617E924805E4D6CA021D341FEF6E2013B";
@@ -98,7 +98,7 @@ public class TransferAssetOperatorTest {
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)),
             ByteString.copyFromUtf8("owner"),
             AccountType.AssetIssue);
-    ownerCapsule.addAsset(ASSET_NAME, OWNER_ASSET_BALANCE);
+    ownerCapsule.addAsset(ASSET_NAME.getBytes(), OWNER_ASSET_BALANCE);
 
     AccountWrapper toAccountWrapper =
         new AccountWrapper(
@@ -110,7 +110,7 @@ public class TransferAssetOperatorTest {
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)))
             .setName(ByteString.copyFrom(ByteArray.fromString(ASSET_NAME)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setGscNum(GSC_NUM)
+            .setGscNum(TRX_NUM)
             .setNum(NUM)
             .setStartTime(START_TIME)
             .setEndTime(END_TIME)
@@ -118,24 +118,24 @@ public class TransferAssetOperatorTest {
             .setDescription(ByteString.copyFrom(ByteArray.fromString(DESCRIPTION)))
             .setUrl(ByteString.copyFrom(ByteArray.fromString(URL)))
             .build();
-    AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
+    AssetIssueWrapper assetIssueCapsule = new AssetIssueWrapper(assetIssueContract);
     dbManager.getAccountStore().put(ownerCapsule.getAddress().toByteArray(), ownerCapsule);
     dbManager.getAccountStore().put(toAccountWrapper.getAddress().toByteArray(), toAccountWrapper);
     dbManager.getAssetIssueStore()
-        .put(assetIssueWrapper.getName().toByteArray(), assetIssueWrapper);
+        .put(assetIssueCapsule.createDbKey(), assetIssueCapsule);
   }
 
   public void createAsset(String assetName) {
     AccountWrapper ownerCapsule = dbManager.getAccountStore()
         .get(ByteArray.fromHexString(OWNER_ADDRESS));
-    ownerCapsule.addAsset(assetName, OWNER_ASSET_BALANCE);
+    ownerCapsule.addAsset(assetName.getBytes(), OWNER_ASSET_BALANCE);
 
     AssetIssueContract assetIssueContract =
         AssetIssueContract.newBuilder()
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)))
             .setName(ByteString.copyFrom(ByteArray.fromString(assetName)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setGscNum(GSC_NUM)
+            .setGscNum(TRX_NUM)
             .setNum(NUM)
             .setStartTime(START_TIME)
             .setEndTime(END_TIME)
@@ -143,10 +143,10 @@ public class TransferAssetOperatorTest {
             .setDescription(ByteString.copyFrom(ByteArray.fromString(DESCRIPTION)))
             .setUrl(ByteString.copyFrom(ByteArray.fromString(URL)))
             .build();
-    AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
+    AssetIssueWrapper assetIssueCapsule = new AssetIssueWrapper(assetIssueContract);
     dbManager.getAccountStore().put(ownerCapsule.getAddress().toByteArray(), ownerCapsule);
     dbManager.getAssetIssueStore()
-        .put(assetIssueWrapper.getName().toByteArray(), assetIssueWrapper);
+        .put(assetIssueCapsule.createDbKey(), assetIssueCapsule);
   }
 
   private Any getContract(long sendCoin) {
@@ -199,7 +199,7 @@ public class TransferAssetOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -225,7 +225,7 @@ public class TransferAssetOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -258,7 +258,7 @@ public class TransferAssetOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("Owner no asset!", e.getMessage());
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       owner = dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
@@ -283,7 +283,7 @@ public class TransferAssetOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("assetBalance is not sufficient.".equals(e.getMessage()));
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -306,7 +306,7 @@ public class TransferAssetOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("Amount must greater than 0.".equals(e.getMessage()));
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -329,7 +329,7 @@ public class TransferAssetOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("Amount must greater than 0.".equals(e.getMessage()));
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS.getNumber());
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -353,7 +353,7 @@ public class TransferAssetOperatorTest {
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertTrue("No asset !".equals(e.getMessage()));
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -386,7 +386,8 @@ public class TransferAssetOperatorTest {
       actuator.execute(ret);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("To account is not exit!", e.getMessage());
+      Assert
+          .assertEquals("Validate TransferAssetOperator error, insufficient fee.", e.getMessage());
       AccountWrapper owner = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
       Assert
@@ -403,7 +404,7 @@ public class TransferAssetOperatorTest {
   public void addOverflowTest() {
     // First, increase the to balance. Else can't complete this test case.
     AccountWrapper toAccount = dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
-    toAccount.addAsset(ASSET_NAME, Long.MAX_VALUE);
+    toAccount.addAsset(ASSET_NAME.getBytes(), Long.MAX_VALUE);
     dbManager.getAccountStore().put(ByteArray.fromHexString(TO_ADDRESS), toAccount);
     TransferAssetOperator actuator = new TransferAssetOperator(getContract(1), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
@@ -458,7 +459,7 @@ public class TransferAssetOperatorTest {
    */
   public void invalidOwnerAddress() {
     TransferAssetOperator actuator = new TransferAssetOperator(
-        getContract(100L, OWNER_ADDRESS_INVALIDATE, TO_ADDRESS), dbManager);
+        getContract(100L, OWNER_ADDRESS_INVALID, TO_ADDRESS), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
@@ -484,7 +485,7 @@ public class TransferAssetOperatorTest {
    */
   public void invalidToAddress() {
     TransferAssetOperator actuator = new TransferAssetOperator(
-        getContract(100L, OWNER_ADDRESS, TO_ADDRESS_INVALIDATE), dbManager);
+        getContract(100L, OWNER_ADDRESS, TO_ADDRESS_INVALID), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
@@ -514,13 +515,13 @@ public class TransferAssetOperatorTest {
             ByteString.copyFrom(ByteArray.fromHexString(ownerAsset_ADDRESS)),
             ByteString.copyFromUtf8("ownerAsset"),
             AccountType.AssetIssue);
-    ownerAssetCapsule.addAsset(ownerASSET_NAME, OWNER_ASSET_Test_BALANCE);
+    ownerAssetCapsule.addAsset(ownerASSET_NAME.getBytes(), OWNER_ASSET_Test_BALANCE);
     AssetIssueContract assetIssueTestContract =
         AssetIssueContract.newBuilder()
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(ownerAsset_ADDRESS)))
             .setName(ByteString.copyFrom(ByteArray.fromString(ownerASSET_NAME)))
             .setTotalSupply(TOTAL_SUPPLY)
-            .setGscNum(GSC_NUM)
+            .setGscNum(TRX_NUM)
             .setNum(NUM)
             .setStartTime(START_TIME)
             .setEndTime(END_TIME)
@@ -528,12 +529,12 @@ public class TransferAssetOperatorTest {
             .setDescription(ByteString.copyFrom(ByteArray.fromString(DESCRIPTION)))
             .setUrl(ByteString.copyFrom(ByteArray.fromString(URL)))
             .build();
-    AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueTestContract);
+    AssetIssueWrapper assetIssueCapsule = new AssetIssueWrapper(assetIssueTestContract);
     dbManager.getAccountStore()
         .put(ownerAssetCapsule.getAddress().toByteArray(), ownerAssetCapsule);
     dbManager
         .getAssetIssueStore()
-        .put(assetIssueWrapper.getName().toByteArray(), assetIssueWrapper);
+        .put(assetIssueCapsule.createDbKey(), assetIssueCapsule);
     TransferAssetOperator actuator = new TransferAssetOperator(getContract(1, ownerASSET_NAME),
         dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
@@ -563,6 +564,8 @@ public class TransferAssetOperatorTest {
   /*
    * Asset name length must between 1 to 32 and can not contain space and other unreadable character, and can not contain chinese characters.
    */
+
+  //asset name validation which is unnecessary has been removed!
   public void assetNameTest() {
     //Empty name, throw exception
     ByteString emptyName = ByteString.EMPTY;
@@ -575,64 +578,64 @@ public class TransferAssetOperatorTest {
       Assert.assertTrue(false);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("Invalid assetName", e.getMessage());
+      Assert.assertEquals("No asset !", e.getMessage());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
 
     //Too long name, throw exception. Max long is 32.
     String assetName = "testname0123456789abcdefghijgklmo";
-    actuator = new TransferAssetOperator(getContract(100L, assetName),
-        dbManager);
-    try {
-      actuator.validate();
-      actuator.execute(ret);
-      Assert.assertTrue(false);
-    } catch (ContractValidateException e) {
-      Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("Invalid assetName", e.getMessage());
-      AccountWrapper toAccount =
-          dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
-      Assert.assertTrue(
-          isNullOrZero(toAccount.getAssetMap().get(assetName)));
-    } catch (ContractExeException e) {
-      Assert.assertFalse(e instanceof ContractExeException);
-    }
+//    actuator = new TransferAssetOperator(getContract(100L, assetName),
+//        dbManager);
+//    try {
+//      actuator.validate();
+//      actuator.execute(ret);
+//      Assert.assertTrue(false);
+//    } catch (ContractValidateException e) {
+//      Assert.assertTrue(e instanceof ContractValidateException);
+//      Assert.assertEquals("Invalid assetName", e.getMessage());
+//      AccountWrapper toAccount =
+//          dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
+//      Assert.assertTrue(
+//          isNullOrZero(toAccount.getAssetMap().get(assetName)));
+//    } catch (ContractExeException e) {
+//      Assert.assertFalse(e instanceof ContractExeException);
+//    }
 
     //Contain space, throw exception. Every character need readable .
-    assetName = "t e";
-    actuator = new TransferAssetOperator(getContract(100L, assetName), dbManager);
-    try {
-      actuator.validate();
-      actuator.execute(ret);
-      Assert.assertTrue(false);
-    } catch (ContractValidateException e) {
-      Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("Invalid assetName", e.getMessage());
-      AccountWrapper toAccount =
-          dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
-      Assert.assertTrue(
-          isNullOrZero(toAccount.getAssetMap().get(assetName)));
-    } catch (ContractExeException e) {
-      Assert.assertFalse(e instanceof ContractExeException);
-    }
+//    assetName = "t e";
+//    actuator = new TransferAssetOperator(getContract(100L, assetName), dbManager);
+//    try {
+//      actuator.validate();
+//      actuator.execute(ret);
+//      Assert.assertTrue(false);
+//    } catch (ContractValidateException e) {
+//      Assert.assertTrue(e instanceof ContractValidateException);
+//      Assert.assertEquals("Invalid assetName", e.getMessage());
+//      AccountWrapper toAccount =
+//          dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
+//      Assert.assertTrue(
+//          isNullOrZero(toAccount.getAssetMap().get(assetName)));
+//    } catch (ContractExeException e) {
+//      Assert.assertFalse(e instanceof ContractExeException);
+//    }
 
     //Contain chinese character, throw exception.
-    actuator = new TransferAssetOperator(getContract(100L, ByteString.copyFrom(ByteArray.fromHexString("E6B58BE8AF95"))), dbManager);
-    try {
-      actuator.validate();
-      actuator.execute(ret);
-      Assert.assertTrue(false);
-    } catch (ContractValidateException e) {
-      Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("Invalid assetName", e.getMessage());
-      AccountWrapper toAccount =
-          dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
-      Assert.assertTrue(
-          isNullOrZero(toAccount.getAssetMap().get(assetName)));
-    } catch (ContractExeException e) {
-      Assert.assertFalse(e instanceof ContractExeException);
-    }
+//    actuator = new TransferAssetOperator(getContract(100L, ByteString.copyFrom(ByteArray.fromHexString("E6B58BE8AF95"))), dbManager);
+//    try {
+//      actuator.validate();
+//      actuator.execute(ret);
+//      Assert.assertTrue(false);
+//    } catch (ContractValidateException e) {
+//      Assert.assertTrue(e instanceof ContractValidateException);
+//      Assert.assertEquals("Invalid assetName", e.getMessage());
+//      AccountWrapper toAccount =
+//          dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
+//      Assert.assertTrue(
+//          isNullOrZero(toAccount.getAssetMap().get(assetName)));
+//    } catch (ContractExeException e) {
+//      Assert.assertFalse(e instanceof ContractExeException);
+//    }
 
     // 32 byte readable character just ok.
     assetName = "testname0123456789abcdefghijgklm";

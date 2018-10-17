@@ -20,8 +20,8 @@ package org.gsc.db;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import org.gsc.common.utils.FastByteComparisons;
 import org.spongycastle.util.encoders.Hex;
+import org.gsc.common.utils.FastByteComparisons;
 
 
 public class ByteArrayWrapper implements Comparable<ByteArrayWrapper>, Serializable {

@@ -5,15 +5,15 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
-import org.gsc.core.exception.BalanceInsufficientException;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
 import org.gsc.db.Manager;
+import org.gsc.core.exception.BalanceInsufficientException;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract.WitnessCreateContract;
 import org.gsc.protos.Protocol.Transaction.Result.code;
 
@@ -31,7 +31,7 @@ public class WitnessCreateOperator extends AbstractOperator {
       final WitnessCreateContract witnessCreateContract = this.contract
           .unpack(WitnessCreateContract.class);
       this.createWitness(witnessCreateContract);
-      ret.setStatus(fee, code.SUCCESS);
+      ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
       ret.setStatus(fee, code.FAILED);
@@ -110,21 +110,21 @@ public class WitnessCreateOperator extends AbstractOperator {
   private void createWitness(final WitnessCreateContract witnessCreateContract)
       throws BalanceInsufficientException {
     //Create Witness by witnessCreateContract
-    final WitnessWrapper witnessWrapper = new WitnessWrapper(
+    final WitnessWrapper witnessCapsule = new WitnessWrapper(
         witnessCreateContract.getOwnerAddress(),
         0,
         witnessCreateContract.getUrl().toStringUtf8());
 
-    logger.debug("createWitness,address[{}]", witnessWrapper.createReadableString());
-    this.dbManager.getWitnessStore().put(witnessWrapper.createDbKey(), witnessWrapper);
+    logger.debug("createWitness,address[{}]", witnessCapsule.createReadableString());
+    this.dbManager.getWitnessStore().put(witnessCapsule.createDbKey(), witnessCapsule);
     AccountWrapper accountWrapper = this.dbManager.getAccountStore()
-        .get(witnessWrapper.createDbKey());
+        .get(witnessCapsule.createDbKey());
     accountWrapper.setIsWitness(true);
     this.dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     long cost = dbManager.getDynamicPropertiesStore().getAccountUpgradeCost();
     dbManager.adjustBalance(witnessCreateContract.getOwnerAddress().toByteArray(), -cost);
 
-    //dbManager.adjustBalance(this.dbManager.getAccountStore().getBlackhole().createDbKey(), +cost);
+    dbManager.adjustBalance(this.dbManager.getAccountStore().getBlackhole().createDbKey(), +cost);
 
     dbManager.getDynamicPropertiesStore().addTotalCreateWitnessCost(cost);
   }

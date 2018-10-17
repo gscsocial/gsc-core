@@ -26,6 +26,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.application.GSCApplicationContext;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
 import org.joda.time.DateTime;
@@ -34,7 +35,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.api.GrpcAPI.AssetIssueList;
 import org.gsc.api.GrpcAPI.BlockList;
 import org.gsc.crypto.ECKey;
@@ -57,7 +57,7 @@ import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
 @Slf4j
 public class WalletTest {
 
-  private static AnnotationConfigApplicationContext context;
+  private static GSCApplicationContext context;
   private static Wallet wallet;
   private static Manager manager;
   private static String dbPath = "output_wallet_test";
@@ -99,8 +99,8 @@ public class WalletTest {
   private static AssetIssueWrapper Asset1;
 
   static {
-    Args.setParam(new String[]{"-d", dbPath}, Constant.TESTNET_CONF);
-    context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    Args.setParam(new String[]{"-d", dbPath}, Constant.TEST_CONF);
+    context = new GSCApplicationContext(DefaultConfig.class);
   }
 
   @BeforeClass
@@ -139,9 +139,9 @@ public class WalletTest {
   }
 
   private static void addTransactionToStore(Transaction transaction) {
-    TransactionWrapper transactionWrapper = new TransactionWrapper(transaction);
+    TransactionWrapper transactionCapsule = new TransactionWrapper(transaction);
     manager.getTransactionStore()
-        .put(transactionWrapper.getTransactionId().getBytes(), transactionWrapper);
+        .put(transactionCapsule.getTransactionId().getBytes(), transactionCapsule);
   }
 
   private static Transaction getBuildTransaction(
@@ -200,7 +200,7 @@ public class WalletTest {
     AssetIssueContract.Builder builder = AssetIssueContract.newBuilder();
     builder.setName(ByteString.copyFromUtf8("Asset1"));
     Asset1 = new AssetIssueWrapper(builder.build());
-    manager.getAssetIssueStore().put(Asset1.getName().toByteArray(),Asset1);
+    manager.getAssetIssueStore().put(Asset1.createDbKey(), Asset1);
   }
 
   @AfterClass

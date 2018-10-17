@@ -4,8 +4,8 @@ import static org.gsc.common.net.udp.message.UdpMessageTypeEnum.DISCOVER_PING;
 
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.net.udp.message.Message;
+import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.config.args.Args;
 import org.gsc.protos.Discover;
@@ -37,19 +37,13 @@ public class PingMessage extends Message {
         .setVersion(Args.getInstance().getNodeP2pVersion())
         .setFrom(fromEndpoint)
         .setTo(toEndpoint)
+        .setTimestamp(System.currentTimeMillis())
         .build();
     this.data = this.pingMessage.toByteArray();
   }
 
   public int getVersion(){
     return this.pingMessage.getVersion();
-  }
-
-  public Node getFrom() {
-    Endpoint from = this.pingMessage.getFrom();
-    Node node = new Node(from.getNodeId().toByteArray(),
-        ByteArray.toStr(from.getAddress().toByteArray()), from.getPort());
-    return node;
   }
 
   public Node getTo() {
@@ -60,8 +54,8 @@ public class PingMessage extends Message {
   }
 
   @Override
-  public byte[] getNodeId() {
-    return this.pingMessage.getFrom().getNodeId().toByteArray();
+  public Node getFrom() {
+    return Message.getNode(pingMessage.getFrom());
   }
 
   @Override

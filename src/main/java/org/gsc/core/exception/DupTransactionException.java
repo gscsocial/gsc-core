@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class DupTransactionException extends GscException {
+public class DupTransactionException extends GSCException {
 
   public DupTransactionException() {
     super();

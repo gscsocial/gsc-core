@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,7 +18,6 @@ package org.gsc.config.args;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
 
-import org.gsc.common.utils.FileUtil;
 import org.iq80.leveldb.CompressionType;
 import org.iq80.leveldb.Options;
 
@@ -26,8 +25,18 @@ import java.io.File;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.gsc.common.utils.FileUtil;
+
 import lombok.Getter;
 import lombok.Setter;
+
+/**
+ * Custom storage configurations
+ *
+ * @author haoyouqiang
+ * @version 1.0
+ * @since 2018/5/25
+ */
 
 public class Storage {
 
@@ -35,6 +44,7 @@ public class Storage {
    * Keys (names) of database config
    */
   private static final String DB_DIRECTORY_CONFIG_KEY = "storage.db.directory";
+  private static final String DB_VERSION_CONFIG_KEY = "storage.db.version";
   private static final String INDEX_DIRECTORY_CONFIG_KEY = "storage.index.directory";
   private static final String PROPERTIES_CONFIG_KEY = "storage.properties";
 
@@ -52,6 +62,7 @@ public class Storage {
   /**
    * Default values of directory
    */
+  private static final int DEFAULT_DB_VERSION = 1;
   private static final String DEFAULT_DB_DIRECTORY = "database";
   private static final String DEFAULT_INDEX_DIRECTORY = "index";
 
@@ -77,6 +88,10 @@ public class Storage {
   @Setter
   private String dbDirectory;
 
+  @Getter
+  @Setter
+  private int dbVersion;
+
   /**
    * Index storage directory: /path/to/{indexDirectory}
    */
@@ -99,6 +114,11 @@ public class Storage {
    * Key: dbName, Value: Property object of that database
    */
   private Map<String, Property> propertyMap;
+
+  public static int getDbVersionFromConfig(final Config config) {
+    return config.hasPath(DB_VERSION_CONFIG_KEY) ?
+        config.getInt(DB_VERSION_CONFIG_KEY) : DEFAULT_DB_VERSION;
+  }
 
   public static String getDbDirectoryFromConfig(final Config config) {
     return config.hasPath(DB_DIRECTORY_CONFIG_KEY) ?

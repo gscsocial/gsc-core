@@ -5,15 +5,15 @@ import com.googlecode.cqengine.attribute.SimpleAttribute;
 import com.googlecode.cqengine.index.disk.DiskIndex;
 import com.googlecode.cqengine.persistence.disk.DiskPersistence;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.db2.core.IGSCChainBase;
 import org.gsc.core.wrapper.TransactionWrapper;
-import org.gsc.db.GscDatabase;
-import org.gsc.db.common.WrappedByteArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.gsc.common.utils.ByteArray;
+import org.gsc.common.utils.Sha256Hash;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.db.common.WrappedByteArray;
 import org.gsc.protos.Protocol.Block;
 
 import javax.annotation.PostConstruct;
@@ -37,7 +37,7 @@ public class BlockIndex extends AbstractIndex<BlockWrapper, Block> {
 
   @Autowired
   public BlockIndex(
-      @Qualifier("blockStore") final GscDatabase<BlockWrapper> database) {
+      @Qualifier("blockStore") final IGSCChainBase<BlockWrapper> database) {
     super(database);
   }
 

@@ -9,7 +9,7 @@ import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.ChainInventory;
 
-public class ChainInventoryMessage extends GscMessage {
+public class ChainInventoryMessage extends GSCMessage {
 
   protected ChainInventory chainInventory;
 

@@ -10,8 +10,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import org.gsc.common.overlay.message.Message;
-import org.gsc.common.overlay.message.PingMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -93,6 +91,7 @@ public class MessageQueue {
       return false;
     }
     logger.info("Send to {}, {} ", ctx.channel().remoteAddress(), msg);
+    channel.getNodeStatistics().messageStatistics.addTcpOutMessage(msg);
     sendTime = System.currentTimeMillis();
     if (msg.getAnswerMessage() != null){
       requestQueue.add(new MessageRoundtrip(msg));
@@ -104,6 +103,7 @@ public class MessageQueue {
 
   public void receivedMessage(Message msg){
     logger.info("Receive from {}, {}", ctx.channel().remoteAddress(), msg);
+    channel.getNodeStatistics().messageStatistics.addTcpInMessage(msg);
     MessageRoundtrip messageRoundtrip = requestQueue.peek();
     if (messageRoundtrip != null && messageRoundtrip.getMsg().getAnswerMessage() == msg.getClass()){
       requestQueue.remove();

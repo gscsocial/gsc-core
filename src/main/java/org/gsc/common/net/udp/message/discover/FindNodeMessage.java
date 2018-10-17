@@ -6,8 +6,6 @@ import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.net.udp.message.Message;
 import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.common.net.udp.message.Message;
-import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.protos.Discover;
 import org.gsc.protos.Discover.Endpoint;
@@ -43,8 +41,8 @@ public class FindNodeMessage extends Message {
   }
 
   @Override
-  public byte[] getNodeId() {
-    return this.findNeighbours.getFrom().getNodeId().toByteArray();
+  public Node getFrom() {
+    return Message.getNode(findNeighbours.getFrom());
   }
 
   @Override

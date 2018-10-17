@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.common.overlay.discover.node.NodeManager;
 
 public class RefreshTask extends DiscoverTask {
 

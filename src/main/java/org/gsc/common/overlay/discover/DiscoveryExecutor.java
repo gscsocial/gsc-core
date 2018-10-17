@@ -22,8 +22,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.gsc.common.overlay.discover.node.NodeManager;
 import org.gsc.common.overlay.discover.table.KademliaOptions;
-import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.overlay.discover.table.KademliaOptions;
 
 public class DiscoveryExecutor {
 

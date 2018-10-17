@@ -31,15 +31,9 @@ public class PongMessage extends Message {
     this.pongMessage = Discover.PongMessage.newBuilder()
         .setFrom(toEndpoint)
         .setEcho(Args.getInstance().getNodeP2pVersion())
+        .setTimestamp(System.currentTimeMillis())
         .build();
     this.data = this.pongMessage.toByteArray();
-  }
-
-  public Node getFrom() {
-    Endpoint from = this.pongMessage.getFrom();
-    Node node = new Node(from.getNodeId().toByteArray(),
-        ByteArray.toStr(from.getAddress().toByteArray()), from.getPort());
-    return node;
   }
 
   public int getVersion() {
@@ -47,8 +41,8 @@ public class PongMessage extends Message {
   }
 
   @Override
-  public byte[] getNodeId() {
-    return this.pongMessage.getFrom().getNodeId().toByteArray();
+  public Node getFrom() {
+    return Message.getNode(pongMessage.getFrom());
   }
 
   @Override

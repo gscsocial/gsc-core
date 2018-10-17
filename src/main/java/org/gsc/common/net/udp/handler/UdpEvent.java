@@ -19,16 +19,15 @@ package org.gsc.common.net.udp.handler;
 
 import java.net.InetSocketAddress;
 import org.gsc.common.net.udp.message.Message;
-import org.gsc.common.net.udp.message.Message;
 
 public class UdpEvent {
 
   private Message message;
   private InetSocketAddress address;
 
-  public UdpEvent(Message m, InetSocketAddress a) {
-    message = m;
-    address = a;
+  public UdpEvent(Message message, InetSocketAddress address) {
+    this.message = message;
+    this.address = address;
   }
 
   public Message getMessage() {

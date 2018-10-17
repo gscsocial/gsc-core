@@ -32,16 +32,16 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
-import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.common.overlay.discover.node.NodeHandler;
-import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.overlay.discover.node.NodeStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.gsc.common.overlay.client.PeerClient;
+import org.gsc.common.overlay.discover.node.Node;
+import org.gsc.common.overlay.discover.node.NodeHandler;
+import org.gsc.common.overlay.discover.node.NodeManager;
+import org.gsc.common.overlay.discover.node.statistics.NodeStatistics;
 import org.gsc.config.args.Args;
 import org.gsc.net.peer.PeerConnection;
 import org.gsc.net.peer.PeerConnectionDelegate;
@@ -51,8 +51,8 @@ public class SyncPool {
 
   public static final Logger logger = LoggerFactory.getLogger("SyncPool");
 
-  private static final double factor = 0.4;
-  private static final double activeFactor = 0.2;
+  private double factor = Args.getInstance().getConnectFactor();
+  private double activeFactor = Args.getInstance().getActiveConnectFactor();
 
   private final List<PeerConnection> activePeers = Collections
       .synchronizedList(new ArrayList<PeerConnection>());
@@ -60,7 +60,7 @@ public class SyncPool {
   private final AtomicInteger activePeersCount = new AtomicInteger(0);
 
   private Cache<NodeHandler, Long> nodeHandlerCache = CacheBuilder.newBuilder()
-      .maximumSize(1000).expireAfterWrite(120, TimeUnit.SECONDS).recordStats().build();
+      .maximumSize(1000).expireAfterWrite(180, TimeUnit.SECONDS).recordStats().build();
 
   @Autowired
   private NodeManager nodeManager;
@@ -101,7 +101,7 @@ public class SyncPool {
       } catch (Throwable t) {
         logger.error("Exception in sync worker", t);
       }
-    }, 30, 16, TimeUnit.SECONDS);
+    }, 30000, 3600, TimeUnit.MILLISECONDS);
 
     logExecutor.scheduleWithFixedDelay(() -> {
       try {

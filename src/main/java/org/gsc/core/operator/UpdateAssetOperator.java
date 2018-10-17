@@ -9,7 +9,6 @@ import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.AssetIssueWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
-import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.db.AssetIssueStore;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
@@ -49,7 +48,7 @@ public class UpdateAssetOperator extends AbstractOperator {
       assetIssueWrapper.setDescription(newDescription);
       assetIssueStore.put(assetIssueWrapper.createDbKey(), assetIssueWrapper);
 
-      ret.setStatus(fee, code.SUCCESS);
+      ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
       ret.setStatus(fee, code.FAILED);
@@ -110,11 +109,12 @@ public class UpdateAssetOperator extends AbstractOperator {
       throw new ContractValidateException("Invalid description");
     }
 
-    if (newLimit < 0 || newLimit >= ChainConstant.ONE_DAY_NET_LIMIT) {
+    if (newLimit < 0 || newLimit >= dbManager.getDynamicPropertiesStore().getOneDayNetLimit()) {
       throw new ContractValidateException("Invalid FreeAssetNetLimit");
     }
 
-    if (newPublicLimit < 0 || newPublicLimit >= ChainConstant.ONE_DAY_NET_LIMIT) {
+    if (newPublicLimit < 0 || newPublicLimit >=
+        dbManager.getDynamicPropertiesStore().getOneDayNetLimit()) {
       throw new ContractValidateException("Invalid PublicFreeAssetNetLimit");
     }
 

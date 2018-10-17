@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class ContractExeException extends GscException {
+public class ContractExeException extends GSCException {
 
   public ContractExeException() {
     super();

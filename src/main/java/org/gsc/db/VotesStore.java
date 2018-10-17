@@ -2,13 +2,12 @@ package org.gsc.db;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.core.wrapper.VotesWrapper;
-import org.gsc.db.common.iterator.DBIterator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class VotesStore extends GscStoreWithRevoking<VotesWrapper> {
+public class VotesStore extends GSCStoreWithRevoking<VotesWrapper> {
 
   @Autowired
   public VotesStore(@Value("votes") String dbName) {
@@ -17,27 +16,7 @@ public class VotesStore extends GscStoreWithRevoking<VotesWrapper> {
 
   @Override
   public VotesWrapper get(byte[] key) {
-    byte[] value = dbSource.getData(key);
+    byte[] value = revokingDB.getUnchecked(key);
     return ArrayUtils.isEmpty(value) ? null : new VotesWrapper(value);
-  }
-
-  /**
-   * isVoterExist fun.
-   *
-   * @param key the address of Voter Account
-   */
-  @Override
-  public boolean has(byte[] key) {
-    byte[] account = dbSource.getData(key);
-    return null != account;
-  }
-
-  @Override
-  public void put(byte[] key, VotesWrapper item) {
-    super.put(key, item);
-  }
-
-  public DBIterator getIterator() {
-    return dbSource.iterator();
   }
 }

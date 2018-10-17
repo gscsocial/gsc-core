@@ -4,27 +4,38 @@
 .DS_Store
 
 # gradle
-.gradle
-build
+.gradle/
+build/
 
 # log
-logs
+logs/
+consensus-logs/
 
 # lombok
-out
+out/
 
 # levelDB
-database/*
+gsc-data/
+database*
 
-# doc
-doc
+# database
+database/
+
+# docs
+docs/
+
+# gossip
+pernodedata.*
+ringstate.*
+shareddata.*
 
 # protobuf generated classes
 src/main/gen
-src/main/protos
 
-/gradle/
-
+src/test/java/org/gsc/wallet/onlineStress
+src/test/java/org/gsc/wallet/wallettestp
+src/main/java/META-INF/
+src/main/resources/META-INF/
 /bin/
 
 # Eclipse IDE specific files and folders
@@ -34,10 +45,14 @@ src/main/protos
 /.apt_generated/
 
 # output directory
-/output-directory/
-/output-nodeImplTest/
+output-directory/
+/output_InheritanceTest/
 
 /output_manager/
 /output_witness/
-
+output*
 nodeId.properties
+Wallet
+
+# vm_trace
+/vm_trace/

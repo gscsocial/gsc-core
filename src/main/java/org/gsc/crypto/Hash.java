@@ -25,7 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.security.Security;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.crypto.jce.GscCastleProvider;
+import org.gsc.crypto.jce.GSCCastleProvider;
 import org.gsc.core.Wallet;
 
 @Slf4j
@@ -37,7 +37,7 @@ public class Hash {
   private static final String HASH_512_ALGORITHM_NAME;
 
   static {
-    Security.addProvider(GscCastleProvider.getInstance());
+    Security.addProvider(GSCCastleProvider.getInstance());
     CRYPTO_PROVIDER = Security.getProvider("SC");
     HASH_256_ALGORITHM_NAME = "GSC-KECCAK-256";
     HASH_512_ALGORITHM_NAME = "GSC-KECCAK-512";

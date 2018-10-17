@@ -14,12 +14,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import lombok.Getter;
-import org.gsc.common.overlay.discover.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.gsc.common.overlay.client.PeerClient;
+import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.config.args.Args;
 import org.gsc.db.ByteArrayWrapper;
 import org.gsc.protos.Protocol.ReasonCode;
@@ -30,8 +30,6 @@ public class ChannelManager {
 
   private static final Logger logger = LoggerFactory.getLogger("ChannelManager");
 
-  private static final int inboundConnectionBanTimeout = 30 * 1000;
-
   private final Map<ByteArrayWrapper, Channel> activePeers = new ConcurrentHashMap<>();
 
   private Cache<InetAddress, ReasonCode> badPeers = CacheBuilder.newBuilder().maximumSize(10000)
@@ -41,7 +39,7 @@ public class ChannelManager {
       .expireAfterWrite(30, TimeUnit.SECONDS).recordStats().build();
 
   @Getter
-  private Map<InetAddress, Node> trustPeers = new ConcurrentHashMap();
+  private Map<InetAddress, Node> trustPeers = new ConcurrentHashMap<>();
 
   private Args args = Args.getInstance();
 
@@ -78,11 +76,9 @@ public class ChannelManager {
       return;
     }
     switch (reason){
-      case FORKED:
       case BAD_PROTOCOL:
       case BAD_BLOCK:
-      case INCOMPATIBLE_CHAIN:
-      case INCOMPATIBLE_PROTOCOL:
+      case BAD_TX:
         badPeers.put(channel.getInetAddress(), reason);
         break;
       default:

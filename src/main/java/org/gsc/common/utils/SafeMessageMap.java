@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.gsc.common.overlay.message.Message;
-import org.gsc.common.overlay.message.Message;
 
 public class SafeMessageMap {
 

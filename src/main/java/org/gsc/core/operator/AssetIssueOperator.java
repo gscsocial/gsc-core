@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -18,21 +18,20 @@ package org.gsc.core.operator;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.core.exception.BalanceInsufficientException;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.AssetIssueWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
-import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.db.Manager;
+import org.gsc.core.exception.BalanceInsufficientException;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract.AssetIssueContract;
 import org.gsc.protos.Contract.AssetIssueContract.FrozenSupply;
 import org.gsc.protos.Protocol.Account.Frozen;
@@ -52,10 +51,22 @@ public class AssetIssueOperator extends AbstractOperator {
       AssetIssueContract assetIssueContract = contract.unpack(AssetIssueContract.class);
       byte[] ownerAddress = assetIssueContract.getOwnerAddress().toByteArray();
       AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
+      String name = new String(assetIssueWrapper.getName().toByteArray(),
+          Charset.forName("UTF-8")); // getName().toStringUtf8()
+      long order = 0;
+      byte[] key = name.getBytes();
+      while (this.dbManager.getAssetIssueStore().get(key) != null) {
+        order++;
+        String nameKey = AssetIssueWrapper.createDbKeyString(name, order);
+        key = nameKey.getBytes();
+      }
+      assetIssueWrapper.setOrder(order);
       dbManager.getAssetIssueStore()
           .put(assetIssueWrapper.createDbKey(), assetIssueWrapper);
 
       dbManager.adjustBalance(ownerAddress, -fee);
+      dbManager.adjustBalance(dbManager.getAccountStore().getBlackhole().getAddress().toByteArray(),
+          fee);//send to blackhole
 
       AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
       List<FrozenSupply> frozenSupplyList = assetIssueContract.getFrozenSupplyList();
@@ -75,14 +86,13 @@ public class AssetIssueOperator extends AbstractOperator {
         remainSupply -= next.getFrozenAmount();
       }
 
-      accountWrapper.setAssetIssuedName(assetIssueContract.getName());
-      accountWrapper.addAsset(ByteArray.toStr(assetIssueContract.getName().toByteArray()),
-          remainSupply);
+      accountWrapper.setAssetIssuedName(assetIssueWrapper.createDbKey());
+      accountWrapper.addAsset(assetIssueWrapper.createDbKey(), remainSupply);
       accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
           .addAllFrozenSupply(frozenList).build());
 
       dbManager.getAccountStore().put(ownerAddress, accountWrapper);
-      ret.setStatus(fee, code.SUCCESS);
+      ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
       ret.setStatus(fee, code.FAILED);
@@ -127,7 +137,8 @@ public class AssetIssueOperator extends AbstractOperator {
     if (!TransactionUtil.validAssetName(assetIssueContract.getName().toByteArray())) {
       throw new ContractValidateException("Invalid assetName");
     }
-    if ((!assetIssueContract.getAbbr().isEmpty()) && !TransactionUtil.validAssetName(assetIssueContract.getAbbr().toByteArray())) {
+    if ((!assetIssueContract.getAbbr().isEmpty()) && !TransactionUtil
+        .validAssetName(assetIssueContract.getAbbr().toByteArray())) {
       throw new ContractValidateException("Invalid abbreviation for token");
     }
     if (!TransactionUtil.validUrl(assetIssueContract.getUrl().toByteArray())) {
@@ -151,10 +162,12 @@ public class AssetIssueOperator extends AbstractOperator {
       throw new ContractValidateException("Start time should be greater than HeadBlockTime");
     }
 
+    /*
     if (this.dbManager.getAssetIssueStore().get(assetIssueContract.getName().toByteArray())
         != null) {
       throw new ContractValidateException("Token exists");
     }
+    */
 
     if (assetIssueContract.getTotalSupply() <= 0) {
       throw new ContractValidateException("TotalSupply must greater than 0!");
@@ -178,12 +191,14 @@ public class AssetIssueOperator extends AbstractOperator {
     }
 
     if (assetIssueContract.getFreeAssetNetLimit() < 0
-        || assetIssueContract.getFreeAssetNetLimit() >= ChainConstant.ONE_DAY_NET_LIMIT) {
+        || assetIssueContract.getFreeAssetNetLimit() >=
+        dbManager.getDynamicPropertiesStore().getOneDayNetLimit()) {
       throw new ContractValidateException("Invalid FreeAssetNetLimit");
     }
 
     if (assetIssueContract.getPublicFreeAssetNetLimit() < 0
-        || assetIssueContract.getPublicFreeAssetNetLimit() >= ChainConstant.ONE_DAY_NET_LIMIT) {
+        || assetIssueContract.getPublicFreeAssetNetLimit() >=
+        dbManager.getDynamicPropertiesStore().getOneDayNetLimit()) {
       throw new ContractValidateException("Invalid PublicFreeAssetNetLimit");
     }
 
@@ -232,7 +247,7 @@ public class AssetIssueOperator extends AbstractOperator {
 
   @Override
   public long calcFee() {
-    return ChainConstant.ASSET_ISSUE_FEE;
+    return dbManager.getDynamicPropertiesStore().getAssetIssueFee();
   }
 
   public long calcUsage() {

@@ -5,7 +5,6 @@ import org.iq80.leveldb.DBIterator;
 
 import java.io.IOException;
 import java.util.Map.Entry;
-import java.util.function.Consumer;
 
 @Slf4j
 public final class StoreIterator implements org.gsc.db.common.iterator.DBIterator {
@@ -55,10 +54,5 @@ public final class StoreIterator implements org.gsc.db.common.iterator.DBIterato
   @Override
   public void remove() {
     throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public void forEachRemaining(Consumer<? super Entry<byte[], byte[]>> action) {
-    dbIterator.forEachRemaining(action);
   }
 }

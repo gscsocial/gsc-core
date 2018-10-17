@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import org.gsc.config.args.Args;
 import org.gsc.db.BlockStore;
 import org.gsc.db.Manager;
-import org.gsc.db.RevokingStore;
 import org.gsc.net.node.Node;
 import org.gsc.net.node.NodeDelegate;
 import org.gsc.net.node.NodeDelegateImpl;
@@ -25,11 +24,12 @@ public class ApplicationImpl implements Application {
 
   @Autowired
   private Manager dbManager;
-
+  
   private boolean isProducer;
 
   private void resetP2PNode() {
     p2pNode.listen();
+    //p2pNode.connectToP2PNetWork();
     p2pNode.syncFrom(null);
   }
 
@@ -70,11 +70,12 @@ public class ApplicationImpl implements Application {
   @Override
   public void shutdown() {
     System.err.println("******** begin to shutdown ********");
-    synchronized (RevokingStore.getInstance()) {
+    synchronized (dbManager.getRevokingStore()) {
       closeRevokingStore();
       closeAllStore();
     }
     closeConnection();
+    dbManager.stopRepushThread();
     System.err.println("******** end to shutdown ********");
   }
 
@@ -123,7 +124,7 @@ public class ApplicationImpl implements Application {
   }
 
   private void closeRevokingStore() {
-    RevokingStore.getInstance().shutdown();
+    dbManager.getRevokingStore().shutdown();
   }
 
   private void closeAllStore() {

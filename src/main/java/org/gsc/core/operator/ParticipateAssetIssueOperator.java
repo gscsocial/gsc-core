@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -21,14 +21,13 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.AssetIssueWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
-import org.gsc.core.wrapper.utils.TransactionUtil;
 import org.gsc.db.Manager;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract;
 import org.gsc.protos.Contract.ParticipateAssetIssueContract;
 import org.gsc.protos.Protocol;
@@ -63,20 +62,20 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
               .get(participateAssetIssueContract.getAssetName().toByteArray());
       long exchangeAmount = Math.multiplyExact(cost, assetIssueWrapper.getNum());
       exchangeAmount = Math.floorDiv(exchangeAmount, assetIssueWrapper.getGscNum());
-      ownerAccount.addAssetAmount(assetIssueWrapper.getName(), exchangeAmount);
+      ownerAccount.addAssetAmount(assetIssueWrapper.createDbKey(), exchangeAmount);
 
       //add to to_address
       byte[] toAddress = participateAssetIssueContract.getToAddress().toByteArray();
       AccountWrapper toAccount = this.dbManager.getAccountStore().get(toAddress);
       toAccount.setBalance(Math.addExact(toAccount.getBalance(), cost));
-      if (!toAccount.reduceAssetAmount(assetIssueWrapper.getName(), exchangeAmount)) {
+      if (!toAccount.reduceAssetAmount(assetIssueWrapper.createDbKey(), exchangeAmount)) {
         throw new ContractExeException("reduceAssetAmount failed !");
       }
 
       //write to db
       dbManager.getAccountStore().put(ownerAddress, ownerAccount);
       dbManager.getAccountStore().put(toAddress, toAccount);
-      ret.setStatus(fee, Protocol.Transaction.Result.code.SUCCESS);
+      ret.setStatus(fee, Protocol.Transaction.Result.code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
       ret.setStatus(fee, code.FAILED);
@@ -124,9 +123,9 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
     if (!Wallet.addressValid(toAddress)) {
       throw new ContractValidateException("Invalid toAddress");
     }
-    if (!TransactionUtil.validAssetName(assetName)) {
-      throw new ContractValidateException("Invalid assetName");
-    }
+//    if (!TransactionUtil.validAssetName(assetName)) {
+//      throw new ContractValidateException("Invalid assetName");
+//    }
     if (amount <= 0) {
       throw new ContractValidateException("Amount must greater than 0!");
     }
@@ -164,10 +163,10 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
         throw new ContractValidateException("No longer valid period!");
       }
 
-      int gscNum = assetIssueWrapper.getGscNum();
+      int trxNum = assetIssueWrapper.getGscNum();
       int num = assetIssueWrapper.getNum();
       long exchangeAmount = Math.multiplyExact(amount, num);
-      exchangeAmount = Math.floorDiv(exchangeAmount, gscNum);
+      exchangeAmount = Math.floorDiv(exchangeAmount, trxNum);
       if (exchangeAmount <= 0) {
         throw new ContractValidateException("Can not process the exchange!");
       }
@@ -177,7 +176,7 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
         throw new ContractValidateException("To account does not exist!");
       }
 
-      if (!toAccount.assetBalanceEnough(assetIssueWrapper.getName(), exchangeAmount)) {
+      if (!toAccount.assetBalanceEnough(assetIssueWrapper.createDbKey(), exchangeAmount)) {
         throw new ContractValidateException("Asset balance is not enough !");
       }
     } catch (ArithmeticException e) {

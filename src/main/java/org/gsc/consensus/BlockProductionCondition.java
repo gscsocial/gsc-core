@@ -3,7 +3,7 @@ package org.gsc.consensus;
 public enum  BlockProductionCondition {
   PRODUCED,           // Successfully generated block
   UNELECTED,
-  NOT_MY_TURN,        // not until my turn
+  NOT_MY_TURN,        // It isn't my turn
   NOT_SYNCED,
   NOT_TIME_YET,       // Not yet arrived
   NO_PRIVATE_KEY,

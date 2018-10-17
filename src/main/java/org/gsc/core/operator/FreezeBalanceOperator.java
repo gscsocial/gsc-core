@@ -5,13 +5,14 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
+import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
+import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
-import org.gsc.core.Wallet;
-import org.gsc.db.Manager;
 import org.gsc.protos.Contract.FreezeBalanceContract;
+import org.gsc.protos.Protocol.Account.AccountResource;
 import org.gsc.protos.Protocol.Account.Frozen;
 import org.gsc.protos.Protocol.Transaction.Result.code;
 
@@ -41,32 +42,59 @@ public class FreezeBalanceOperator extends AbstractOperator {
 
     long newBalance = accountWrapper.getBalance() - freezeBalanceContract.getFrozenBalance();
 
-    long currentFrozenBalance = accountWrapper.getFrozenBalance();
-    long newFrozenBalance = freezeBalanceContract.getFrozenBalance() + currentFrozenBalance;
+    switch (freezeBalanceContract.getResource()) {
+      case BANDWIDTH:
+        long currentFrozenBalance = accountWrapper.getFrozenBalance();
+        long newFrozenBalance = freezeBalanceContract.getFrozenBalance() + currentFrozenBalance;
 
-    Frozen newFrozen = Frozen.newBuilder()
-        .setFrozenBalance(newFrozenBalance)
-        .setExpireTime(now + duration)
-        .build();
+        Frozen newFrozen = Frozen.newBuilder()
+            .setFrozenBalance(newFrozenBalance)
+            .setExpireTime(now + duration)
+            .build();
 
-    long frozenCount = accountWrapper.getFrozenCount();
-    if (frozenCount == 0) {
-      accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-          .addFrozen(newFrozen)
-          .setBalance(newBalance)
-          .build());
-    } else {
-      accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-          .setFrozen(0, newFrozen)
-          .setBalance(newBalance)
-          .build()
-      );
+        long frozenCount = accountWrapper.getFrozenCount();
+        if (frozenCount == 0) {
+          accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
+              .addFrozen(newFrozen)
+              .setBalance(newBalance)
+              .build());
+        } else {
+          accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
+              .setFrozen(0, newFrozen)
+              .setBalance(newBalance)
+              .build()
+          );
+        }
+        dbManager.getDynamicPropertiesStore()
+            .addTotalNetWeight(freezeBalanceContract.getFrozenBalance() / 1000_000L);
+        break;
+      case ENERGY:
+        long currentFrozenBalanceForEnergy = accountWrapper.getAccountResource()
+            .getFrozenBalanceForEnergy()
+            .getFrozenBalance();
+        long newFrozenBalanceForEnergy =
+            freezeBalanceContract.getFrozenBalance() + currentFrozenBalanceForEnergy;
+
+        Frozen newFrozenForEnergy = Frozen.newBuilder()
+            .setFrozenBalance(newFrozenBalanceForEnergy)
+            .setExpireTime(now + duration)
+            .build();
+
+        AccountResource newAccountResource = accountWrapper.getAccountResource().toBuilder()
+            .setFrozenBalanceForEnergy(newFrozenForEnergy).build();
+
+        accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
+            .setAccountResource(newAccountResource)
+            .setBalance(newBalance)
+            .build());
+        dbManager.getDynamicPropertiesStore()
+            .addTotalEnergyWeight(freezeBalanceContract.getFrozenBalance() / 1000_000L);
+        break;
     }
-    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
-    dbManager.getDynamicPropertiesStore()
-        .addTotalNetWeight(freezeBalanceContract.getFrozenBalance() / 1000_000L);
 
-    ret.setStatus(fee, code.SUCCESS);
+    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
+
+    ret.setStatus(fee, code.SUCESS);
 
     return true;
   }
@@ -110,7 +138,7 @@ public class FreezeBalanceOperator extends AbstractOperator {
       throw new ContractValidateException("frozenBalance must be positive");
     }
     if (frozenBalance < 1_000_000L) {
-      throw new ContractValidateException("frozenBalance must be more than 1TRX");
+      throw new ContractValidateException("frozenBalance must be more than 1GSC");
     }
 
     int frozenCount = accountWrapper.getFrozenCount();
@@ -134,6 +162,16 @@ public class FreezeBalanceOperator extends AbstractOperator {
       throw new ContractValidateException(
           "frozenDuration must be less than " + maxFrozenTime + " days "
               + "and more than " + minFrozenTime + " days");
+    }
+
+    switch (freezeBalanceContract.getResource()) {
+      case BANDWIDTH:
+        break;
+      case ENERGY:
+        break;
+      default:
+        throw new ContractValidateException(
+            "ResourceCode error,valid ResourceCode[BANDWIDTH、ENERGY]");
     }
 
     return true;

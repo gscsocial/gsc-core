@@ -41,11 +41,6 @@ import java.util.Arrays;
 import javax.annotation.Nullable;
 import javax.crypto.KeyAgreement;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.crypto.jce.ECKeyAgreement;
-import org.gsc.crypto.jce.ECKeyFactory;
-import org.gsc.crypto.jce.ECKeyPairGenerator;
-import org.gsc.crypto.jce.ECSignatureFactory;
-import org.gsc.crypto.jce.GscCastleProvider;
 import org.spongycastle.asn1.ASN1InputStream;
 import org.spongycastle.asn1.ASN1Integer;
 import org.spongycastle.asn1.DLSequence;
@@ -54,7 +49,7 @@ import org.spongycastle.asn1.x9.X9ECParameters;
 import org.spongycastle.asn1.x9.X9IntegerConverter;
 import org.spongycastle.crypto.agreement.ECDHBasicAgreement;
 import org.spongycastle.crypto.digests.SHA256Digest;
-import org.spongycastle.crypto.engines.AESFastEngine;
+import org.spongycastle.crypto.engines.AESEngine;
 import org.spongycastle.crypto.modes.SICBlockCipher;
 import org.spongycastle.crypto.params.ECDomainParameters;
 import org.spongycastle.crypto.params.ECPrivateKeyParameters;
@@ -74,6 +69,12 @@ import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.util.BigIntegers;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
+import org.gsc.crypto.Hash;
+import org.gsc.crypto.jce.ECKeyAgreement;
+import org.gsc.crypto.jce.ECKeyFactory;
+import org.gsc.crypto.jce.ECKeyPairGenerator;
+import org.gsc.crypto.jce.ECSignatureFactory;
+import org.gsc.crypto.jce.GSCCastleProvider;
 import org.gsc.common.utils.ByteUtil;
 
 @Slf4j
@@ -171,7 +172,7 @@ public class ECKey implements Serializable {
    * @param secureRandom -
    */
   public ECKey(SecureRandom secureRandom) {
-    this(GscCastleProvider.getInstance(), secureRandom);
+    this(GSCCastleProvider.getInstance(), secureRandom);
   }
 
   /**
@@ -207,7 +208,7 @@ public class ECKey implements Serializable {
    */
   public ECKey(@Nullable BigInteger priv, ECPoint pub) {
     this(
-        GscCastleProvider.getInstance(),
+        GSCCastleProvider.getInstance(),
         privateKeyFromBigInteger(priv),
         pub
     );
@@ -242,7 +243,7 @@ public class ECKey implements Serializable {
     } else {
       try {
         return ECKeyFactory
-            .getInstance(GscCastleProvider.getInstance())
+            .getInstance(GSCCastleProvider.getInstance())
             .generatePrivate(new ECPrivateKeySpec(priv,
                 CURVE_SPEC));
       } catch (InvalidKeySpecException ex) {
@@ -772,7 +773,7 @@ public class ECKey implements Serializable {
   /**
    * Gets the address form of the public key.
    *
-   * @return 20-byte address
+   * @return 21-byte address
    */
   public byte[] getAddress() {
     if (pubKeyHash == null) {
@@ -970,7 +971,7 @@ public class ECKey implements Serializable {
           "key as an AES key");
     }
 
-    AESFastEngine engine = new AESFastEngine();
+    AESEngine engine = new AESEngine();
     SICBlockCipher ctrEngine = new SICBlockCipher(engine);
 
     KeyParameter key = new KeyParameter(BigIntegers.asUnsignedByteArray((

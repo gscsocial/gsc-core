@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class TooBigTransactionException extends GscException {
+public class TooBigTransactionException extends GSCException {
 
     public TooBigTransactionException() { super(); }
 

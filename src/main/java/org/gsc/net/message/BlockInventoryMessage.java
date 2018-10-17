@@ -8,7 +8,7 @@ import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.BlockInventory;
 
-public class BlockInventoryMessage extends GscMessage {
+public class BlockInventoryMessage extends GSCMessage {
 
   protected BlockInventory blockInventory;
 

@@ -10,15 +10,16 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Objects;
-import org.gsc.config.args.Args;
 import org.gsc.core.wrapper.ProtoWrapper;
-import org.gsc.db.GscDatabase;
+import org.gsc.config.args.Args;
+import org.gsc.db.api.index.Index.Iface;
 import org.gsc.db.common.WrappedByteArray;
 import org.gsc.db.common.WrappedResultSet;
+import org.gsc.core.db2.core.IGSCChainBase;
 
-public abstract class AbstractIndex<E extends ProtoWrapper<T>, T> implements Index.Iface<T> {
+public abstract class AbstractIndex<E extends ProtoWrapper<T>, T> implements Iface<T> {
 
-  protected GscDatabase<E> database;
+  protected IGSCChainBase<E> database;
   protected ConcurrentIndexedCollection<WrappedByteArray> index;
   private File parent = new File(Args.getInstance().getOutputDirectory() + "index");
   protected File indexPath;
@@ -31,12 +32,12 @@ public abstract class AbstractIndex<E extends ProtoWrapper<T>, T> implements Ind
     setAttribute();
   }
 
-  public AbstractIndex(GscDatabase<E> database) {
+  public AbstractIndex(IGSCChainBase<E> database) {
     this.database = database;
-    String dbName = database.getDbSource().getDBName();
+    String dbName = database.getDbName();
     File parentDir = Paths.get(
-            Args.getInstance().getOutputDirectoryByDbName(dbName),
-            Args.getInstance().getStorage().getIndexDirectory()
+        Args.getInstance().getOutputDirectoryByDbName(dbName),
+        Args.getInstance().getStorage().getIndexDirectory()
     ).toFile();
     if (!parentDir.exists()) {
       parentDir.mkdirs();

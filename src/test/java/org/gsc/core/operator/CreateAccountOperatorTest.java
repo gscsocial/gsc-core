@@ -4,21 +4,21 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
+import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
@@ -29,7 +29,7 @@ import org.gsc.protos.Protocol.Transaction.Result.code;
 @Slf4j
 public class CreateAccountOperatorTest {
 
-  private static AnnotationConfigApplicationContext context;
+  private static GSCApplicationContext context;
   private static Manager dbManager;
   private static final String dbPath = "output_CreateAccount_test";
   private static final String OWNER_ADDRESS_FIRST;
@@ -38,7 +38,7 @@ public class CreateAccountOperatorTest {
 
   static {
     Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
-    context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS_FIRST =
         Wallet.getAddressPreFixString() + "abd4b9367799eaa3197fecb144eb71de1e049abc";
     OWNER_ADDRESS_SECOND =
@@ -91,7 +91,7 @@ public class CreateAccountOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper accountWrapper =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS_FIRST));
       Assert.assertNotNull(accountWrapper);

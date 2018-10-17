@@ -5,7 +5,7 @@ import java.util.List;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Transaction;
 
-public class TransactionsMessage extends GscMessage {
+public class TransactionsMessage extends GSCMessage {
 
   private Protocol.Transactions transactions;
 

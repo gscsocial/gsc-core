@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class BadNumberBlockException extends GscException {
+public class BadNumberBlockException extends GSCException {
 
   public BadNumberBlockException() {
     super();

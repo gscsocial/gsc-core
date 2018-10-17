@@ -8,16 +8,17 @@ import java.util.Iterator;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.StringUtil;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.VotesWrapper;
+import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.db.AccountStore;
 import org.gsc.db.Manager;
 import org.gsc.db.VotesStore;
 import org.gsc.db.WitnessStore;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract.VoteWitnessContract;
 import org.gsc.protos.Contract.VoteWitnessContract.Vote;
 import org.gsc.protos.Protocol.Transaction.Result.code;
@@ -35,7 +36,7 @@ public class VoteWitnessOperator extends AbstractOperator {
     try {
       VoteWitnessContract voteContract = contract.unpack(VoteWitnessContract.class);
       countVoteAccount(voteContract);
-      ret.setStatus(fee, code.SUCCESS);
+      ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
       ret.setStatus(fee, code.FAILED);
@@ -77,10 +78,10 @@ public class VoteWitnessOperator extends AbstractOperator {
       throw new ContractValidateException(
           "VoteNumber must more than 0");
     }
-    if (contract.getVotesCount() > dbManager.getDynamicPropertiesStore().getMaxVoteNumber()) {
+    int maxVoteNumber = ChainConstant.MAX_VOTE_NUMBER;
+    if (contract.getVotesCount() > maxVoteNumber) {
       throw new ContractValidateException(
-          "VoteNumber more than maxVoteNumber " + dbManager.getDynamicPropertiesStore()
-              .getMaxVoteNumber());
+          "VoteNumber more than maxVoteNumber " + maxVoteNumber);
     }
     try {
       Iterator<Vote> iterator = contract.getVotesList().iterator();
@@ -113,9 +114,9 @@ public class VoteWitnessOperator extends AbstractOperator {
             "Account[" + readableOwnerAddress + "] not exists");
       }
 
-      long gscPower = accountWrapper.getGscPower();
+      long gscPower = accountWrapper.getGSCPower();
 
-      sum = LongMath.checkedMultiply(sum, 1000000L); //gsc -> drop. The vote count is based on GSC
+      sum = LongMath.checkedMultiply(sum, 1000000L); //trx -> drop. The vote count is based on TRX
       if (sum > gscPower) {
         throw new ContractValidateException(
             "The total number of votes[" + sum + "] is greater than the gscPower[" + gscPower
@@ -132,31 +133,32 @@ public class VoteWitnessOperator extends AbstractOperator {
   private void countVoteAccount(VoteWitnessContract voteContract) {
     byte[] ownerAddress = voteContract.getOwnerAddress().toByteArray();
 
-    VotesWrapper votesWrapper;
+    VotesWrapper votesCapsule;
     VotesStore votesStore = dbManager.getVotesStore();
     AccountStore accountStore = dbManager.getAccountStore();
 
     AccountWrapper accountWrapper = accountStore.get(ownerAddress);
 
     if (!votesStore.has(ownerAddress)) {
-      votesWrapper = new VotesWrapper(voteContract.getOwnerAddress(), accountWrapper.getVotesList());
+      votesCapsule = new VotesWrapper(voteContract.getOwnerAddress(),
+          accountWrapper.getVotesList());
     } else {
-      votesWrapper = votesStore.get(ownerAddress);
+      votesCapsule = votesStore.get(ownerAddress);
     }
 
     accountWrapper.clearVotes();
-    votesWrapper.clearNewVotes();
+    votesCapsule.clearNewVotes();
 
     voteContract.getVotesList().forEach(vote -> {
       logger.debug("countVoteAccount,address[{}]",
           ByteArray.toHexString(vote.getVoteAddress().toByteArray()));
 
-      votesWrapper.addNewVotes(vote.getVoteAddress(), vote.getVoteCount());
+      votesCapsule.addNewVotes(vote.getVoteAddress(), vote.getVoteCount());
       accountWrapper.addVotes(vote.getVoteAddress(), vote.getVoteCount());
     });
 
     accountStore.put(accountWrapper.createDbKey(), accountWrapper);
-    votesStore.put(ownerAddress, votesWrapper);
+    votesStore.put(ownerAddress, votesCapsule);
   }
 
   @Override

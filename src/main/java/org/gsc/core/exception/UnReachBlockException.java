@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class UnReachBlockException extends GscException {
+public class UnReachBlockException extends GSCException {
 
   public UnReachBlockException() {
     super();

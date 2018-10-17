@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -50,7 +50,7 @@ public class BlockUtil {
     BlockWrapper blockWrapper = new BlockWrapper(timestamp, parentHash, number, transactionList);
 
     blockWrapper.setMerkleRoot();
-    blockWrapper.setWitness("GSC");
+    blockWrapper.setWitness("A new system must allow existing systems to be linked together without requiring any central control or coordination");
     blockWrapper.generatedByMyself = true;
 
     return blockWrapper;

@@ -6,6 +6,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
+import org.gsc.config.args.Witness;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.WitnessWrapper;
@@ -14,15 +18,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
-import org.gsc.config.args.Witness;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.BalanceInsufficientException;
 import org.gsc.core.exception.ContractExeException;
@@ -36,18 +36,18 @@ public class WithdrawBalanceOperatorTest {
 
   private static Manager dbManager;
   private static final String dbPath = "output_withdraw_balance_test";
-  private static AnnotationConfigApplicationContext context;
+  private static GSCApplicationContext context;
   private static final String OWNER_ADDRESS;
-  private static final String OWNER_ADDRESS_INVALIDATE = "aaaa";
-  private static final String OWNER_ACCOUNT_INVALIDATE;
+  private static final String OWNER_ADDRESS_INVALID = "aaaa";
+  private static final String OWNER_ACCOUNT_INVALID;
   private static final long initBalance = 10_000_000_000L;
   private static final long allowance = 32_000_000L;
 
   static {
     Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
-    context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS = Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a1abc";
-    OWNER_ACCOUNT_INVALIDATE =
+    OWNER_ACCOUNT_INVALID =
         Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a3456";
   }
 
@@ -112,9 +112,9 @@ public class WithdrawBalanceOperatorTest {
     Assert.assertEquals(accountWrapper.getAllowance(), allowance);
     Assert.assertEquals(accountWrapper.getLatestWithdrawTime(), 0);
 
-    WitnessWrapper witnessWrapper = new WitnessWrapper(ByteString.copyFrom(address),
+    WitnessWrapper witnessCapsule = new WitnessWrapper(ByteString.copyFrom(address),
         100, "http://baidu.com");
-    dbManager.getWitnessStore().put(address, witnessWrapper);
+    dbManager.getWitnessStore().put(address, witnessCapsule);
 
     WithdrawBalanceOperator actuator = new WithdrawBalanceOperator(
         getContract(OWNER_ADDRESS), dbManager);
@@ -123,7 +123,7 @@ public class WithdrawBalanceOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
 
@@ -141,7 +141,7 @@ public class WithdrawBalanceOperatorTest {
   @Test
   public void invalidOwnerAddress() {
     WithdrawBalanceOperator actuator = new WithdrawBalanceOperator(
-        getContract(OWNER_ADDRESS_INVALIDATE), dbManager);
+        getContract(OWNER_ADDRESS_INVALID), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
 
     try {
@@ -163,7 +163,7 @@ public class WithdrawBalanceOperatorTest {
   @Test
   public void invalidOwnerAccount() {
     WithdrawBalanceOperator actuator = new WithdrawBalanceOperator(
-        getContract(OWNER_ACCOUNT_INVALIDATE), dbManager);
+        getContract(OWNER_ACCOUNT_INVALID), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
 
     try {
@@ -172,7 +172,7 @@ public class WithdrawBalanceOperatorTest {
       fail("cannot run here.");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("Account[" + OWNER_ACCOUNT_INVALIDATE + "] not exists",
+      Assert.assertEquals("Account[" + OWNER_ACCOUNT_INVALID + "] not exists",
           e.getMessage());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
@@ -214,9 +214,9 @@ public class WithdrawBalanceOperatorTest {
     AccountWrapper accountWrapper = dbManager.getAccountStore().get(address);
     Assert.assertEquals(accountWrapper.getAllowance(), 0);
 
-    WitnessWrapper witnessWrapper = new WitnessWrapper(ByteString.copyFrom(address),
+    WitnessWrapper witnessCapsule = new WitnessWrapper(ByteString.copyFrom(address),
         100, "http://baidu.com");
-    dbManager.getWitnessStore().put(address, witnessWrapper);
+    dbManager.getWitnessStore().put(address, witnessCapsule);
 
     WithdrawBalanceOperator actuator = new WithdrawBalanceOperator(
         getContract(OWNER_ADDRESS), dbManager);
@@ -257,11 +257,11 @@ public class WithdrawBalanceOperatorTest {
     AccountWrapper accountWrapper = dbManager.getAccountStore().get(address);
     Assert.assertEquals(accountWrapper.getAllowance(), allowance);
 
-    WitnessWrapper witnessWrapper = new WitnessWrapper(ByteString.copyFrom(address),
+    WitnessWrapper witnessCapsule = new WitnessWrapper(ByteString.copyFrom(address),
         100, "http://google.com");
 
     dbManager.getAccountStore().put(address, accountWrapper);
-    dbManager.getWitnessStore().put(address, witnessWrapper);
+    dbManager.getWitnessStore().put(address, witnessCapsule);
 
     WithdrawBalanceOperator actuator = new WithdrawBalanceOperator(
         getContract(ByteArray.toHexString(address)), dbManager);
@@ -299,11 +299,11 @@ public class WithdrawBalanceOperatorTest {
     Assert.assertEquals(accountWrapper.getAllowance(), allowance);
     Assert.assertEquals(accountWrapper.getLatestWithdrawTime(), now);
 
-    WitnessWrapper witnessWrapper = new WitnessWrapper(ByteString.copyFrom(address),
+    WitnessWrapper witnessCapsule = new WitnessWrapper(ByteString.copyFrom(address),
         100, "http://baidu.com");
 
     dbManager.getAccountStore().put(address, accountWrapper);
-    dbManager.getWitnessStore().put(address, witnessWrapper);
+    dbManager.getWitnessStore().put(address, witnessCapsule);
 
     WithdrawBalanceOperator actuator = new WithdrawBalanceOperator(
         getContract(OWNER_ADDRESS), dbManager);

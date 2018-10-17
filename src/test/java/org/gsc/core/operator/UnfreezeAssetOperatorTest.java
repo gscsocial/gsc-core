@@ -4,6 +4,9 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.junit.AfterClass;
@@ -11,14 +14,11 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
@@ -33,19 +33,19 @@ public class UnfreezeAssetOperatorTest {
 
   private static Manager dbManager;
   private static final String dbPath = "output_unfreeze_asset_test";
-  private static AnnotationConfigApplicationContext context;
+  private static GSCApplicationContext context;
   private static final String OWNER_ADDRESS;
-  private static final String OWNER_ADDRESS_INVALIDATE = "aaaa";
-  private static final String OWNER_ACCOUNT_INVALIDATE;
+  private static final String OWNER_ADDRESS_INVALID = "aaaa";
+  private static final String OWNER_ACCOUNT_INVALID;
   private static final long initBalance = 10_000_000_000L;
   private static final long frozenBalance = 1_000_000_000L;
   private static final String assetName = "testCoin";
 
   static {
     Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
-    context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS = Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a1abc";
-    OWNER_ACCOUNT_INVALIDATE =
+    OWNER_ACCOUNT_INVALID =
         Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a3456";
   }
 
@@ -82,7 +82,7 @@ public class UnfreezeAssetOperatorTest {
             StringUtil.hexString2ByteString(OWNER_ADDRESS),
             AccountType.Normal,
             initBalance);
-    ownerCapsule.setAssetIssuedName(ByteString.copyFromUtf8(assetName));
+    ownerCapsule.setAssetIssuedName(assetName.getBytes());
     dbManager.getAccountStore().put(ownerCapsule.createDbKey(), ownerCapsule);
   }
 
@@ -105,8 +105,8 @@ public class UnfreezeAssetOperatorTest {
         .setExpireTime(now)
         .build();
     Frozen newFrozen1 = Frozen.newBuilder()
-        .setFrozenBalance(frozenBalance+1)
-        .setExpireTime(now+600000)
+        .setFrozenBalance(frozenBalance + 1)
+        .setExpireTime(now + 600000)
         .build();
     account = account.toBuilder().addFrozenSupply(newFrozen0).addFrozenSupply(newFrozen1).build();
     AccountWrapper accountWrapper = new AccountWrapper(account);
@@ -117,7 +117,7 @@ public class UnfreezeAssetOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
       Assert.assertEquals(owner.getAssetMap().get(assetName).longValue(), frozenBalance);
@@ -131,7 +131,7 @@ public class UnfreezeAssetOperatorTest {
 
   @Test
   public void invalidOwnerAddress() {
-    UnfreezeAssetOperator actuator = new UnfreezeAssetOperator(getContract(OWNER_ADDRESS_INVALIDATE),
+    UnfreezeAssetOperator actuator = new UnfreezeAssetOperator(getContract(OWNER_ADDRESS_INVALID),
         dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
@@ -148,7 +148,7 @@ public class UnfreezeAssetOperatorTest {
 
   @Test
   public void invalidOwnerAccount() {
-    UnfreezeAssetOperator actuator = new UnfreezeAssetOperator(getContract(OWNER_ACCOUNT_INVALIDATE),
+    UnfreezeAssetOperator actuator = new UnfreezeAssetOperator(getContract(OWNER_ACCOUNT_INVALID),
         dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
@@ -157,7 +157,7 @@ public class UnfreezeAssetOperatorTest {
       Assert.assertTrue(false);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("Account[" + OWNER_ACCOUNT_INVALIDATE + "] not exists",
+      Assert.assertEquals("Account[" + OWNER_ACCOUNT_INVALID + "] not exists",
           e.getMessage());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);

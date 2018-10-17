@@ -1,59 +1,39 @@
 package org.gsc.db;
 
-import java.util.Iterator;
+import static org.gsc.config.Parameter.DatabaseConstants.ASSET_ISSUE_COUNT_LIMIT_MAX;
+
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Streams;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.core.wrapper.AssetIssueWrapper;
-import org.gsc.config.Parameter.DatabaseConstants;
-import org.gsc.db.common.iterator.AssetIssueIterator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.gsc.core.wrapper.AssetIssueWrapper;
 
 @Slf4j
 @Component
-public class AssetIssueStore extends GscStoreWithRevoking<AssetIssueWrapper> {
+public class AssetIssueStore extends GSCStoreWithRevoking<AssetIssueWrapper> {
 
   @Autowired
   private AssetIssueStore(@Value("asset-issue") String dbName) {
     super(dbName);
   }
 
+
   @Override
   public AssetIssueWrapper get(byte[] key) {
-    byte[] value = dbSource.getData(key);
-    return ArrayUtils.isEmpty(value) ? null : new AssetIssueWrapper(value);
-  }
-
-  /**
-   * isAssetIssusExist fun.
-   *
-   * @param key the address of Account
-   */
-  @Override
-  public boolean has(byte[] key) {
-    byte[] assetIssue = dbSource.getData(key);
-    return null != assetIssue;
-  }
-
-  @Override
-  public void put(byte[] key, AssetIssueWrapper item) {
-    super.put(key, item);
-    if (Objects.nonNull(indexHelper)) {
-      indexHelper.update(item.getInstance());
-    }
+    return super.getUnchecked(key);
   }
 
   /**
    * get all asset issues.
    */
   public List<AssetIssueWrapper> getAllAssetIssues() {
-    return dbSource.allKeys().stream()
-        .map(this::get)
+    return Streams.stream(iterator())
+        .map(Entry::getValue)
         .collect(Collectors.toList());
   }
 
@@ -61,38 +41,28 @@ public class AssetIssueStore extends GscStoreWithRevoking<AssetIssueWrapper> {
     if (limit < 0 || offset < 0) {
       return null;
     }
-    List<AssetIssueWrapper> assetIssueList = dbSource.allKeys().stream()
-        .map(this::get)
-        .collect(Collectors.toList());
+
+//    return Streams.stream(iterator())
+//        .map(Entry::getValue)
+//        .sorted(Comparator.comparing(a -> a.getName().toStringUtf8(), String::compareTo))
+//        .skip(offset)
+//        .limit(Math.min(limit, ASSET_ISSUE_COUNT_LIMIT_MAX))
+//        .collect(Collectors.toList());
+
+    List<AssetIssueWrapper> assetIssueList = getAllAssetIssues();
     if (assetIssueList.size() <= offset) {
       return null;
     }
     assetIssueList.sort((o1, o2) -> {
-      return o1.getName().toStringUtf8().compareTo(o2.getName().toStringUtf8());
+      if (o1.getName() != o2.getName()) {
+        return o1.getName().toStringUtf8().compareTo(o2.getName().toStringUtf8());
+      }
+      return Long.compare(o1.getOrder(), o2.getOrder());
     });
-    limit = limit > DatabaseConstants.ASSET_ISSUE_COUNT_LIMIT_MAX ? DatabaseConstants.ASSET_ISSUE_COUNT_LIMIT_MAX : limit;
+    limit = limit > ASSET_ISSUE_COUNT_LIMIT_MAX ? ASSET_ISSUE_COUNT_LIMIT_MAX : limit;
     long end = offset + limit;
     end = end > assetIssueList.size() ? assetIssueList.size() : end ;
     return assetIssueList.subList((int)offset,(int)end);
   }
 
-  @Override
-  public Iterator<Entry<byte[], AssetIssueWrapper>> iterator() {
-    return new AssetIssueIterator(dbSource.iterator());
-  }
-
-  @Override
-  public void delete(byte[] key) {
-    deleteIndex(key);
-    super.delete(key);
-  }
-
-  private void deleteIndex(byte[] key) {
-    if (Objects.nonNull(indexHelper)) {
-      AssetIssueWrapper item = get(key);
-      if (Objects.nonNull(item)) {
-        indexHelper.remove(item.getInstance());
-      }
-    }
-  }
 }

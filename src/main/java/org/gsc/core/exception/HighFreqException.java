@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class HighFreqException extends GscException {
+public class HighFreqException extends GSCException {
 
   public HighFreqException() {
     super();

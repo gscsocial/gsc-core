@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class TraitorPeerException extends GscException {
+public class TraitorPeerException extends GSCException {
 
   public TraitorPeerException() {
     super();

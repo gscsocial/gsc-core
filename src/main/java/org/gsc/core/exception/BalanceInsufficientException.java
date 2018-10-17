@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class BalanceInsufficientException extends GscException {
+public class BalanceInsufficientException extends GSCException {
 
   public BalanceInsufficientException() {
     super();

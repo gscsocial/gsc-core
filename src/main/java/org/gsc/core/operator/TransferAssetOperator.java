@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -22,14 +22,14 @@ import java.util.Arrays;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
-import org.gsc.core.wrapper.utils.TransactionUtil;
 import org.gsc.db.AccountStore;
 import org.gsc.db.Manager;
+import org.gsc.core.exception.BalanceInsufficientException;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract.TransferAssetContract;
 import org.gsc.protos.Protocol.AccountType;
 import org.gsc.protos.Protocol.Transaction.Result.code;
@@ -55,20 +55,28 @@ public class TransferAssetOperator extends AbstractOperator {
         toAccountWrapper = new AccountWrapper(ByteString.copyFrom(toAddress), AccountType.Normal,
             dbManager.getHeadBlockTimeStamp());
         dbManager.getAccountStore().put(toAddress, toAccountWrapper);
+
+        fee = fee + dbManager.getDynamicPropertiesStore().getCreateNewAccountFeeInSystemContract();
       }
       ByteString assetName = transferAssetContract.getAssetName();
       long amount = transferAssetContract.getAmount();
 
+      dbManager.adjustBalance(ownerAddress, -fee);
+
       AccountWrapper ownerAccountWrapper = accountStore.get(ownerAddress);
-      if (!ownerAccountWrapper.reduceAssetAmount(assetName, amount)) {
+      if (!ownerAccountWrapper.reduceAssetAmount(assetName.toByteArray(), amount)) {
         throw new ContractExeException("reduceAssetAmount failed !");
       }
       accountStore.put(ownerAddress, ownerAccountWrapper);
 
-      toAccountWrapper.addAssetAmount(assetName, amount);
+      toAccountWrapper.addAssetAmount(assetName.toByteArray(), amount);
       accountStore.put(toAddress, toAccountWrapper);
 
-      ret.setStatus(fee, code.SUCCESS);
+      ret.setStatus(fee, code.SUCESS);
+    } catch (BalanceInsufficientException e) {
+      logger.debug(e.getMessage(), e);
+      ret.setStatus(fee, code.FAILED);
+      throw new ContractExeException(e.getMessage());
     } catch (InvalidProtocolBufferException e) {
       ret.setStatus(fee, code.FAILED);
       throw new ContractExeException(e.getMessage());
@@ -101,6 +109,7 @@ public class TransferAssetOperator extends AbstractOperator {
       throw new ContractValidateException(e.getMessage());
     }
 
+    long fee = calcFee();
     byte[] ownerAddress = transferAssetContract.getOwnerAddress().toByteArray();
     byte[] toAddress = transferAssetContract.getToAddress().toByteArray();
     byte[] assetName = transferAssetContract.getAssetName().toByteArray();
@@ -112,9 +121,9 @@ public class TransferAssetOperator extends AbstractOperator {
     if (!Wallet.addressValid(toAddress)) {
       throw new ContractValidateException("Invalid toAddress");
     }
-    if (!TransactionUtil.validAssetName(assetName)) {
-      throw new ContractValidateException("Invalid assetName");
-    }
+//    if (!TransactionUtil.validAssetName(assetName)) {
+//      throw new ContractValidateException("Invalid assetName");
+//    }
     if (amount <= 0) {
       throw new ContractValidateException("Amount must greater than 0.");
     }
@@ -155,6 +164,12 @@ public class TransferAssetOperator extends AbstractOperator {
           logger.debug(e.getMessage(), e);
           throw new ContractValidateException(e.getMessage());
         }
+      }
+    } else {
+      fee = fee + dbManager.getDynamicPropertiesStore().getCreateNewAccountFeeInSystemContract();
+      if (ownerAccount.getBalance() < fee) {
+        throw new ContractValidateException(
+            "Validate TransferAssetOperator error, insufficient fee.");
       }
     }
 

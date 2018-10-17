@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class TransactionExpirationException extends GscException {
+public class TransactionExpirationException extends GSCException {
 
     public TransactionExpirationException() {
         super();

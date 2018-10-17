@@ -3,7 +3,6 @@ package org.gsc.common.overlay.message;
 import com.google.protobuf.ByteString;
 import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.Sha256Hash;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.config.args.Args;
 import org.gsc.net.message.MessageTypes;
@@ -29,14 +28,29 @@ public class HelloMessage extends P2pMessage {
         .setAddress(ByteString.copyFrom(ByteArray.fromString(from.getHost())))
         .build();
 
+    Protocol.HelloMessage.BlockId gBlockId = Protocol.HelloMessage.BlockId.newBuilder()
+            .setHash(genesisBlockId.getByteString())
+            .setNumber(genesisBlockId.getNum())
+            .build();
+
+    Protocol.HelloMessage.BlockId sBlockId = Protocol.HelloMessage.BlockId.newBuilder()
+            .setHash(solidBlockId.getByteString())
+            .setNumber(solidBlockId.getNum())
+            .build();
+
+    Protocol.HelloMessage.BlockId hBlockId = Protocol.HelloMessage.BlockId.newBuilder()
+            .setHash(headBlockId.getByteString())
+            .setNumber(headBlockId.getNum())
+            .build();
+
     Builder builder = Protocol.HelloMessage.newBuilder();
 
     builder.setFrom(fromEndpoint);
     builder.setVersion(Args.getInstance().getNodeP2pVersion());
     builder.setTimestamp(timestamp);
-    builder.setGenesisBlockId(genesisBlockId.getByteString());
-    builder.setSolidBlockId(solidBlockId.getByteString());
-    builder.setHeadBlockId(headBlockId.getByteString());
+    builder.setGenesisBlockId(gBlockId);
+    builder.setSolidBlockId(sBlockId);
+    builder.setHeadBlockId(hBlockId);
 
     this.helloMessage = builder.build();
     this.type = MessageTypes.P2P_HELLO.asByte();
@@ -58,15 +72,18 @@ public class HelloMessage extends P2pMessage {
   }
 
   public BlockWrapper.BlockId getGenesisBlockId(){
-    return new BlockWrapper.BlockId(Sha256Hash.wrap(this.helloMessage.getGenesisBlockId()));
+    return new BlockWrapper.BlockId(this.helloMessage.getGenesisBlockId().getHash(),
+            this.helloMessage.getGenesisBlockId().getNumber());
   }
 
   public BlockWrapper.BlockId getSolidBlockId(){
-    return new BlockWrapper.BlockId(Sha256Hash.wrap(this.helloMessage.getSolidBlockId()));
+    return new BlockWrapper.BlockId(this.helloMessage.getSolidBlockId().getHash(),
+            this.helloMessage.getSolidBlockId().getNumber());
   }
 
   public BlockWrapper.BlockId getHeadBlockId(){
-    return new BlockWrapper.BlockId(Sha256Hash.wrap(this.helloMessage.getHeadBlockId()));
+    return new BlockWrapper.BlockId(this.helloMessage.getHeadBlockId().getHash(),
+            this.helloMessage.getHeadBlockId().getNumber());
   }
 
   @Override

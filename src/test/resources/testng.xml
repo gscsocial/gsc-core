@@ -2,13 +2,16 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 
 <suite name="Wallet case">
+  <listeners>
+    <listener class-name="org.gsc.common.overlay.util.RetryListener"/>
+  </listeners>
     <test name="Debug case" preserve-order="true">
                 <packages>
-                    <package name="stest.gsc.wallet.*">
+                    <package name="org.gsc.wallet.*">
                     </package>
                 </packages>
 <!--        <classes>
-            <class name="WalletTestAssetIssue002"/>
+            <class name="org.gsc.wallet.onlinestress.TestNetErc721Cat"/>
         </classes>-->
     </test>
 </suite>

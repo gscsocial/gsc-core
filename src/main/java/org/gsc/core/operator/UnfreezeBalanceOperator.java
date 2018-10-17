@@ -8,14 +8,15 @@ import java.util.Iterator;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
+import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.VotesWrapper;
+import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
-import org.gsc.core.Wallet;
-import org.gsc.db.Manager;
 import org.gsc.protos.Contract.UnfreezeBalanceContract;
+import org.gsc.protos.Protocol.Account.AccountResource;
 import org.gsc.protos.Protocol.Account.Frozen;
 import org.gsc.protos.Protocol.Transaction.Result.code;
 
@@ -42,37 +43,57 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
     AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
     long oldBalance = accountWrapper.getBalance();
     long unfreezeBalance = 0L;
-    List<Frozen> frozenList = Lists.newArrayList();
-    frozenList.addAll(accountWrapper.getFrozenList());
-    Iterator<Frozen> iterator = frozenList.iterator();
-    long now = dbManager.getHeadBlockTimeStamp();
-    while (iterator.hasNext()) {
-      Frozen next = iterator.next();
-      if (next.getExpireTime() <= now) {
-        unfreezeBalance += next.getFrozenBalance();
-        iterator.remove();
-      }
+    switch (unfreezeBalanceContract.getResource()) {
+      case BANDWIDTH:
+
+        List<Frozen> frozenList = Lists.newArrayList();
+        frozenList.addAll(accountWrapper.getFrozenList());
+        Iterator<Frozen> iterator = frozenList.iterator();
+        long now = dbManager.getHeadBlockTimeStamp();
+        while (iterator.hasNext()) {
+          Frozen next = iterator.next();
+          if (next.getExpireTime() <= now) {
+            unfreezeBalance += next.getFrozenBalance();
+            iterator.remove();
+          }
+        }
+
+        accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
+            .setBalance(oldBalance + unfreezeBalance)
+            .clearFrozen().addAllFrozen(frozenList).build());
+
+        dbManager.getDynamicPropertiesStore().addTotalNetWeight(-unfreezeBalance / 1000_000L);
+        break;
+      case ENERGY:
+        unfreezeBalance = accountWrapper.getAccountResource().getFrozenBalanceForEnergy()
+            .getFrozenBalance();
+
+        AccountResource newAccountResource = accountWrapper.getAccountResource().toBuilder()
+            .clearFrozenBalanceForEnergy().build();
+        accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
+            .setBalance(oldBalance + unfreezeBalance)
+            .setAccountResource(newAccountResource).build());
+
+        dbManager.getDynamicPropertiesStore().addTotalEnergyWeight(-unfreezeBalance / 1000_000L);
+        break;
     }
 
-    accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-        .setBalance(oldBalance + unfreezeBalance)
-        .clearFrozen().addAllFrozen(frozenList).build());
-
-    VotesWrapper votesWrapper;
+    VotesWrapper votesCapsule;
     if (!dbManager.getVotesStore().has(ownerAddress)) {
-      votesWrapper = new VotesWrapper(unfreezeBalanceContract.getOwnerAddress(),
+      votesCapsule = new VotesWrapper(unfreezeBalanceContract.getOwnerAddress(),
           accountWrapper.getVotesList());
     } else {
-      votesWrapper = dbManager.getVotesStore().get(ownerAddress);
+      votesCapsule = dbManager.getVotesStore().get(ownerAddress);
     }
     accountWrapper.clearVotes();
-    votesWrapper.clearNewVotes();
+    votesCapsule.clearNewVotes();
 
     dbManager.getAccountStore().put(ownerAddress, accountWrapper);
-    dbManager.getVotesStore().put(ownerAddress, votesWrapper);
-    dbManager.getDynamicPropertiesStore().addTotalNetWeight(-unfreezeBalance / 1000_000L);
+    dbManager.getVotesStore().put(ownerAddress, votesCapsule);
 
-    ret.setStatus(fee, code.SUCCESS);
+
+    ret.setUnfreezeAmount(unfreezeBalance);
+    ret.setStatus(fee, code.SUCESS);
 
     return true;
   }
@@ -108,15 +129,35 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
       throw new ContractValidateException(
           "Account[" + readableOwnerAddress + "] not exists");
     }
-    if (accountWrapper.getFrozenCount() <= 0) {
-      throw new ContractValidateException("no frozenBalance");
-    }
 
     long now = dbManager.getHeadBlockTimeStamp();
-    long allowedUnfreezeCount = accountWrapper.getFrozenList().stream()
-        .filter(frozen -> frozen.getExpireTime() <= now).count();
-    if (allowedUnfreezeCount <= 0) {
-      throw new ContractValidateException("It's not time to unfreeze.");
+
+    switch (unfreezeBalanceContract.getResource()) {
+      case BANDWIDTH:
+        if (accountWrapper.getFrozenCount() <= 0) {
+          throw new ContractValidateException("no frozenBalance");
+        }
+
+        long allowedUnfreezeCount = accountWrapper.getFrozenList().stream()
+            .filter(frozen -> frozen.getExpireTime() <= now).count();
+        if (allowedUnfreezeCount <= 0) {
+          throw new ContractValidateException("It's not time to unfreeze.");
+        }
+        break;
+      case ENERGY:
+        Frozen frozenBalanceForEnergy = accountWrapper.getAccountResource()
+            .getFrozenBalanceForEnergy();
+        if (frozenBalanceForEnergy.getFrozenBalance() <= 0) {
+          throw new ContractValidateException("no frozenBalance");
+        }
+        if (frozenBalanceForEnergy.getExpireTime() > now) {
+          throw new ContractValidateException("It's not time to unfreeze.");
+        }
+
+        break;
+      default:
+        throw new ContractValidateException(
+            "ResourceCode error.valid ResourceCode[BANDWIDTH、ENERGY]");
     }
 
     return true;

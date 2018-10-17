@@ -19,6 +19,9 @@ package org.gsc.common.overlay.discover.table;
 
 import org.gsc.common.overlay.discover.node.Node;
 
+/**
+ * Created by kest on 5/25/15.
+ */
 public class NodeEntry {
 
   private byte[] ownerId;

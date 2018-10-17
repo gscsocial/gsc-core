@@ -24,17 +24,17 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.List;
-import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.overlay.message.DisconnectMessage;
-import org.gsc.common.overlay.message.HelloMessage;
-import org.gsc.common.overlay.message.P2pMessage;
-import org.gsc.common.overlay.message.P2pMessageFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.gsc.common.overlay.discover.node.NodeManager;
+import org.gsc.common.overlay.message.DisconnectMessage;
+import org.gsc.common.overlay.message.HelloMessage;
+import org.gsc.common.overlay.message.P2pMessage;
+import org.gsc.common.overlay.message.P2pMessageFactory;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.net.peer.PeerConnection;
@@ -56,8 +56,8 @@ public class HandshakeHandler extends ByteToMessageDecoder {
 
   private Manager manager;
 
-  private P2pMessageFactory messageFactory = new P2pMessageFactory();
-  
+  private  P2pMessageFactory messageFactory = new P2pMessageFactory();
+
   @Autowired
   private SyncPool syncPool;
 
@@ -119,7 +119,7 @@ public class HandshakeHandler extends ByteToMessageDecoder {
     HelloMessage message = new HelloMessage(nodeManager.getPublicHomeNode(), time,
             manager.getGenesisBlockId(), manager.getSolidBlockId(), manager.getHeadBlockId());
     ctx.writeAndFlush(message.getSendData());
-    channel.getNodeStatistics().p2pOutHello.add();
+    channel.getNodeStatistics().messageStatistics.addTcpOutMessage(message);
     logger.info("Handshake Send to {}, {} ", ctx.channel().remoteAddress(), message);
   }
 
@@ -136,7 +136,7 @@ public class HandshakeHandler extends ByteToMessageDecoder {
     if (msg.getVersion() != Args.getInstance().getNodeP2pVersion()) {
       logger.info("Peer {} different p2p version, peer->{}, me->{}",
               ctx.channel().remoteAddress(), msg.getVersion(), Args.getInstance().getNodeP2pVersion());
-      channel.disconnect(ReasonCode.INCOMPATIBLE_PROTOCOL);
+      channel.disconnect(ReasonCode.INCOMPATIBLE_VERSION);
       return;
     }
 
@@ -156,7 +156,7 @@ public class HandshakeHandler extends ByteToMessageDecoder {
 
     ((PeerConnection)channel).setHelloMessage(msg);
 
-    channel.getNodeStatistics().p2pInHello.add();
+    channel.getNodeStatistics().messageStatistics.addTcpInMessage(msg);
 
     channel.publicHandshakeFinished(ctx, msg);
     if (!channelManager.processPeer(channel)) {

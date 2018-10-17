@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class RevokingStoreIllegalStateException extends GscRuntimeException {
+public class RevokingStoreIllegalStateException extends GSCRuntimeException {
 
   /**
    * Constructs an RevokingStoreIllegalStateException with no detail message. A detail message is a

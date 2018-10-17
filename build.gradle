@@ -225,7 +225,7 @@ run {
 }
 
 shadowJar {
-    baseName = 'gsc-core'
+    baseName = 'java-gsc'
     classifier = null
     version = null
 }

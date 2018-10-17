@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class NonCommonBlockException extends GscException {
+public class NonCommonBlockException extends GSCException {
   public NonCommonBlockException() {
     super();
   }

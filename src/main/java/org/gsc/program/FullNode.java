@@ -1,20 +1,16 @@
 package org.gsc.program;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Hex;
-import org.gsc.core.Constant;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.gsc.api.GrpcAPI.AddressPrKeyPairMessage;
 import org.gsc.common.application.Application;
 import org.gsc.common.application.ApplicationFactory;
-import org.gsc.crypto.ECKey;
-import org.gsc.common.utils.Utils;
-import org.gsc.core.Wallet;
+import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.core.Constant;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.services.RpcApiService;
 import org.gsc.services.WitnessService;
+import org.gsc.services.http.FullNodeHttpApiService;
 
 @Slf4j
 public class FullNode {
@@ -24,7 +20,10 @@ public class FullNode {
    */
   public static void main(String[] args) throws InterruptedException {
     logger.info("Full node running.");
+    //LOCAL_TESTNET_CONF
+    //Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
     Args.setParam(args, Constant.TESTNET_CONF);
+    //Args.setParam(args, Constant.TESTNET_CONF);
     Args cfgArgs = Args.getInstance();
 
     if (cfgArgs.isHelp()) {
@@ -32,41 +31,45 @@ public class FullNode {
       return;
     }
 
+    if (Args.getInstance().isDebug()) {
+      logger.info("in debug mode, it won't check energy time");
+    } else {
+      logger.info("not in debug mode, it will check energy time");
+    }
+
     /**
      *
      */
     DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
     beanFactory.setAllowCircularReferences(false);
-    AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(beanFactory);
+    GSCApplicationContext context =
+        new GSCApplicationContext(beanFactory);
     context.register(DefaultConfig.class);
+
     context.refresh();
     Application appT = ApplicationFactory.create(context);
     shutdown(appT);
 
+    // grpc api server
     RpcApiService rpcApiService = context.getBean(RpcApiService.class);
     appT.addService(rpcApiService);
     if (cfgArgs.isWitness()) {
       appT.addService(new WitnessService(appT, context));
     }
+
+    // http api server
+    FullNodeHttpApiService httpApiService = context.getBean(FullNodeHttpApiService.class);
+    appT.addService(httpApiService);
+
     appT.initServices(cfgArgs);
     appT.startServices();
     appT.startup();
+
     rpcApiService.blockUntilShutdown();
   }
 
   public static void shutdown(final Application app) {
     logger.info("********register application shutdown hook********");
     Runtime.getRuntime().addShutdownHook(new Thread(app::shutdown));
-  }
-
-  private static void generate(){
-    ECKey ecKey = new ECKey(Utils.getRandom());
-    byte[] priKey = ecKey.getPrivKeyBytes();
-    byte[] address = ecKey.getAddress();
-    String addressStr = Wallet.encode58Check(address);
-    String priKeyStr = Hex.encodeHexString(priKey);
-    AddressPrKeyPairMessage.Builder builder = AddressPrKeyPairMessage.newBuilder();
-    System.out.println(addressStr);
-    System.out.println(priKeyStr);
   }
 }

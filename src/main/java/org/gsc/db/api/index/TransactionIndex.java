@@ -10,13 +10,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.utils.ByteArray;
 import org.gsc.core.wrapper.TransactionWrapper;
-import org.gsc.db.GscDatabase;
-import org.gsc.db.common.WrappedByteArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.gsc.common.utils.ByteArray;
+import org.gsc.db.common.WrappedByteArray;
+import org.gsc.core.db2.core.IGSCChainBase;
 import org.gsc.protos.Protocol.Transaction;
 
 @Component
@@ -30,7 +30,7 @@ public class TransactionIndex extends AbstractIndex<TransactionWrapper, Transact
 
   @Autowired
   public TransactionIndex(
-      @Qualifier("transactionStore") final GscDatabase<TransactionWrapper> database) {
+      @Qualifier("transactionStore") final IGSCChainBase<TransactionWrapper> database) {
     super(database);
   }
 
@@ -64,6 +64,5 @@ public class TransactionIndex extends AbstractIndex<TransactionWrapper, Transact
                 .collect(Collectors.toList()));
     TIMESTAMP =
         attribute("timestamp", bytes -> getObject(bytes).getRawData().getTimestamp());
-
   }
 }

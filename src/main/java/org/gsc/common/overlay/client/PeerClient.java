@@ -10,15 +10,15 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.common.overlay.discover.node.NodeHandler;
-import org.gsc.common.overlay.server.GscChannelInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.gsc.common.overlay.discover.node.Node;
+import org.gsc.common.overlay.discover.node.NodeHandler;
+import org.gsc.common.overlay.server.GSCChannelInitializer;
 import org.gsc.config.args.Args;
 import org.gsc.net.node.NodeImpl;
 import org.gsc.protos.Protocol.ReasonCode;
@@ -42,7 +42,7 @@ public class PeerClient {
             AtomicInteger cnt = new AtomicInteger(0);
             @Override
             public Thread newThread(Runnable r) {
-                return new Thread(r, "GscJClientWorker-" + cnt.getAndIncrement());
+                return new Thread(r, "gscJClientWorker-" + cnt.getAndIncrement());
             }
         });
     }
@@ -74,7 +74,7 @@ public class PeerClient {
 
         logger.info("connect peer {} {} {}", host, port, remoteId);
 
-        GscChannelInitializer gscChannelInitializer = ctx.getBean(GscChannelInitializer.class, remoteId);
+        GSCChannelInitializer gscChannelInitializer = ctx.getBean(GSCChannelInitializer.class, remoteId);
         gscChannelInitializer.setPeerDiscoveryMode(discoveryMode);
         gscChannelInitializer.setNodeImpl(node);
 
@@ -89,6 +89,7 @@ public class PeerClient {
 
         b.handler(gscChannelInitializer);
 
+        // Start the client.
         return b.connect();
     }
 

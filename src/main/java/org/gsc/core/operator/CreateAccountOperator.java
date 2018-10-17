@@ -5,12 +5,13 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.db.Manager;
+import org.gsc.core.exception.BalanceInsufficientException;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract.AccountCreateContract;
 import org.gsc.protos.Protocol.Transaction.Result.code;
 
@@ -31,7 +32,13 @@ public class CreateAccountOperator extends AbstractOperator {
           dbManager.getHeadBlockTimeStamp());
       dbManager.getAccountStore()
           .put(accountCreateContract.getAccountAddress().toByteArray(), accountWrapper);
-      ret.setStatus(fee, code.SUCCESS);
+
+      dbManager.adjustBalance(accountCreateContract.getOwnerAddress().toByteArray(), -fee);
+      ret.setStatus(fee, code.SUCESS);
+    } catch (BalanceInsufficientException e) {
+      logger.debug(e.getMessage(), e);
+      ret.setStatus(fee, code.FAILED);
+      throw new ContractExeException(e.getMessage());
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
       ret.setStatus(fee, code.FAILED);
@@ -76,14 +83,16 @@ public class CreateAccountOperator extends AbstractOperator {
           "Account[" + readableOwnerAddress + "] not exists");
     }
 
+    final long fee = calcFee();
+    if (accountWrapper.getBalance() < fee) {
+      throw new ContractValidateException(
+          "Validate CreateAccountOperator error, insufficient fee.");
+    }
+
     byte[] accountAddress = contract.getAccountAddress().toByteArray();
     if (!Wallet.addressValid(accountAddress)) {
       throw new ContractValidateException("Invalid account address");
     }
-
-//    if (contract.getType() == null) {
-//      throw new ContractValidateException("Type is null");
-//    }
 
     if (dbManager.getAccountStore().has(accountAddress)) {
       throw new ContractValidateException("Account has existed");
@@ -99,6 +108,6 @@ public class CreateAccountOperator extends AbstractOperator {
 
   @Override
   public long calcFee() {
-    return 0;
+    return dbManager.getDynamicPropertiesStore().getCreateNewAccountFeeInSystemContract();
   }
 }

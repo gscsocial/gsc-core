@@ -26,22 +26,23 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
-import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.overlay.discover.node.NodeStatistics;
-import org.gsc.common.overlay.message.DisconnectMessage;
-import org.gsc.common.overlay.message.HelloMessage;
-import org.gsc.common.overlay.message.MessageCodec;
-import org.gsc.common.overlay.message.StaticMessages;
+
+import org.gsc.net.peer.GSCHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.gsc.common.overlay.discover.node.Node;
+import org.gsc.common.overlay.discover.node.NodeManager;
+import org.gsc.common.overlay.discover.node.statistics.NodeStatistics;
+import org.gsc.common.overlay.message.DisconnectMessage;
+import org.gsc.common.overlay.message.HelloMessage;
+import org.gsc.common.overlay.message.MessageCodec;
+import org.gsc.common.overlay.message.StaticMessages;
 import org.gsc.db.ByteArrayWrapper;
 import org.gsc.core.exception.P2pException;
 import org.gsc.net.peer.PeerConnectionDelegate;
-import org.gsc.net.peer.GscHandler;
 import org.gsc.protos.Protocol.ReasonCode;
 
 @Component
@@ -72,7 +73,7 @@ public class Channel {
   private P2pHandler p2pHandler;
 
   @Autowired
-  private GscHandler gscHandler;
+  private GSCHandler gscHandler;
 
   private ChannelManager channelManager;
 
@@ -86,7 +87,7 @@ public class Channel {
 
   private PeerConnectionDelegate peerDel;
 
-  private GscState gscState = GscState.INIT;
+  private GSCState gscState = GSCState.INIT;
 
   protected NodeStatistics nodeStatistics;
 
@@ -98,6 +99,8 @@ public class Channel {
 
   private PeerStatistics peerStats = new PeerStatistics();
 
+  private boolean isTrustPeer;
+
   public void init(ChannelPipeline pipeline, String remoteId, boolean discoveryMode,
       ChannelManager channelManager, PeerConnectionDelegate peerDel) {
 
@@ -107,11 +110,13 @@ public class Channel {
 
     isActive = remoteId != null && !remoteId.isEmpty();
 
+    startTime = System.currentTimeMillis();
+
     //TODO: use config here
     pipeline.addLast("readTimeoutHandler", new ReadTimeoutHandler(60, TimeUnit.SECONDS));
     pipeline.addLast(stats.tcp);
     pipeline.addLast("protoPender", new ProtobufVarint32LengthFieldPrepender());
-    pipeline.addLast("lengthDecode", new GscProtobufVarint32FrameDecoder(this));
+    pipeline.addLast("lengthDecode", new TrxProtobufVarint32FrameDecoder(this));
 
     //handshake first
     pipeline.addLast("handshakeHandler", handshakeHandler);
@@ -131,13 +136,14 @@ public class Channel {
   }
 
   public void publicHandshakeFinished(ChannelHandlerContext ctx, HelloMessage msg) {
+    isTrustPeer = channelManager.getTrustPeers().containsKey(getInetAddress());
     ctx.pipeline().remove(handshakeHandler);
     msgQueue.activate(ctx);
     ctx.pipeline().addLast("messageCodec", messageCodec);
     ctx.pipeline().addLast("p2p", p2pHandler);
     ctx.pipeline().addLast("data", gscHandler);
     setStartTime(msg.getTimestamp());
-    setGscState(GscState.HANDSHAKE_FINISHED);
+    setGscState(GSCState.HANDSHAKE_FINISHED);
     getNodeStatistics().p2pHandShake.add();
     logger.info("Finish handshake with {}.", ctx.channel().remoteAddress());
   }
@@ -186,7 +192,7 @@ public class Channel {
     ctx.close();
   }
 
-  public enum GscState {
+  public enum GSCState {
     INIT,
     HANDSHAKE_FINISHED,
     START_TO_SYNC,
@@ -240,11 +246,11 @@ public class Channel {
     return startTime;
   }
 
-  public void setGscState(GscState gscState) {
+  public void setGscState(GSCState gscState) {
     this.gscState = gscState;
   }
 
-  public GscState getGscState() {
+  public GSCState getGscState() {
     return gscState;
   }
 
@@ -257,7 +263,11 @@ public class Channel {
   }
 
   public boolean isProtocolsInitialized() {
-    return gscState.ordinal() > GscState.INIT.ordinal();
+    return gscState.ordinal() > GSCState.INIT.ordinal();
+  }
+
+  public boolean isTrustPeer() {
+    return isTrustPeer;
   }
 
   @Override
@@ -291,5 +301,6 @@ public class Channel {
   public String toString() {
     return String.format("%s | %s", inetSocketAddress, getPeerId());
   }
+  
 }
 

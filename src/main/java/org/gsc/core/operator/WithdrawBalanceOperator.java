@@ -7,13 +7,13 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
+import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.config.args.Args;
+import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
-import org.gsc.core.Wallet;
-import org.gsc.db.Manager;
 import org.gsc.protos.Contract.WithdrawBalanceContract;
 import org.gsc.protos.Protocol.Transaction.Result.code;
 
@@ -49,7 +49,8 @@ public class WithdrawBalanceOperator extends AbstractOperator {
         .setLatestWithdrawTime(now)
         .build());
     dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
-    ret.setStatus(fee, code.SUCCESS);
+    ret.setWithdrawAmount(allowance);
+    ret.setStatus(fee, code.SUCESS);
 
     return true;
   }

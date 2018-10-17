@@ -6,25 +6,28 @@ import com.google.protobuf.ByteString;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
+import org.gsc.config.args.Witness;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 
 public class WitnessControllerTest {
+
   private static Manager dbManager = new Manager();
-  private static AnnotationConfigApplicationContext context;
+  private static GSCApplicationContext context;
   private static String dbPath = "output_witness_controller_test";
 
   static {
-    Args.setParam(new String[] {"-d", dbPath}, Constant.TEST_CONF);
-    context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    Args.setParam(new String[]{"-d", dbPath}, Constant.TEST_CONF);
+    context = new GSCApplicationContext(DefaultConfig.class);
   }
 
   @BeforeClass
@@ -51,10 +54,9 @@ public class WitnessControllerTest {
 //    assertEquals(2, dbManager.getWitnessController().getSlotAtTime(21500));
 //    assertEquals(19, dbManager.getWitnessController().getHeadSlot());
 
-
   }
 
-//  @Test
+  //  @Test
   public void testWitnessSchedule() {
 
     // no witness produce block
@@ -106,4 +108,26 @@ public class WitnessControllerTest {
     assertEquals(a, dbManager.getWitnessController().getScheduledWitness(3));
     assertEquals(b, dbManager.getWitnessController().getScheduledWitness(4));
   }
+
+  @Test
+  public void testTryRemoveThePowerOfTheGr() {
+
+    Witness witness = Args.getInstance().getGenesisBlock().getWitnesses().get(0);
+    assertEquals(105, witness.getVoteCount());
+
+    dbManager.getDynamicPropertiesStore().saveRemoveThePowerOfTheGr(-1);
+    dbManager.getWitnessController().tryRemoveThePowerOfTheGr();
+    assertEquals(105, dbManager.getWitnessStore().get(witness.getAddress()).getVoteCount());
+
+    dbManager.getDynamicPropertiesStore().saveRemoveThePowerOfTheGr(1);
+    dbManager.getWitnessController().tryRemoveThePowerOfTheGr();
+    assertEquals(0, dbManager.getWitnessStore().get(witness.getAddress()).getVoteCount());
+
+    dbManager.getWitnessController().tryRemoveThePowerOfTheGr();
+    assertEquals(0, dbManager.getWitnessStore().get(witness.getAddress()).getVoteCount());
+
+
+  }
+
+
 }

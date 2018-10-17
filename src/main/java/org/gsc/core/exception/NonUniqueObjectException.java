@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class NonUniqueObjectException extends GscException {
+public class NonUniqueObjectException extends GSCException {
 
   public NonUniqueObjectException() {
     super();

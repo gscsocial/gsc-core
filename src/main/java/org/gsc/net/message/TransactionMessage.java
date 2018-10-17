@@ -5,18 +5,18 @@ import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.core.exception.BadItemException;
 import org.gsc.protos.Protocol.Transaction;
 
-public class TransactionMessage extends GscMessage {
+public class TransactionMessage extends GSCMessage {
 
-  private TransactionWrapper transactionWrapper;
+  private TransactionWrapper transactionCapsule;
 
   public TransactionMessage(byte[] data) throws BadItemException {
-    this.transactionWrapper = new TransactionWrapper(data);
+    this.transactionCapsule = new TransactionWrapper(data);
     this.data = data;
     this.type = MessageTypes.TRX.asByte();
   }
 
   public TransactionMessage(Transaction trx) {
-    this.transactionWrapper = new TransactionWrapper(trx);
+    this.transactionCapsule = new TransactionWrapper(trx);
     this.type = MessageTypes.TRX.asByte();
     this.data = trx.toByteArray();
   }
@@ -29,7 +29,7 @@ public class TransactionMessage extends GscMessage {
 
   @Override
   public Sha256Hash getMessageId() {
-    return this.transactionWrapper.getTransactionId();
+    return this.transactionCapsule.getTransactionId();
   }
 
   @Override
@@ -37,7 +37,7 @@ public class TransactionMessage extends GscMessage {
     return null;
   }
 
-  public TransactionWrapper getTransactionWrapper() {
-    return this.transactionWrapper;
+  public TransactionWrapper getTransactionCapsule() {
+    return this.transactionCapsule;
   }
 }

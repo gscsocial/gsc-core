@@ -8,12 +8,12 @@ import java.util.Iterator;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
+import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
+import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
-import org.gsc.core.Wallet;
-import org.gsc.db.Manager;
 import org.gsc.protos.Contract.UnfreezeAssetContract;
 import org.gsc.protos.Protocol.Account.Frozen;
 import org.gsc.protos.Protocol.Transaction.Result.code;
@@ -47,11 +47,12 @@ public class UnfreezeAssetOperator extends AbstractOperator {
         }
       }
 
-      accountWrapper.addAssetAmount(accountWrapper.getAssetIssuedName(), unfreezeAsset);
+      accountWrapper
+          .addAssetAmount(accountWrapper.getAssetIssuedName().toByteArray(), unfreezeAsset);
       accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
           .clearFrozenSupply().addAllFrozenSupply(frozenList).build());
       dbManager.getAccountStore().put(ownerAddress, accountWrapper);
-      ret.setStatus(fee, code.SUCCESS);
+      ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
       ret.setStatus(fee, code.FAILED);

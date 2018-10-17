@@ -5,7 +5,7 @@ import javax.annotation.Resource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.core.wrapper.*;
-import org.gsc.core.wrapper.WitnessWrapper;
+import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.db.api.index.Index;
 import org.gsc.protos.Contract.AssetIssueContract;
 import org.gsc.protos.Protocol.Account;
@@ -130,6 +130,6 @@ public class IndexHelper {
   }
 
   private byte[] getKey(AssetIssueContract a) {
-    return new AssetIssueWrapper(a).getName().toByteArray();
+    return new AssetIssueWrapper(a).createDbKey();
   }
 }

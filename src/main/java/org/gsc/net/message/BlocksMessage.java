@@ -5,7 +5,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.Items;
 
-public class BlocksMessage extends GscMessage {
+public class BlocksMessage extends GSCMessage {
 
   private List<Block> blocks;
 

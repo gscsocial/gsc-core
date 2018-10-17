@@ -7,64 +7,32 @@ import com.google.protobuf.ByteString;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.exception.AccountResourceInsufficientException;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.core.wrapper.AssetIssueWrapper;
+import org.gsc.core.Constant;
+import org.gsc.core.wrapper.*;
 import org.gsc.core.wrapper.TransactionWrapper;
-import org.gsc.core.wrapper.TransactionResultWrapper;
-import org.gsc.config.Parameter.ChainConstant;
-import org.gsc.core.exception.BalanceInsufficientException;
+import org.gsc.core.exception.AccountResourceInsufficientException;
 import org.gsc.core.exception.ContractValidateException;
+import org.gsc.core.exception.TooBigTransactionResultException;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.protos.Contract.TransferAssetContract;
 import org.gsc.protos.Contract.TransferContract;
 import org.gsc.protos.Protocol.Transaction.Contract;
 
 @Slf4j
-public class BandwidthProcessor {
-
-  private Manager dbManager;
-  private long precision;
-  private long windowSize;
+public class BandwidthProcessor extends ResourceProcessor {
 
   public BandwidthProcessor(Manager manager) {
-    this.dbManager = manager;
-    this.precision = ChainConstant.PRECISION;
-    this.windowSize = ChainConstant.WINDOW_SIZE_MS / ChainConstant.BLOCK_PRODUCED_INTERVAL;
+    super(manager);
   }
 
-  private long divideCeil(long numerator, long denominator) {
-    return (numerator / denominator) + ((numerator % denominator) > 0 ? 1 : 0);
-  }
-
-  private long increase(long lastUsage, long usage, long lastTime, long now) {
-    long averageLastUsage = divideCeil(lastUsage * precision, windowSize);
-    long averageUsage = divideCeil(usage * precision, windowSize);
-
-    if (lastTime != now) {
-      assert now > lastTime;
-      if (lastTime + windowSize > now) {
-        long delta = now - lastTime;
-        double decay = (windowSize - delta) / (double) windowSize;
-        averageLastUsage = Math.round(averageLastUsage * decay);
-      } else {
-        averageLastUsage = 0;
-      }
-    }
-    averageLastUsage += averageUsage;
-    return getUsage(averageLastUsage);
-  }
-
-  private long getUsage(long usage) {
-    return usage * windowSize / precision;
-  }
-
+  @Override
   public void updateUsage(AccountWrapper accountWrapper) {
     long now = dbManager.getWitnessController().getHeadSlot();
     updateUsage(accountWrapper, now);
   }
 
-  public void updateUsage(AccountWrapper accountWrapper, long now) {
+  private void updateUsage(AccountWrapper accountWrapper, long now) {
     long oldNetUsage = accountWrapper.getNetUsage();
     long latestConsumeTime = accountWrapper.getLatestConsumeTime();
     accountWrapper.setNetUsage(increase(oldNetUsage, 0, latestConsumeTime, now));
@@ -80,14 +48,26 @@ public class BandwidthProcessor {
     });
   }
 
-  public void consumeBandwidth(TransactionWrapper trx, TransactionResultWrapper ret)
-      throws ContractValidateException, AccountResourceInsufficientException {
-    List<Contract> contracts =
-        trx.getInstance().getRawData().getContractList();
-
+  @Override
+  public void consume(TransactionWrapper trx, TransactionResultWrapper ret,
+                      TransactionTrace trace)
+      throws ContractValidateException, AccountResourceInsufficientException, TooBigTransactionResultException {
+    List<Contract> contracts = trx.getInstance().getRawData().getContractList();
+    if (trx.getResultSerializedSize() > Constant.MAX_RESULT_SIZE_IN_TX * contracts.size()) {
+      throw new TooBigTransactionResultException();
+    }
     for (Contract contract : contracts) {
-      long bytes = trx.getSerializedSize();
+      long bytes = 0;
+      if (dbManager.getDynamicPropertiesStore().supportVM()) {
+        TransactionWrapper txCapForEstimateBandWidth = new TransactionWrapper(
+            trx.getInstance().getRawData(),
+            trx.getInstance().getSignatureList());
+        bytes = txCapForEstimateBandWidth.getSerializedSize() + Constant.MAX_RESULT_SIZE_IN_TX;
+      } else {
+        bytes = trx.getSerializedSize();
+      }
       logger.debug("trxId {},bandwidth cost :{}", trx.getTransactionId(), bytes);
+      trace.setNetBill(bytes, 0);
       byte[] address = TransactionWrapper.getOwner(contract);
       AccountWrapper accountWrapper = dbManager.getAccountStore().get(address);
       if (accountWrapper == null) {
@@ -97,6 +77,7 @@ public class BandwidthProcessor {
 
       if (contractCreateNewAccount(contract)) {
         consumeForCreateNewAccount(accountWrapper, bytes, now, ret);
+        trace.setNetBill(0, ret.getFee());
         continue;
       }
 
@@ -115,22 +96,14 @@ public class BandwidthProcessor {
       }
 
       if (useTransactionFee(accountWrapper, bytes, ret)) {
+        trace.setNetBill(0, ret.getFee());
         continue;
       }
 
+      long fee = dbManager.getDynamicPropertiesStore().getTransactionFee() * bytes;
       throw new AccountResourceInsufficientException(
-          "Account Insufficient bandwidth and balance to create new account");
-    }
-  }
-
-  private boolean consumeFee(AccountWrapper accountWrapper, long fee) {
-    try {
-      long latestOperationTime = dbManager.getHeadBlockTimeStamp();
-      accountWrapper.setLatestOperationTime(latestOperationTime);
-      dbManager.adjustBalance(accountWrapper, -fee);
-      return true;
-    } catch (BalanceInsufficientException e) {
-      return false;
+          "Account Insufficient bandwidth[" + bytes + "] and balance["
+              + fee + "] to create new account");
     }
   }
 
@@ -161,16 +134,21 @@ public class BandwidthProcessor {
 
   public boolean consumeBandwidthForCreateNewAccount(AccountWrapper accountWrapper, long bytes,
                                                      long now) {
+
+    long createNewAccountBandwidthRatio = dbManager.getDynamicPropertiesStore()
+        .getCreateNewAccountBandwidthRate();
+
     long netUsage = accountWrapper.getNetUsage();
     long latestConsumeTime = accountWrapper.getLatestConsumeTime();
     long netLimit = calculateGlobalNetLimit(accountWrapper.getFrozenBalance());
 
     long newNetUsage = increase(netUsage, 0, latestConsumeTime, now);
 
-    if (bytes <= (netLimit - newNetUsage)) {
+    if (bytes * createNewAccountBandwidthRatio <= (netLimit - newNetUsage)) {
       latestConsumeTime = now;
       long latestOperationTime = dbManager.getHeadBlockTimeStamp();
-      newNetUsage = increase(newNetUsage, bytes, latestConsumeTime, now);
+      newNetUsage = increase(newNetUsage, bytes * createNewAccountBandwidthRatio, latestConsumeTime,
+          now);
       accountWrapper.setLatestConsumeTime(latestConsumeTime);
       accountWrapper.setLatestOperationTime(latestOperationTime);
       accountWrapper.setNetUsage(newNetUsage);
@@ -181,7 +159,7 @@ public class BandwidthProcessor {
   }
 
   public boolean consumeFeeForCreateNewAccount(AccountWrapper accountWrapper,
-      TransactionResultWrapper ret) {
+                                               TransactionResultWrapper ret) {
     long fee = dbManager.getDynamicPropertiesStore().getCreateAccountFee();
     if (consumeFee(accountWrapper, fee)) {
       ret.addFee(fee);

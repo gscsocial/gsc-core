@@ -2,9 +2,18 @@ package org.gsc.core.wrapper;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.gsc.runtime.Runtime;
+import org.gsc.runtime.vm.LogInfo;
+import org.gsc.runtime.vm.program.ProgramResult;
 import org.gsc.core.exception.BadItemException;
 import org.gsc.protos.Protocol.TransactionInfo;
+import org.gsc.protos.Protocol.TransactionInfo.Log;
+import org.gsc.protos.Protocol.TransactionInfo.code;
 
 @Slf4j
 public class TransactionInfoWrapper implements ProtoWrapper<TransactionInfo> {
@@ -14,8 +23,8 @@ public class TransactionInfoWrapper implements ProtoWrapper<TransactionInfo> {
   /**
    * constructor TransactionWrapper.
    */
-  public TransactionInfoWrapper(TransactionInfo gscRet) {
-    this.transactionInfo = gscRet;
+  public TransactionInfoWrapper(TransactionInfo trxRet) {
+    this.transactionInfo = trxRet;
   }
 
   public TransactionInfoWrapper(byte[] data) throws BadItemException {
@@ -43,8 +52,34 @@ public class TransactionInfoWrapper implements ProtoWrapper<TransactionInfo> {
     return transactionInfo.getId().toByteArray();
   }
 
+
+  public void setUnfreezeAmount(long amount) {
+    this.transactionInfo = this.transactionInfo.toBuilder().setUnfreezeAmount(amount).build();
+  }
+
+  public long getUnfreezeAmount() {
+    return transactionInfo.getUnfreezeAmount();
+  }
+
+  public void setWithdrawAmount(long amount) {
+    this.transactionInfo = this.transactionInfo.toBuilder().setWithdrawAmount(amount).build();
+  }
+
+  public long getWithdrawAmount() {
+    return transactionInfo.getWithdrawAmount();
+  }
+
   public void setFee(long fee) {
     this.transactionInfo = this.transactionInfo.toBuilder().setFee(fee).build();
+  }
+
+  public void setResult(code result) {
+    this.transactionInfo = this.transactionInfo.toBuilder().setResult(result).build();
+  }
+
+  public void setResMessage(String message) {
+    this.transactionInfo = this.transactionInfo.toBuilder()
+        .setResMessage(ByteString.copyFromUtf8(message)).build();
   }
 
   public void addFee(long fee) {
@@ -70,6 +105,31 @@ public class TransactionInfoWrapper implements ProtoWrapper<TransactionInfo> {
         .build();
   }
 
+  public void setContractResult(byte[] ret) {
+    this.transactionInfo = this.transactionInfo.toBuilder()
+        .addContractResult(ByteString.copyFrom(ret))
+        .build();
+  }
+
+  public void setContractAddress(byte[] contractAddress) {
+    this.transactionInfo = this.transactionInfo.toBuilder()
+        .setContractAddress(ByteString.copyFrom(contractAddress))
+        .build();
+  }
+
+  public void setReceipt(ReceiptWrapper receipt) {
+    this.transactionInfo = this.transactionInfo.toBuilder()
+        .setReceipt(receipt.getReceipt())
+        .build();
+  }
+
+
+  public void addAllLog(List<Log> logs) {
+    this.transactionInfo = this.transactionInfo.toBuilder()
+        .addAllLog(logs)
+        .build();
+  }
+
   @Override
   public byte[] getData() {
     return this.transactionInfo.toByteArray();
@@ -78,5 +138,47 @@ public class TransactionInfoWrapper implements ProtoWrapper<TransactionInfo> {
   @Override
   public TransactionInfo getInstance() {
     return this.transactionInfo;
+  }
+
+  public static TransactionInfoWrapper buildInstance(TransactionWrapper trxCap, BlockWrapper block,
+                                                     Runtime runtime, ReceiptWrapper traceReceipt) {
+
+    TransactionInfo.Builder builder = TransactionInfo.newBuilder();
+
+    builder.setResult(code.SUCESS);
+    if (StringUtils.isNoneEmpty(runtime.getRuntimeError()) || Objects
+        .nonNull(runtime.getResult().getException())) {
+      builder.setResult(code.FAILED);
+      builder.setResMessage(ByteString.copyFromUtf8(runtime.getRuntimeError()));
+    }
+    builder.setId(ByteString.copyFrom(trxCap.getTransactionId().getBytes()));
+
+    ProgramResult programResult = runtime.getResult();
+    long fee = programResult.getRet().getFee() + traceReceipt.getEnergyFee();
+    ByteString contractResult = ByteString.copyFrom(programResult.getHReturn());
+    ByteString ContractAddress = ByteString.copyFrom(programResult.getContractAddress());
+
+    builder.setFee(fee);
+    builder.addContractResult(contractResult);
+    builder.setContractAddress(ContractAddress);
+    builder.setUnfreezeAmount(programResult.getRet().getUnfreezeAmount());
+    builder.setWithdrawAmount(programResult.getRet().getWithdrawAmount());
+
+    List<Log> logList = new ArrayList<>();
+    programResult.getLogInfoList().forEach(
+        logInfo -> {
+          logList.add(LogInfo.buildLog(logInfo));
+        }
+    );
+    builder.addAllLog(logList);
+
+    if (Objects.nonNull(block)) {
+      builder.setBlockNumber(block.getInstance().getBlockHeader().getRawData().getNumber());
+      builder.setBlockTimeStamp(block.getInstance().getBlockHeader().getRawData().getTimestamp());
+    }
+
+    builder.setReceipt(traceReceipt.getReceipt());
+
+    return new TransactionInfoWrapper(builder.build());
   }
 }

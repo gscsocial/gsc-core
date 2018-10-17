@@ -15,18 +15,18 @@ import java.util.stream.Stream;
 import javafx.util.Pair;
 import lombok.Getter;
 import org.apache.commons.collections4.CollectionUtils;
-import org.gsc.common.utils.Sha256Hash;
 import org.gsc.core.wrapper.BlockWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.gsc.common.utils.Sha256Hash;
 import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.core.exception.BadNumberBlockException;
 import org.gsc.core.exception.NonCommonBlockException;
 import org.gsc.core.exception.UnLinkedBlockException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 @Component
-public class KhaosDatabase extends GscDatabase {
+public class KhaosDatabase extends GSCDatabase {
 
   public static class KhaosBlock {
 
@@ -80,6 +80,7 @@ public class KhaosDatabase extends GscDatabase {
     // private HashMap<Sha256Hash, KhaosBlock> parentHashKblkMap = new HashMap<>();
     private int maxCapcity = 1024;
 
+    @Getter
     private LinkedHashMap<Long, ArrayList<KhaosBlock>> numKblkMap =
         new LinkedHashMap<Long, ArrayList<KhaosBlock>>() {
 
@@ -350,6 +351,7 @@ public class KhaosDatabase extends GscDatabase {
         .map(KhaosBlock::getParent)
         .map(khaosBlock -> khaosBlock == null ? null : khaosBlock.blk)
         .filter(Objects::nonNull)
+        .filter(b -> containBlock(b.getBlockId()))
         .findFirst()
         .orElse(null);
   }

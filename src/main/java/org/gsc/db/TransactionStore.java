@@ -1,38 +1,24 @@
 package org.gsc.db;
 
-import java.util.Iterator;
-import java.util.Map.Entry;
 import java.util.Objects;
+
+import com.google.common.collect.Streams;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.core.wrapper.TransactionWrapper;
-import org.gsc.db.common.iterator.TransactionIterator;
-import org.gsc.core.exception.BadItemException;
-import org.gsc.core.exception.StoreException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.gsc.core.exception.BadItemException;
+import org.gsc.core.exception.StoreException;
 
 @Slf4j
 @Component
-public class TransactionStore extends GscStoreWithRevoking<TransactionWrapper> {
+public class TransactionStore extends GSCStoreWithRevoking<TransactionWrapper> {
 
   @Autowired
   private TransactionStore(@Value("trans") String dbName) {
     super(dbName);
-  }
-
-  @Override
-  public TransactionWrapper get(byte[] key) throws BadItemException {
-    byte[] value = dbSource.getData(key);
-    return ArrayUtils.isEmpty(value) ? null : new TransactionWrapper(value);
-  }
-
-  @Override
-  public boolean has(byte[] key) {
-    byte[] transaction = dbSource.getData(key);
-    logger.info("address is {}, transaction is {}", key, transaction);
-    return null != transaction;
   }
 
   @Override
@@ -43,16 +29,17 @@ public class TransactionStore extends GscStoreWithRevoking<TransactionWrapper> {
     }
   }
 
+  @Override
+  public TransactionWrapper get(byte[] key) throws BadItemException {
+    byte[] value = revokingDB.getUnchecked(key);
+    return ArrayUtils.isEmpty(value) ? null : new TransactionWrapper(value);
+  }
+
   /**
    * get total transaction.
    */
   public long getTotalTransactions() {
-    return dbSource.getTotal();
-  }
-
-  @Override
-  public Iterator<Entry<byte[], TransactionWrapper>> iterator() {
-    return new TransactionIterator(dbSource.iterator());
+    return Streams.stream(iterator()).count();
   }
 
   @Override

@@ -42,7 +42,7 @@ public class PeerServer {
 
     private ApplicationContext ctx;
 
-    public GscChannelInitializer gscChannelInitializer;
+    public GSCChannelInitializer gscChannelInitializer;
 
     private boolean listening;
 
@@ -62,7 +62,7 @@ public class PeerServer {
 
         bossGroup = new NioEventLoopGroup(1);
         workerGroup = new NioEventLoopGroup(args.getTcpNettyWorkThreadNum());
-        gscChannelInitializer = ctx.getBean(GscChannelInitializer.class, "");
+        gscChannelInitializer = ctx.getBean(GSCChannelInitializer.class, "");
 
         gscChannelInitializer.setNodeImpl(p2pNode);
 

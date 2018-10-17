@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -33,6 +33,7 @@ import org.gsc.common.utils.ByteUtil;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Time;
 import org.gsc.core.wrapper.utils.MerkleTree;
+import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.core.exception.BadItemException;
 import org.gsc.core.exception.ValidateSignatureException;
 import org.gsc.protos.Protocol.Block;
@@ -128,7 +129,9 @@ public class BlockWrapper implements ProtoWrapper<Block> {
         .setNumber(number)
         .setParentHash(hash.getByteString())
         .setTimestamp(when)
-        .setWitnessAddress(witnessAddress).build();
+        .setVersion(ChainConstant.version)
+        .setWitnessAddress(witnessAddress)
+        .build();
 
     // block header
     BlockHeader.Builder blockHeaderBuild = BlockHeader.newBuilder();
@@ -157,7 +160,7 @@ public class BlockWrapper implements ProtoWrapper<Block> {
 
     // block
     Block.Builder blockBuild = Block.newBuilder();
-    transactionList.forEach(gsc -> blockBuild.addTransactions(gsc));
+    transactionList.forEach(trx -> blockBuild.addTransactions(trx));
     this.block = blockBuild.setBlockHeader(blockHeader).build();
     initTxs();
   }
@@ -176,9 +179,9 @@ public class BlockWrapper implements ProtoWrapper<Block> {
     }
   }
 
-  public void addTransaction(TransactionWrapper pendingGsc) {
-    this.block = this.block.toBuilder().addTransactions(pendingGsc.getInstance()).build();
-    getTransactions().add(pendingGsc);
+  public void addTransaction(TransactionWrapper pendingTrx) {
+    this.block = this.block.toBuilder().addTransactions(pendingTrx.getInstance()).build();
+    getTransactions().add(pendingTrx);
   }
 
   public List<TransactionWrapper> getTransactions() {
@@ -187,7 +190,7 @@ public class BlockWrapper implements ProtoWrapper<Block> {
 
   private void initTxs() {
     transactions = this.block.getTransactionsList().stream()
-        .map(gsc -> new TransactionWrapper(gsc))
+        .map(trx -> new TransactionWrapper(trx))
         .collect(Collectors.toList());
   }
 

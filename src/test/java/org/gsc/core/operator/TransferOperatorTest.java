@@ -7,21 +7,21 @@ import com.google.protobuf.ByteString;
 import java.io.File;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.Parameter;
+import org.gsc.config.args.Args;
 import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.TransactionResultWrapper;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.Parameter.ChainConstant;
-import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
@@ -34,27 +34,27 @@ public class TransferOperatorTest {
 
   private static Manager dbManager;
   private static final String dbPath = "output_transfer_test";
-  private static AnnotationConfigApplicationContext context;
+  private static GSCApplicationContext context;
   private static final String OWNER_ADDRESS;
   private static final String TO_ADDRESS;
   private static final long AMOUNT = 100;
   private static final long OWNER_BALANCE = 9999999;
   private static final long TO_BALANCE = 100001;
-  private static final String OWNER_ADDRESS_INVALIDATE = "aaaa";
-  private static final String TO_ADDRESS_INVALIDATE = "bbb";
-  private static final String OWNER_ACCOUNT_INVALIDATE;
+  private static final String OWNER_ADDRESS_INVALID = "aaaa";
+  private static final String TO_ADDRESS_INVALID = "bbb";
+  private static final String OWNER_ACCOUNT_INVALID;
   private static final String OWNER_NO_BALANCE;
-  private static final String To_ACCOUNT_INVALIDATE;
+  private static final String To_ACCOUNT_INVALID;
 
   static {
     Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
-    context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS = Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a1abc";
     TO_ADDRESS = Wallet.getAddressPreFixString() + "abd4b9367799eaa3197fecb144eb71de1e049abc";
-    OWNER_ACCOUNT_INVALIDATE =
+    OWNER_ACCOUNT_INVALID =
         Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a3456";
     OWNER_NO_BALANCE = Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a3433";
-    To_ACCOUNT_INVALIDATE =
+    To_ACCOUNT_INVALID =
         Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a3422";
   }
 
@@ -132,13 +132,13 @@ public class TransferOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
           dbManager.getAccountStore().get(ByteArray.fromHexString(TO_ADDRESS));
 
-      Assert.assertEquals(owner.getBalance(), OWNER_BALANCE - AMOUNT - ChainConstant.TRANSFER_FEE);
+      Assert.assertEquals(owner.getBalance(), OWNER_BALANCE - AMOUNT - Parameter.ChainConstant.TRANSFER_FEE);
       Assert.assertEquals(toAccount.getBalance(), TO_BALANCE + AMOUNT);
       Assert.assertTrue(true);
     } catch (ContractValidateException e) {
@@ -151,12 +151,12 @@ public class TransferOperatorTest {
   @Test
   public void perfectTransfer() {
     TransferOperator actuator = new TransferOperator(
-        getContract(OWNER_BALANCE - ChainConstant.TRANSFER_FEE), dbManager);
+        getContract(OWNER_BALANCE - Parameter.ChainConstant.TRANSFER_FEE), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount =
@@ -182,7 +182,9 @@ public class TransferOperatorTest {
       Assert.assertTrue(false);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertTrue("balance is not sufficient.".equals(e.getMessage()));
+      logger.info(e.getMessage());
+      Assert.assertTrue(
+          "Validate TransferContract error, balance is not sufficient.".equals(e.getMessage()));
       AccountWrapper owner = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount = dbManager.getAccountStore()
@@ -198,7 +200,7 @@ public class TransferOperatorTest {
   @Test
   public void iniviateOwnerAddress() {
     TransferOperator actuator = new TransferOperator(
-        getContract(10000L, OWNER_ADDRESS_INVALIDATE, TO_ADDRESS), dbManager);
+        getContract(10000L, OWNER_ADDRESS_INVALID, TO_ADDRESS), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
@@ -224,7 +226,7 @@ public class TransferOperatorTest {
   @Test
   public void iniviateToAddress() {
     TransferOperator actuator = new TransferOperator(
-        getContract(10000L, OWNER_ADDRESS, TO_ADDRESS_INVALIDATE), dbManager);
+        getContract(10000L, OWNER_ADDRESS, TO_ADDRESS_INVALID), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
@@ -254,11 +256,11 @@ public class TransferOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      fail("Cannot transfer gsc to yourself.");
+      fail("Cannot transfer trx to yourself.");
 
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("Cannot transfer gsc to yourself.", e.getMessage());
+      Assert.assertEquals("Cannot transfer trx to yourself.", e.getMessage());
       AccountWrapper owner = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount = dbManager.getAccountStore()
@@ -274,7 +276,7 @@ public class TransferOperatorTest {
   @Test
   public void noExitOwnerAccount() {
     TransferOperator actuator = new TransferOperator(
-        getContract(100L, OWNER_ACCOUNT_INVALIDATE, TO_ADDRESS), dbManager);
+        getContract(100L, OWNER_ACCOUNT_INVALID, TO_ADDRESS), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
@@ -301,16 +303,16 @@ public class TransferOperatorTest {
    */
   public void noExitToAccount() {
     TransferOperator actuator = new TransferOperator(
-        getContract(1_000_000L, OWNER_ADDRESS, To_ACCOUNT_INVALIDATE), dbManager);
+        getContract(1_000_000L, OWNER_ADDRESS, To_ACCOUNT_INVALID), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       AccountWrapper noExitAccount = dbManager.getAccountStore()
-          .get(ByteArray.fromHexString(To_ACCOUNT_INVALIDATE));
+          .get(ByteArray.fromHexString(To_ACCOUNT_INVALID));
       Assert.assertTrue(null == noExitAccount);
       actuator.validate();
       actuator.execute(ret);
       noExitAccount = dbManager.getAccountStore()
-          .get(ByteArray.fromHexString(To_ACCOUNT_INVALIDATE));
+          .get(ByteArray.fromHexString(To_ACCOUNT_INVALID));
       Assert.assertFalse(null == noExitAccount);    //Had created.
       AccountWrapper owner = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
@@ -319,14 +321,14 @@ public class TransferOperatorTest {
       Assert.assertEquals(owner.getBalance(), OWNER_BALANCE - 1_000_000L);
       Assert.assertEquals(toAccount.getBalance(), TO_BALANCE);
       noExitAccount = dbManager.getAccountStore()
-          .get(ByteArray.fromHexString(To_ACCOUNT_INVALIDATE));
+          .get(ByteArray.fromHexString(To_ACCOUNT_INVALID));
       Assert.assertEquals(noExitAccount.getBalance(), 1_000_000L);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     } finally {
-      dbManager.getAccountStore().delete(ByteArray.fromHexString(To_ACCOUNT_INVALIDATE));
+      dbManager.getAccountStore().delete(ByteArray.fromHexString(To_ACCOUNT_INVALID));
     }
   }
 
@@ -410,14 +412,14 @@ public class TransferOperatorTest {
     AccountWrapper toAccountWrapper =
         new AccountWrapper(
             ByteString.copyFromUtf8("toAccount"),
-            ByteString.copyFrom(ByteArray.fromHexString(To_ACCOUNT_INVALIDATE)),
+            ByteString.copyFrom(ByteArray.fromHexString(To_ACCOUNT_INVALID)),
             AccountType.Normal,
             100L);
     dbManager.getAccountStore().put(ownerCapsule.getAddress().toByteArray(), ownerCapsule);
     dbManager.getAccountStore().put(toAccountWrapper.getAddress().toByteArray(), toAccountWrapper);
 
     TransferOperator actuator = new TransferOperator(
-        getContract(AMOUNT, OWNER_NO_BALANCE, To_ACCOUNT_INVALIDATE), dbManager);
+        getContract(AMOUNT, OWNER_NO_BALANCE, To_ACCOUNT_INVALID), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
@@ -425,7 +427,8 @@ public class TransferOperatorTest {
       fail("Validate TransferContract error, insufficient fee.");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("Validate TransferContract error, insufficient fee.", e.getMessage());
+      Assert.assertEquals("Validate TransferContract error, balance is not sufficient.",
+          e.getMessage());
       AccountWrapper owner = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
       AccountWrapper toAccount = dbManager.getAccountStore()
@@ -435,7 +438,7 @@ public class TransferOperatorTest {
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     } finally {
-      dbManager.getAccountStore().delete(ByteArray.fromHexString(To_ACCOUNT_INVALIDATE));
+      dbManager.getAccountStore().delete(ByteArray.fromHexString(To_ACCOUNT_INVALID));
     }
   }
 

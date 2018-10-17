@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class CancelException extends GscException {
+public class CancelException extends GSCException {
 
   public CancelException() {
     super();

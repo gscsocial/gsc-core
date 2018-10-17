@@ -4,15 +4,15 @@ import com.google.protobuf.ByteString;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.gsc.api.GrpcAPI.TransactionList;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.core.wrapper.TransactionInfoWrapper;
 import org.gsc.db.Manager;
 import org.gsc.db.api.StoreAPI;
 import org.gsc.core.exception.BadItemException;
 import org.gsc.core.exception.NonUniqueObjectException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.gsc.api.GrpcAPI.TransactionList;
 import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.TransactionInfo;
 
@@ -40,14 +40,14 @@ public class WalletSolidity {
     if (Objects.isNull(id)) {
       return null;
     }
-    TransactionInfoWrapper transactionInfoWrapper = null;
+    TransactionInfoWrapper transactionInfoCapsule = null;
     try {
-      transactionInfoWrapper = dbManager.getTransactionHistoryStore()
+      transactionInfoCapsule = dbManager.getTransactionHistoryStore()
           .get(id.toByteArray());
     } catch (BadItemException e) {
     }
-    if (transactionInfoWrapper != null) {
-      return transactionInfoWrapper.getInstance();
+    if (transactionInfoCapsule != null) {
+      return transactionInfoCapsule.getInstance();
     }
     return null;
   }

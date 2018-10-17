@@ -22,7 +22,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.handler.codec.MessageToMessageDecoder;
 import java.util.List;
-import org.gsc.common.net.udp.message.Message;
 import org.slf4j.LoggerFactory;
 import org.gsc.common.net.udp.message.Message;
 
@@ -30,13 +29,13 @@ public class PacketDecoder extends MessageToMessageDecoder<DatagramPacket> {
 
   private static final org.slf4j.Logger logger = LoggerFactory.getLogger("PacketDecoder");
 
-  private int maxSize = 2048;
+  private final int maxSize = 2048;
 
   @Override
   public void decode(ChannelHandlerContext ctx, DatagramPacket packet, List<Object> out) throws Exception {
     ByteBuf buf = packet.content();
     int length = buf.readableBytes();
-    if (length > maxSize) {
+    if (length <= 1 || length >= maxSize) {
       logger.error("UDP rcv bad packet, from {} length = {}", ctx.channel().remoteAddress(), length);
       return;
     }

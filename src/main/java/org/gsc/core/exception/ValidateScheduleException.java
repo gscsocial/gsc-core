@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class ValidateScheduleException extends GscException {
+public class ValidateScheduleException extends GSCException {
 
   public ValidateScheduleException() {
     super();

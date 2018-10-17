@@ -25,18 +25,18 @@ public class OperatorFactory {
    * create actuator.
    */
   public static List<Operator> createActuator(TransactionWrapper transactionWrapper,
-      Manager manager) {
-    List<Operator> actuatorList = Lists.newArrayList();
+                                              Manager manager) {
+    List<Operator> operatorList = Lists.newArrayList();
     if (null == transactionWrapper || null == transactionWrapper.getInstance()) {
-      logger.info("transactionWrapper or Transaction is null");
-      return actuatorList;
+      logger.info("transactionCapsule or Transaction is null");
+      return operatorList;
     }
 
     Preconditions.checkNotNull(manager, "manager is null");
     Protocol.Transaction.raw rawData = transactionWrapper.getInstance().getRawData();
     rawData.getContractList()
-        .forEach(contract -> actuatorList.add(getActuatorByContract(contract, manager)));
-    return actuatorList;
+        .forEach(contract -> operatorList.add(getActuatorByContract(contract, manager)));
+    return operatorList;
   }
 
   private static Operator getActuatorByContract(Contract contract, Manager manager) {
@@ -59,8 +59,6 @@ public class OperatorFactory {
         return new AssetIssueOperator(contract.getParameter(), manager);
       case UnfreezeAssetContract:
         return new UnfreezeAssetOperator(contract.getParameter(), manager);
-      case DeployContract:
-        break;
       case WitnessUpdateContract:
         return new WitnessUpdateOperator(contract.getParameter(), manager);
       case ParticipateAssetIssueContract:
@@ -73,7 +71,32 @@ public class OperatorFactory {
         return new WithdrawBalanceOperator(contract.getParameter(), manager);
       case UpdateAssetContract:
         return new UpdateAssetOperator(contract.getParameter(), manager);
+      case ProposalCreateContract:
+        return new ProposalCreateOperator(contract.getParameter(), manager);
+      case ProposalApproveContract:
+        return new ProposalApproveOperator(contract.getParameter(), manager);
+      case ProposalDeleteContract:
+        return new ProposalDeleteOperator(contract.getParameter(), manager);
+      case SetAccountIdContract:
+        return new SetAccountIdOperator(contract.getParameter(), manager);
+//      case BuyStorageContract:
+//        return new BuyStorageOperator(contract.getParameter(), manager);
+//      case BuyStorageBytesContract:
+//        return new BuyStorageBytesOperator(contract.getParameter(), manager);
+//      case SellStorageContract:
+//        return new SellStorageOperator(contract.getParameter(), manager);
+      case UpdateSettingContract:
+        return new UpdateSettingContractOperator(contract.getParameter(), manager);
+      case ExchangeCreateContract:
+        return new ExchangeCreateOperator(contract.getParameter(), manager);
+      case ExchangeInjectContract:
+        return new ExchangeInjectOperator(contract.getParameter(), manager);
+      case ExchangeWithdrawContract:
+        return new ExchangeWithdrawOperator(contract.getParameter(), manager);
+      case ExchangeTransactionContract:
+        return new ExchangeTransactionOperator(contract.getParameter(), manager);
       default:
+        break;
 
     }
     return null;

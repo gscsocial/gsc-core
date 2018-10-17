@@ -1,5 +1,8 @@
 package org.gsc.net.node;
 
+import static org.gsc.config.Parameter.ChainConstant.BLOCK_PRODUCED_INTERVAL;
+import static org.gsc.config.Parameter.ChainConstant.BLOCK_SIZE;
+
 import com.google.common.primitives.Longs;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,31 +17,12 @@ import org.gsc.common.utils.Sha256Hash;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.core.wrapper.TransactionWrapper;
-import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.Parameter.NodeConstant;
-import org.gsc.core.exception.AccountResourceInsufficientException;
-import org.gsc.core.exception.BadBlockException;
-import org.gsc.core.exception.BadItemException;
-import org.gsc.core.exception.BadNumberBlockException;
-import org.gsc.core.exception.BadTransactionException;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractSizeNotEqualToOneException;
-import org.gsc.core.exception.ContractValidateException;
-import org.gsc.core.exception.DupTransactionException;
-import org.gsc.core.exception.ItemNotFoundException;
-import org.gsc.core.exception.NonCommonBlockException;
-import org.gsc.core.exception.StoreException;
-import org.gsc.core.exception.TaposException;
-import org.gsc.core.exception.GscException;
-import org.gsc.core.exception.UnLinkedBlockException;
-import org.gsc.core.exception.ValidateScheduleException;
-import org.gsc.core.exception.ValidateSignatureException;
+import org.gsc.db.Manager;
+import org.gsc.core.exception.*;
 import org.gsc.net.message.BlockMessage;
 import org.gsc.net.message.MessageTypes;
 import org.gsc.net.message.TransactionMessage;
-import org.gsc.db.Manager;
-import org.gsc.core.exception.TooBigTransactionException;
-import org.gsc.core.exception.TransactionExpirationException;
 
 @Slf4j
 public class NodeDelegateImpl implements NodeDelegate {
@@ -53,13 +37,13 @@ public class NodeDelegateImpl implements NodeDelegate {
   public synchronized LinkedList<Sha256Hash> handleBlock(BlockWrapper block, boolean syncMode)
       throws BadBlockException, UnLinkedBlockException, InterruptedException, NonCommonBlockException {
 
-    if (block.getInstance().getSerializedSize() > ChainConstant.BLOCK_SIZE + 100) {
+    if (block.getInstance().getSerializedSize() > BLOCK_SIZE + 100) {
       throw new BadBlockException("block size over limit");
     }
 
     // TODO timestamp should be consistent.
     long gap = block.getTimeStamp() - System.currentTimeMillis();
-    if (gap >= ChainConstant.BLOCK_PRODUCED_INTERVAL) {
+    if (gap >= BLOCK_PRODUCED_INTERVAL) {
       throw new BadBlockException("block time error");
     }
     try {
@@ -91,10 +75,20 @@ public class NodeDelegateImpl implements NodeDelegate {
       throw new BadBlockException("DupTransaction exception," + e.getMessage());
     } catch (TooBigTransactionException e) {
       throw new BadBlockException("TooBigTransaction exception," + e.getMessage());
+    } catch (TooBigTransactionResultException e) {
+      throw new BadBlockException("TooBigTransaction exception," + e.getMessage());
     } catch (TransactionExpirationException e) {
       throw new BadBlockException("Expiration exception," + e.getMessage());
+    } catch (ReceiptException e) {
+      throw new BadBlockException("Receipt exception," + e.getMessage());
     } catch (BadNumberBlockException e) {
       throw new BadBlockException("bad number exception," + e.getMessage());
+    } catch (TransactionTraceException e) {
+      throw new BadBlockException("TransactionTrace Exception," + e.getMessage());
+    } catch (ReceiptCheckErrException e) {
+      throw new BadBlockException("TransactionTrace Exception," + e.getMessage());
+    } catch (UnsupportVMException e) {
+      throw new BadBlockException(e.getMessage());
     }
 
   }
@@ -102,6 +96,9 @@ public class NodeDelegateImpl implements NodeDelegate {
 
   @Override
   public boolean handleTransaction(TransactionWrapper trx) throws BadTransactionException {
+    if (dbManager.getDynamicPropertiesStore().supportVM()) {
+      trx.resetResult();
+    }
     logger.debug("handle transaction");
     if (dbManager.getTransactionIdCache().getIfPresent(trx.getTransactionId()) != null) {
       logger.warn("This transaction has been processed");
@@ -110,8 +107,8 @@ public class NodeDelegateImpl implements NodeDelegate {
       dbManager.getTransactionIdCache().put(trx.getTransactionId(), true);
     }
     try {
-      dbManager.pushTransactions(trx);
-    } catch (ContractSizeNotEqualToOneException e){
+      dbManager.pushTransaction(trx);
+    } catch (ContractSizeNotEqualToOneException e) {
       logger.info("Contract validate failed" + e.getMessage());
       throw new BadTransactionException();
     } catch (ContractValidateException e) {
@@ -134,13 +131,28 @@ public class NodeDelegateImpl implements NodeDelegate {
     } catch (TaposException e) {
       logger.info("tapos error" + e.getMessage());
       return false;
+    } catch (ReceiptException e) {
+      logger.info("Receipt exception," + e.getMessage());
     } catch (TooBigTransactionException e) {
       logger.info("too big transaction" + e.getMessage());
       return false;
     } catch (TransactionExpirationException e) {
       logger.info("expiration transaction" + e.getMessage());
       return false;
+    } catch (TransactionTraceException e) {
+      logger.info("TransactionTrace Exception" + e.getMessage());
+      return false;
+    } catch (ReceiptCheckErrException e) {
+      logger.info("ReceiptCheckErrException Exception" + e.getMessage());
+      return false;
+    } catch (UnsupportVMException e) {
+      logger.warn(e.getMessage());
+      return false;
+    } catch (TooBigTransactionResultException e) {
+      logger.info("too big transactionresult" + e.getMessage());
+      return false;
     }
+
     return true;
   }
 
@@ -161,7 +173,7 @@ public class NodeDelegateImpl implements NodeDelegate {
       unForkedBlockId = dbManager.getGenesisBlockId();
     } else if (blockChainSummary.size() == 1
         && blockChainSummary.get(0).getNum() == 0) {
-      return new LinkedList(Arrays.asList(dbManager.getGenesisBlockId()));
+      return new LinkedList<>(Arrays.asList(dbManager.getGenesisBlockId()));
     } else {
       //todo: find a block we all know between the summary and my db.
       Collections.reverse(blockChainSummary);
@@ -189,7 +201,7 @@ public class NodeDelegateImpl implements NodeDelegate {
 
   @Override
   public Deque<BlockId> getBlockChainSummary(BlockId beginBlockId, Deque<BlockId> blockIdsToFetch)
-      throws GscException {
+      throws GSCException {
 
     Deque<BlockId> retSummary = new LinkedList<>();
     List<BlockId> blockIds = new ArrayList<>(blockIdsToFetch);
@@ -204,7 +216,7 @@ public class NodeDelegateImpl implements NodeDelegate {
       if (containBlockInMainChain(beginBlockId)) {
         highBlkNum = beginBlockId.getNum();
         if (highBlkNum == 0) {
-          throw new GscException(
+          throw new GSCException(
               "This block don't equal my genesis block hash, but it is in my DB, the block id is :"
                   + beginBlockId.getString());
         }

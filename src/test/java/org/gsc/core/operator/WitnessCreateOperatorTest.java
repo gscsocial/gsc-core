@@ -6,6 +6,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
+import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.WitnessWrapper;
 import org.junit.AfterClass;
@@ -13,14 +17,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
@@ -32,21 +32,21 @@ import org.gsc.protos.Protocol.Transaction.Result.code;
 
 public class WitnessCreateOperatorTest {
 
-  private static AnnotationConfigApplicationContext context;
+  private static GSCApplicationContext context;
   private static Manager dbManager;
   private static final String dbPath = "output_WitnessCreate_test";
   private static final String ACCOUNT_NAME_FIRST = "ownerF";
   private static final String OWNER_ADDRESS_FIRST;
   private static final String ACCOUNT_NAME_SECOND = "ownerS";
   private static final String OWNER_ADDRESS_SECOND;
-  private static final String URL = "https://gsc.network";
-  private static final String OWNER_ADDRESS_INVALIDATE = "aaaa";
+  private static final String URL = "https://gscan.social";
+  private static final String OWNER_ADDRESS_INVALID = "aaaa";
   private static final String OWNER_ADDRESS_NOACCOUNT;
   private static final String OWNER_ADDRESS_BALANCENOTSUFFIENT;
 
   static {
     Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
-    context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS_FIRST =
         Wallet.getAddressPreFixString() + "abd4b9367799eaa3197fecb144eb71de1e049abc";
     OWNER_ADDRESS_SECOND =
@@ -127,12 +127,12 @@ public class WitnessCreateOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
-      WitnessWrapper witnessWrapper =
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      WitnessWrapper witnessCapsule =
           dbManager.getWitnessStore().get(ByteArray.fromHexString(OWNER_ADDRESS_FIRST));
-      Assert.assertNotNull(witnessWrapper);
+      Assert.assertNotNull(witnessCapsule);
       Assert.assertEquals(
-          witnessWrapper.getInstance().getUrl(),
+          witnessCapsule.getInstance().getUrl(),
           URL);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
@@ -167,7 +167,7 @@ public class WitnessCreateOperatorTest {
   @Test
   public void InvalidAddress() {
     WitnessCreateOperator actuator =
-        new WitnessCreateOperator(getContract(OWNER_ADDRESS_INVALIDATE, URL), dbManager);
+        new WitnessCreateOperator(getContract(OWNER_ADDRESS_INVALID, URL), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
@@ -223,11 +223,11 @@ public class WitnessCreateOperatorTest {
           getContract(OWNER_ADDRESS_FIRST, "0"), dbManager);
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
-      WitnessWrapper witnessWrapper =
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      WitnessWrapper witnessCapsule =
           dbManager.getWitnessStore().get(ByteArray.fromHexString(OWNER_ADDRESS_FIRST));
-      Assert.assertNotNull(witnessWrapper);
-      Assert.assertEquals(witnessWrapper.getInstance().getUrl(), "0");
+      Assert.assertNotNull(witnessCapsule);
+      Assert.assertEquals(witnessCapsule.getInstance().getUrl(), "0");
       Assert.assertTrue(true);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
@@ -242,11 +242,11 @@ public class WitnessCreateOperatorTest {
           getContract(OWNER_ADDRESS_FIRST, url256Bytes), dbManager);
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
-      WitnessWrapper witnessWrapper =
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      WitnessWrapper witnessCapsule =
           dbManager.getWitnessStore().get(ByteArray.fromHexString(OWNER_ADDRESS_FIRST));
-      Assert.assertNotNull(witnessWrapper);
-      Assert.assertEquals(witnessWrapper.getInstance().getUrl(), url256Bytes);
+      Assert.assertNotNull(witnessCapsule);
+      Assert.assertEquals(witnessCapsule.getInstance().getUrl(), url256Bytes);
       Assert.assertTrue(true);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);

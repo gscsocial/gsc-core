@@ -1,16 +1,16 @@
 package org.gsc.common.net.udp.message;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.gsc.common.net.udp.message.discover.NeighborsMessage;
-import org.gsc.common.net.udp.message.discover.PingMessage;
-import org.gsc.common.net.udp.message.discover.PongMessage;
 import org.gsc.common.net.udp.message.backup.KeepAliveMessage;
 import org.gsc.common.net.udp.message.discover.FindNodeMessage;
 import org.gsc.common.net.udp.message.discover.NeighborsMessage;
 import org.gsc.common.net.udp.message.discover.PingMessage;
 import org.gsc.common.net.udp.message.discover.PongMessage;
+import org.gsc.common.overlay.discover.node.Node;
+import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.core.exception.P2pException;
+import org.gsc.protos.Discover.Endpoint;
 
 public abstract class Message {
 
@@ -38,7 +38,7 @@ public abstract class Message {
     return Sha256Hash.of(getData());
   }
 
-  public abstract byte[] getNodeId();
+  public abstract Node getFrom();
 
   @Override
   public String toString() {
@@ -53,6 +53,12 @@ public abstract class Message {
   @Override
   public int hashCode() {
     return getMessageId().hashCode();
+  }
+
+  public static Node getNode(Endpoint endpoint){
+    Node node = new Node(endpoint.getNodeId().toByteArray(),
+        ByteArray.toStr(endpoint.getAddress().toByteArray()), endpoint.getPort());
+    return node;
   }
 
   public static Message parse(byte[] encode) throws Exception {

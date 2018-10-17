@@ -5,9 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.gsc.core.exception.BadItemException;
 import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Result;
+import org.gsc.protos.Protocol.Transaction.Result.contractResult;
 
 @Slf4j
-public class TransactionResultWrapper implements ProtoWrapper<Transaction.Result> {
+public class TransactionResultWrapper implements ProtoWrapper<Result> {
 
   private Transaction.Result transactionResult;
 
@@ -30,6 +31,10 @@ public class TransactionResultWrapper implements ProtoWrapper<Transaction.Result
     this.transactionResult = Transaction.Result.newBuilder().build();
   }
 
+  public TransactionResultWrapper(contractResult code) {
+    this.transactionResult = Transaction.Result.newBuilder().setContractRet(code).build();
+  }
+
   public TransactionResultWrapper(Transaction.Result.code code, long fee) {
     this.transactionResult = Transaction.Result.newBuilder().setRet(code).setFee(fee).build();
   }
@@ -43,6 +48,22 @@ public class TransactionResultWrapper implements ProtoWrapper<Transaction.Result
 
   public long getFee() {
     return transactionResult.getFee();
+  }
+
+  public void setUnfreezeAmount(long amount) {
+    this.transactionResult = this.transactionResult.toBuilder().setUnfreezeAmount(amount).build();
+  }
+
+  public long getUnfreezeAmount() {
+    return transactionResult.getUnfreezeAmount();
+  }
+
+  public void setWithdrawAmount(long amount) {
+    this.transactionResult = this.transactionResult.toBuilder().setWithdrawAmount(amount).build();
+  }
+
+  public long getWithdrawAmount() {
+    return transactionResult.getWithdrawAmount();
   }
 
   public void setFee(long fee) {

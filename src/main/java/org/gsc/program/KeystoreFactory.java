@@ -5,16 +5,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.core.Constant;
-import org.gsc.keystore.CipherException;
-import org.gsc.keystore.Credentials;
-import org.gsc.keystore.WalletUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gsc.crypto.ECKey;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Utils;
+import org.gsc.core.Constant;
 import org.gsc.config.args.Args;
+import org.gsc.keystore.CipherException;
+import org.gsc.keystore.Credentials;
+import org.gsc.keystore.WalletUtils;
 
 
 public class KeystoreFactory {
@@ -31,7 +31,7 @@ public class KeystoreFactory {
       logger.warn("Warning: PrivateKey length need 64 but " + priKey.length() + " !!");
       return false;
     }
-    //Other rule, TODO#;
+    //Other rule;
     return true;
   }
 

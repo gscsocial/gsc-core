@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -17,12 +17,9 @@ package org.gsc.config.args;
 
 import com.google.protobuf.ByteString;
 import java.io.Serializable;
-import java.util.Arrays;
 
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.StringUtil;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.core.Wallet;
@@ -43,6 +40,10 @@ public class Account implements Serializable {
   private byte[] address;
 
   private String balance;
+
+//  public byte[] getAddressBytes() {
+//    return ByteArray.fromHexString(this.address);
+//  }
 
   /**
    * Account address is a 21-bits hex string.

@@ -5,7 +5,7 @@ import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.core.exception.BadItemException;
 
-public class BlockMessage extends GscMessage {
+public class BlockMessage extends GSCMessage {
 
   private BlockWrapper block;
 

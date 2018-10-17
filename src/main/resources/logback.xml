@@ -5,14 +5,14 @@
   <!-- Be sure to flush latest logs on exit -->
   <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
 
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-  <encoder>
-  <pattern>%d{HH:mm:ss.SSS} %-5level [%t] [%c{1}]\(%F:%L\) %m%n</pattern>
-  </encoder>
-  <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-  <level>INFO</level>
-  </filter>
-  </appender>
+  <!--<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">-->
+  <!--<encoder>-->
+  <!--<pattern>%d{HH:mm:ss.SSS} %-5level [%t] [%c{1}]\(%F:%L\) %m%n</pattern>-->
+  <!--</encoder>-->
+  <!--<filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+  <!--<level>INFO</level>-->
+  <!--</filter>-->
+  <!--</appender>-->
 
   <appender name="FILE"
     class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -20,10 +20,10 @@
     <rollingPolicy
       class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
       <!-- rollover daily -->
-      <fileNamePattern>./logs/gsc-%d{yyyy-MM-dd}.%i.log.tar.gz</fileNamePattern>
+      <fileNamePattern>./logs/gsc-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
       <!-- each file should be at most 500MB, keep 30 days worth of history, but at most 50GB -->
       <maxFileSize>500MB</maxFileSize>
-      <maxHistory>720</maxHistory>
+      <maxHistory>30</maxHistory>
       <totalSizeCap>50GB</totalSizeCap>
     </rollingPolicy>
     <encoder>
@@ -46,7 +46,7 @@
   </appender>
 
   <root level="INFO">
-    <appender-ref ref="STDOUT"/>
+    <!--<appender-ref ref="STDOUT"/>-->
     <appender-ref ref="ASYNC"/>
   </root>
 
@@ -56,7 +56,6 @@
   <logger name="DB" level="INFO"/>
   <logger name="Command" level="INFO"/>
   <logger name="UTXOSet" level="INFO"/>
-  <logger name="UTXOStore" level="INFO"/>
   <logger name="TransactionMessageHandler" level="INFO"/>
   <logger name="BlockMessageHandler" level="INFO"/>
   <logger name="BlockStores" level="INFO"/>
@@ -76,18 +75,22 @@
   <logger name="FullNode" level="INFO"/>
   <logger name="PeerConnection" level="INFO"/>
   <logger name="TransactionUtil" level="INFO"/>
-  <logger name="TransactionVoteOperator" level="INFO"/>
+  <logger name="TransactionVoteActuator" level="INFO"/>
   <logger name="WitnessStore" level="INFO"/>
   <logger name="AssetIssueStore" level="INFO"/>
-  <logger name="OperatorFactory" level="INFO"/>
+  <logger name="ActuatorFactory" level="INFO"/>
   <logger name="ByteArray" level="INFO"/>
   <logger name="Args" level="INFO"/>
-  <logger name="WitnessCreateOperator" level="INFO"/>
-  <logger name="AssetIssueOperator" level="INFO"/>
-  <logger name="AccountWrapper" level="INFO"/>
-  <logger name="AssetIssueWrapper" level="INFO"/>
+  <logger name="WitnessCteateActuator" level="INFO"/>
+  <logger name="AssetIssueActuator" level="INFO"/>
+  <logger name="AccountCapsule" level="INFO"/>
+  <logger name="AssetIssueCapsule" level="INFO"/>
   <logger name="Manager" level="INFO"/>
   <logger name="Net" level="INFO"/>
+  <logger name="Runtime" level="ERROR"/>
+  <logger name="VM" level="ERROR"/>
+  <logger name="Program" level="ERROR"/>
+  <logger name="ProgramPrecompile" level="ERROR"/>
 
 </configuration>
 

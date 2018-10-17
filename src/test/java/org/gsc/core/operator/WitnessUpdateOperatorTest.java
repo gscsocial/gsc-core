@@ -6,6 +6,9 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.WitnessWrapper;
@@ -14,13 +17,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
@@ -31,7 +31,7 @@ import org.gsc.protos.Protocol.Transaction.Result.code;
 @Slf4j
 public class WitnessUpdateOperatorTest {
 
-  private static AnnotationConfigApplicationContext context;
+  private static GSCApplicationContext context;
   private static Manager dbManager;
   private static final String dbPath = "output_WitnessUpdate_test";
   private static final String OWNER_ADDRESS;
@@ -39,13 +39,13 @@ public class WitnessUpdateOperatorTest {
   private static final String OWNER_ADDRESS_NOT_WITNESS;
   private static final String OWNER_ADDRESS_NOT_WITNESS_ACCOUNT_NAME = "test_account1";
   private static final String OWNER_ADDRESS_NOTEXIST;
-  private static final String URL = "https://gsc.network";
-  private static final String NewURL = "https://gsc.org";
-  private static final String OWNER_ADDRESS_INVALIDATE = "aaaa";
+  private static final String URL = "https://gscan.social";
+  private static final String NewURL = "https://gsc.social";
+  private static final String OWNER_ADDRESS_INVALID = "aaaa";
 
   static {
     Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
-    context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS = Wallet.getAddressPreFixString() + "abd4b9367799eaa3197fecb144eb71de1e049abc";
     OWNER_ADDRESS_NOTEXIST =
         Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a1abc";
@@ -68,10 +68,10 @@ public class WitnessUpdateOperatorTest {
   public void createCapsule() {
     // address in accountStore and witnessStore
     AccountWrapper accountWrapper =
-            new AccountWrapper(
-                    ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)),
-                    ByteString.copyFromUtf8(OWNER_ADDRESS_ACCOUNT_NAME),
-                    Protocol.AccountType.Normal);
+        new AccountWrapper(
+            ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)),
+            ByteString.copyFromUtf8(OWNER_ADDRESS_ACCOUNT_NAME),
+            Protocol.AccountType.Normal);
     dbManager.getAccountStore().put(ByteArray.fromHexString(OWNER_ADDRESS), accountWrapper);
     WitnessWrapper ownerCapsule = new WitnessWrapper(
         ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)), 10_000_000L, URL);
@@ -79,11 +79,12 @@ public class WitnessUpdateOperatorTest {
 
     // address exist in accountStore, but is not witness
     AccountWrapper accountNotWitnessCapsule =
-            new AccountWrapper(
-                    ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_NOT_WITNESS)),
-                    ByteString.copyFromUtf8(OWNER_ADDRESS_NOT_WITNESS_ACCOUNT_NAME),
-                    Protocol.AccountType.Normal);
-    dbManager.getAccountStore().put(ByteArray.fromHexString(OWNER_ADDRESS_NOT_WITNESS), accountNotWitnessCapsule);
+        new AccountWrapper(
+            ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_NOT_WITNESS)),
+            ByteString.copyFromUtf8(OWNER_ADDRESS_NOT_WITNESS_ACCOUNT_NAME),
+            Protocol.AccountType.Normal);
+    dbManager.getAccountStore()
+        .put(ByteArray.fromHexString(OWNER_ADDRESS_NOT_WITNESS), accountNotWitnessCapsule);
     dbManager.getWitnessStore().delete(ByteArray.fromHexString(OWNER_ADDRESS_NOT_WITNESS));
 
     // address does not exist in accountStore
@@ -117,11 +118,11 @@ public class WitnessUpdateOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
-      WitnessWrapper witnessWrapper = dbManager.getWitnessStore()
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      WitnessWrapper witnessCapsule = dbManager.getWitnessStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
-      Assert.assertNotNull(witnessWrapper);
-      Assert.assertEquals(witnessWrapper.getUrl(), NewURL);
+      Assert.assertNotNull(witnessCapsule);
+      Assert.assertEquals(witnessCapsule.getUrl(), NewURL);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {
@@ -135,7 +136,7 @@ public class WitnessUpdateOperatorTest {
   @Test
   public void InvalidAddress() {
     WitnessUpdateOperator actuator = new WitnessUpdateOperator(
-        getContract(OWNER_ADDRESS_INVALIDATE, NewURL), dbManager);
+        getContract(OWNER_ADDRESS_INVALID, NewURL), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
@@ -191,11 +192,11 @@ public class WitnessUpdateOperatorTest {
           dbManager);
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
-      WitnessWrapper witnessWrapper = dbManager.getWitnessStore()
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      WitnessWrapper witnessCapsule = dbManager.getWitnessStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
-      Assert.assertNotNull(witnessWrapper);
-      Assert.assertEquals(witnessWrapper.getUrl(), "0");
+      Assert.assertNotNull(witnessCapsule);
+      Assert.assertEquals(witnessCapsule.getUrl(), "0");
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {
@@ -208,11 +209,11 @@ public class WitnessUpdateOperatorTest {
           getContract(OWNER_ADDRESS, url256Bytes), dbManager);
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
-      WitnessWrapper witnessWrapper = dbManager.getWitnessStore()
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      WitnessWrapper witnessCapsule = dbManager.getWitnessStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
-      Assert.assertNotNull(witnessWrapper);
-      Assert.assertEquals(witnessWrapper.getUrl(), url256Bytes);
+      Assert.assertNotNull(witnessCapsule);
+      Assert.assertEquals(witnessCapsule.getUrl(), url256Bytes);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {
@@ -221,8 +222,8 @@ public class WitnessUpdateOperatorTest {
   }
 
   /**
-   * use AccountStore not exists Address createWitness,result is failed,exception is
-   * "Witness does not exist"
+   * use AccountStore not exists Address createWitness,result is failed,exception is "Witness does
+   * not exist"
    */
   @Test
   public void notExistWitness() {
@@ -247,7 +248,7 @@ public class WitnessUpdateOperatorTest {
   @Test
   public void notExistAccount() {
     WitnessUpdateOperator actuator = new WitnessUpdateOperator(
-            getContract(OWNER_ADDRESS_NOTEXIST, URL), dbManager);
+        getContract(OWNER_ADDRESS_NOTEXIST, URL), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();

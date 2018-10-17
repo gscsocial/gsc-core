@@ -1,10 +1,10 @@
 /*
- * java-gsc is free software: you can redistribute it and/or modify
+ * gsc-core is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * java-gsc is distributed in the hope that it will be useful,
+ * gsc-core is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -17,13 +17,13 @@ package org.gsc.core;
 
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.BlockWrapper;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.utils.BlockUtil;
 import org.gsc.config.args.Args;
 import org.gsc.protos.Protocol.Block;

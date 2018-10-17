@@ -18,7 +18,6 @@
 package org.gsc.common.overlay.server;
 
 import org.gsc.common.overlay.message.Message;
-import org.gsc.common.overlay.message.Message;
 
 /**
  * Utility wraps around a message to keep track of the number of times it has

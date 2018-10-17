@@ -4,13 +4,13 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
 import org.gsc.db.Manager;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract.WitnessUpdateContract;
 import org.gsc.protos.Protocol.Transaction.Result.code;
 
@@ -22,10 +22,10 @@ public class WitnessUpdateOperator extends AbstractOperator {
   }
 
   private void updateWitness(final WitnessUpdateContract contract) {
-    WitnessWrapper witnessWrapper = this.dbManager.getWitnessStore()
+    WitnessWrapper witnessCapsule = this.dbManager.getWitnessStore()
         .get(contract.getOwnerAddress().toByteArray());
-    witnessWrapper.setUrl(contract.getUpdateUrl().toStringUtf8());
-    this.dbManager.getWitnessStore().put(witnessWrapper.createDbKey(), witnessWrapper);
+    witnessCapsule.setUrl(contract.getUpdateUrl().toStringUtf8());
+    this.dbManager.getWitnessStore().put(witnessCapsule.createDbKey(), witnessCapsule);
   }
 
   @Override
@@ -35,7 +35,7 @@ public class WitnessUpdateOperator extends AbstractOperator {
       final WitnessUpdateContract witnessUpdateContract = this.contract
           .unpack(WitnessUpdateContract.class);
       this.updateWitness(witnessUpdateContract);
-      ret.setStatus(fee, code.SUCCESS);
+      ret.setStatus(fee, code.SUCESS);
     } catch (final InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
       ret.setStatus(fee, code.FAILED);

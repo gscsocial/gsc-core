@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class StoreException extends GscException {
+public class StoreException extends GSCException {
 
   public StoreException() {
     super();

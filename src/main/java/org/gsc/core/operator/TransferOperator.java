@@ -5,14 +5,15 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.exception.BalanceInsufficientException;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
+import org.gsc.common.storage.Deposit;
 import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.db.Manager;
+import org.gsc.core.exception.BalanceInsufficientException;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract.TransferContract;
 import org.gsc.protos.Protocol.AccountType;
 import org.gsc.protos.Protocol.Transaction.Result.code;
@@ -39,9 +40,11 @@ public class TransferOperator extends AbstractOperator {
         toAccount = new AccountWrapper(ByteString.copyFrom(toAddress), AccountType.Normal,
             dbManager.getHeadBlockTimeStamp());
         dbManager.getAccountStore().put(toAddress, toAccount);
+
+        fee = fee + dbManager.getDynamicPropertiesStore().getCreateNewAccountFeeInSystemContract();
       }
       dbManager.adjustBalance(ownerAddress, -fee);
-      ret.setStatus(fee, code.SUCCESS);
+      ret.setStatus(fee, code.SUCESS);
       dbManager.adjustBalance(ownerAddress, -amount);
       dbManager.adjustBalance(toAddress, amount);
     } catch (BalanceInsufficientException e) {
@@ -73,7 +76,7 @@ public class TransferOperator extends AbstractOperator {
           "contract type error,expected type [TransferContract],real type[" + contract
               .getClass() + "]");
     }
-    final long fee = calcFee();
+    long fee = calcFee();
     final TransferContract transferContract;
     try {
       transferContract = contract.unpack(TransferContract.class);
@@ -94,7 +97,7 @@ public class TransferOperator extends AbstractOperator {
     }
 
     if (Arrays.equals(toAddress, ownerAddress)) {
-      throw new ContractValidateException("Cannot transfer gsc to yourself.");
+      throw new ContractValidateException("Cannot transfer trx to yourself.");
     }
 
     AccountWrapper ownerAccount = dbManager.getAccountStore().get(ownerAddress);
@@ -104,21 +107,22 @@ public class TransferOperator extends AbstractOperator {
 
     long balance = ownerAccount.getBalance();
 
-    if (ownerAccount.getBalance() < fee) {
-      throw new ContractValidateException("Validate TransferContract error, insufficient fee.");
-    }
-
     if (amount <= 0) {
       throw new ContractValidateException("Amount must greater than 0.");
     }
 
     try {
-      if (balance < Math.addExact(amount, fee)) {
-        throw new ContractValidateException("balance is not sufficient.");
+
+      AccountWrapper toAccount = dbManager.getAccountStore().get(toAddress);
+      if (toAccount == null) {
+        fee = fee + dbManager.getDynamicPropertiesStore().getCreateNewAccountFeeInSystemContract();
       }
 
-      AccountWrapper toAccount = dbManager.getAccountStore()
-          .get(transferContract.getToAddress().toByteArray());
+      if (balance < Math.addExact(amount, fee)) {
+        throw new ContractValidateException(
+            "Validate TransferContract error, balance is not sufficient.");
+      }
+
       if (toAccount != null) {
         long toAddressBalance = Math.addExact(toAccount.getBalance(), amount);
       }
@@ -126,6 +130,54 @@ public class TransferOperator extends AbstractOperator {
       logger.debug(e.getMessage(), e);
       throw new ContractValidateException(e.getMessage());
     }
+
+    return true;
+  }
+
+  public static boolean validateForSmartContract(Deposit deposit, byte[] ownerAddress,
+      byte[] toAddress, long amount) throws ContractValidateException {
+    if (!Wallet.addressValid(ownerAddress)) {
+      throw new ContractValidateException("Invalid ownerAddress");
+    }
+    if (!Wallet.addressValid(toAddress)) {
+      throw new ContractValidateException("Invalid toAddress");
+    }
+
+    if (Arrays.equals(toAddress, ownerAddress)) {
+      throw new ContractValidateException("Cannot transfer trx to yourself.");
+    }
+
+    AccountWrapper ownerAccount = deposit.getAccount(ownerAddress);
+    if (ownerAccount == null) {
+      throw new ContractValidateException("Validate InternalTransfer error, no OwnerAccount.");
+    }
+
+    AccountWrapper toAccount = deposit.getAccount(toAddress);
+    if (toAccount == null) {
+      throw new ContractValidateException(
+          "Validate InternalTransfer error, no ToAccount. And not allowed to create account in smart contract.");
+    }
+
+    long balance = ownerAccount.getBalance();
+
+    if (amount < 0) {
+      throw new ContractValidateException("Amount must greater than or equals 0.");
+    }
+
+    try {
+      if (balance < amount) {
+        throw new ContractValidateException(
+            "Validate InternalTransfer error, balance is not sufficient.");
+      }
+
+      if (toAccount != null) {
+        long toAddressBalance = Math.addExact(toAccount.getBalance(), amount);
+      }
+    } catch (ArithmeticException e) {
+      logger.debug(e.getMessage(), e);
+      throw new ContractValidateException(e.getMessage());
+    }
+
     return true;
   }
 
@@ -138,4 +190,5 @@ public class TransferOperator extends AbstractOperator {
   public long calcFee() {
     return ChainConstant.TRANSFER_FEE;
   }
+
 }

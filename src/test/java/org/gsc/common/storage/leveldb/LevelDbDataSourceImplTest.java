@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.config.args.Args;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,7 +38,6 @@ import org.junit.Test;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
-import org.gsc.config.args.Args;
 
 @Slf4j
 public class LevelDbDataSourceImplTest {

@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class ContractValidateException extends GscException {
+public class ContractValidateException extends GSCException {
 
   public ContractValidateException() {
     super();

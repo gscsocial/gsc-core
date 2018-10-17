@@ -2,11 +2,11 @@ package org.gsc.program;
 
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.application.GSCApplicationContext;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.application.Application;
 import org.gsc.common.application.ApplicationFactory;
 import org.gsc.common.overlay.client.DatabaseGrpcClient;
@@ -20,7 +20,7 @@ import org.gsc.protos.Protocol.DynamicProperties;
 @Slf4j
 public class SolidityNodeTest {
 
-  private static AnnotationConfigApplicationContext context;
+  private static GSCApplicationContext context;
 
   private static RpcApiService rpcApiService;
   private static Application appT;
@@ -28,7 +28,7 @@ public class SolidityNodeTest {
 
   static {
     Args.setParam(new String[]{"-d", dbPath}, Constant.TEST_CONF);
-    context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    context = new GSCApplicationContext(DefaultConfig.class);
     Args.getInstance().setSolidityNode(true);
     appT = ApplicationFactory.create(context);
     rpcApiService = context.getBean(RpcApiService.class);

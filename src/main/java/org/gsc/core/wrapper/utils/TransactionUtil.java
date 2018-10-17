@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -52,18 +52,29 @@ public class TransactionUtil {
 
   public static boolean validAccountName(byte[] accountName) {
     if (ArrayUtils.isEmpty(accountName)) {
+      return true;   //accountname can empty
+    }
+    if (accountName.length > 200) {
+      return false;
+    }
+    // other rules.
+    return true;
+  }
+
+  public static boolean validAccountId(byte[] accountId) {
+    if (ArrayUtils.isEmpty(accountId)) {
       return false;
     }
 
-    if (accountName.length < 8) {
+    if (accountId.length < 8) {
       return false;
     }
 
-    if (accountName.length > 32) {
+    if (accountId.length > 32) {
       return false;
     }
     // b must read able.
-    for (byte b : accountName) {
+    for (byte b : accountId) {
       if (b < 0x21) {
         return false; // 0x21 = '!'
       }

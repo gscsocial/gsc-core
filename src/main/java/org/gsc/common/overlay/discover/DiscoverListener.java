@@ -19,8 +19,6 @@ package org.gsc.common.overlay.discover;
 
 import org.gsc.common.overlay.discover.node.NodeHandler;
 import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.overlay.discover.node.NodeHandler;
-import org.gsc.common.overlay.discover.node.NodeManager;
 
 /**
  * Allows to handle discovered nodes state changes

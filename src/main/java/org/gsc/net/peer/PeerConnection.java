@@ -1,7 +1,11 @@
 package org.gsc.net.peer;
 
+import static org.gsc.config.Parameter.NetConstants.MAX_INVENTORY_SIZE_IN_MINUTES;
+import static org.gsc.config.Parameter.NetConstants.NET_MAX_TRX_PER_SECOND;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -12,22 +16,35 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import javafx.util.Pair;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import org.gsc.common.overlay.message.HelloMessage;
 import org.gsc.common.overlay.message.Message;
 import org.gsc.common.overlay.server.Channel;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Time;
 import org.gsc.core.wrapper.BlockWrapper.BlockId;
-import org.gsc.config.Parameter.NetConstants;
+import org.gsc.config.Parameter.NodeConstant;
 import org.gsc.net.node.Item;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @Scope("prototype")
 public class PeerConnection extends Channel {
+
+  private Cache<Sha256Hash, Integer> syncBlockIdCache = CacheBuilder.newBuilder()
+      .maximumSize(2 * NodeConstant.SYNC_FETCH_BATCH_NUM).build();
+
+  @Setter
+  @Getter
+  private BlockId lastSyncBlockId;
+
+  @Setter
+  @Getter
+  private long remainNum;
 
   private volatile boolean syncFlag = true;
 
@@ -50,17 +67,8 @@ public class PeerConnection extends Channel {
     return advObjSpreadToUs;
   }
 
-  public void setAdvObjSpreadToUs(
-      HashMap<Sha256Hash, Long> advObjSpreadToUs) {
-    this.advObjSpreadToUs = advObjSpreadToUs;
-  }
-
   public Map<Sha256Hash, Long> getAdvObjWeSpread() {
     return advObjWeSpread;
-  }
-
-  public void setAdvObjWeSpread(HashMap<Sha256Hash, Long> advObjWeSpread) {
-    this.advObjWeSpread = advObjWeSpread;
   }
 
   public boolean isAdvInhibit() {
@@ -84,6 +92,10 @@ public class PeerConnection extends Channel {
 
   public Pair<Deque<BlockId>, Long> getSyncChainRequested() {
     return syncChainRequested;
+  }
+
+  public Cache<Sha256Hash, Integer> getSyncBlockIdCache() {
+    return syncBlockIdCache;
   }
 
   public void setSyncChainRequested(
@@ -143,7 +155,7 @@ public class PeerConnection extends Channel {
 
   public void cleanInvGarbage() {
     long oldestTimestamp =
-        Time.getCurrentMillis() - NetConstants.MAX_INVENTORY_SIZE_IN_MINUTES * 60 * 1000;
+        Time.getCurrentMillis() - MAX_INVENTORY_SIZE_IN_MINUTES * 60 * 1000;
 
     Iterator<Entry<Sha256Hash, Long>> iterator = this.advObjSpreadToUs.entrySet().iterator();
 
@@ -156,8 +168,8 @@ public class PeerConnection extends Channel {
 
   private void removeIterator(Iterator<Entry<Sha256Hash, Long>> iterator, long oldestTimestamp) {
     while (iterator.hasNext()) {
-      Map.Entry entry = iterator.next();
-      Long ts = (Long) entry.getValue();
+      Entry<Sha256Hash, Long> entry = iterator.next();
+      Long ts = entry.getValue();
 
       if (ts < oldestTimestamp) {
         iterator.remove();
@@ -166,7 +178,7 @@ public class PeerConnection extends Channel {
   }
 
   public boolean isAdvInvFull() {
-   return advObjSpreadToUs.size() > NetConstants.MAX_INVENTORY_SIZE_IN_MINUTES * 60 * NetConstants.NET_MAX_TRX_PER_SECOND;
+    return advObjSpreadToUs.size() > MAX_INVENTORY_SIZE_IN_MINUTES * 60 * NET_MAX_TRX_PER_SECOND;
   }
 
   public boolean isBanned() {
@@ -278,6 +290,5 @@ public class PeerConnection extends Channel {
 
   public void sendMessage(Message message) {
     msgQueue.sendMessage(message);
-    nodeStatistics.gscOutMessage.add();
   }
 }

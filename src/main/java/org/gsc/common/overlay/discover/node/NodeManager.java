@@ -45,6 +45,7 @@ import org.gsc.common.net.udp.message.discover.PingMessage;
 import org.gsc.common.net.udp.message.discover.PongMessage;
 import org.gsc.common.overlay.discover.DiscoverListener;
 import org.gsc.common.overlay.discover.node.NodeHandler.State;
+import org.gsc.common.overlay.discover.node.statistics.NodeStatistics;
 import org.gsc.common.overlay.discover.table.NodeTable;
 import org.gsc.common.utils.CollectionUtils;
 import org.gsc.config.args.Args;
@@ -225,13 +226,14 @@ public class NodeManager implements EventHandler {
     Message m = udpEvent.getMessage();
     InetSocketAddress sender = udpEvent.getAddress();
 
-    Node n = new Node(m.getNodeId(), sender.getHostString(), sender.getPort());
-
+    Node n = new Node(m.getFrom().getId(), sender.getHostString(), sender.getPort());
     if (inboundOnlyFromKnownNodes && !hasNodeHandler(n)) {
-      logger.debug("Inbound packet from unknown peer {}.", sender.getAddress());
+      logger.warn("Receive packet from unknown node {}.", sender.getAddress());
       return;
     }
+
     NodeHandler nodeHandler = getNodeHandler(n);
+    nodeHandler.getNodeStatistics().messageStatistics.addUdpInMessage(m.getType());
 
     switch (m.getType()) {
       case DISCOVER_PING:

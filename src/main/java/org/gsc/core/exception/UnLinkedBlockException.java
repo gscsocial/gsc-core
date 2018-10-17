@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class UnLinkedBlockException extends GscException {
+public class UnLinkedBlockException extends GSCException {
 
   public UnLinkedBlockException() {
     super();

@@ -27,30 +27,57 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.spongycastle.util.encoders.Hex;
+import org.springframework.util.StringUtils;
 import org.gsc.crypto.ECKey;
 import org.gsc.crypto.ECKey.ECDSASignature;
+import org.gsc.runtime.Runtime;
+import org.gsc.runtime.vm.program.Program.BadJumpDestinationException;
+import org.gsc.runtime.vm.program.Program.IllegalOperationException;
+import org.gsc.runtime.vm.program.Program.JVMStackOverFlowException;
+import org.gsc.runtime.vm.program.Program.OutOfEnergyException;
+import org.gsc.runtime.vm.program.Program.OutOfMemoryException;
+import org.gsc.runtime.vm.program.Program.OutOfResourceException;
+import org.gsc.runtime.vm.program.Program.PrecompiledContractException;
+import org.gsc.runtime.vm.program.Program.StackTooLargeException;
+import org.gsc.runtime.vm.program.Program.StackTooSmallException;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.exception.BadItemException;
-import org.gsc.core.exception.ValidateSignatureException;
 import org.gsc.core.Wallet;
 import org.gsc.db.AccountStore;
+import org.gsc.core.exception.BadItemException;
+import org.gsc.core.exception.ValidateSignatureException;
+import org.gsc.protos.Contract;
 import org.gsc.protos.Contract.AccountCreateContract;
 import org.gsc.protos.Contract.AccountUpdateContract;
+import org.gsc.protos.Contract.CreateSmartContract;
+import org.gsc.protos.Contract.ExchangeCreateContract;
+import org.gsc.protos.Contract.ExchangeInjectContract;
+import org.gsc.protos.Contract.ExchangeTransactionContract;
+import org.gsc.protos.Contract.ExchangeWithdrawContract;
 import org.gsc.protos.Contract.FreezeBalanceContract;
 import org.gsc.protos.Contract.ParticipateAssetIssueContract;
+import org.gsc.protos.Contract.ProposalApproveContract;
+import org.gsc.protos.Contract.ProposalCreateContract;
+import org.gsc.protos.Contract.ProposalDeleteContract;
+import org.gsc.protos.Contract.SetAccountIdContract;
 import org.gsc.protos.Contract.TransferAssetContract;
 import org.gsc.protos.Contract.TransferContract;
+import org.gsc.protos.Contract.TriggerSmartContract;
 import org.gsc.protos.Contract.UnfreezeAssetContract;
 import org.gsc.protos.Contract.UnfreezeBalanceContract;
 import org.gsc.protos.Contract.UpdateAssetContract;
+import org.gsc.protos.Contract.UpdateSettingContract;
 import org.gsc.protos.Contract.WithdrawBalanceContract;
 import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
-import org.spongycastle.util.encoders.Hex;
+import org.gsc.protos.Protocol.Transaction.Result;
+import org.gsc.protos.Protocol.Transaction.Result.contractResult;
+import org.gsc.protos.Protocol.Transaction.raw;
 
 @Slf4j
 public class TransactionWrapper implements ProtoWrapper<Transaction> {
@@ -58,6 +85,7 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
   private Transaction transaction;
   @Setter
   private boolean isVerified = false;
+
   /**
    * constructor TransactionWrapper.
    */
@@ -133,12 +161,20 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
     createTransaction(participateAssetIssueContract, ContractType.ParticipateAssetIssueContract);
   }
 
-  public void resetResult() {
-    this.transaction = this.getInstance().toBuilder().clearRet().build();
+  public TransactionWrapper(raw rawData, List<ByteString> signatureList) {
+    this.transaction = Transaction.newBuilder().setRawData(rawData).addAllSignature(signatureList)
+        .build();
   }
 
-  public void setResult(TransactionResultWrapper transactionResultWrapper) {
-//    this.transaction = this.getInstance().toBuilder().addRet(transactionResultWrapper.getInstance()).build();
+  public void resetResult() {
+    if (this.getInstance().getRetCount() > 0) {
+      this.transaction = this.getInstance().toBuilder().clearRet().build();
+    }
+  }
+
+  public void setResult(TransactionResultWrapper transactionResultCapsule) {
+    this.transaction = this.getInstance().toBuilder().addRet(transactionResultCapsule.getInstance())
+        .build();
   }
 
   public void setReference(long blockNum, byte[] blockHash) {
@@ -163,15 +199,34 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
     return transaction.getRawData().getExpiration();
   }
 
+  public void setTimestamp() {
+    Transaction.raw rawData = this.transaction.getRawData().toBuilder()
+        .setTimestamp(System.currentTimeMillis())
+        .build();
+    this.transaction = this.transaction.toBuilder().setRawData(rawData).build();
+  }
+
+  public long getTimestamp() {
+    return transaction.getRawData().getTimestamp();
+  }
+
   @Deprecated
   public TransactionWrapper(AssetIssueContract assetIssueContract) {
     createTransaction(assetIssueContract, ContractType.AssetIssueContract);
   }
 
   public TransactionWrapper(com.google.protobuf.Message message, ContractType contractType) {
-    Transaction.raw.Builder transactionBuilder = Transaction.raw.newBuilder().addContract(
-        Transaction.Contract.newBuilder().setType(contractType).setParameter(
-            Any.pack(message)).build());
+
+    Transaction.raw.Builder transactionBuilder = Transaction.raw.newBuilder().addContract
+            (
+        Transaction.Contract.newBuilder().setType(contractType).setParameter(Any.pack(message))
+                .build()
+    );
+
+    //Transaction.raw.Builder transactionBuilder2 = Transaction.raw.newBuilder().addContract(
+     //       Transaction.Contract.newBuilder().setType(ContractType.CreateSmartContract).setParameter(Any.pack(message)).build()
+    //);
+    //transaction = Transaction.newBuilder().setRawData(transactionBuilder2.build()).build();
     transaction = Transaction.newBuilder().setRawData(transactionBuilder.build()).build();
   }
 
@@ -274,8 +329,51 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
         case WithdrawBalanceContract:
           owner = contractParameter.unpack(WithdrawBalanceContract.class).getOwnerAddress();
           break;
+        case CreateSmartContract:
+          owner = contractParameter.unpack(Contract.CreateSmartContract.class).getOwnerAddress();
+          break;
+        case TriggerSmartContract:
+          owner = contractParameter.unpack(Contract.TriggerSmartContract.class).getOwnerAddress();
+          break;
         case UpdateAssetContract:
           owner = contractParameter.unpack(UpdateAssetContract.class).getOwnerAddress();
+          break;
+        case ProposalCreateContract:
+          owner = contractParameter.unpack(ProposalCreateContract.class).getOwnerAddress();
+          break;
+        case ProposalApproveContract:
+          owner = contractParameter.unpack(ProposalApproveContract.class).getOwnerAddress();
+          break;
+        case ProposalDeleteContract:
+          owner = contractParameter.unpack(ProposalDeleteContract.class).getOwnerAddress();
+          break;
+        case SetAccountIdContract:
+          owner = contractParameter.unpack(SetAccountIdContract.class).getOwnerAddress();
+          break;
+//        case BuyStorageContract:
+//          owner = contractParameter.unpack(BuyStorageContract.class).getOwnerAddress();
+//          break;
+//        case BuyStorageBytesContract:
+//          owner = contractParameter.unpack(BuyStorageBytesContract.class).getOwnerAddress();
+//          break;
+//        case SellStorageContract:
+//          owner = contractParameter.unpack(SellStorageContract.class).getOwnerAddress();
+//          break;
+        case UpdateSettingContract:
+          owner = contractParameter.unpack(UpdateSettingContract.class)
+              .getOwnerAddress();
+          break;
+        case ExchangeCreateContract:
+          owner = contractParameter.unpack(ExchangeCreateContract.class).getOwnerAddress();
+          break;
+        case ExchangeInjectContract:
+          owner = contractParameter.unpack(ExchangeInjectContract.class).getOwnerAddress();
+          break;
+        case ExchangeWithdrawContract:
+          owner = contractParameter.unpack(ExchangeWithdrawContract.class).getOwnerAddress();
+          break;
+        case ExchangeTransactionContract:
+          owner = contractParameter.unpack(ExchangeTransactionContract.class).getOwnerAddress();
           break;
         // todo add other contract
         default:
@@ -283,7 +381,7 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
       }
       return owner.toByteArray();
     } catch (Exception ex) {
-      ex.printStackTrace();
+      logger.error(ex.getMessage());
       return null;
     }
   }
@@ -310,8 +408,30 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
       }
       return to.toByteArray();
     } catch (Exception ex) {
-      ex.printStackTrace();
+      logger.error(ex.getMessage());
       return null;
+    }
+  }
+
+  // todo mv this static function to capsule util
+  public static long getCallValue(Transaction.Contract contract) {
+    int energyForTrx;
+    try {
+      Any contractParameter = contract.getParameter();
+      long callValue;
+      switch (contract.getType()) {
+        case TriggerSmartContract:
+          return contractParameter.unpack(TriggerSmartContract.class).getCallValue();
+
+        case CreateSmartContract:
+          return contractParameter.unpack(CreateSmartContract.class).getNewContract()
+              .getCallValue();
+        default:
+          return 0L;
+      }
+    } catch (Exception ex) {
+      logger.error(ex.getMessage());
+      return 0L;
     }
   }
 
@@ -375,6 +495,14 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
     return this.transaction.getSerializedSize();
   }
 
+  public long getResultSerializedSize() {
+    long size = 0;
+    for (Result result : this.transaction.getRetList()) {
+      size += result.getSerializedSize();
+    }
+    return size;
+  }
+
   @Override
   public Transaction getInstance() {
     return this.transaction;
@@ -432,5 +560,74 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
 
     toStringBuff.append("]");
     return toStringBuff.toString();
+  }
+
+  public void setResult(Runtime runtime) {
+    RuntimeException exception = runtime.getResult().getException();
+    if (Objects.isNull(exception) && StringUtils
+        .isEmpty(runtime.getRuntimeError()) && !runtime.getResult().isRevert()) {
+      this.setResultCode(contractResult.SUCCESS);
+      return;
+    }
+    if (runtime.getResult().isRevert()) {
+      this.setResultCode(contractResult.REVERT);
+      return;
+    }
+    if (exception instanceof IllegalOperationException) {
+      this.setResultCode(contractResult.ILLEGAL_OPERATION);
+      return;
+    }
+    if (exception instanceof OutOfEnergyException) {
+      this.setResultCode(contractResult.OUT_OF_ENERGY);
+      return;
+    }
+    if (exception instanceof BadJumpDestinationException) {
+      this.setResultCode(contractResult.BAD_JUMP_DESTINATION);
+      return;
+    }
+    if (exception instanceof OutOfResourceException) {
+      this.setResultCode(contractResult.OUT_OF_TIME);
+      return;
+    }
+    if (exception instanceof OutOfMemoryException) {
+      this.setResultCode(contractResult.OUT_OF_MEMORY);
+      return;
+    }
+    if (exception instanceof PrecompiledContractException) {
+      this.setResultCode(contractResult.PRECOMPILED_CONTRACT);
+      return;
+    }
+    if (exception instanceof StackTooSmallException) {
+      this.setResultCode(contractResult.STACK_TOO_SMALL);
+      return;
+    }
+    if (exception instanceof StackTooLargeException) {
+      this.setResultCode(contractResult.STACK_TOO_LARGE);
+      return;
+    }
+    if (exception instanceof JVMStackOverFlowException) {
+      this.setResultCode(contractResult.JVM_STACK_OVER_FLOW);
+      return;
+    }
+    this.setResultCode(contractResult.UNKNOWN);
+    return;
+  }
+
+  private void setResultCode(contractResult code) {
+    Result ret = Result.newBuilder().setContractRet(code).build();
+    if (this.transaction.getRetCount() > 0) {
+      ret = this.transaction.getRet(0).toBuilder().setContractRet(code).build();
+
+      this.transaction = transaction.toBuilder().setRet(0, ret).build();
+      return;
+    }
+    this.transaction = transaction.toBuilder().addRet(ret).build();
+  }
+
+  public contractResult getContractRet() {
+    if (this.transaction.getRetCount() <= 0) {
+      return null;
+    }
+    return this.transaction.getRet(0).getContractRet();
   }
 }

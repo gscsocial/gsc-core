@@ -5,13 +5,13 @@ import com.googlecode.cqengine.attribute.SimpleAttribute;
 import com.googlecode.cqengine.index.disk.DiskIndex;
 import com.googlecode.cqengine.persistence.disk.DiskPersistence;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.utils.ByteArray;
 import org.gsc.core.wrapper.WitnessWrapper;
-import org.gsc.db.GscDatabase;
-import org.gsc.db.common.WrappedByteArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.gsc.common.utils.ByteArray;
+import org.gsc.db.common.WrappedByteArray;
+import org.gsc.core.db2.core.IGSCChainBase;
 import org.gsc.protos.Protocol.Witness;
 
 import javax.annotation.PostConstruct;
@@ -28,7 +28,7 @@ public class WitnessIndex extends AbstractIndex<WitnessWrapper, Witness> {
 
   @Autowired
   public WitnessIndex(
-      @Qualifier("witnessStore") final GscDatabase<WitnessWrapper> database) {
+      @Qualifier("witnessStore") final IGSCChainBase<WitnessWrapper> database) {
     super(database);
   }
 

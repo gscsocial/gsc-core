@@ -2,9 +2,9 @@ package org.gsc.core.operator;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
-import org.gsc.core.wrapper.TransactionResultWrapper;
 
 public interface Operator {
 

@@ -4,15 +4,14 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
-import org.gsc.db.AccountIndexStore;
 import org.gsc.db.AccountStore;
 import org.gsc.db.Manager;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract.AccountUpdateContract;
 import org.gsc.protos.Protocol.Transaction.Result.code;
 
@@ -37,13 +36,13 @@ public class UpdateAccountOperator extends AbstractOperator {
 
     byte[] ownerAddress = accountUpdateContract.getOwnerAddress().toByteArray();
     AccountStore accountStore = dbManager.getAccountStore();
-    AccountIndexStore accountIndexStore = dbManager.getAccountIndexStore();
+//    AccountIdIndexStore accountIndexStore = dbManager.getAccountIdIndexStore();
     AccountWrapper account = accountStore.get(ownerAddress);
 
     account.setAccountName(accountUpdateContract.getAccountName().toByteArray());
     accountStore.put(ownerAddress, account);
-    accountIndexStore.put(account);
-    ret.setStatus(fee, code.SUCCESS);
+//    accountIndexStore.put(account);
+    ret.setStatus(fee, code.SUCESS);
 
     return true;
   }
@@ -80,12 +79,6 @@ public class UpdateAccountOperator extends AbstractOperator {
     AccountWrapper account = dbManager.getAccountStore().get(ownerAddress);
     if (account == null) {
       throw new ContractValidateException("Account has not existed");
-    }
-    if (account.getAccountName() != null && !account.getAccountName().isEmpty()) {
-      throw new ContractValidateException("This account name already exist");
-    }
-    if (dbManager.getAccountIndexStore().has(accountName)) {
-      throw new ContractValidateException("This name has existed");
     }
 
     return true;

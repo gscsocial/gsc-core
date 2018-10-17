@@ -6,6 +6,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.Parameter;
+import org.gsc.config.args.Args;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.junit.AfterClass;
@@ -13,14 +17,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.Parameter.ChainConstant;
-import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
@@ -33,17 +33,17 @@ public class FreezeBalanceOperatorTest {
 
   private static Manager dbManager;
   private static final String dbPath = "output_freeze_balance_test";
-  private static AnnotationConfigApplicationContext context;
+  private static GSCApplicationContext context;
   private static final String OWNER_ADDRESS;
-  private static final String OWNER_ADDRESS_INVALIDATE = "aaaa";
-  private static final String OWNER_ACCOUNT_INVALIDATE;
+  private static final String OWNER_ADDRESS_INVALID = "aaaa";
+  private static final String OWNER_ACCOUNT_INVALID;
   private static final long initBalance = 10_000_000_000L;
 
   static {
     Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
-    context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS = Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a1abc";
-    OWNER_ACCOUNT_INVALIDATE =
+    OWNER_ACCOUNT_INVALID =
         Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a3456";
   }
 
@@ -106,12 +106,12 @@ public class FreezeBalanceOperatorTest {
     try {
       actuator.validate();
       actuator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCCESS);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), initBalance - frozenBalance
-          - ChainConstant.TRANSFER_FEE);
+          - Parameter.ChainConstant.TRANSFER_FEE);
       Assert.assertEquals(owner.getFrozenBalance(), frozenBalance);
     } catch (ContractValidateException e) {
       Assert.assertFalse(e instanceof ContractValidateException);
@@ -164,7 +164,7 @@ public class FreezeBalanceOperatorTest {
     long frozenBalance = 1_000_000_000L;
     long duration = 3;
     FreezeBalanceOperator actuator = new FreezeBalanceOperator(
-        getContract(OWNER_ADDRESS_INVALIDATE, frozenBalance, duration), dbManager);
+        getContract(OWNER_ADDRESS_INVALID, frozenBalance, duration), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
@@ -187,7 +187,7 @@ public class FreezeBalanceOperatorTest {
     long frozenBalance = 1_000_000_000L;
     long duration = 3;
     FreezeBalanceOperator actuator = new FreezeBalanceOperator(
-        getContract(OWNER_ACCOUNT_INVALIDATE, frozenBalance, duration), dbManager);
+        getContract(OWNER_ACCOUNT_INVALID, frozenBalance, duration), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
       actuator.validate();
@@ -195,7 +195,7 @@ public class FreezeBalanceOperatorTest {
       fail("cannot run here.");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("Account[" + OWNER_ACCOUNT_INVALIDATE + "] not exists",
+      Assert.assertEquals("Account[" + OWNER_ACCOUNT_INVALID + "] not exists",
           e.getMessage());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
@@ -262,7 +262,7 @@ public class FreezeBalanceOperatorTest {
       fail("cannot run here.");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("frozenBalance must be more than 1GSC", e.getMessage());
+      Assert.assertEquals("frozenBalance must be more than 1TRX", e.getMessage());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -313,7 +313,7 @@ public class FreezeBalanceOperatorTest {
       actuator.execute(ret);
       fail("cannot run here.");
     } catch (ContractValidateException e) {
-      long maxFrozenNumber = dbManager.getDynamicPropertiesStore().getMaxFrozenNumber();
+      long maxFrozenNumber = Parameter.ChainConstant.MAX_FROZEN_NUMBER;
       Assert.assertTrue(e instanceof ContractValidateException);
       Assert.assertEquals("max frozen number is: " + maxFrozenNumber, e.getMessage());
 

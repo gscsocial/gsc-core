@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class ValidateSignatureException extends GscException {
+public class ValidateSignatureException extends GSCException {
 
   public ValidateSignatureException() {
     super();

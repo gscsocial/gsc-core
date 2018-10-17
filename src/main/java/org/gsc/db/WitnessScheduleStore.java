@@ -5,15 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.utils.ByteArray;
 import org.gsc.core.wrapper.BytesWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.gsc.common.utils.ByteArray;
 
 @Slf4j
 @Component
-public class WitnessScheduleStore extends GscStoreWithRevoking<BytesWrapper> {
+public class WitnessScheduleStore extends GSCStoreWithRevoking<BytesWrapper> {
 
   private static final byte[] ACTIVE_WITNESSES = "active_witnesses".getBytes();
   private static final byte[] CURRENT_SHUFFLED_WITNESSES = "current_shuffled_witnesses".getBytes();
@@ -25,16 +25,6 @@ public class WitnessScheduleStore extends GscStoreWithRevoking<BytesWrapper> {
     super(dbName);
   }
 
-  @Override
-  public BytesWrapper get(byte[] key) {
-    return null;
-  }
-
-  @Override
-  public boolean has(byte[] key) {
-    return false;
-  }
-
   private void saveData(byte[] species, List<ByteString> witnessesAddressList) {
     byte[] ba = new byte[witnessesAddressList.size() * ADDRESS_BYTE_ARRAY_LENGTH];
     int i = 0;
@@ -43,13 +33,14 @@ public class WitnessScheduleStore extends GscStoreWithRevoking<BytesWrapper> {
           ba, i * ADDRESS_BYTE_ARRAY_LENGTH, ADDRESS_BYTE_ARRAY_LENGTH);
       i++;
     }
-    ;
+
     this.put(species, new BytesWrapper(ba));
   }
 
   private List<ByteString> getData(byte[] species) {
     List<ByteString> witnessesAddressList = new ArrayList<>();
-    return Optional.ofNullable(this.dbSource.getData(species))
+    return Optional.ofNullable(getUnchecked(species))
+        .map(BytesWrapper::getData)
         .map(ba -> {
           int len = ba.length / ADDRESS_BYTE_ARRAY_LENGTH;
           for (int i = 0; i < len; ++i) {

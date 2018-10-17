@@ -1,6 +1,10 @@
 package org.gsc.net.node;
 
-import static org.gsc.net.message.MessageTypes.BLOCK;
+import static org.gsc.config.Parameter.ChainConstant.BLOCK_PRODUCED_INTERVAL;
+import static org.gsc.config.Parameter.NetConstants.MAX_TRX_PER_PEER;
+import static org.gsc.config.Parameter.NetConstants.MSG_CACHE_DURATION_IN_BLOCKS;
+import static org.gsc.config.Parameter.NetConstants.NET_MAX_TRX_PER_SECOND;
+import static org.gsc.config.Parameter.NodeConstant.MAX_BLOCKS_SYNC_FROM_ONE_PEER;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -23,7 +27,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -31,14 +34,18 @@ import javafx.util.Pair;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.TransactionWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.gsc.common.overlay.discover.node.statistics.MessageCount;
 import org.gsc.common.overlay.message.Message;
-import org.gsc.common.overlay.server.Channel.GscState;
+import org.gsc.common.overlay.server.Channel.GSCState;
 import org.gsc.common.overlay.server.SyncPool;
 import org.gsc.common.utils.ExecutorLoop;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.SlidingWindowCounter;
 import org.gsc.common.utils.Time;
-import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.Parameter.NetConstants;
@@ -49,7 +56,7 @@ import org.gsc.core.exception.BadTransactionException;
 import org.gsc.core.exception.NonCommonBlockException;
 import org.gsc.core.exception.StoreException;
 import org.gsc.core.exception.TraitorPeerException;
-import org.gsc.core.exception.GscException;
+import org.gsc.core.exception.GSCException;
 import org.gsc.core.exception.UnLinkedBlockException;
 import org.gsc.net.message.BlockMessage;
 import org.gsc.net.message.ChainInventoryMessage;
@@ -60,19 +67,13 @@ import org.gsc.net.message.MessageTypes;
 import org.gsc.net.message.SyncBlockChainMessage;
 import org.gsc.net.message.TransactionMessage;
 import org.gsc.net.message.TransactionsMessage;
-import org.gsc.net.message.GscMessage;
+import org.gsc.net.message.GSCMessage;
 import org.gsc.net.peer.PeerConnection;
 import org.gsc.net.peer.PeerConnectionDelegate;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Inventory.InventoryType;
 import org.gsc.protos.Protocol.ReasonCode;
 import org.gsc.protos.Protocol.Transaction;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-/**
- * p2p node
- */
 
 @Slf4j
 @Component
@@ -80,6 +81,8 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
 
   @Autowired
   private SyncPool pool;
+
+  private MessageCount trxCount = new MessageCount();
 
   private Cache<Sha256Hash, TransactionMessage> TrxCache = CacheBuilder.newBuilder()
       .maximumSize(100_000).expireAfterWrite(1, TimeUnit.HOURS).initialCapacity(100_000)
@@ -90,7 +93,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
       .recordStats().build();
 
   private SlidingWindowCounter fetchWaterLine =
-      new SlidingWindowCounter(ChainConstant.BLOCK_PRODUCED_INTERVAL * NetConstants.MSG_CACHE_DURATION_IN_BLOCKS / 100);
+      new SlidingWindowCounter(BLOCK_PRODUCED_INTERVAL * MSG_CACHE_DURATION_IN_BLOCKS / 100);
 
   private int maxTrxsSize = 1_000_000;
 
@@ -142,29 +145,23 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     }
 
     public void add(Entry<Sha256Hash, InventoryType> id, PeerConnection peer) {
-      if (send.containsKey(peer) && send.get(peer).containsKey(id.getValue())) {
-        send.get(peer).get(id.getValue()).offer(id.getKey());
-      } else if (send.containsKey(peer)) {
+      if (send.containsKey(peer) && !send.get(peer).containsKey(id.getValue())) {
         send.get(peer).put(id.getValue(), new LinkedList<>());
-        send.get(peer).get(id.getValue()).offer(id.getKey());
-      } else {
+      } else if (!send.containsKey(peer)) {
         send.put(peer, new HashMap<>());
         send.get(peer).put(id.getValue(), new LinkedList<>());
-        send.get(peer).get(id.getValue()).offer(id.getKey());
       }
+      send.get(peer).get(id.getValue()).offer(id.getKey());
     }
 
     public void add(PriorItem id, PeerConnection peer) {
-      if (send.containsKey(peer) && send.get(peer).containsKey(id.getType())) {
-        send.get(peer).get(id.getType()).offer(id.getHash());
-      } else if (send.containsKey(peer)) {
+      if (send.containsKey(peer) && !send.get(peer).containsKey(id.getType())) {
         send.get(peer).put(id.getType(), new LinkedList<>());
-        send.get(peer).get(id.getType()).offer(id.getHash());
-      } else {
+      } else if (!send.containsKey(peer)) {
         send.put(peer, new HashMap<>());
         send.get(peer).put(id.getType(), new LinkedList<>());
-        send.get(peer).get(id.getType()).offer(id.getHash());
       }
+      send.get(peer).get(id.getType()).offer(id.getHash());
     }
 
     public int getSize(PeerConnection peer) {
@@ -203,9 +200,6 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
           new ThreadFactoryBuilder()
               .setNameFormat("TrxsHandlePool-%d").build());
 
-  //public
-  //TODO:need auto erase oldest block
-
   private Queue<BlockId> freshBlockId = new ConcurrentLinkedQueue<BlockId>() {
     @Override
     public boolean offer(BlockId blockId) {
@@ -243,11 +237,9 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
   private ExecutorService broadPool = Executors.newFixedThreadPool(2, new ThreadFactory() {
     @Override
     public Thread newThread(Runnable r) {
-      return new Thread(r, "broad-msg-");
+      return new Thread(r, "broad-msg");
     }
   });
-
-  private HashMap<Sha256Hash, Long> badAdvObj = new HashMap<>(); //TODO:need auto erase oldest obj
 
   //blocks we requested but not received
 
@@ -269,9 +261,6 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
 
   private ExecutorLoop<Message> loopAdvertiseInv;
 
-  private ExecutorService handleBackLogBlocksPool = Executors.newCachedThreadPool();
-
-
   private ScheduledExecutorService fetchSyncBlocksExecutor = Executors
       .newSingleThreadScheduledExecutor();
 
@@ -292,7 +281,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
   private volatile boolean isFetchSyncActive = false;
 
   @Override
-  public void onMessage(PeerConnection peer, GscMessage msg) {
+  public void onMessage(PeerConnection peer, GSCMessage msg) {
     switch (msg.getType()) {
       case BLOCK:
         onHandleBlockMessage(peer, (BlockMessage) msg);
@@ -365,7 +354,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     pool.init(this);
     isAdvertiseActive = true;
     isFetchActive = true;
-    activeGscPump();
+    activegscPump();
   }
 
   @Override
@@ -373,7 +362,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     getActivePeer().forEach(peer -> disconnectPeer(peer, ReasonCode.REQUESTED));
   }
 
-  private void activeGscPump() {
+  private void activegscPump() {
     // broadcast inv
     loopAdvertiseInv = new ExecutorLoop<>(2, 10, b -> {
       //logger.info("loop advertise inv");
@@ -435,7 +424,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
       } catch (Throwable t) {
         logger.error("Unhandled exception", t);
       }
-    }, 30000, ChainConstant.BLOCK_PRODUCED_INTERVAL / 2, TimeUnit.MILLISECONDS);
+    }, 30000, BLOCK_PRODUCED_INTERVAL / 2, TimeUnit.MILLISECONDS);
 
     logExecutor.scheduleWithFixedDelay(() -> {
       try {
@@ -494,14 +483,14 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     long now = Time.getCurrentMillis();
     advObjToFetch.values().stream().sorted(PriorItem::compareTo).forEach(idToFetch -> {
       Sha256Hash hash = idToFetch.getHash();
-      if (idToFetch.getTime() < now - NetConstants.MSG_CACHE_DURATION_IN_BLOCKS * ChainConstant.BLOCK_PRODUCED_INTERVAL) {
+      if (idToFetch.getTime() < now - MSG_CACHE_DURATION_IN_BLOCKS * BLOCK_PRODUCED_INTERVAL) {
         logger.info("This obj is too late to fetch: " + idToFetch);
         advObjToFetch.remove(hash);
         return;
       }
       filterActivePeer.stream()
           .filter(peer -> peer.getAdvObjSpreadToUs().containsKey(hash)
-              && sendPackage.getSize(peer) < NetConstants.MAX_TRX_PER_PEER)
+              && sendPackage.getSize(peer) < MAX_TRX_PER_PEER)
           .sorted(Comparator.comparingInt(peer -> sendPackage.getSize(peer)))
           .findFirst().ifPresent(peer -> {
         sendPackage.add(idToFetch, peer);
@@ -528,6 +517,11 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
       spread.putAll(advObjToSpread);
       advObjToSpread.clear();
     }
+    for (InventoryType type : spread.values()) {
+      if (type == InventoryType.TRX) {
+        trxCount.add();
+      }
+    }
     getActivePeer().stream()
         .filter(peer -> !peer.isNeedSyncFromUs())
         .forEach(peer ->
@@ -543,10 +537,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
   }
 
   private synchronized void handleSyncBlock() {
-    if (((ThreadPoolExecutor) handleBackLogBlocksPool).getActiveCount() > NodeConstant.MAX_BLOCKS_IN_PROCESS) {
-      logger.info("we're already processing too many blocks");
-      return;
-    } else if (isSuspendFetch) {
+    if (isSuspendFetch) {
       isSuspendFetch = false;
     }
 
@@ -594,14 +585,6 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
         }
       });
 
-      if (((ThreadPoolExecutor) handleBackLogBlocksPool).getActiveCount() > NodeConstant.MAX_BLOCKS_IN_PROCESS) {
-        logger.info("we're already processing too many blocks");
-        if (blockWaitToProc.size() >= NodeConstant.MAX_BLOCKS_ALREADY_FETCHED) {
-          isSuspendFetch = true;
-        }
-        break;
-      }
-
     }
   }
 
@@ -617,8 +600,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
             + "unSyncNum: %d\n"
             + "blockWaitToProc: %d\n"
             + "blockJustReceived: %d\n"
-            + "syncBlockIdWeRequested: %d\n"
-            + "badAdvObj: %d\n",
+            + "syncBlockIdWeRequested: %d\n",
         del.getHeadBlockId().getNum(),
         advObjToSpread.size(),
         advObjToFetch.size(),
@@ -626,44 +608,26 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
         getUnSyncNum(),
         blockWaitToProc.size(),
         blockJustReceived.size(),
-        syncBlockIdWeRequested.size(),
-        badAdvObj.size()
+        syncBlockIdWeRequested.size()
     ));
 
     logger.info(sb.toString());
   }
 
   public synchronized void disconnectInactive() {
-    //logger.debug("size of activePeer: " + getActivePeer().size());
+
     getActivePeer().forEach(peer -> {
       final boolean[] isDisconnected = {false};
-      final ReasonCode[] reasonCode = {ReasonCode.USER_REASON};
 
       peer.getAdvObjWeRequested().values().stream()
           .filter(time -> time < Time.getCurrentMillis() - NetConstants.ADV_TIME_OUT)
-          .findFirst().ifPresent(time -> {
-        isDisconnected[0] = true;
-        reasonCode[0] = ReasonCode.FETCH_FAIL;
-      });
+          .findFirst().ifPresent(time -> isDisconnected[0] = true);
 
       if (!isDisconnected[0]) {
         peer.getSyncBlockRequested().values().stream()
             .filter(time -> time < Time.getCurrentMillis() - NetConstants.SYNC_TIME_OUT)
-            .findFirst().ifPresent(time -> {
-          isDisconnected[0] = true;
-          reasonCode[0] = ReasonCode.SYNC_FAIL;
-        });
+            .findFirst().ifPresent(time -> isDisconnected[0] = true);
       }
-
-//    TODO:optimize here
-//      if (!isDisconnected[0]) {
-//        if (del.getHeadBlockId().getNum() - peer.getHeadBlockWeBothHave().getNum()
-//            > 2 * NetConstants.HEAD_NUM_CHECK_TIME / ChainConstant.BLOCK_PRODUCED_INTERVAL
-//            && peer.getConnectTime() < Time.getCurrentMillis() - NetConstants.HEAD_NUM_CHECK_TIME
-//            && peer.getSyncBlockRequested().isEmpty()) {
-//          isDisconnected[0] = true;
-//        }
-//      }
 
       if (isDisconnected[0]) {
         disconnectPeer(peer, ReasonCode.TIME_OUT);
@@ -699,22 +663,21 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
             && (peer.isAdvInvFull()
             || isFlooded())) {
           logger.warn("A peer is flooding us, stop handle inv, the peer is: " + peer);
+          //todo,should be disconnect the peer?
           return;
         }
 
         peer.getAdvObjSpreadToUs().put(id, System.currentTimeMillis());
         if (!requested[0]) {
-          if (!badAdvObj.containsKey(id)) {
-            PriorItem targetPriorItem = this.advObjToFetch.get(id);
+          PriorItem targetPriorItem = this.advObjToFetch.get(id);
 
-            if (targetPriorItem != null) {
-              //another peer tell this trx to us, refresh its time.
-              targetPriorItem.refreshTime();
-            } else {
-              fetchWaterLine.increase();
-              this.advObjToFetch.put(id, new PriorItem(new Item(id, msg.getInventoryType()),
-                  fetchSequenceCounter.incrementAndGet()));
-            }
+          if (targetPriorItem != null) {
+            //another peer tell this trx to us, refresh its time.
+            targetPriorItem.refreshTime();
+          } else {
+            fetchWaterLine.increase();
+            this.advObjToFetch.put(id, new PriorItem(new Item(id, msg.getInventoryType()),
+                fetchSequenceCounter.incrementAndGet()));
           }
         }
       }
@@ -723,7 +686,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
 
   private boolean isFlooded() {
     return fetchWaterLine.totalCount()
-        > ChainConstant.BLOCK_PRODUCED_INTERVAL * NetConstants.NET_MAX_TRX_PER_SECOND * NetConstants.MSG_CACHE_DURATION_IN_BLOCKS / 1000;
+        > BLOCK_PRODUCED_INTERVAL * NET_MAX_TRX_PER_SECOND * MSG_CACHE_DURATION_IN_BLOCKS / 1000;
   }
 
   @Override
@@ -766,7 +729,6 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
         }
       }
     }
-
     if (advObjWeRequested.containsKey(item)) {
       advObjWeRequested.remove(item);
       if (!syncFlag) {
@@ -774,6 +736,13 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
         startFetchItem();
       }
     }
+//    else {
+//      if (!syncFlag) {//not we request and not sync,disconnect
+//        logger.error("not we request and not sync, disconnect : {}, block : {}",
+//            peer.getInetAddress(), blockId.getString());
+//        banTraitorPeer(peer, ReasonCode.BAD_PROTOCOL);
+//      }
+//    }
 
   }
 
@@ -796,7 +765,6 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
       } catch (BadBlockException e) {
         logger.error("We get a bad block {}, from {}, reason is {} ",
             block.getBlockId().getString(), peer.getNode().getHost(), e.getMessage());
-        badAdvObj.put(block.getBlockId(), System.currentTimeMillis());
         disconnectPeer(peer, ReasonCode.BAD_BLOCK);
       } catch (UnLinkedBlockException e) {
         logger.error("We get a unlinked block {}, from {}, head is {}",
@@ -804,9 +772,9 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
             del.getHeadBlockId().getString());
         startSyncWithPeer(peer);
       } catch (NonCommonBlockException e) {
-        logger.error("We get a block {} that do not have the most recent common ancestor with the main chain, from {}, reason is {} ",
+        logger.error(
+            "We get a block {} that do not have the most recent common ancestor with the main chain, from {}, reason is {} ",
             block.getBlockId().getString(), peer.getNode().getHost(), e.getMessage());
-        badAdvObj.put(block.getBlockId(), System.currentTimeMillis());
         disconnectPeer(peer, ReasonCode.FORKED);
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
@@ -833,14 +801,14 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     } catch (BadBlockException e) {
       logger.error("We get a bad block {}, reason is {} ", block.getBlockId().getString(),
           e.getMessage());
-      badAdvObj.put(block.getBlockId(), System.currentTimeMillis());
       reason = ReasonCode.BAD_BLOCK;
     } catch (UnLinkedBlockException e) {
       logger.error("We get a unlinked block {}, head is {}", block.getBlockId().getString(),
           del.getHeadBlockId().getString());
       reason = ReasonCode.UNLINKABLE;
     } catch (NonCommonBlockException e) {
-      logger.error("We get a block {} that do not have the most recent common ancestor with the main chain, head is {}",
+      logger.error(
+          "We get a block {} that do not have the most recent common ancestor with the main chain, head is {}",
           block.getBlockId().getString(),
           del.getHeadBlockId().getString());
       reason = ReasonCode.FORKED;
@@ -892,14 +860,15 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
             peer.getNode().getHost());
         return;
       }
-      if(del.handleTransaction(trxMsg.getTransactionWrapper())){
+      TransactionWrapper transactionCapsule = trxMsg.getTransactionCapsule();
+
+      if (del.handleTransaction(transactionCapsule)) {
         broadcast(trxMsg);
       }
     } catch (TraitorPeerException e) {
       logger.error(e.getMessage());
       banTraitorPeer(peer, ReasonCode.BAD_PROTOCOL);
     } catch (BadTransactionException e) {
-      badAdvObj.put(trxMsg.getMessageId(), System.currentTimeMillis());
       banTraitorPeer(peer, ReasonCode.BAD_TX);
     }
   }
@@ -911,12 +880,27 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     }
   }
 
+  private boolean checkSyncBlockChainMessage(PeerConnection peer, SyncBlockChainMessage syncMsg) {
+    long lastBlockNum = syncMsg.getBlockIds().get(syncMsg.getBlockIds().size() - 1).getNum();
+    BlockId lastSyncBlockId = peer.getLastSyncBlockId();
+    if (lastSyncBlockId != null && lastBlockNum < lastSyncBlockId.getNum()) {
+      logger.warn("Peer {} receive bad SyncBlockChain message, firstNum {} lastSyncNum {}.",
+          peer.getInetAddress(), lastBlockNum, lastSyncBlockId.getNum());
+      return false;
+    }
+    return true;
+  }
+
   private void onHandleSyncBlockChainMessage(PeerConnection peer, SyncBlockChainMessage syncMsg) {
-    peer.setGscState(GscState.SYNCING);
+    peer.setGscState(GSCState.SYNCING);
+    BlockId headBlockId = del.getHeadBlockId();
+    long remainNum = 0;
     LinkedList<BlockId> blockIds = new LinkedList<>();
     List<BlockId> summaryChainIds = syncMsg.getBlockIds();
-    long remainNum = 0;
-
+    if (!checkSyncBlockChainMessage(peer, syncMsg)) {
+      disconnectPeer(peer, ReasonCode.BAD_PROTOCOL);
+      return;
+    }
     try {
       blockIds = del.getLostBlockIds(summaryChainIds);
     } catch (StoreException e) {
@@ -946,20 +930,94 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     //TODO: need a block older than revokingDB size exception. otherwise will be a dead loop here
     if (!peer.isNeedSyncFromPeer()
         && CollectionUtils.isNotEmpty(summaryChainIds)
-        && !del.contain(Iterables.getLast(summaryChainIds), BLOCK)
+        && !del.contain(Iterables.getLast(summaryChainIds), MessageTypes.BLOCK)
         && del.canChainRevoke(summaryChainIds.get(0).getNum())) {
       startSyncWithPeer(peer);
     }
 
+    if (blockIds.peekLast() == null) {
+      peer.setLastSyncBlockId(headBlockId);
+    } else {
+      peer.setLastSyncBlockId(blockIds.peekLast());
+    }
+    peer.setRemainNum(remainNum);
     peer.sendMessage(new ChainInventoryMessage(blockIds, remainNum));
+  }
+
+  private boolean checkFetchInvDataMsg(PeerConnection peer, FetchInvDataMessage fetchInvDataMsg) {
+    MessageTypes type = fetchInvDataMsg.getInvMessageType();
+    if (type == MessageTypes.TRX) {
+      int elementCount = peer.getNodeStatistics().messageStatistics.gscInTrxFetchInvDataElement
+          .getCount(10);
+      int maxCount = trxCount.getCount(60);
+      if (elementCount > maxCount) {
+        logger.warn(
+            "Check FetchInvDataMsg failed: Peer {} request count {} in 10s gt trx count {} generate in 60s",
+            peer.getInetAddress(), elementCount, maxCount);
+        return false;
+      }
+      for (Sha256Hash hash : fetchInvDataMsg.getHashList()) {
+        if (!peer.getAdvObjWeSpread().containsKey(hash)) {
+          logger.warn("Check FetchInvDataMsg failed: Peer {} get trx {} we not spread.",
+              peer.getInetAddress(), hash);
+          return false;
+        }
+      }
+    } else {
+      boolean isAdv = true;
+      for (Sha256Hash hash : fetchInvDataMsg.getHashList()) {
+        if (!peer.getAdvObjWeSpread().containsKey(hash)) {
+          isAdv = false;
+          break;
+        }
+      }
+      if (isAdv) {
+        MessageCount gscOutAdvBlock = peer.getNodeStatistics().messageStatistics.gscOutAdvBlock;
+        gscOutAdvBlock.add(fetchInvDataMsg.getHashList().size());
+        int outBlockCountIn1min = gscOutAdvBlock.getCount(60);
+        int producedBlockIn2min = 120_000 / ChainConstant.BLOCK_PRODUCED_INTERVAL;
+        if (outBlockCountIn1min > producedBlockIn2min) {
+          logger
+              .warn("Check FetchInvDataMsg failed: Peer {} outBlockCount {} producedBlockIn2min {}",
+                  peer.getInetAddress(), outBlockCountIn1min, producedBlockIn2min);
+          return false;
+        }
+      } else {
+        if (!peer.isNeedSyncFromUs()) {
+          logger.warn("Check FetchInvDataMsg failed: Peer {} not need sync from us.",
+              peer.getInetAddress());
+          return false;
+        }
+        for (Sha256Hash hash : fetchInvDataMsg.getHashList()) {
+          long blockNum = new BlockId(hash).getNum();
+          long minBlockNum =
+              peer.getLastSyncBlockId().getNum() - 2 * NodeConstant.SYNC_FETCH_BATCH_NUM;
+          if (blockNum < minBlockNum) {
+            logger.warn("Check FetchInvDataMsg failed: Peer {} blockNum {} lt minBlockNum {}",
+                peer.getInetAddress(), blockNum, minBlockNum);
+            return false;
+          }
+          if (peer.getSyncBlockIdCache().getIfPresent(hash) != null) {
+            logger.warn("Check FetchInvDataMsg failed: Peer {} blockNum {} hash {} is exist",
+                peer.getInetAddress(), blockNum, hash);
+            return false;
+          }
+          peer.getSyncBlockIdCache().put(hash, 1);
+        }
+      }
+    }
+    return true;
   }
 
   private void onHandleFetchDataMessage(PeerConnection peer, FetchInvDataMessage fetchInvDataMsg) {
 
+    if (!checkFetchInvDataMsg(peer, fetchInvDataMsg)) {
+      disconnectPeer(peer, ReasonCode.BAD_PROTOCOL);
+      return;
+    }
+
     MessageTypes type = fetchInvDataMsg.getInvMessageType();
-
     BlockWrapper block = null;
-
     List<Protocol.Transaction> transactions = Lists.newArrayList();
 
     int size = 0;
@@ -968,7 +1026,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
 
       Message msg;
 
-      if (type == BLOCK) {
+      if (type == MessageTypes.BLOCK) {
         msg = BlockCache.getIfPresent(hash);
       } else {
         msg = TrxCache.getIfPresent(hash);
@@ -981,15 +1039,17 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
       if (msg == null) {
         logger.error("fetch message {} {} failed.", type, hash);
         peer.sendMessage(new ItemNotFound());
+        //todo,should be disconnect?
         return;
       }
 
-      if (type.equals(BLOCK)) {
+      if (type.equals(MessageTypes.BLOCK)) {
         block = ((BlockMessage) msg).getBlockCapsule();
         peer.sendMessage(msg);
       } else {
-        transactions.add(((TransactionMessage) msg).getTransactionWrapper().getInstance());
-        size += ((TransactionMessage) msg).getTransactionWrapper().getInstance().getSerializedSize();
+        transactions.add(((TransactionMessage) msg).getTransactionCapsule().getInstance());
+        size += ((TransactionMessage) msg).getTransactionCapsule().getInstance()
+            .getSerializedSize();
         if (transactions.size() % maxTrxsCnt == 0 || size > maxTrxsSize) {
           peer.sendMessage(new TransactionsMessage(transactions));
           transactions = Lists.newArrayList();
@@ -1045,7 +1105,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
             long maxRemainTime = ChainConstant.CLOCK_MAX_DELAY + System.currentTimeMillis() - del
                 .getBlockTime(del.getSolidBlockId());
             long maxFutureNum =
-                maxRemainTime / ChainConstant.BLOCK_PRODUCED_INTERVAL + del.getSolidBlockId()
+                maxRemainTime / BLOCK_PRODUCED_INTERVAL + del.getSolidBlockId()
                     .getNum();
             if (blockIdWeGet.peekLast().getNum() + msg.getRemainNum() > maxFutureNum) {
               throw new TraitorPeerException(
@@ -1123,7 +1183,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
           }
         }
 
-        if (msg.getRemainNum() == 0 && peer.getSyncBlockToFetch().size() == 0) {
+        if (msg.getRemainNum() == 0 && peer.getSyncBlockToFetch().isEmpty()) {
           peer.setNeedSyncFromPeer(false);
         }
 
@@ -1189,15 +1249,14 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
           if (!send.containsKey(peer)) { //TODO: Attention multi thread here
             send.put(peer, new LinkedList<>());
           }
-          for (BlockId blockId :
-              peer.getSyncBlockToFetch()) {
+          for (BlockId blockId : peer.getSyncBlockToFetch()) {
             if (!request.contains(blockId) //TODO: clean processing block
                 && (syncBlockIdWeRequested.getIfPresent(blockId) == null)) {
               send.get(peer).add(blockId);
               request.add(blockId);
               //TODO: check max block num to fetch from one peer.
               if (send.get(peer).size()
-                  > NodeConstant.MAX_BLOCKS_SYNC_FROM_ONE_PEER) { //Max Blocks peer get one time
+                  > MAX_BLOCKS_SYNC_FROM_ONE_PEER) { //Max Blocks peer get one time
                 break;
               }
             }
@@ -1231,7 +1290,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     logger.info("update peer {} block both we have, {}", peer.getNode().getHost(),
         blockId.getString());
     peer.setHeadBlockWeBothHave(blockId);
-    long time = ((BlockMessage) del.getData(blockId, BLOCK)).getBlockCapsule()
+    long time = ((BlockMessage) del.getData(blockId, MessageTypes.BLOCK)).getBlockCapsule()
         .getTimeStamp();
     peer.setHeadBlockTimeWeBothHave(time);
   }
@@ -1261,7 +1320,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
       peer.setSyncChainRequested(
           new Pair<>(chainSummary, System.currentTimeMillis()));
       peer.sendMessage(new SyncBlockChainMessage((LinkedList<BlockId>) chainSummary));
-    } catch (GscException e) {
+    } catch (GSCException e) {
       logger.error("Peer {} sync next batch chainIds failed, error: {}", peer.getNode().getHost(),
           e.getMessage());
       disconnectPeer(peer, ReasonCode.FORKED);
@@ -1271,10 +1330,10 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
   @Override
   public void onConnectPeer(PeerConnection peer) {
     if (peer.getHelloMessage().getHeadBlockId().getNum() > del.getHeadBlockId().getNum()) {
-      peer.setGscState(GscState.SYNCING);
+      peer.setGscState(GSCState.SYNCING);
       startSyncWithPeer(peer);
     } else {
-      peer.setGscState(GscState.SYNC_COMPLETED);
+      peer.setGscState(GSCState.SYNC_COMPLETED);
     }
   }
 
@@ -1311,7 +1370,6 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     loopSyncBlockChain.shutdown();
     loopFetchBlocks.shutdown();
     loopAdvertiseInv.shutdown();
-    handleBackLogBlocksPool.shutdown();
     fetchSyncBlocksExecutor.shutdown();
     handleSyncBlockExecutor.shutdown();
   }

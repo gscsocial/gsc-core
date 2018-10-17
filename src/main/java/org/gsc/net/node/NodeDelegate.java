@@ -12,7 +12,7 @@ import org.gsc.core.exception.BadBlockException;
 import org.gsc.core.exception.BadTransactionException;
 import org.gsc.core.exception.NonCommonBlockException;
 import org.gsc.core.exception.StoreException;
-import org.gsc.core.exception.GscException;
+import org.gsc.core.exception.GSCException;
 import org.gsc.core.exception.UnLinkedBlockException;
 import org.gsc.net.message.MessageTypes;
 
@@ -26,7 +26,7 @@ public interface NodeDelegate {
   LinkedList<BlockId> getLostBlockIds(List<BlockId> blockChainSummary) throws StoreException;
 
   Deque<BlockId> getBlockChainSummary(BlockId beginBLockId, Deque<BlockId> blockIds)
-      throws GscException;
+      throws GSCException;
 
   Message getData(Sha256Hash msgId, MessageTypes type);
 

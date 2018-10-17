@@ -20,12 +20,17 @@ package org.gsc.common.overlay.message;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.core.exception.P2pException;
+import org.gsc.core.exception.P2pException.TypeEnum;
 import org.gsc.net.message.MessageTypes;
 
 public class P2pMessageFactory extends MessageFactory {
 
   @Override
   public P2pMessage create(byte[] data) throws Exception{
+    if (data.length <= 1){
+      throw new P2pException(TypeEnum.MESSAGE_WITH_WRONG_LENGTH, "len=" + data.length
+          + ", MessageType=" + (data.length == 1 ? data[0] : "unknow"));
+    }
     try {
       byte type = data[0];
       byte[] rawData = ArrayUtils.subarray(data, 1, data.length);

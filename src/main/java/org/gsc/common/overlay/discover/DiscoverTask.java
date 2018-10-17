@@ -19,10 +19,6 @@ package org.gsc.common.overlay.discover;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.overlay.discover.table.KademliaOptions;
-import org.gsc.common.overlay.discover.table.NodeEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.gsc.common.overlay.discover.node.Node;

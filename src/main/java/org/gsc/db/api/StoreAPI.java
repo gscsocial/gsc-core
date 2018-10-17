@@ -1,27 +1,23 @@
 package org.gsc.db.api;
 
-import static com.googlecode.cqengine.query.QueryFactory.applyThresholds;
 import static com.googlecode.cqengine.query.QueryFactory.ascending;
 import static com.googlecode.cqengine.query.QueryFactory.equal;
 import static com.googlecode.cqengine.query.QueryFactory.orderBy;
 import static com.googlecode.cqengine.query.QueryFactory.queryOptions;
-import static com.googlecode.cqengine.query.QueryFactory.threshold;
-import static com.googlecode.cqengine.query.option.EngineThresholds.INDEX_ORDERING_SELECTIVITY;
+import static org.gsc.config.Parameter.DatabaseConstants.TRANSACTIONS_COUNT_LIMIT_MAX;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
-import com.googlecode.cqengine.query.QueryFactory;
 import com.googlecode.cqengine.resultset.ResultSet;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.config.Parameter.DatabaseConstants;
-import org.gsc.db.api.index.TransactionIndex;
-import org.gsc.core.exception.NonUniqueObjectException;
-import org.gsc.db.api.index.Index;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.gsc.db.api.index.Index;
+import org.gsc.db.api.index.TransactionIndex;
+import org.gsc.core.exception.NonUniqueObjectException;
 import org.gsc.protos.Protocol.Transaction;
 
 @Component
@@ -103,11 +99,10 @@ public class StoreAPI {
     try (ResultSet<Transaction> resultSet =
         index.retrieve(
             equal(TransactionIndex.OWNERS, address),
-            QueryFactory.queryOptions(
-                QueryFactory.orderBy(ascending(TransactionIndex.TIMESTAMP)),
-                applyThresholds(threshold(INDEX_ORDERING_SELECTIVITY, 1.0))))) {
-      if (limit > DatabaseConstants.TRANSACTIONS_COUNT_LIMIT_MAX) {
-        limit = DatabaseConstants.TRANSACTIONS_COUNT_LIMIT_MAX;
+            queryOptions(
+                orderBy(ascending(TransactionIndex.TIMESTAMP))))) {
+      if (limit > TRANSACTIONS_COUNT_LIMIT_MAX) {
+        limit = TRANSACTIONS_COUNT_LIMIT_MAX;
       }
       return ImmutableList.copyOf(Streams.stream(resultSet).skip(offset).limit(limit).iterator());
     }
@@ -122,11 +117,10 @@ public class StoreAPI {
     try (ResultSet<Transaction> resultSet =
         index.retrieve(
             equal(TransactionIndex.TOS, address),
-            QueryFactory.queryOptions(
-                QueryFactory.orderBy(ascending(TransactionIndex.TIMESTAMP)),
-                applyThresholds(threshold(INDEX_ORDERING_SELECTIVITY, 1.0))))) {
-      if (limit > DatabaseConstants.TRANSACTIONS_COUNT_LIMIT_MAX) {
-        limit = DatabaseConstants.TRANSACTIONS_COUNT_LIMIT_MAX;
+            queryOptions(
+                orderBy(ascending(TransactionIndex.TIMESTAMP))))) {
+      if (limit > TRANSACTIONS_COUNT_LIMIT_MAX) {
+        limit = TRANSACTIONS_COUNT_LIMIT_MAX;
       }
       return ImmutableList.copyOf(Streams.stream(resultSet).skip(offset).limit(limit).iterator());
     }

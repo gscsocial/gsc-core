@@ -1,6 +1,6 @@
 package org.gsc.core.exception;
 
-public class BadTransactionException extends GscException {
+public class BadTransactionException extends GSCException {
 
   public BadTransactionException() {
     super();
