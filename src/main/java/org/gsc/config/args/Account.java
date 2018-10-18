@@ -51,7 +51,7 @@ public class Account implements Serializable {
   public void setAddress(final byte[] address) {
     if (!Wallet.addressValid(address)){
       throw new IllegalArgumentException(
-          "The address(" + StringUtil.createReadableString(address) + ") must be a 21 bytes.");
+              "The address(" + StringUtil.createReadableString(address) + ") must be a 21 bytes.");
     }
     this.address = address;
   }

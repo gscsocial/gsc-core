@@ -69,9 +69,9 @@ public class Node implements Serializable {
 
   public String getEnodeURL() {
     return new StringBuilder("enode://")
-        .append(ByteArray.toHexString(id)).append("@")
-        .append(host).append(":")
-        .append(port).toString();
+            .append(ByteArray.toHexString(id)).append("@")
+            .append(host).append(":")
+            .append(port).toString();
   }
 
   public Node(String enodeURL) {
@@ -138,10 +138,10 @@ public class Node implements Serializable {
   @Override
   public String toString() {
     return "Node{" +
-        " host='" + host + '\'' +
-        ", port=" + port +
-        ", id=" + ByteArray.toHexString(id) +
-        '}';
+            " host='" + host + '\'' +
+            ", port=" + port +
+            ", id=" + ByteArray.toHexString(id) +
+            '}';
   }
 
   @Override

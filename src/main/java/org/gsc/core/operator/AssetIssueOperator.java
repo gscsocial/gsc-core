@@ -52,7 +52,7 @@ public class AssetIssueOperator extends AbstractOperator {
       byte[] ownerAddress = assetIssueContract.getOwnerAddress().toByteArray();
       AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
       String name = new String(assetIssueWrapper.getName().toByteArray(),
-          Charset.forName("UTF-8")); // getName().toStringUtf8()
+              Charset.forName("UTF-8")); // getName().toStringUtf8()
       long order = 0;
       byte[] key = name.getBytes();
       while (this.dbManager.getAssetIssueStore().get(key) != null) {
@@ -62,11 +62,11 @@ public class AssetIssueOperator extends AbstractOperator {
       }
       assetIssueWrapper.setOrder(order);
       dbManager.getAssetIssueStore()
-          .put(assetIssueWrapper.createDbKey(), assetIssueWrapper);
+              .put(assetIssueWrapper.createDbKey(), assetIssueWrapper);
 
       dbManager.adjustBalance(ownerAddress, -fee);
       dbManager.adjustBalance(dbManager.getAccountStore().getBlackhole().getAddress().toByteArray(),
-          fee);//send to blackhole
+              fee);//send to blackhole
 
       AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
       List<FrozenSupply> frozenSupplyList = assetIssueContract.getFrozenSupplyList();
@@ -79,9 +79,9 @@ public class AssetIssueOperator extends AbstractOperator {
         FrozenSupply next = iterator.next();
         long expireTime = startTime + next.getFrozenDays() * 86_400_000;
         Frozen newFrozen = Frozen.newBuilder()
-            .setFrozenBalance(next.getFrozenAmount())
-            .setExpireTime(expireTime)
-            .build();
+                .setFrozenBalance(next.getFrozenAmount())
+                .setExpireTime(expireTime)
+                .build();
         frozenList.add(newFrozen);
         remainSupply -= next.getFrozenAmount();
       }
@@ -89,7 +89,7 @@ public class AssetIssueOperator extends AbstractOperator {
       accountWrapper.setAssetIssuedName(assetIssueWrapper.createDbKey());
       accountWrapper.addAsset(assetIssueWrapper.createDbKey(), remainSupply);
       accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-          .addAllFrozenSupply(frozenList).build());
+              .addAllFrozenSupply(frozenList).build());
 
       dbManager.getAccountStore().put(ownerAddress, accountWrapper);
       ret.setStatus(fee, code.SUCESS);
@@ -120,8 +120,8 @@ public class AssetIssueOperator extends AbstractOperator {
     }
     if (!this.contract.is(AssetIssueContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [AssetIssueContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [AssetIssueContract],real type[" + contract
+                      .getClass() + "]");
     }
     final AssetIssueContract assetIssueContract;
     try {
@@ -138,14 +138,14 @@ public class AssetIssueOperator extends AbstractOperator {
       throw new ContractValidateException("Invalid assetName");
     }
     if ((!assetIssueContract.getAbbr().isEmpty()) && !TransactionUtil
-        .validAssetName(assetIssueContract.getAbbr().toByteArray())) {
+            .validAssetName(assetIssueContract.getAbbr().toByteArray())) {
       throw new ContractValidateException("Invalid abbreviation for token");
     }
     if (!TransactionUtil.validUrl(assetIssueContract.getUrl().toByteArray())) {
       throw new ContractValidateException("Invalid url");
     }
     if (!TransactionUtil
-        .validAssetDescription(assetIssueContract.getDescription().toByteArray())) {
+            .validAssetDescription(assetIssueContract.getDescription().toByteArray())) {
       throw new ContractValidateException("Invalid description");
     }
 
@@ -186,19 +186,19 @@ public class AssetIssueOperator extends AbstractOperator {
     }
 
     if (assetIssueContract.getFrozenSupplyCount()
-        > this.dbManager.getDynamicPropertiesStore().getMaxFrozenSupplyNumber()) {
+            > this.dbManager.getDynamicPropertiesStore().getMaxFrozenSupplyNumber()) {
       throw new ContractValidateException("Frozen supply list length is too long");
     }
 
     if (assetIssueContract.getFreeAssetNetLimit() < 0
-        || assetIssueContract.getFreeAssetNetLimit() >=
-        dbManager.getDynamicPropertiesStore().getOneDayNetLimit()) {
+            || assetIssueContract.getFreeAssetNetLimit() >=
+            dbManager.getDynamicPropertiesStore().getOneDayNetLimit()) {
       throw new ContractValidateException("Invalid FreeAssetNetLimit");
     }
 
     if (assetIssueContract.getPublicFreeAssetNetLimit() < 0
-        || assetIssueContract.getPublicFreeAssetNetLimit() >=
-        dbManager.getDynamicPropertiesStore().getOneDayNetLimit()) {
+            || assetIssueContract.getPublicFreeAssetNetLimit() >=
+            dbManager.getDynamicPropertiesStore().getOneDayNetLimit()) {
       throw new ContractValidateException("Invalid PublicFreeAssetNetLimit");
     }
 
@@ -217,10 +217,10 @@ public class AssetIssueOperator extends AbstractOperator {
         throw new ContractValidateException("Frozen supply cannot exceed total supply");
       }
       if (!(next.getFrozenDays() >= minFrozenSupplyTime
-          && next.getFrozenDays() <= maxFrozenSupplyTime)) {
+              && next.getFrozenDays() <= maxFrozenSupplyTime)) {
         throw new ContractValidateException(
-            "frozenDuration must be less than " + maxFrozenSupplyTime + " days "
-                + "and more than " + minFrozenSupplyTime + " days");
+                "frozenDuration must be less than " + maxFrozenSupplyTime + " days "
+                        + "and more than " + minFrozenSupplyTime + " days");
       }
       remainSupply -= next.getFrozenAmount();
     }

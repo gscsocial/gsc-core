@@ -27,23 +27,23 @@ public class NeighborsMessage extends Message {
   public NeighborsMessage(Node from, List<Node> neighbours) {
     super(DISCOVER_NEIGHBORS, null);
     Builder builder = Neighbours.newBuilder()
-        .setTimestamp(System.currentTimeMillis());
+            .setTimestamp(System.currentTimeMillis());
 
     neighbours.forEach(neighbour -> {
       Endpoint endpoint = Endpoint.newBuilder()
-          .setAddress(ByteString.copyFrom(ByteArray.fromString(neighbour.getHost())))
-          .setPort(neighbour.getPort())
-          .setNodeId(ByteString.copyFrom(neighbour.getId()))
-          .build();
+              .setAddress(ByteString.copyFrom(ByteArray.fromString(neighbour.getHost())))
+              .setPort(neighbour.getPort())
+              .setNodeId(ByteString.copyFrom(neighbour.getId()))
+              .build();
 
       builder.addNeighbours(endpoint);
     });
 
     Endpoint fromEndpoint = Endpoint.newBuilder()
-        .setAddress(ByteString.copyFrom(ByteArray.fromString(from.getHost())))
-        .setPort(from.getPort())
-        .setNodeId(ByteString.copyFrom(from.getId()))
-        .build();
+            .setAddress(ByteString.copyFrom(ByteArray.fromString(from.getHost())))
+            .setPort(from.getPort())
+            .setNodeId(ByteString.copyFrom(from.getId()))
+            .build();
 
     builder.setFrom(fromEndpoint);
 
@@ -55,9 +55,9 @@ public class NeighborsMessage extends Message {
   public List<Node> getNodes() {
     List<Node> nodes = new ArrayList<>();
     neighbours.getNeighboursList().forEach(neighbour -> nodes.add(
-        new Node(neighbour.getNodeId().toByteArray(),
-            ByteArray.toStr(neighbour.getAddress().toByteArray()),
-            neighbour.getPort())));
+            new Node(neighbour.getNodeId().toByteArray(),
+                    ByteArray.toStr(neighbour.getAddress().toByteArray()),
+                    neighbour.getPort())));
     return nodes;
   }
 

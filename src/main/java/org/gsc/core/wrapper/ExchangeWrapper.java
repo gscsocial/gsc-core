@@ -27,12 +27,12 @@ public class ExchangeWrapper implements ProtoWrapper<Exchange> {
   public ExchangeWrapper(ByteString address, final long id, long createTime,
                          byte[] firstTokenID, byte[] secondTokenID) {
     this.exchange = Exchange.newBuilder()
-        .setExchangeId(id)
-        .setCreatorAddress(address)
-        .setCreateTime(createTime)
-        .setFirstTokenId(ByteString.copyFrom(firstTokenID))
-        .setSecondTokenId(ByteString.copyFrom(secondTokenID))
-        .build();
+            .setExchangeId(id)
+            .setCreatorAddress(address)
+            .setCreateTime(createTime)
+            .setFirstTokenId(ByteString.copyFrom(firstTokenID))
+            .setSecondTokenId(ByteString.copyFrom(secondTokenID))
+            .build();
   }
 
   public long getID() {
@@ -41,8 +41,8 @@ public class ExchangeWrapper implements ProtoWrapper<Exchange> {
 
   public void setID(long id) {
     this.exchange = this.exchange.toBuilder()
-        .setExchangeId(id)
-        .build();
+            .setExchangeId(id)
+            .build();
   }
 
   public ByteString getCreatorAddress() {
@@ -51,15 +51,15 @@ public class ExchangeWrapper implements ProtoWrapper<Exchange> {
 
   public void setExchangeAddress(ByteString address) {
     this.exchange = this.exchange.toBuilder()
-        .setCreatorAddress(address)
-        .build();
+            .setCreatorAddress(address)
+            .build();
   }
 
   public void setBalance(long firstTokenBalance, long secondTokenBalance) {
     this.exchange = this.exchange.toBuilder()
-        .setFirstTokenBalance(firstTokenBalance)
-        .setSecondTokenBalance(secondTokenBalance)
-        .build();
+            .setFirstTokenBalance(firstTokenBalance)
+            .setSecondTokenBalance(secondTokenBalance)
+            .build();
   }
 
   public long getCreateTime() {
@@ -68,8 +68,8 @@ public class ExchangeWrapper implements ProtoWrapper<Exchange> {
 
   public void setCreateTime(long time) {
     this.exchange = this.exchange.toBuilder()
-        .setCreateTime(time)
-        .build();
+            .setCreateTime(time)
+            .build();
   }
 
   public byte[] getFirstTokenId() {
@@ -107,20 +107,20 @@ public class ExchangeWrapper implements ProtoWrapper<Exchange> {
 
     if (this.exchange.getFirstTokenId().equals(ByteString.copyFrom(sellTokenID))) {
       buyTokenQuant = processor.exchange(firstTokenBalance,
-          secondTokenBalance,
-          sellTokenQuant);
+              secondTokenBalance,
+              sellTokenQuant);
       this.exchange = this.exchange.toBuilder()
-          .setFirstTokenBalance(firstTokenBalance + sellTokenQuant)
-          .setSecondTokenBalance(secondTokenBalance - buyTokenQuant)
-          .build();
+              .setFirstTokenBalance(firstTokenBalance + sellTokenQuant)
+              .setSecondTokenBalance(secondTokenBalance - buyTokenQuant)
+              .build();
     } else {
       buyTokenQuant = processor.exchange(secondTokenBalance,
-          firstTokenBalance,
-          sellTokenQuant);
+              firstTokenBalance,
+              sellTokenQuant);
       this.exchange = this.exchange.toBuilder()
-          .setFirstTokenBalance(firstTokenBalance - buyTokenQuant)
-          .setSecondTokenBalance(secondTokenBalance + sellTokenQuant)
-          .build();
+              .setFirstTokenBalance(firstTokenBalance - buyTokenQuant)
+              .setSecondTokenBalance(secondTokenBalance + sellTokenQuant)
+              .build();
     }
 
     return buyTokenQuant;

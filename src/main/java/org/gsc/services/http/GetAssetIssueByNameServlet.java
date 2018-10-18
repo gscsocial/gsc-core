@@ -25,7 +25,7 @@ public class GetAssetIssueByNameServlet extends HttpServlet {
     try {
       String input = request.getParameter("value");
       AssetIssueContract reply = wallet
-          .getAssetIssueByName(ByteString.copyFrom(ByteArray.fromHexString(input)));
+              .getAssetIssueByName(ByteString.copyFrom(ByteArray.fromHexString(input)));
       if (reply != null) {
         response.getWriter().println(JsonFormat.printToString(reply));
       } else {
@@ -44,7 +44,7 @@ public class GetAssetIssueByNameServlet extends HttpServlet {
   protected void doPost(HttpServletRequest request, HttpServletResponse response) {
     try {
       String input = request.getReader().lines()
-          .collect(Collectors.joining(System.lineSeparator()));
+              .collect(Collectors.joining(System.lineSeparator()));
       BytesMessage.Builder build = BytesMessage.newBuilder();
       JsonFormat.merge(input, build);
       AssetIssueContract reply = wallet.getAssetIssueByName(build.getValue());

@@ -35,7 +35,7 @@ public class OperatorFactory {
     Preconditions.checkNotNull(manager, "manager is null");
     Protocol.Transaction.raw rawData = transactionWrapper.getInstance().getRawData();
     rawData.getContractList()
-        .forEach(contract -> operatorList.add(getActuatorByContract(contract, manager)));
+            .forEach(contract -> operatorList.add(getActuatorByContract(contract, manager)));
     return operatorList;
   }
 

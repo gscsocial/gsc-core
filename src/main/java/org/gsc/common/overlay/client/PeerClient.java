@@ -59,15 +59,15 @@ public class PeerClient {
     public ChannelFuture connectAsync(NodeHandler nodeHandler, boolean discoveryMode) {
         Node node = nodeHandler.getNode();
         return connectAsync(node.getHost(), node.getPort(), node.getHexId(), discoveryMode)
-            .addListener((ChannelFutureListener) future -> {
-                if (!future.isSuccess()) {
-                    logger.error("connect to {}:{} fail,cause:{}", node.getHost(), node.getPort(),
-                        future.cause().getMessage());
-                    nodeHandler.getNodeStatistics().nodeDisconnectedLocal(ReasonCode.CONNECT_FAIL);
-                    nodeHandler.getNodeStatistics().notifyDisconnect();
-                    future.channel().close();
-                }
-            });
+                .addListener((ChannelFutureListener) future -> {
+                    if (!future.isSuccess()) {
+                        logger.error("connect to {}:{} fail,cause:{}", node.getHost(), node.getPort(),
+                                future.cause().getMessage());
+                        nodeHandler.getNodeStatistics().nodeDisconnectedLocal(ReasonCode.CONNECT_FAIL);
+                        nodeHandler.getNodeStatistics().notifyDisconnect();
+                        future.channel().close();
+                    }
+                });
     }
 
     public ChannelFuture connectAsync(String host, int port, String remoteId, boolean discoveryMode) {

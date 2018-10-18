@@ -30,7 +30,7 @@ public class TransactionIndex extends AbstractIndex<TransactionWrapper, Transact
 
   @Autowired
   public TransactionIndex(
-      @Qualifier("transactionStore") final IGSCChainBase<TransactionWrapper> database) {
+          @Qualifier("transactionStore") final IGSCChainBase<TransactionWrapper> database) {
     super(database);
   }
 
@@ -46,23 +46,23 @@ public class TransactionIndex extends AbstractIndex<TransactionWrapper, Transact
   @Override
   protected void setAttribute() {
     Transaction_ID =
-        attribute("transaction id",
-            bytes -> new TransactionWrapper(getObject(bytes)).getTransactionId().toString());
+            attribute("transaction id",
+                    bytes -> new TransactionWrapper(getObject(bytes)).getTransactionId().toString());
     OWNERS =
-        attribute(String.class, "owner address",
-            bytes -> getObject(bytes).getRawData().getContractList().stream()
-                .map(TransactionWrapper::getOwner)
-                .filter(Objects::nonNull)
-                .map(ByteArray::toHexString)
-                .collect(Collectors.toList()));
+            attribute(String.class, "owner address",
+                    bytes -> getObject(bytes).getRawData().getContractList().stream()
+                            .map(TransactionWrapper::getOwner)
+                            .filter(Objects::nonNull)
+                            .map(ByteArray::toHexString)
+                            .collect(Collectors.toList()));
     TOS =
-        attribute(String.class, "to address",
-            bytes -> getObject(bytes).getRawData().getContractList().stream()
-                .map(TransactionWrapper::getToAddress)
-                .filter(Objects::nonNull)
-                .map(ByteArray::toHexString)
-                .collect(Collectors.toList()));
+            attribute(String.class, "to address",
+                    bytes -> getObject(bytes).getRawData().getContractList().stream()
+                            .map(TransactionWrapper::getToAddress)
+                            .filter(Objects::nonNull)
+                            .map(ByteArray::toHexString)
+                            .collect(Collectors.toList()));
     TIMESTAMP =
-        attribute("timestamp", bytes -> getObject(bytes).getRawData().getTimestamp());
+            attribute("timestamp", bytes -> getObject(bytes).getRawData().getTimestamp());
   }
 }

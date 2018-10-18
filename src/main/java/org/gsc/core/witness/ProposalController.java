@@ -38,14 +38,14 @@ public class ProposalController {
     while (proposalNum > 0) {
       try {
         proposalWrapper = manager.getProposalStore()
-            .get(ProposalWrapper.calculateDbKey(proposalNum));
+                .get(ProposalWrapper.calculateDbKey(proposalNum));
       } catch (Exception ex) {
         logger.error("", ex);
       }
 
       if (proposalWrapper.hasProcessed()) {
         logger
-            .info("Proposal has processed，id:[{}],skip it and before it", proposalWrapper.getID());
+                .info("Proposal has processed，id:[{}],skip it and before it", proposalWrapper.getID());
         //proposals with number less than this one, have been processed before
         break;
       }
@@ -74,15 +74,15 @@ public class ProposalController {
     List<ByteString> activeWitnesses = this.manager.getWitnessScheduleStore().getActiveWitnesses();
     if (proposalWrapper.hasMostApprovals(activeWitnesses)) {
       logger.info(
-          "Processing proposal,id:{},it has received most approvals ,begin to set dynamic parameter,{},and set  proposal state as DISAPPROVED",
-          proposalWrapper.getID(), proposalWrapper.getParameters());
+              "Processing proposal,id:{},it has received most approvals ,begin to set dynamic parameter,{},and set  proposal state as DISAPPROVED",
+              proposalWrapper.getID(), proposalWrapper.getParameters());
       setDynamicParameters(proposalWrapper);
       proposalWrapper.setState(State.APPROVED);
       manager.getProposalStore().put(proposalWrapper.createDbKey(), proposalWrapper);
     } else {
       logger.info(
-          "Processing proposal,id:{},it has not received enough approvals,set proposal state as DISAPPROVED",
-          proposalWrapper.getID());
+              "Processing proposal,id:{},it has not received enough approvals,set proposal state as DISAPPROVED",
+              proposalWrapper.getID());
       proposalWrapper.setState(State.DISAPPROVED);
       manager.getProposalStore().put(proposalWrapper.createDbKey(), proposalWrapper);
     }

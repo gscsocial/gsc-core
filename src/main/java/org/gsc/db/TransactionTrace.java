@@ -51,7 +51,7 @@ public class TransactionTrace {
   public TransactionTrace(TransactionWrapper trx, Manager dbManager) {
     this.trx = trx;
     Transaction.Contract.ContractType contractType = this.trx.getInstance().getRawData()
-        .getContract(0).getType();
+            .getContract(0).getType();
     switch (contractType.getNumber()) {
       case ContractType.TriggerSmartContract_VALUE:
         trxType = TRX_CONTRACT_CALL_TYPE;
@@ -101,7 +101,7 @@ public class TransactionTrace {
   }
 
   public void exec(Runtime runtime)
-      throws ContractExeException, ContractValidateException {
+          throws ContractExeException, ContractValidateException {
     /**  VM execute  **/
     runtime.execute();
     runtime.go();
@@ -126,11 +126,11 @@ public class TransactionTrace {
         break;
       case TRX_CONTRACT_CALL_TYPE:
         TriggerSmartContract callContract = ContractWrapper
-            .getTriggerContractFromTransaction(trx.getInstance());
+                .getTriggerContractFromTransaction(trx.getInstance());
         callerAccount = callContract.getOwnerAddress().toByteArray();
 
         ContractWrapper contract =
-            dbManager.getContractStore().get(callContract.getContractAddress().toByteArray());
+                dbManager.getContractStore().get(callContract.getContractAddress().toByteArray());
         originAccount = contract.getInstance().getOriginAddress().toByteArray();
         percent = Math.max(100 - contract.getConsumeUserResourcePercent(), 0);
         percent = Math.min(percent, 100);
@@ -143,12 +143,12 @@ public class TransactionTrace {
     AccountWrapper origin = dbManager.getAccountStore().get(originAccount);
     AccountWrapper caller = dbManager.getAccountStore().get(callerAccount);
     receipt.payEnergyBill(
-        dbManager,
-        origin,
-        caller,
-        percent,
-        energyProcessor,
-        dbManager.getWitnessController().getHeadSlot());
+            dbManager,
+            origin,
+            caller,
+            percent,
+            energyProcessor,
+            dbManager.getWitnessController().getHeadSlot());
   }
 
   public void check() throws ReceiptCheckErrException {
@@ -173,7 +173,7 @@ public class TransactionTrace {
     }
     RuntimeException exception = runtime.getResult().getException();
     if (Objects.isNull(exception) && StringUtils
-        .isEmpty(runtime.getRuntimeError()) && !runtime.getResult().isRevert()) {
+            .isEmpty(runtime.getRuntimeError()) && !runtime.getResult().isRevert()) {
       receipt.setResult(contractResult.SUCCESS);
       return;
     }

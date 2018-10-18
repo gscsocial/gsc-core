@@ -40,5 +40,5 @@ public class P2pException extends Exception {
             return value + ", " + desc;
         }
     }
-    
+
 }

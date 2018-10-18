@@ -29,9 +29,9 @@ public class ProposalDeleteOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       final ProposalDeleteContract proposalDeleteContract = this.contract
-          .unpack(ProposalDeleteContract.class);
+              .unpack(ProposalDeleteContract.class);
       ProposalWrapper proposalWrapper = dbManager.getProposalStore().
-          get(ByteArray.fromLong(proposalDeleteContract.getProposalId()));
+              get(ByteArray.fromLong(proposalDeleteContract.getProposalId()));
 
       proposalWrapper.setState(State.CANCELED);
       dbManager.getProposalStore().put(proposalWrapper.createDbKey(), proposalWrapper);
@@ -58,8 +58,8 @@ public class ProposalDeleteOperator extends AbstractOperator {
     }
     if (!this.contract.is(ProposalDeleteContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [ProposalDeleteContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [ProposalDeleteContract],real type[" + contract
+                      .getClass() + "]");
     }
     final ProposalDeleteContract contract;
     try {
@@ -86,7 +86,7 @@ public class ProposalDeleteOperator extends AbstractOperator {
     ProposalWrapper proposalWrapper = null;
     try {
       proposalWrapper = dbManager.getProposalStore().
-          get(ByteArray.fromLong(contract.getProposalId()));
+              get(ByteArray.fromLong(contract.getProposalId()));
     } catch (ItemNotFoundException ex) {
       throw new ContractValidateException("Proposal[" + contract.getProposalId() + "] not exists");
     }
@@ -94,7 +94,7 @@ public class ProposalDeleteOperator extends AbstractOperator {
     long now = dbManager.getHeadBlockTimeStamp();
     if (!proposalWrapper.getProposalAddress().equals(contract.getOwnerAddress())) {
       throw new ContractValidateException("Proposal[" + contract.getProposalId() + "] "
-          + "is not proposed by " + readableOwnerAddress);
+              + "is not proposed by " + readableOwnerAddress);
     }
     if (now >= proposalWrapper.getExpirationTime()) {
       throw new ContractValidateException("Proposal[" + contract.getProposalId() + "] expired");

@@ -58,8 +58,8 @@ public class SetAccountIdOperator extends AbstractOperator {
     }
     if (!this.contract.is(SetAccountIdContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [SetAccountIdContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [SetAccountIdContract],real type[" + contract
+                      .getClass() + "]");
     }
     final SetAccountIdContract setAccountIdContract;
     try {

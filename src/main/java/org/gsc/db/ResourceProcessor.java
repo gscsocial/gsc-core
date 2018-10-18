@@ -25,7 +25,7 @@ abstract class ResourceProcessor {
 
   abstract void consume(TransactionWrapper trx, TransactionResultWrapper ret,
                         TransactionTrace trace)
-      throws ContractValidateException, AccountResourceInsufficientException, TooBigTransactionResultException;
+          throws ContractValidateException, AccountResourceInsufficientException, TooBigTransactionResultException;
 
   protected long increase(long lastUsage, long usage, long lastTime, long now) {
     long averageLastUsage = divideCeil(lastUsage * precision, windowSize);

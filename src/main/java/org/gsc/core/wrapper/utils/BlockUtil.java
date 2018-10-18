@@ -34,17 +34,17 @@ public class BlockUtil {
     Args args = Args.getInstance();
     GenesisBlock genesisBlockArg = args.getGenesisBlock();
     List<Transaction> transactionList =
-        genesisBlockArg.getAssets().stream()
-            .map(key -> {
-              byte[] address = key.getAddress();
-              long balance = key.getBalance();
-              return TransactionUtil.newGenesisTransaction(address, balance);
-            })
-            .collect(Collectors.toList());
+            genesisBlockArg.getAssets().stream()
+                    .map(key -> {
+                      byte[] address = key.getAddress();
+                      long balance = key.getBalance();
+                      return TransactionUtil.newGenesisTransaction(address, balance);
+                    })
+                    .collect(Collectors.toList());
 
     long timestamp = Long.parseLong(genesisBlockArg.getTimestamp());
     ByteString parentHash =
-        ByteString.copyFrom(ByteArray.fromHexString(genesisBlockArg.getParentHash()));
+            ByteString.copyFrom(ByteArray.fromHexString(genesisBlockArg.getParentHash()));
     long number = Long.parseLong(genesisBlockArg.getNumber());
 
     BlockWrapper blockWrapper = new BlockWrapper(timestamp, parentHash, number, transactionList);

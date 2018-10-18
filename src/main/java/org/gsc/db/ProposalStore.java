@@ -29,10 +29,10 @@ public class ProposalStore extends GSCStoreWithRevoking<ProposalWrapper> {
    */
   public List<ProposalWrapper> getAllProposals() {
     return Streams.stream(iterator())
-        .map(Map.Entry::getValue)
-        .sorted(
-            (ProposalWrapper a, ProposalWrapper b) -> a.getCreateTime() <= b.getCreateTime() ? 1
-                : -1)
-        .collect(Collectors.toList());
+            .map(Map.Entry::getValue)
+            .sorted(
+                    (ProposalWrapper a, ProposalWrapper b) -> a.getCreateTime() <= b.getCreateTime() ? 1
+                            : -1)
+            .collect(Collectors.toList());
   }
 }

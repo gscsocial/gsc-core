@@ -30,7 +30,7 @@ import org.gsc.common.overlay.discover.node.NodeManager;
 
 
 public class MessageHandler extends SimpleChannelInboundHandler<UdpEvent>
-    implements Consumer<UdpEvent> {
+        implements Consumer<UdpEvent> {
 
   private static final org.slf4j.Logger logger = LoggerFactory.getLogger("MessageHandler");
 
@@ -51,18 +51,18 @@ public class MessageHandler extends SimpleChannelInboundHandler<UdpEvent>
   @Override
   public void channelRead0(ChannelHandlerContext ctx, UdpEvent udpEvent) {
     logger.debug("rcv udp msg type {}, len {} from {} ",
-        udpEvent.getMessage().getType(),
-        udpEvent.getMessage().getSendData().length,
-        udpEvent.getAddress());
+            udpEvent.getMessage().getType(),
+            udpEvent.getMessage().getSendData().length,
+            udpEvent.getAddress());
     eventHandler.handleEvent(udpEvent);
   }
 
   @Override
   public void accept(UdpEvent udpEvent) {
     logger.debug("send udp msg type {}, len {} to {} ",
-        udpEvent.getMessage().getType(),
-        udpEvent.getMessage().getSendData().length,
-        udpEvent.getAddress());
+            udpEvent.getMessage().getType(),
+            udpEvent.getMessage().getSendData().length,
+            udpEvent.getAddress());
     InetSocketAddress address = udpEvent.getAddress();
     sendPacket(udpEvent.getMessage().getSendData(), address);
   }

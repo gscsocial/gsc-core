@@ -77,18 +77,18 @@ public class WalletFile {
     WalletFile that = (WalletFile) o;
 
     if (getAddress() != null
-        ? !getAddress().equals(that.getAddress())
-        : that.getAddress() != null) {
+            ? !getAddress().equals(that.getAddress())
+            : that.getAddress() != null) {
       return false;
     }
     if (getCrypto() != null
-        ? !getCrypto().equals(that.getCrypto())
-        : that.getCrypto() != null) {
+            ? !getCrypto().equals(that.getCrypto())
+            : that.getCrypto() != null) {
       return false;
     }
     if (getId() != null
-        ? !getId().equals(that.getId())
-        : that.getId() != null) {
+            ? !getId().equals(that.getId())
+            : that.getId() != null) {
       return false;
     }
     return version == that.version;
@@ -154,12 +154,12 @@ public class WalletFile {
     }
 
     @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
-        property = "kdf")
+            use = JsonTypeInfo.Id.NAME,
+            include = JsonTypeInfo.As.EXTERNAL_PROPERTY,
+            property = "kdf")
     @JsonSubTypes({
-        @JsonSubTypes.Type(value = Aes128CtrKdfParams.class, name = Wallet.AES_128_CTR),
-        @JsonSubTypes.Type(value = ScryptKdfParams.class, name = Wallet.SCRYPT)
+            @JsonSubTypes.Type(value = Aes128CtrKdfParams.class, name = Wallet.AES_128_CTR),
+            @JsonSubTypes.Type(value = ScryptKdfParams.class, name = Wallet.SCRYPT)
     })
     // To support my Ether Wallet keys uncomment this annotation & comment out the above
     //  @JsonDeserialize(using = KdfParamsDeserialiser.class)
@@ -192,32 +192,32 @@ public class WalletFile {
       Crypto that = (Crypto) o;
 
       if (getCipher() != null
-          ? !getCipher().equals(that.getCipher())
-          : that.getCipher() != null) {
+              ? !getCipher().equals(that.getCipher())
+              : that.getCipher() != null) {
         return false;
       }
       if (getCiphertext() != null
-          ? !getCiphertext().equals(that.getCiphertext())
-          : that.getCiphertext() != null) {
+              ? !getCiphertext().equals(that.getCiphertext())
+              : that.getCiphertext() != null) {
         return false;
       }
       if (getCipherparams() != null
-          ? !getCipherparams().equals(that.getCipherparams())
-          : that.getCipherparams() != null) {
+              ? !getCipherparams().equals(that.getCipherparams())
+              : that.getCipherparams() != null) {
         return false;
       }
       if (getKdf() != null
-          ? !getKdf().equals(that.getKdf())
-          : that.getKdf() != null) {
+              ? !getKdf().equals(that.getKdf())
+              : that.getKdf() != null) {
         return false;
       }
       if (getKdfparams() != null
-          ? !getKdfparams().equals(that.getKdfparams())
-          : that.getKdfparams() != null) {
+              ? !getKdfparams().equals(that.getKdfparams())
+              : that.getKdfparams() != null) {
         return false;
       }
       return getMac() != null
-          ? getMac().equals(that.getMac()) : that.getMac() == null;
+              ? getMac().equals(that.getMac()) : that.getMac() == null;
     }
 
     @Override
@@ -263,7 +263,7 @@ public class WalletFile {
       CipherParams that = (CipherParams) o;
 
       return getIv() != null
-          ? getIv().equals(that.getIv()) : that.getIv() == null;
+              ? getIv().equals(that.getIv()) : that.getIv() == null;
     }
 
     @Override
@@ -344,12 +344,12 @@ public class WalletFile {
         return false;
       }
       if (getPrf() != null
-          ? !getPrf().equals(that.getPrf())
-          : that.getPrf() != null) {
+              ? !getPrf().equals(that.getPrf())
+              : that.getPrf() != null) {
         return false;
       }
       return getSalt() != null
-          ? getSalt().equals(that.getSalt()) : that.getSalt() == null;
+              ? getSalt().equals(that.getSalt()) : that.getSalt() == null;
     }
 
     @Override
@@ -440,7 +440,7 @@ public class WalletFile {
         return false;
       }
       return getSalt() != null
-          ? getSalt().equals(that.getSalt()) : that.getSalt() == null;
+              ? getSalt().equals(that.getSalt()) : that.getSalt() == null;
     }
 
     @Override
@@ -460,8 +460,8 @@ public class WalletFile {
 
     @Override
     public KdfParams deserialize(
-        JsonParser jsonParser, DeserializationContext deserializationContext)
-        throws IOException {
+            JsonParser jsonParser, DeserializationContext deserializationContext)
+            throws IOException {
 
       ObjectMapper objectMapper = (ObjectMapper) jsonParser.getCodec();
       ObjectNode root = objectMapper.readTree(jsonParser);

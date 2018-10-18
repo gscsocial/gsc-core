@@ -30,7 +30,7 @@ public class WitnessScheduleStore extends GSCStoreWithRevoking<BytesWrapper> {
     int i = 0;
     for (ByteString address : witnessesAddressList) {
       System.arraycopy(address.toByteArray(), 0,
-          ba, i * ADDRESS_BYTE_ARRAY_LENGTH, ADDRESS_BYTE_ARRAY_LENGTH);
+              ba, i * ADDRESS_BYTE_ARRAY_LENGTH, ADDRESS_BYTE_ARRAY_LENGTH);
       i++;
     }
 
@@ -40,19 +40,19 @@ public class WitnessScheduleStore extends GSCStoreWithRevoking<BytesWrapper> {
   private List<ByteString> getData(byte[] species) {
     List<ByteString> witnessesAddressList = new ArrayList<>();
     return Optional.ofNullable(getUnchecked(species))
-        .map(BytesWrapper::getData)
-        .map(ba -> {
-          int len = ba.length / ADDRESS_BYTE_ARRAY_LENGTH;
-          for (int i = 0; i < len; ++i) {
-            byte[] b = new byte[ADDRESS_BYTE_ARRAY_LENGTH];
-            System.arraycopy(ba, i * ADDRESS_BYTE_ARRAY_LENGTH, b, 0, ADDRESS_BYTE_ARRAY_LENGTH);
-            witnessesAddressList.add(ByteString.copyFrom(b));
-          }
-          logger.debug("getWitnesses:" + ByteArray.toStr(species) + witnessesAddressList);
-          return witnessesAddressList;
-        }).orElseThrow(
-            () -> new IllegalArgumentException(
-                "not found " + ByteArray.toStr(species) + "Witnesses"));
+            .map(BytesWrapper::getData)
+            .map(ba -> {
+              int len = ba.length / ADDRESS_BYTE_ARRAY_LENGTH;
+              for (int i = 0; i < len; ++i) {
+                byte[] b = new byte[ADDRESS_BYTE_ARRAY_LENGTH];
+                System.arraycopy(ba, i * ADDRESS_BYTE_ARRAY_LENGTH, b, 0, ADDRESS_BYTE_ARRAY_LENGTH);
+                witnessesAddressList.add(ByteString.copyFrom(b));
+              }
+              logger.debug("getWitnesses:" + ByteArray.toStr(species) + witnessesAddressList);
+              return witnessesAddressList;
+            }).orElseThrow(
+                    () -> new IllegalArgumentException(
+                            "not found " + ByteArray.toStr(species) + "Witnesses"));
   }
 
   public void saveActiveWitnesses(List<ByteString> witnessesAddressList) {

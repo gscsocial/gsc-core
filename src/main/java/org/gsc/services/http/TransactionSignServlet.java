@@ -29,7 +29,7 @@ public class TransactionSignServlet extends HttpServlet {
   protected void doPost(HttpServletRequest request, HttpServletResponse response) {
     try {
       String contract = request.getReader().lines()
-          .collect(Collectors.joining(System.lineSeparator()));
+              .collect(Collectors.joining(System.lineSeparator()));
       JSONObject input = JSONObject.parseObject(contract);
       String strTransaction = input.getJSONObject("transaction").toJSONString();
       Transaction transaction = Util.packTransaction(strTransaction);

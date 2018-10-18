@@ -26,7 +26,7 @@ public class GetAssetIssueByAccountServlet extends HttpServlet {
     try {
       String address = request.getParameter("address");
       AssetIssueList reply = wallet
-          .getAssetIssueByAccount(ByteString.copyFrom(ByteArray.fromHexString(address)));
+              .getAssetIssueByAccount(ByteString.copyFrom(ByteArray.fromHexString(address)));
       if (reply != null) {
         response.getWriter().println(JsonFormat.printToString(reply));
       } else {
@@ -45,7 +45,7 @@ public class GetAssetIssueByAccountServlet extends HttpServlet {
   protected void doPost(HttpServletRequest request, HttpServletResponse response) {
     try {
       String account = request.getReader().lines()
-          .collect(Collectors.joining(System.lineSeparator()));
+              .collect(Collectors.joining(System.lineSeparator()));
       Account.Builder build = Account.newBuilder();
       JsonFormat.merge(account, build);
       AssetIssueList reply = wallet.getAssetIssueByAccount(build.getAddress());

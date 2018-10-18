@@ -46,7 +46,7 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       final ParticipateAssetIssueContract participateAssetIssueContract =
-          contract.unpack(Contract.ParticipateAssetIssueContract.class);
+              contract.unpack(Contract.ParticipateAssetIssueContract.class);
       long cost = participateAssetIssueContract.getAmount();
 
       //subtract from owner address
@@ -58,8 +58,8 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
 
       //calculate the exchange amount
       AssetIssueWrapper assetIssueWrapper =
-          this.dbManager.getAssetIssueStore()
-              .get(participateAssetIssueContract.getAssetName().toByteArray());
+              this.dbManager.getAssetIssueStore()
+                      .get(participateAssetIssueContract.getAssetName().toByteArray());
       long exchangeAmount = Math.multiplyExact(cost, assetIssueWrapper.getNum());
       exchangeAmount = Math.floorDiv(exchangeAmount, assetIssueWrapper.getGscNum());
       ownerAccount.addAssetAmount(assetIssueWrapper.createDbKey(), exchangeAmount);
@@ -99,14 +99,14 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
     }
     if (!this.contract.is(ParticipateAssetIssueContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [ParticipateAssetIssueContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [ParticipateAssetIssueContract],real type[" + contract
+                      .getClass() + "]");
     }
 
     final ParticipateAssetIssueContract participateAssetIssueContract;
     try {
       participateAssetIssueContract =
-          this.contract.unpack(ParticipateAssetIssueContract.class);
+              this.contract.unpack(ParticipateAssetIssueContract.class);
     } catch (InvalidProtocolBufferException e) {
       logger.debug(e.getMessage(), e);
       throw new ContractValidateException(e.getMessage());
@@ -154,12 +154,12 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
 
       if (!Arrays.equals(toAddress, assetIssueWrapper.getOwnerAddress().toByteArray())) {
         throw new ContractValidateException(
-            "The asset is not issued by " + ByteArray.toHexString(toAddress));
+                "The asset is not issued by " + ByteArray.toHexString(toAddress));
       }
       //Whether the exchange can be processed: to see if the exchange can be the exact int
       long now = dbManager.getDynamicPropertiesStore().getLatestBlockHeaderTimestamp();
       if (now >= assetIssueWrapper.getEndTime() || now < assetIssueWrapper
-          .getStartTime()) {
+              .getStartTime()) {
         throw new ContractValidateException("No longer valid period!");
       }
 

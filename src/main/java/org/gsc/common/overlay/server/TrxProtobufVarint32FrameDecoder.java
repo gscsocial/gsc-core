@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 public class TrxProtobufVarint32FrameDecoder extends ByteToMessageDecoder {
 
   private final static Logger logger = LoggerFactory
-      .getLogger(TrxProtobufVarint32FrameDecoder.class);
+          .getLogger(TrxProtobufVarint32FrameDecoder.class);
 
   private final static int maxMsgLength = 5 * 1024 * 1024;//5M
 
@@ -28,7 +28,7 @@ public class TrxProtobufVarint32FrameDecoder extends ByteToMessageDecoder {
     int length = readRawVarint32(in);
     if (length >= maxMsgLength) {
       logger.error("recv a big msg, host : {}, msg length is : {}", ctx.channel().remoteAddress(),
-          length);
+              length);
       in.clear();
       channel.close();
       return;

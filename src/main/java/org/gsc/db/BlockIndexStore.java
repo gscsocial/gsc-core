@@ -26,7 +26,7 @@ public class BlockIndexStore extends GSCStoreWithRevoking<BytesWrapper> {
   }
 
   public BlockId get(Long num)
-      throws ItemNotFoundException {
+          throws ItemNotFoundException {
     BytesWrapper value = getUnchecked(ByteArray.fromLong(num));
     if (value == null || value.getData() == null) {
       throw new ItemNotFoundException("number: " + num + " is not found!");
@@ -36,7 +36,7 @@ public class BlockIndexStore extends GSCStoreWithRevoking<BytesWrapper> {
 
   @Override
   public BytesWrapper get(byte[] key)
-      throws ItemNotFoundException {
+          throws ItemNotFoundException {
     byte[] value = revokingDB.getUnchecked(key);
     if (ArrayUtils.isEmpty(value)) {
       throw new ItemNotFoundException("number: " + Arrays.toString(key) + " is not found!");

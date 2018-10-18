@@ -26,8 +26,8 @@ public class WitnessStore extends GSCStoreWithRevoking<WitnessWrapper> {
    */
   public List<WitnessWrapper> getAllWitnesses() {
     return Streams.stream(iterator())
-        .map(Entry::getValue)
-        .collect(Collectors.toList());
+            .map(Entry::getValue)
+            .collect(Collectors.toList());
   }
 
   @Override

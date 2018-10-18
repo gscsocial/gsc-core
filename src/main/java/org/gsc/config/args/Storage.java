@@ -117,17 +117,17 @@ public class Storage {
 
   public static int getDbVersionFromConfig(final Config config) {
     return config.hasPath(DB_VERSION_CONFIG_KEY) ?
-        config.getInt(DB_VERSION_CONFIG_KEY) : DEFAULT_DB_VERSION;
+            config.getInt(DB_VERSION_CONFIG_KEY) : DEFAULT_DB_VERSION;
   }
 
   public static String getDbDirectoryFromConfig(final Config config) {
     return config.hasPath(DB_DIRECTORY_CONFIG_KEY) ?
-        config.getString(DB_DIRECTORY_CONFIG_KEY) : DEFAULT_DB_DIRECTORY;
+            config.getString(DB_DIRECTORY_CONFIG_KEY) : DEFAULT_DB_DIRECTORY;
   }
 
   public static String getIndexDirectoryFromConfig(final Config config) {
     return config.hasPath(INDEX_DIRECTORY_CONFIG_KEY) ?
-        config.getString(INDEX_DIRECTORY_CONFIG_KEY) : DEFAULT_INDEX_DIRECTORY;
+            config.getString(INDEX_DIRECTORY_CONFIG_KEY) : DEFAULT_INDEX_DIRECTORY;
   }
 
   /**
@@ -138,8 +138,8 @@ public class Storage {
   public void setPropertyMapFromConfig(final Config config) {
     if (config.hasPath(PROPERTIES_CONFIG_KEY)) {
       propertyMap = config.getObjectList(PROPERTIES_CONFIG_KEY).stream()
-          .map(Storage::createProperty)
-          .collect(Collectors.toMap(Property::getName, p -> p));
+              .map(Storage::createProperty)
+              .collect(Collectors.toMap(Property::getName, p -> p));
     }
   }
 
@@ -227,36 +227,36 @@ public class Storage {
 
     if (conf.containsKey(CREATE_IF_MISSING_CONFIG_KEY)) {
       dbOptions.createIfMissing(
-          Boolean.parseBoolean(
-              conf.get(CREATE_IF_MISSING_CONFIG_KEY).unwrapped().toString()
-          )
+              Boolean.parseBoolean(
+                      conf.get(CREATE_IF_MISSING_CONFIG_KEY).unwrapped().toString()
+              )
       );
     }
 
     if (conf.containsKey(PARANOID_CHECKS_CONFIG_KEY)) {
       dbOptions.paranoidChecks(
-          Boolean.parseBoolean(
-              conf.get(PARANOID_CHECKS_CONFIG_KEY).unwrapped().toString()
-          )
+              Boolean.parseBoolean(
+                      conf.get(PARANOID_CHECKS_CONFIG_KEY).unwrapped().toString()
+              )
       );
     }
 
     if (conf.containsKey(VERITY_CHECK_SUMS_CONFIG_KEY)) {
       dbOptions.verifyChecksums(
-          Boolean.parseBoolean(
-              conf.get(VERITY_CHECK_SUMS_CONFIG_KEY).unwrapped().toString()
-          )
+              Boolean.parseBoolean(
+                      conf.get(VERITY_CHECK_SUMS_CONFIG_KEY).unwrapped().toString()
+              )
       );
     }
 
     if (conf.containsKey(COMPRESSION_TYPE_CONFIG_KEY)) {
       try {
         dbOptions.compressionType(
-            CompressionType.getCompressionTypeByPersistentId(
-                Integer.parseInt(
-                    conf.get(COMPRESSION_TYPE_CONFIG_KEY).unwrapped().toString()
+                CompressionType.getCompressionTypeByPersistentId(
+                        Integer.parseInt(
+                                conf.get(COMPRESSION_TYPE_CONFIG_KEY).unwrapped().toString()
+                        )
                 )
-            )
         );
       } catch (NumberFormatException e) {
         throw new IllegalArgumentException("[storage.properties] compressionType must be Integer type.");
@@ -266,9 +266,9 @@ public class Storage {
     if (conf.containsKey(BLOCK_SIZE_CONFIG_KEY)) {
       try {
         dbOptions.blockSize(
-            Integer.parseInt(
-                conf.get(BLOCK_SIZE_CONFIG_KEY).unwrapped().toString()
-            )
+                Integer.parseInt(
+                        conf.get(BLOCK_SIZE_CONFIG_KEY).unwrapped().toString()
+                )
         );
       } catch (NumberFormatException e) {
         throw new IllegalArgumentException("[storage.properties] blockSize must be Integer type.");
@@ -278,9 +278,9 @@ public class Storage {
     if (conf.containsKey(WRITE_BUFFER_SIZE_CONFIG_KEY)) {
       try {
         dbOptions.writeBufferSize(
-            Integer.parseInt(
-                conf.get(WRITE_BUFFER_SIZE_CONFIG_KEY).unwrapped().toString()
-            )
+                Integer.parseInt(
+                        conf.get(WRITE_BUFFER_SIZE_CONFIG_KEY).unwrapped().toString()
+                )
         );
       } catch (NumberFormatException e) {
         throw new IllegalArgumentException("[storage.properties] writeBufferSize must be Integer type.");
@@ -290,9 +290,9 @@ public class Storage {
     if (conf.containsKey(CACHE_SIZE_CONFIG_KEY)) {
       try {
         dbOptions.cacheSize(
-            Long.parseLong(
-                conf.get(CACHE_SIZE_CONFIG_KEY).unwrapped().toString()
-            )
+                Long.parseLong(
+                        conf.get(CACHE_SIZE_CONFIG_KEY).unwrapped().toString()
+                )
         );
       } catch (NumberFormatException e) {
         throw new IllegalArgumentException("[storage.properties] cacheSize must be Long type.");
@@ -302,9 +302,9 @@ public class Storage {
     if (conf.containsKey(MAX_OPEN_FILES_CONFIG_KEY)) {
       try {
         dbOptions.maxOpenFiles(
-            Integer.parseInt(
-                conf.get(MAX_OPEN_FILES_CONFIG_KEY).unwrapped().toString()
-            )
+                Integer.parseInt(
+                        conf.get(MAX_OPEN_FILES_CONFIG_KEY).unwrapped().toString()
+                )
         );
       } catch (NumberFormatException e) {
         throw new IllegalArgumentException("[storage.properties] maxOpenFiles must be Integer type.");

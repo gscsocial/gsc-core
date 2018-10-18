@@ -45,7 +45,7 @@ public class TransactionInfoWrapper implements ProtoWrapper<TransactionInfo> {
 
   public void setId(byte[] id) {
     this.transactionInfo = this.transactionInfo.toBuilder()
-        .setId(ByteString.copyFrom(id)).build();
+            .setId(ByteString.copyFrom(id)).build();
   }
 
   public byte[] getId() {
@@ -79,12 +79,12 @@ public class TransactionInfoWrapper implements ProtoWrapper<TransactionInfo> {
 
   public void setResMessage(String message) {
     this.transactionInfo = this.transactionInfo.toBuilder()
-        .setResMessage(ByteString.copyFromUtf8(message)).build();
+            .setResMessage(ByteString.copyFromUtf8(message)).build();
   }
 
   public void addFee(long fee) {
     this.transactionInfo = this.transactionInfo.toBuilder()
-        .setFee(this.transactionInfo.getFee() + fee).build();
+            .setFee(this.transactionInfo.getFee() + fee).build();
   }
 
   public long getBlockNumber() {
@@ -93,7 +93,7 @@ public class TransactionInfoWrapper implements ProtoWrapper<TransactionInfo> {
 
   public void setBlockNumber(long num) {
     this.transactionInfo = this.transactionInfo.toBuilder().setBlockNumber(num)
-        .build();
+            .build();
   }
 
   public long getBlockTimeStamp() {
@@ -102,32 +102,32 @@ public class TransactionInfoWrapper implements ProtoWrapper<TransactionInfo> {
 
   public void setBlockTimeStamp(long time) {
     this.transactionInfo = this.transactionInfo.toBuilder().setBlockTimeStamp(time)
-        .build();
+            .build();
   }
 
   public void setContractResult(byte[] ret) {
     this.transactionInfo = this.transactionInfo.toBuilder()
-        .addContractResult(ByteString.copyFrom(ret))
-        .build();
+            .addContractResult(ByteString.copyFrom(ret))
+            .build();
   }
 
   public void setContractAddress(byte[] contractAddress) {
     this.transactionInfo = this.transactionInfo.toBuilder()
-        .setContractAddress(ByteString.copyFrom(contractAddress))
-        .build();
+            .setContractAddress(ByteString.copyFrom(contractAddress))
+            .build();
   }
 
   public void setReceipt(ReceiptWrapper receipt) {
     this.transactionInfo = this.transactionInfo.toBuilder()
-        .setReceipt(receipt.getReceipt())
-        .build();
+            .setReceipt(receipt.getReceipt())
+            .build();
   }
 
 
   public void addAllLog(List<Log> logs) {
     this.transactionInfo = this.transactionInfo.toBuilder()
-        .addAllLog(logs)
-        .build();
+            .addAllLog(logs)
+            .build();
   }
 
   @Override
@@ -147,7 +147,7 @@ public class TransactionInfoWrapper implements ProtoWrapper<TransactionInfo> {
 
     builder.setResult(code.SUCESS);
     if (StringUtils.isNoneEmpty(runtime.getRuntimeError()) || Objects
-        .nonNull(runtime.getResult().getException())) {
+            .nonNull(runtime.getResult().getException())) {
       builder.setResult(code.FAILED);
       builder.setResMessage(ByteString.copyFromUtf8(runtime.getRuntimeError()));
     }
@@ -166,9 +166,9 @@ public class TransactionInfoWrapper implements ProtoWrapper<TransactionInfo> {
 
     List<Log> logList = new ArrayList<>();
     programResult.getLogInfoList().forEach(
-        logInfo -> {
-          logList.add(LogInfo.buildLog(logInfo));
-        }
+            logInfo -> {
+              logList.add(LogInfo.buildLog(logInfo));
+            }
     );
     builder.addAllLog(logList);
 

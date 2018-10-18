@@ -33,10 +33,10 @@ public class ChannelManager {
   private final Map<ByteArrayWrapper, Channel> activePeers = new ConcurrentHashMap<>();
 
   private Cache<InetAddress, ReasonCode> badPeers = CacheBuilder.newBuilder().maximumSize(10000)
-      .expireAfterWrite(1, TimeUnit.HOURS).recordStats().build();
+          .expireAfterWrite(1, TimeUnit.HOURS).recordStats().build();
 
   private Cache<InetAddress, ReasonCode> recentlyDisconnected = CacheBuilder.newBuilder().maximumSize(1000)
-      .expireAfterWrite(30, TimeUnit.SECONDS).recordStats().build();
+          .expireAfterWrite(30, TimeUnit.SECONDS).recordStats().build();
 
   @Getter
   private Map<InetAddress, Node> trustPeers = new ConcurrentHashMap<>();
@@ -61,7 +61,7 @@ public class ChannelManager {
 
     if (this.args.getNodeListenPort() > 0) {
       new Thread(() -> peerServer.start(Args.getInstance().getNodeListenPort()),
-          "PeerServerThread").start();
+              "PeerServerThread").start();
     }
 
     for (Node node : args.getPassiveNodes()){

@@ -50,8 +50,8 @@ public class ByteArrayWrapper implements Comparable<ByteArrayWrapper>, Serializa
     }
     byte[] otherData = ((ByteArrayWrapper) other).getData();
     return FastByteComparisons.compareTo(
-        data, 0, data.length,
-        otherData, 0, otherData.length) == 0;
+            data, 0, data.length,
+            otherData, 0, otherData.length) == 0;
   }
 
   @Override
@@ -62,8 +62,8 @@ public class ByteArrayWrapper implements Comparable<ByteArrayWrapper>, Serializa
   @Override
   public int compareTo(ByteArrayWrapper o) {
     return FastByteComparisons.compareTo(
-        data, 0, data.length,
-        o.getData(), 0, o.getData().length);
+            data, 0, data.length,
+            o.getData(), 0, o.getData().length);
   }
 
   public byte[] getData() {

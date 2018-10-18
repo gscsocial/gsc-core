@@ -20,13 +20,13 @@ package org.gsc.common.overlay.server;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
-import io.netty.handler.timeout.ReadTimeoutException;
-import io.netty.handler.timeout.ReadTimeoutHandler;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import io.netty.handler.timeout.ReadTimeoutException;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.gsc.net.peer.GSCHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +102,7 @@ public class Channel {
   private boolean isTrustPeer;
 
   public void init(ChannelPipeline pipeline, String remoteId, boolean discoveryMode,
-      ChannelManager channelManager, PeerConnectionDelegate peerDel) {
+                   ChannelManager channelManager, PeerConnectionDelegate peerDel) {
 
     this.channelManager = channelManager;
 
@@ -176,7 +176,7 @@ public class Channel {
       logger.error("Read timeout, {}", address);
     } else if (baseThrowable instanceof P2pException) {
       logger.error("type: {}, info: {}, {}", ((P2pException) baseThrowable).getType(),
-          baseThrowable.getMessage(), address);
+              baseThrowable.getMessage(), address);
     } else if (errMsg != null && errMsg.contains("Connection reset by peer")) {
       logger.error("{}, {}", errMsg, address);
     } else {
@@ -281,7 +281,7 @@ public class Channel {
     }
     Channel channel = (Channel) o;
     if (inetSocketAddress != null ? !inetSocketAddress.equals(channel.inetSocketAddress)
-        : channel.inetSocketAddress != null) {
+            : channel.inetSocketAddress != null) {
       return false;
     }
     if (node != null ? !node.equals(channel.node) : channel.node != null) {
@@ -301,6 +301,6 @@ public class Channel {
   public String toString() {
     return String.format("%s | %s", inetSocketAddress, getPeerId());
   }
-  
+
 }
 

@@ -1287,11 +1287,11 @@ public class RpcApiService implements Service {
             responseObserver.onCompleted();
         }
 
-    @Override
-    public void deployContract(org.gsc.protos.Contract.CreateSmartContract request,
-        io.grpc.stub.StreamObserver<TransactionExtention> responseObserver) {
-      createTransactionExtention(request, ContractType.CreateSmartContract, responseObserver);
-    }
+        @Override
+        public void deployContract(org.gsc.protos.Contract.CreateSmartContract request,
+                                   io.grpc.stub.StreamObserver<TransactionExtention> responseObserver) {
+            createTransactionExtention(request, ContractType.CreateSmartContract, responseObserver);
+        }
 
 
 //        public void deployContract(org.gsc.protos.Contract.CreateSmartContract request,

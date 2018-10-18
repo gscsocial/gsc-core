@@ -28,12 +28,12 @@ public class CreateWitnessServlet extends HttpServlet {
   protected void doPost(HttpServletRequest request, HttpServletResponse response) {
     try {
       String contract = request.getReader().lines()
-          .collect(Collectors.joining(System.lineSeparator()));
+              .collect(Collectors.joining(System.lineSeparator()));
       WitnessCreateContract.Builder build = WitnessCreateContract.newBuilder();
       JsonFormat.merge(contract, build);
       Transaction tx = wallet
-          .createTransactionCapsule(build.build(), ContractType.WitnessCreateContract)
-          .getInstance();
+              .createTransactionCapsule(build.build(), ContractType.WitnessCreateContract)
+              .getInstance();
       response.getWriter().println(Util.printTransaction(tx));
     } catch (Exception e) {
       logger.debug("Exception: {}", e.getMessage());

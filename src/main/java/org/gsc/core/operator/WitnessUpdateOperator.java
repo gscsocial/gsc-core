@@ -23,7 +23,7 @@ public class WitnessUpdateOperator extends AbstractOperator {
 
   private void updateWitness(final WitnessUpdateContract contract) {
     WitnessWrapper witnessCapsule = this.dbManager.getWitnessStore()
-        .get(contract.getOwnerAddress().toByteArray());
+            .get(contract.getOwnerAddress().toByteArray());
     witnessCapsule.setUrl(contract.getUpdateUrl().toStringUtf8());
     this.dbManager.getWitnessStore().put(witnessCapsule.createDbKey(), witnessCapsule);
   }
@@ -33,7 +33,7 @@ public class WitnessUpdateOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       final WitnessUpdateContract witnessUpdateContract = this.contract
-          .unpack(WitnessUpdateContract.class);
+              .unpack(WitnessUpdateContract.class);
       this.updateWitness(witnessUpdateContract);
       ret.setStatus(fee, code.SUCESS);
     } catch (final InvalidProtocolBufferException e) {
@@ -54,8 +54,8 @@ public class WitnessUpdateOperator extends AbstractOperator {
     }
     if (!this.contract.is(WitnessUpdateContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [WitnessUpdateContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [WitnessUpdateContract],real type[" + contract
+                      .getClass() + "]");
     }
     final WitnessUpdateContract contract;
     try {

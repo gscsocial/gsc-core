@@ -22,53 +22,53 @@ import static com.googlecode.cqengine.query.QueryFactory.attribute;
 @Slf4j
 public class AssetIssueIndex extends AbstractIndex<AssetIssueWrapper, AssetIssueContract> {
 
-  public static Attribute<WrappedByteArray, String> AssetIssue_OWNER_ADDRESS;
-  public static SimpleAttribute<WrappedByteArray, String> AssetIssue_NAME;
-  public static Attribute<WrappedByteArray, Long> AssetIssue_START;
-  public static Attribute<WrappedByteArray, Long> AssetIssue_END;
+    public static Attribute<WrappedByteArray, String> AssetIssue_OWNER_ADDRESS;
+    public static SimpleAttribute<WrappedByteArray, String> AssetIssue_NAME;
+    public static Attribute<WrappedByteArray, Long> AssetIssue_START;
+    public static Attribute<WrappedByteArray, Long> AssetIssue_END;
 
-  @Autowired
-  public AssetIssueIndex(
-      @Qualifier("assetIssueStore") final IGSCChainBase<AssetIssueWrapper> database) {
-    super(database);
-  }
+    @Autowired
+    public AssetIssueIndex(
+            @Qualifier("assetIssueStore") final IGSCChainBase<AssetIssueWrapper> database) {
+        super(database);
+    }
 
-  @PostConstruct
-  public void init() {
-    initIndex(DiskPersistence.onPrimaryKeyInFile(AssetIssue_NAME, indexPath));
-    index.addIndex(DiskIndex.onAttribute(AssetIssue_OWNER_ADDRESS));
+    @PostConstruct
+    public void init() {
+        initIndex(DiskPersistence.onPrimaryKeyInFile(AssetIssue_NAME, indexPath));
+        index.addIndex(DiskIndex.onAttribute(AssetIssue_OWNER_ADDRESS));
 //    index.addIndex(DiskIndex.onAttribute(AssetIssue_NAME));
-    index.addIndex(DiskIndex.onAttribute(AssetIssue_START));
-    index.addIndex(DiskIndex.onAttribute(AssetIssue_END));
-  }
+        index.addIndex(DiskIndex.onAttribute(AssetIssue_START));
+        index.addIndex(DiskIndex.onAttribute(AssetIssue_END));
+    }
 
-  @Override
-  protected void setAttribute() {
-    AssetIssue_OWNER_ADDRESS =
-        attribute(
-            "assetIssue owner address",
-            bytes -> {
-              AssetIssueContract assetIssue = getObject(bytes);
-              return ByteArray.toHexString(assetIssue.getOwnerAddress().toByteArray());
-            });
+    @Override
+    protected void setAttribute() {
+        AssetIssue_OWNER_ADDRESS =
+                attribute(
+                        "assetIssue owner address",
+                        bytes -> {
+                            AssetIssueContract assetIssue = getObject(bytes);
+                            return ByteArray.toHexString(assetIssue.getOwnerAddress().toByteArray());
+                        });
 
-    AssetIssue_NAME =
-        attribute("assetIssue name", bytes -> {
-          AssetIssueContract assetIssue = getObject(bytes);
-          return assetIssue.getName().toStringUtf8();
-        });
+        AssetIssue_NAME =
+                attribute("assetIssue name", bytes -> {
+                    AssetIssueContract assetIssue = getObject(bytes);
+                    return assetIssue.getName().toStringUtf8();
+                });
 
-    AssetIssue_START =
-        attribute("assetIssue start time", bytes -> {
-          AssetIssueContract assetIssue = getObject(bytes);
-          return assetIssue.getStartTime();
-        });
+        AssetIssue_START =
+                attribute("assetIssue start time", bytes -> {
+                    AssetIssueContract assetIssue = getObject(bytes);
+                    return assetIssue.getStartTime();
+                });
 
-    AssetIssue_END =
-        attribute("assetIssue end time", bytes -> {
-          AssetIssueContract assetIssue = getObject(bytes);
-          return assetIssue.getEndTime();
-        });
+        AssetIssue_END =
+                attribute("assetIssue end time", bytes -> {
+                    AssetIssueContract assetIssue = getObject(bytes);
+                    return assetIssue.getEndTime();
+                });
 
-  }
+    }
 }

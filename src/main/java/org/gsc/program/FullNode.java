@@ -22,8 +22,8 @@ public class FullNode {
     logger.info("Full node running.");
     //LOCAL_TESTNET_CONF
     //Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
+    //Args.setParam(args, Constant.KAY_CONF);
     Args.setParam(args, Constant.TESTNET_CONF);
-    //Args.setParam(args, Constant.TESTNET_CONF);
     Args cfgArgs = Args.getInstance();
 
     if (cfgArgs.isHelp()) {
@@ -43,7 +43,7 @@ public class FullNode {
     DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
     beanFactory.setAllowCircularReferences(false);
     GSCApplicationContext context =
-        new GSCApplicationContext(beanFactory);
+            new GSCApplicationContext(beanFactory);
     context.register(DefaultConfig.class);
 
     context.refresh();

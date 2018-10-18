@@ -50,10 +50,10 @@ public class DiscoverTask implements Runnable {
       if (round == KademliaOptions.MAX_STEPS) {
         logger.debug("Node table contains [{}] peers", nodeManager.getTable().getNodesCount());
         logger.debug("{}", String
-            .format("(KademliaOptions.MAX_STEPS) Terminating discover after %d rounds.", round));
+                .format("(KademliaOptions.MAX_STEPS) Terminating discover after %d rounds.", round));
         logger.trace("{}\n{}",
-            String.format("Nodes discovered %d ", nodeManager.getTable().getNodesCount()),
-            dumpNodes());
+                String.format("Nodes discovered %d ", nodeManager.getTable().getNodesCount()),
+                dumpNodes());
         return;
       }
 
@@ -77,10 +77,10 @@ public class DiscoverTask implements Runnable {
 
       if (tried.isEmpty()) {
         logger.debug("{}",
-            String.format("(tried.isEmpty()) Terminating discover after %d rounds.", round));
+                String.format("(tried.isEmpty()) Terminating discover after %d rounds.", round));
         logger.trace("{}\n{}",
-            String.format("Nodes discovered %d ", nodeManager.getTable().getNodesCount()),
-            dumpNodes());
+                String.format("Nodes discovered %d ", nodeManager.getTable().getNodesCount()),
+                dumpNodes());
         return;
       }
 

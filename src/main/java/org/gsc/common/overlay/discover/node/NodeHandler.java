@@ -205,7 +205,7 @@ public class NodeHandler {
     if (waitForPong) {
       waitForPong = false;
       getNodeStatistics().discoverMessageLatency
-          .add((double) System.currentTimeMillis() - pingSent);
+              .add((double) System.currentTimeMillis() - pingSent);
       getNodeStatistics().lastPongReplyTime.set(System.currentTimeMillis());
       node.setId(msg.getFrom().getId());
       if (msg.getVersion() != Args.getInstance().getNodeP2pVersion()) {
@@ -294,7 +294,7 @@ public class NodeHandler {
   @Override
   public String toString() {
     return "NodeHandler[state: " + state + ", node: " + node.getHost() + ":" + node.getPort()
-        + ", id=" + (node.getId().length > 0 ? Hex.toHexString(node.getId(), 0, 4) : "empty") + "]";
+            + ", id=" + (node.getId().length > 0 ? Hex.toHexString(node.getId(), 0, 4) : "empty") + "]";
   }
 
 }

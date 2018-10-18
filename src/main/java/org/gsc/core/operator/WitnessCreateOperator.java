@@ -29,7 +29,7 @@ public class WitnessCreateOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       final WitnessCreateContract witnessCreateContract = this.contract
-          .unpack(WitnessCreateContract.class);
+              .unpack(WitnessCreateContract.class);
       this.createWitness(witnessCreateContract);
       ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
@@ -54,8 +54,8 @@ public class WitnessCreateOperator extends AbstractOperator {
     }
     if (!this.contract.is(WitnessCreateContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [WitnessCreateContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [WitnessCreateContract],real type[" + contract
+                      .getClass() + "]");
     }
     final WitnessCreateContract contract;
     try {
@@ -90,7 +90,7 @@ public class WitnessCreateOperator extends AbstractOperator {
     }
 
     if (accountWrapper.getBalance() < dbManager.getDynamicPropertiesStore()
-        .getAccountUpgradeCost()) {
+            .getAccountUpgradeCost()) {
       throw new ContractValidateException("balance < AccountUpgradeCost");
     }
 
@@ -108,17 +108,17 @@ public class WitnessCreateOperator extends AbstractOperator {
   }
 
   private void createWitness(final WitnessCreateContract witnessCreateContract)
-      throws BalanceInsufficientException {
+          throws BalanceInsufficientException {
     //Create Witness by witnessCreateContract
     final WitnessWrapper witnessCapsule = new WitnessWrapper(
-        witnessCreateContract.getOwnerAddress(),
-        0,
-        witnessCreateContract.getUrl().toStringUtf8());
+            witnessCreateContract.getOwnerAddress(),
+            0,
+            witnessCreateContract.getUrl().toStringUtf8());
 
     logger.debug("createWitness,address[{}]", witnessCapsule.createReadableString());
     this.dbManager.getWitnessStore().put(witnessCapsule.createDbKey(), witnessCapsule);
     AccountWrapper accountWrapper = this.dbManager.getAccountStore()
-        .get(witnessCapsule.createDbKey());
+            .get(witnessCapsule.createDbKey());
     accountWrapper.setIsWitness(true);
     this.dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     long cost = dbManager.getDynamicPropertiesStore().getAccountUpgradeCost();

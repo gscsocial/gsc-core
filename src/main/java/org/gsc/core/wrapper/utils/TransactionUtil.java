@@ -28,19 +28,19 @@ import org.gsc.protos.Protocol.Transaction.Contract;
 public class TransactionUtil {
 
   public static Transaction newGenesisTransaction(byte[] key, long value)
-      throws IllegalArgumentException {
+          throws IllegalArgumentException {
 
     if (!Wallet.addressValid(key)) {
       throw new IllegalArgumentException("Invalid address");
     }
     TransferContract transferContract = TransferContract.newBuilder()
-        .setAmount(value)
-        .setOwnerAddress(ByteString.copyFrom("0x000000000000000000000".getBytes()))
-        .setToAddress(ByteString.copyFrom(key))
-        .build();
+            .setAmount(value)
+            .setOwnerAddress(ByteString.copyFrom("0x000000000000000000000".getBytes()))
+            .setToAddress(ByteString.copyFrom(key))
+            .build();
 
     return new TransactionWrapper(transferContract,
-        Contract.ContractType.TransferContract).getInstance();
+            Contract.ContractType.TransferContract).getInstance();
   }
 
   /**

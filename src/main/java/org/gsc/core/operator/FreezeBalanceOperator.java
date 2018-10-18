@@ -35,7 +35,7 @@ public class FreezeBalanceOperator extends AbstractOperator {
       throw new ContractExeException(e.getMessage());
     }
     AccountWrapper accountWrapper = dbManager.getAccountStore()
-        .get(freezeBalanceContract.getOwnerAddress().toByteArray());
+            .get(freezeBalanceContract.getOwnerAddress().toByteArray());
 
     long now = dbManager.getHeadBlockTimeStamp();
     long duration = freezeBalanceContract.getFrozenDuration() * 86_400_000;
@@ -48,47 +48,47 @@ public class FreezeBalanceOperator extends AbstractOperator {
         long newFrozenBalance = freezeBalanceContract.getFrozenBalance() + currentFrozenBalance;
 
         Frozen newFrozen = Frozen.newBuilder()
-            .setFrozenBalance(newFrozenBalance)
-            .setExpireTime(now + duration)
-            .build();
+                .setFrozenBalance(newFrozenBalance)
+                .setExpireTime(now + duration)
+                .build();
 
         long frozenCount = accountWrapper.getFrozenCount();
         if (frozenCount == 0) {
           accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-              .addFrozen(newFrozen)
-              .setBalance(newBalance)
-              .build());
+                  .addFrozen(newFrozen)
+                  .setBalance(newBalance)
+                  .build());
         } else {
           accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-              .setFrozen(0, newFrozen)
-              .setBalance(newBalance)
-              .build()
+                  .setFrozen(0, newFrozen)
+                  .setBalance(newBalance)
+                  .build()
           );
         }
         dbManager.getDynamicPropertiesStore()
-            .addTotalNetWeight(freezeBalanceContract.getFrozenBalance() / 1000_000L);
+                .addTotalNetWeight(freezeBalanceContract.getFrozenBalance() / 1000_000L);
         break;
       case ENERGY:
         long currentFrozenBalanceForEnergy = accountWrapper.getAccountResource()
-            .getFrozenBalanceForEnergy()
-            .getFrozenBalance();
+                .getFrozenBalanceForEnergy()
+                .getFrozenBalance();
         long newFrozenBalanceForEnergy =
-            freezeBalanceContract.getFrozenBalance() + currentFrozenBalanceForEnergy;
+                freezeBalanceContract.getFrozenBalance() + currentFrozenBalanceForEnergy;
 
         Frozen newFrozenForEnergy = Frozen.newBuilder()
-            .setFrozenBalance(newFrozenBalanceForEnergy)
-            .setExpireTime(now + duration)
-            .build();
+                .setFrozenBalance(newFrozenBalanceForEnergy)
+                .setExpireTime(now + duration)
+                .build();
 
         AccountResource newAccountResource = accountWrapper.getAccountResource().toBuilder()
-            .setFrozenBalanceForEnergy(newFrozenForEnergy).build();
+                .setFrozenBalanceForEnergy(newFrozenForEnergy).build();
 
         accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-            .setAccountResource(newAccountResource)
-            .setBalance(newBalance)
-            .build());
+                .setAccountResource(newAccountResource)
+                .setBalance(newBalance)
+                .build());
         dbManager.getDynamicPropertiesStore()
-            .addTotalEnergyWeight(freezeBalanceContract.getFrozenBalance() / 1000_000L);
+                .addTotalEnergyWeight(freezeBalanceContract.getFrozenBalance() / 1000_000L);
         break;
     }
 
@@ -110,8 +110,8 @@ public class FreezeBalanceOperator extends AbstractOperator {
     }
     if (!contract.is(FreezeBalanceContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [FreezeBalanceContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [FreezeBalanceContract],real type[" + contract
+                      .getClass() + "]");
     }
 
     final FreezeBalanceContract freezeBalanceContract;
@@ -130,7 +130,7 @@ public class FreezeBalanceOperator extends AbstractOperator {
     if (accountWrapper == null) {
       String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
       throw new ContractValidateException(
-          "Account[" + readableOwnerAddress + "] not exists");
+              "Account[" + readableOwnerAddress + "] not exists");
     }
 
     long frozenBalance = freezeBalanceContract.getFrozenBalance();
@@ -160,8 +160,8 @@ public class FreezeBalanceOperator extends AbstractOperator {
 
     if (!(frozenDuration >= minFrozenTime && frozenDuration <= maxFrozenTime)) {
       throw new ContractValidateException(
-          "frozenDuration must be less than " + maxFrozenTime + " days "
-              + "and more than " + minFrozenTime + " days");
+              "frozenDuration must be less than " + maxFrozenTime + " days "
+                      + "and more than " + minFrozenTime + " days");
     }
 
     switch (freezeBalanceContract.getResource()) {
@@ -171,7 +171,7 @@ public class FreezeBalanceOperator extends AbstractOperator {
         break;
       default:
         throw new ContractValidateException(
-            "ResourceCode error,valid ResourceCode[BANDWIDTH、ENERGY]");
+                "ResourceCode error,valid ResourceCode[BANDWIDTH、ENERGY]");
     }
 
     return true;

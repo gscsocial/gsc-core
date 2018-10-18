@@ -136,7 +136,7 @@ public class FullNodeHttpApiService implements Service {
       context.addServlet(new ServletHolder(updateAssetServlet), "/updateasset");
       context.addServlet(new ServletHolder(listNodesServlet), "/listnodes");
       context
-          .addServlet(new ServletHolder(getAssetIssueByAccountServlet), "/getassetissuebyaccount");
+              .addServlet(new ServletHolder(getAssetIssueByAccountServlet), "/getassetissuebyaccount");
       context.addServlet(new ServletHolder(getAccountNetServlet), "/getaccountnet");
       context.addServlet(new ServletHolder(getAssetIssueByNameServlet), "/getassetissuebyname"); //
       context.addServlet(new ServletHolder(getNowBlockServlet), "/getnowblock");
@@ -148,10 +148,10 @@ public class FullNodeHttpApiService implements Service {
       context.addServlet(new ServletHolder(listWitnessesServlet), "/listwitnesses");
       context.addServlet(new ServletHolder(getAssetIssueListServlet), "/getassetissuelist");
       context.addServlet(new ServletHolder(getPaginatedAssetIssueListServlet),
-          "/getpaginatedassetissuelist");
+              "/getpaginatedassetissuelist");
       context.addServlet(new ServletHolder(totalTransactionServlet), "/totaltransaction");
       context
-          .addServlet(new ServletHolder(getNextMaintenanceTimeServlet), "/getnextmaintenancetime");
+              .addServlet(new ServletHolder(getNextMaintenanceTimeServlet), "/getnextmaintenancetime");
       context.addServlet(new ServletHolder(createAddressServlet), "/createaddress");
       context.addServlet(new ServletHolder(easyTransferServlet), "/easytransfer");
       context.addServlet(new ServletHolder(easyTransferByPrivateServlet), "/easytransferbyprivate");

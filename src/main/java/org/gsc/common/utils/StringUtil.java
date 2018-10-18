@@ -49,14 +49,14 @@ public class StringUtil {
 
   public static List<String> getAddressStringList(Collection<ByteString> collection) {
     return collection.stream()
-        .map(bytes -> Wallet.encode58Check(bytes.toByteArray()))
-        .collect(Collectors.toList());
+            .map(bytes -> Wallet.encode58Check(bytes.toByteArray()))
+            .collect(Collectors.toList());
   }
 
   public static List<String> getAddressStringListFromByteArray(Collection<byte[]> collection) {
     return collection.stream()
-        .map(bytes -> createReadableString(bytes))
-        .collect(Collectors.toList());
+            .map(bytes -> createReadableString(bytes))
+            .collect(Collectors.toList());
   }
 
   public static ByteString hexString2ByteString(String hexString) {

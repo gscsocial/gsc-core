@@ -72,14 +72,14 @@ public class TriggerSmartContractServlet extends HttpServlet {
    *
    */
   protected void doPost(HttpServletRequest request, HttpServletResponse response)
-      throws IOException {
+          throws IOException {
     TriggerSmartContract.Builder build = TriggerSmartContract.newBuilder();
     TransactionExtention.Builder trxExtBuilder = TransactionExtention.newBuilder();
     Return.Builder retBuilder = Return.newBuilder();
 
     try {
       String contract = request.getReader().lines()
-          .collect(Collectors.joining(System.lineSeparator()));
+              .collect(Collectors.joining(System.lineSeparator()));
 
       JsonFormat.merge(contract, build);
       JSONObject jsonObject = JSONObject.parseObject(contract);
@@ -93,7 +93,7 @@ public class TriggerSmartContractServlet extends HttpServlet {
       long feeLimit = jsonObject.getLongValue("fee_limit");//
       System.out.println("5");
       TransactionWrapper trxCap = wallet
-          .createTransactionCapsule(build.build(), ContractType.TriggerSmartContract);
+              .createTransactionCapsule(build.build(), ContractType.TriggerSmartContract);
 
       Transaction.Builder txBuilder = trxCap.getInstance().toBuilder();
       Transaction.raw.Builder rawBuilder = trxCap.getInstance().getRawData().toBuilder();
@@ -101,17 +101,17 @@ public class TriggerSmartContractServlet extends HttpServlet {
       txBuilder.setRawData(rawBuilder);
 
       Transaction trx = wallet
-          .triggerContract(build.build(), new TransactionWrapper(txBuilder.build()), trxExtBuilder,
-              retBuilder);
+              .triggerContract(build.build(), new TransactionWrapper(txBuilder.build()), trxExtBuilder,
+                      retBuilder);
       trxExtBuilder.setTransaction(trx);
       trxExtBuilder.setTxid(trxCap.getTransactionId().getByteString());
       retBuilder.setResult(true).setCode(response_code.SUCCESS);
     } catch (ContractValidateException e) {
       retBuilder.setResult(false).setCode(response_code.CONTRACT_VALIDATE_ERROR)
-          .setMessage(ByteString.copyFromUtf8(e.getMessage()));
+              .setMessage(ByteString.copyFromUtf8(e.getMessage()));
     } catch (Exception e) {
       retBuilder.setResult(false).setCode(response_code.OTHER_ERROR)
-          .setMessage(ByteString.copyFromUtf8(e.getClass() + " : " + e.getMessage()));
+              .setMessage(ByteString.copyFromUtf8(e.getClass() + " : " + e.getMessage()));
     }
     trxExtBuilder.setResult(retBuilder);
     response.getWriter().println(Util.printTransactionExtention(trxExtBuilder.build()));

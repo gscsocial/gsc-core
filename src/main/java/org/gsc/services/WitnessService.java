@@ -38,12 +38,12 @@ import org.gsc.core.witness.WitnessController;
 public class WitnessService implements Service {
 
   private static final int MIN_PARTICIPATION_RATE = Args.getInstance()
-      .getMinParticipationRate(); // MIN_PARTICIPATION_RATE * 1%
+          .getMinParticipationRate(); // MIN_PARTICIPATION_RATE * 1%
   private static final int PRODUCE_TIME_OUT = 500; // ms
   private Application gscApp;
   @Getter
   protected Map<ByteString, WitnessWrapper> localWitnessStateMap = Maps
-      .newHashMap(); //  <address,WitnessWrapper>
+          .newHashMap(); //  <address,WitnessWrapper>
   private Thread generateThread;
 
   private volatile boolean isRunning = false;
@@ -83,39 +83,39 @@ public class WitnessService implements Service {
    * Cycle thread to generate blocks
    */
   private Runnable scheduleProductionLoop =
-      () -> {
-        if (localWitnessStateMap == null || localWitnessStateMap.keySet().isEmpty()) {
-          logger.error("LocalWitnesses is null");
-          return;
-        }
-
-        while (isRunning) {
-          try {
-            if (this.needSyncCheck) {
-              Thread.sleep(500L);
-            } else {
-              DateTime time = DateTime.now();
-              long timeToNextSecond = ChainConstant.BLOCK_PRODUCED_INTERVAL
-                  - (time.getSecondOfMinute() * 1000 + time.getMillisOfSecond())
-                  % ChainConstant.BLOCK_PRODUCED_INTERVAL;
-              if (timeToNextSecond < 50L) {
-                timeToNextSecond = timeToNextSecond + ChainConstant.BLOCK_PRODUCED_INTERVAL;
-              }
-              DateTime nextTime = time.plus(timeToNextSecond);
-              logger.debug(
-                  "ProductionLoop sleep : " + timeToNextSecond + " ms,next time:" + nextTime);
-              Thread.sleep(timeToNextSecond);
+          () -> {
+            if (localWitnessStateMap == null || localWitnessStateMap.keySet().isEmpty()) {
+              logger.error("LocalWitnesses is null");
+              return;
             }
-            this.blockProductionLoop();
-          } catch (InterruptedException ex) {
-            logger.info("ProductionLoop interrupted");
-          } catch (Exception ex) {
-            logger.error("unknown exception happened in witness loop", ex);
-          } catch (Throwable throwable) {
-            logger.error("unknown throwable happened in witness loop", throwable);
-          }
-        }
-      };
+
+            while (isRunning) {
+              try {
+                if (this.needSyncCheck) {
+                  Thread.sleep(500L);
+                } else {
+                  DateTime time = DateTime.now();
+                  long timeToNextSecond = ChainConstant.BLOCK_PRODUCED_INTERVAL
+                          - (time.getSecondOfMinute() * 1000 + time.getMillisOfSecond())
+                          % ChainConstant.BLOCK_PRODUCED_INTERVAL;
+                  if (timeToNextSecond < 50L) {
+                    timeToNextSecond = timeToNextSecond + ChainConstant.BLOCK_PRODUCED_INTERVAL;
+                  }
+                  DateTime nextTime = time.plus(timeToNextSecond);
+                  logger.debug(
+                          "ProductionLoop sleep : " + timeToNextSecond + " ms,next time:" + nextTime);
+                  Thread.sleep(timeToNextSecond);
+                }
+                this.blockProductionLoop();
+              } catch (InterruptedException ex) {
+                logger.info("ProductionLoop interrupted");
+              } catch (Exception ex) {
+                logger.error("unknown exception happened in witness loop", ex);
+              } catch (Throwable throwable) {
+                logger.error("unknown throwable happened in witness loop", throwable);
+              }
+            }
+          };
 
   /**
    * Loop to generate blocks
@@ -152,11 +152,11 @@ public class WitnessService implements Service {
         now = DateTime.now().getMillis();
       } else {
         logger.debug("Not sync ,now:{},headBlockTime:{},headBlockNumber:{},headBlockId:{}",
-            new DateTime(now),
-            new DateTime(this.gscApp.getDbManager().getDynamicPropertiesStore()
-                .getLatestBlockHeaderTimestamp()),
-            this.gscApp.getDbManager().getDynamicPropertiesStore().getLatestBlockHeaderNumber(),
-            this.gscApp.getDbManager().getDynamicPropertiesStore().getLatestBlockHeaderHash());
+                new DateTime(now),
+                new DateTime(this.gscApp.getDbManager().getDynamicPropertiesStore()
+                        .getLatestBlockHeaderTimestamp()),
+                this.gscApp.getDbManager().getDynamicPropertiesStore().getLatestBlockHeaderNumber(),
+                this.gscApp.getDbManager().getDynamicPropertiesStore().getLatestBlockHeaderHash());
         return BlockProductionCondition.NOT_SYNCED;
       }
     }
@@ -164,8 +164,8 @@ public class WitnessService implements Service {
     final int participation = this.controller.calculateParticipationRate(); //check node could participate or not
     if (participation < MIN_PARTICIPATION_RATE) {
       logger.warn(
-          "Participation[" + participation + "] <  MIN_PARTICIPATION_RATE[" + MIN_PARTICIPATION_RATE
-              + "]");
+              "Participation[" + participation + "] <  MIN_PARTICIPATION_RATE[" + MIN_PARTICIPATION_RATE
+                      + "]");
 
       if (logger.isDebugEnabled()) {
         this.controller.dumpParticipationLog();
@@ -179,27 +179,27 @@ public class WitnessService implements Service {
 
     if (slot == 0) { //check until time or not
       logger.info("Not time yet,now:{},headBlockTime:{},headBlockNumber:{},headBlockId:{}",
-          new DateTime(now),
-          new DateTime(
-              this.gscApp.getDbManager().getDynamicPropertiesStore()
-                  .getLatestBlockHeaderTimestamp()),
-          this.gscApp.getDbManager().getDynamicPropertiesStore().getLatestBlockHeaderNumber(),
-          this.gscApp.getDbManager().getDynamicPropertiesStore().getLatestBlockHeaderHash());
+              new DateTime(now),
+              new DateTime(
+                      this.gscApp.getDbManager().getDynamicPropertiesStore()
+                              .getLatestBlockHeaderTimestamp()),
+              this.gscApp.getDbManager().getDynamicPropertiesStore().getLatestBlockHeaderNumber(),
+              this.gscApp.getDbManager().getDynamicPropertiesStore().getLatestBlockHeaderHash());
       return BlockProductionCondition.NOT_TIME_YET;
     }
     //check time now and latest time on block
     if (now < controller.getManager().getDynamicPropertiesStore().getLatestBlockHeaderTimestamp()) {
       logger.warn("have a timestamp:{} less than or equal to the previous block:{}",
-          new DateTime(now), new DateTime(
-              this.gscApp.getDbManager().getDynamicPropertiesStore()
-                  .getLatestBlockHeaderTimestamp()));
+              new DateTime(now), new DateTime(
+                      this.gscApp.getDbManager().getDynamicPropertiesStore()
+                              .getLatestBlockHeaderTimestamp()));
       return BlockProductionCondition.EXCEPTION_PRODUCING_BLOCK;
     }
 
-     // check if belongs witness active list
+    // check if belongs witness active list
     if (!controller.activeWitnessesContain(this.getLocalWitnessStateMap().keySet())) {
       logger.info("Unelected. Elected Witnesses: {}",
-          StringUtil.getAddressStringList(controller.getActiveWitnesses()));
+              StringUtil.getAddressStringList(controller.getActiveWitnesses()));
       return BlockProductionCondition.UNELECTED;
     }
 
@@ -207,8 +207,8 @@ public class WitnessService implements Service {
 
     if (!this.getLocalWitnessStateMap().containsKey(scheduledWitness)) {
       logger.info("It's not my turn, ScheduledWitness[{}],slot[{}],abSlot[{}],",
-          ByteArray.toHexString(scheduledWitness.toByteArray()), slot,
-          controller.getAbSlotAtTime(now));
+              ByteArray.toHexString(scheduledWitness.toByteArray()), slot,
+              controller.getAbSlotAtTime(now));
       return NOT_MY_TURN;
     }
 
@@ -232,19 +232,19 @@ public class WitnessService implements Service {
         return BlockProductionCondition.EXCEPTION_PRODUCING_BLOCK;
       }
       if (DateTime.now().getMillis() - now
-          > ChainConstant.BLOCK_PRODUCED_INTERVAL * ChainConstant.BLOCK_PRODUCED_TIME_OUT / 100) {
+              > ChainConstant.BLOCK_PRODUCED_INTERVAL * ChainConstant.BLOCK_PRODUCED_TIME_OUT / 100) {
         logger.warn("Task timeout ( > {}ms)，startTime:{},endTime:{}",
-            ChainConstant.BLOCK_PRODUCED_INTERVAL * ChainConstant.BLOCK_PRODUCED_TIME_OUT / 100,
-            new DateTime(now), DateTime.now());
+                ChainConstant.BLOCK_PRODUCED_INTERVAL * ChainConstant.BLOCK_PRODUCED_TIME_OUT / 100,
+                new DateTime(now), DateTime.now());
         return BlockProductionCondition.TIME_OUT;
       }
 
       logger.info(
-          "Produce block successfully, blockNumber:{}, abSlot[{}], blockId:{}, transactionSize:{}, blockTime:{}, parentBlockId:{}",
-          block.getNum(), controller.getAbSlotAtTime(now), block.getBlockId(),
-          block.getTransactions().size(),
-          new DateTime(block.getTimeStamp()),
-          this.gscApp.getDbManager().getDynamicPropertiesStore().getLatestBlockHeaderHash());
+              "Produce block successfully, blockNumber:{}, abSlot[{}], blockId:{}, transactionSize:{}, blockTime:{}, parentBlockId:{}",
+              block.getNum(), controller.getAbSlotAtTime(now), block.getBlockId(),
+              block.getTransactions().size(),
+              new DateTime(block.getTimeStamp()),
+              this.gscApp.getDbManager().getDynamicPropertiesStore().getLatestBlockHeaderHash());
       broadcastBlock(block);
 
       return BlockProductionCondition.PRODUCED;
@@ -265,9 +265,9 @@ public class WitnessService implements Service {
   }
 
   private BlockWrapper generateBlock(long when, ByteString witnessAddress)
-      throws ValidateSignatureException, ContractValidateException, ContractExeException, UnLinkedBlockException, ValidateScheduleException, AccountResourceInsufficientException, ReceiptException, TransactionTraceException {
+          throws ValidateSignatureException, ContractValidateException, ContractExeException, UnLinkedBlockException, ValidateScheduleException, AccountResourceInsufficientException, ReceiptException, TransactionTraceException {
     return gscApp.getDbManager().generateBlock(this.localWitnessStateMap.get(witnessAddress), when,
-        this.privateKeyMap.get(witnessAddress));
+            this.privateKeyMap.get(witnessAddress));
   }
 
   /**
@@ -280,7 +280,7 @@ public class WitnessService implements Service {
       final ECKey ecKey = ECKey.fromPrivate(privateKey);
       byte[] address = ecKey.getAddress();
       WitnessWrapper witnessCapsule = this.gscApp.getDbManager().getWitnessStore()
-          .get(address);
+              .get(address);
       // need handle init witness
       if (null == witnessCapsule) {
         logger.warn("WitnessWrapper[" + address + "] is not in witnessStore");

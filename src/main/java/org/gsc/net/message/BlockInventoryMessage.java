@@ -44,8 +44,8 @@ public class BlockInventoryMessage extends GSCMessage {
 
   public List<BlockId> getBlockIds() {
     return getBlockInventory().getIdsList().stream()
-        .map(blockId -> new BlockId(blockId.getHash(), blockId.getNumber()))
-        .collect(Collectors.toCollection(ArrayList::new));
+            .map(blockId -> new BlockId(blockId.getHash(), blockId.getNumber()))
+            .collect(Collectors.toCollection(ArrayList::new));
   }
 
 }

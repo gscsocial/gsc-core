@@ -55,8 +55,8 @@ public class VoteWitnessOperator extends AbstractOperator {
     }
     if (!this.contract.is(VoteWitnessContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [VoteWitnessContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [VoteWitnessContract],real type[" + contract
+                      .getClass() + "]");
     }
     final VoteWitnessContract contract;
     try {
@@ -76,12 +76,12 @@ public class VoteWitnessOperator extends AbstractOperator {
 
     if (contract.getVotesCount() == 0) {
       throw new ContractValidateException(
-          "VoteNumber must more than 0");
+              "VoteNumber must more than 0");
     }
     int maxVoteNumber = ChainConstant.MAX_VOTE_NUMBER;
     if (contract.getVotesCount() > maxVoteNumber) {
       throw new ContractValidateException(
-          "VoteNumber more than maxVoteNumber " + maxVoteNumber);
+              "VoteNumber more than maxVoteNumber " + maxVoteNumber);
     }
     try {
       Iterator<Vote> iterator = contract.getVotesList().iterator();
@@ -99,11 +99,11 @@ public class VoteWitnessOperator extends AbstractOperator {
         String readableWitnessAddress = StringUtil.createReadableString(vote.getVoteAddress());
         if (!accountStore.has(witnessCandidate)) {
           throw new ContractValidateException(
-              "Account[" + readableWitnessAddress + "] not exists");
+                  "Account[" + readableWitnessAddress + "] not exists");
         }
         if (!witnessStore.has(witnessCandidate)) {
           throw new ContractValidateException(
-              "Witness[" + readableWitnessAddress + "] not exists");
+                  "Witness[" + readableWitnessAddress + "] not exists");
         }
         sum = LongMath.checkedAdd(sum, vote.getVoteCount());
       }
@@ -111,7 +111,7 @@ public class VoteWitnessOperator extends AbstractOperator {
       AccountWrapper accountWrapper = accountStore.get(ownerAddress);
       if (accountWrapper == null) {
         throw new ContractValidateException(
-            "Account[" + readableOwnerAddress + "] not exists");
+                "Account[" + readableOwnerAddress + "] not exists");
       }
 
       long gscPower = accountWrapper.getGSCPower();
@@ -119,8 +119,8 @@ public class VoteWitnessOperator extends AbstractOperator {
       sum = LongMath.checkedMultiply(sum, 1000000L); //trx -> drop. The vote count is based on TRX
       if (sum > gscPower) {
         throw new ContractValidateException(
-            "The total number of votes[" + sum + "] is greater than the gscPower[" + gscPower
-                + "]");
+                "The total number of votes[" + sum + "] is greater than the gscPower[" + gscPower
+                        + "]");
       }
     } catch (ArithmeticException e) {
       logger.debug(e.getMessage(), e);
@@ -141,7 +141,7 @@ public class VoteWitnessOperator extends AbstractOperator {
 
     if (!votesStore.has(ownerAddress)) {
       votesCapsule = new VotesWrapper(voteContract.getOwnerAddress(),
-          accountWrapper.getVotesList());
+              accountWrapper.getVotesList());
     } else {
       votesCapsule = votesStore.get(ownerAddress);
     }
@@ -151,7 +151,7 @@ public class VoteWitnessOperator extends AbstractOperator {
 
     voteContract.getVotesList().forEach(vote -> {
       logger.debug("countVoteAccount,address[{}]",
-          ByteArray.toHexString(vote.getVoteAddress().toByteArray()));
+              ByteArray.toHexString(vote.getVoteAddress().toByteArray()));
 
       votesCapsule.addNewVotes(vote.getVoteAddress(), vote.getVoteCount());
       accountWrapper.addVotes(vote.getVoteAddress(), vote.getVoteCount());

@@ -54,7 +54,7 @@ public abstract class GSCStoreWithRevoking<T extends ProtoWrapper> implements IG
 
   // only for test
   protected GSCStoreWithRevoking(String dbName, RevokingDatabase revokingDatabase) {
-      this.revokingDB = new RevokingDBWithCachingOldValue(dbName, (AbstractRevokingStore) revokingDatabase);
+    this.revokingDB = new RevokingDBWithCachingOldValue(dbName, (AbstractRevokingStore) revokingDatabase);
   }
 
   @Override

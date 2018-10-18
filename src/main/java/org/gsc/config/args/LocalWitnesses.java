@@ -61,7 +61,7 @@ public class LocalWitnesses {
 
     if (StringUtils.isNotBlank(privateKey) && privateKey.length() != ChainConstant.PRIVATE_KEY_LENGTH) {
       throw new IllegalArgumentException(
-          "Private key(" + privateKey + ") must be " + ChainConstant.PRIVATE_KEY_LENGTH + "-bits hex string.");
+              "Private key(" + privateKey + ") must be " + ChainConstant.PRIVATE_KEY_LENGTH + "-bits hex string.");
     }
   }
 

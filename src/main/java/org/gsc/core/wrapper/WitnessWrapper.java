@@ -12,7 +12,7 @@ public class WitnessWrapper implements ProtoWrapper<Witness>, Comparable<Witness
 
   private Witness witness;
 
-  
+
   @Override
   public int compareTo(WitnessWrapper otherObject) {
     return Long.compare(otherObject.getVoteCount(), this.getVoteCount());
@@ -24,9 +24,9 @@ public class WitnessWrapper implements ProtoWrapper<Witness>, Comparable<Witness
   public WitnessWrapper(final ByteString pubKey, final String url) {
     final Witness.Builder witnessBuilder = Witness.newBuilder();
     this.witness = witnessBuilder
-        .setPubKey(pubKey)
-        .setAddress(ByteString.copyFrom(ECKey.computeAddress(pubKey.toByteArray())))
-        .setUrl(url).build();
+            .setPubKey(pubKey)
+            .setAddress(ByteString.copyFrom(ECKey.computeAddress(pubKey.toByteArray())))
+            .setUrl(url).build();
   }
 
   public WitnessWrapper(final Witness witness) {
@@ -46,8 +46,8 @@ public class WitnessWrapper implements ProtoWrapper<Witness>, Comparable<Witness
   public WitnessWrapper(final ByteString address, final long voteCount, final String url) {
     final Witness.Builder witnessBuilder = Witness.newBuilder();
     this.witness = witnessBuilder
-        .setAddress(address)
-        .setVoteCount(voteCount).setUrl(url).build();
+            .setAddress(address)
+            .setVoteCount(voteCount).setUrl(url).build();
   }
 
   public WitnessWrapper(final byte[] data) {

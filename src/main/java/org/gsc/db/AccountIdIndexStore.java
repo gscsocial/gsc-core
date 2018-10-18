@@ -50,7 +50,7 @@ public class AccountIdIndexStore extends GSCStoreWithRevoking<BytesWrapper> {
 
   private static byte[] getLowerCaseAccountId(byte[] bsAccountId) {
     return ByteString
-        .copyFromUtf8(ByteString.copyFrom(bsAccountId).toStringUtf8().toLowerCase()).toByteArray();
+            .copyFromUtf8(ByteString.copyFrom(bsAccountId).toStringUtf8().toLowerCase()).toByteArray();
   }
 
 }

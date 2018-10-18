@@ -35,7 +35,7 @@ public class NodeDelegateImpl implements NodeDelegate {
 
   @Override
   public synchronized LinkedList<Sha256Hash> handleBlock(BlockWrapper block, boolean syncMode)
-      throws BadBlockException, UnLinkedBlockException, InterruptedException, NonCommonBlockException {
+          throws BadBlockException, UnLinkedBlockException, InterruptedException, NonCommonBlockException {
 
     if (block.getInstance().getSerializedSize() > BLOCK_SIZE + 100) {
       throw new BadBlockException("block size over limit");
@@ -53,8 +53,8 @@ public class NodeDelegateImpl implements NodeDelegate {
         List<TransactionWrapper> trx = null;
         trx = block.getTransactions();
         return trx.stream()
-            .map(TransactionWrapper::getTransactionId)
-            .collect(Collectors.toCollection(LinkedList::new));
+                .map(TransactionWrapper::getTransactionId)
+                .collect(Collectors.toCollection(LinkedList::new));
       } else {
         return null;
       }
@@ -158,7 +158,7 @@ public class NodeDelegateImpl implements NodeDelegate {
 
   @Override
   public LinkedList<BlockId> getLostBlockIds(List<BlockId> blockChainSummary)
-      throws StoreException {
+          throws StoreException {
     //todo: return the remain block count.
     //todo: return the blocks it should be have.
     if (dbManager.getHeadBlockNum() == 0) {
@@ -168,18 +168,18 @@ public class NodeDelegateImpl implements NodeDelegate {
     BlockId unForkedBlockId;
 
     if (blockChainSummary.isEmpty() ||
-        (blockChainSummary.size() == 1
-            && blockChainSummary.get(0).equals(dbManager.getGenesisBlockId()))) {
+            (blockChainSummary.size() == 1
+                    && blockChainSummary.get(0).equals(dbManager.getGenesisBlockId()))) {
       unForkedBlockId = dbManager.getGenesisBlockId();
     } else if (blockChainSummary.size() == 1
-        && blockChainSummary.get(0).getNum() == 0) {
+            && blockChainSummary.get(0).getNum() == 0) {
       return new LinkedList<>(Arrays.asList(dbManager.getGenesisBlockId()));
     } else {
       //todo: find a block we all know between the summary and my db.
       Collections.reverse(blockChainSummary);
       unForkedBlockId = blockChainSummary.stream()
-          .filter(blockId -> containBlockInMainChain(blockId))
-          .findFirst().orElse(null);
+              .filter(blockId -> containBlockInMainChain(blockId))
+              .findFirst().orElse(null);
       if (unForkedBlockId == null) {
         return new LinkedList<>();
       }
@@ -189,7 +189,7 @@ public class NodeDelegateImpl implements NodeDelegate {
     //todo: limit the count of block to send peer by one time.
     long unForkedBlockIdNum = unForkedBlockId.getNum();
     long len = Longs
-        .min(dbManager.getHeadBlockNum(), unForkedBlockIdNum + NodeConstant.SYNC_FETCH_BATCH_NUM);
+            .min(dbManager.getHeadBlockNum(), unForkedBlockIdNum + NodeConstant.SYNC_FETCH_BATCH_NUM);
 
     LinkedList<BlockId> blockIds = new LinkedList<>();
     for (long i = unForkedBlockIdNum; i <= len; i++) {
@@ -201,7 +201,7 @@ public class NodeDelegateImpl implements NodeDelegate {
 
   @Override
   public Deque<BlockId> getBlockChainSummary(BlockId beginBlockId, Deque<BlockId> blockIdsToFetch)
-      throws GSCException {
+          throws GSCException {
 
     Deque<BlockId> retSummary = new LinkedList<>();
     List<BlockId> blockIds = new ArrayList<>(blockIdsToFetch);
@@ -217,8 +217,8 @@ public class NodeDelegateImpl implements NodeDelegate {
         highBlkNum = beginBlockId.getNum();
         if (highBlkNum == 0) {
           throw new GSCException(
-              "This block don't equal my genesis block hash, but it is in my DB, the block id is :"
-                  + beginBlockId.getString());
+                  "This block don't equal my genesis block hash, but it is in my DB, the block id is :"
+                          + beginBlockId.getString());
         }
         highNoForkBlkNum = highBlkNum;
         if (beginBlockId.getNum() < lowBlkNum) {
@@ -228,9 +228,9 @@ public class NodeDelegateImpl implements NodeDelegate {
         forkList = dbManager.getBlockChainHashesOnFork(beginBlockId);
         if (forkList.isEmpty()) {
           throw new UnLinkedBlockException(
-              "We want to find forkList of this block: " + beginBlockId.getString()
-                  + " ,but in KhasoDB we can not find it, It maybe a very old beginBlockId, we are sync once,"
-                  + " we switch and pop it after that time. ");
+                  "We want to find forkList of this block: " + beginBlockId.getString()
+                          + " ,but in KhasoDB we can not find it, It maybe a very old beginBlockId, we are sync once,"
+                          + " we switch and pop it after that time. ");
         }
         highNoForkBlkNum = forkList.peekLast().getNum();
         forkList.pollLast();
@@ -238,9 +238,9 @@ public class NodeDelegateImpl implements NodeDelegate {
         highBlkNum = highNoForkBlkNum + forkList.size();
         if (highNoForkBlkNum < lowBlkNum) {
           throw new UnLinkedBlockException(
-              "It is a too old block that we take it as a forked block long long ago"
-                  + "\n lowBlkNum:" + lowBlkNum
-                  + "\n highNoForkBlkNum" + highNoForkBlkNum);
+                  "It is a too old block that we take it as a forked block long long ago"
+                          + "\n lowBlkNum:" + lowBlkNum
+                          + "\n highNoForkBlkNum" + highNoForkBlkNum);
         }
       }
     } else {
@@ -251,8 +251,8 @@ public class NodeDelegateImpl implements NodeDelegate {
 
     if (!blockIds.isEmpty() && highBlkNum != blockIds.get(0).getNum() - 1) {
       logger.error("Check ERROR: highBlkNum:" + highBlkNum + ",blockIdToSyncFirstNum is "
-          + blockIds.get(0).getNum() + ",blockIdToSyncEnd is " + blockIds.get(blockIds.size() - 1)
-          .getNum());
+              + blockIds.get(0).getNum() + ",blockIdToSyncEnd is " + blockIds.get(blockIds.size() - 1)
+              .getNum());
     }
 
     long realHighBlkNum = highBlkNum + blockIds.size();
@@ -287,7 +287,7 @@ public class NodeDelegateImpl implements NodeDelegate {
       case TRX:
         try {
           return new TransactionMessage(
-              dbManager.getTransactionStore().get(hash.getBytes()).getData());
+                  dbManager.getTransactionStore().get(hash.getBytes()).getData());
         } catch (Exception e) {
           logger.error("new TransactionMessage fail", e);
         }

@@ -19,7 +19,7 @@ public class GSCMessageFactory extends MessageFactory {
       throw e;
     } catch (final Exception e) {
       throw new P2pException(P2pException.TypeEnum.PARSE_MESSAGE_FAILED,
-          "type=" + data[0] + ", len=" + data.length);
+              "type=" + data[0] + ", len=" + data.length);
     }
   }
 
@@ -27,7 +27,7 @@ public class GSCMessageFactory extends MessageFactory {
     MessageTypes receivedTypes = MessageTypes.fromByte(type);
     if (receivedTypes == null) {
       throw new P2pException(P2pException.TypeEnum.NO_SUCH_MESSAGE,
-          "type=" + type + ", len=" + packed.length);
+              "type=" + type + ", len=" + packed.length);
     }
     switch (receivedTypes) {
       case TRX:
@@ -54,7 +54,7 @@ public class GSCMessageFactory extends MessageFactory {
         return new TransactionInventoryMessage(packed);
       default:
         throw new P2pException(P2pException.TypeEnum.NO_SUCH_MESSAGE,
-            receivedTypes.toString() + ", len=" + packed.length);
+                receivedTypes.toString() + ", len=" + packed.length);
     }
   }
 }

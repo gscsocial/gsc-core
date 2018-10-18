@@ -26,7 +26,7 @@ public class Item {
     }
     Item item = (Item) o;
     return hash.equals(item.getHash()) &&
-        type.equals(item.getType());
+            type.equals(item.getType());
   }
 
   @Override

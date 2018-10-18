@@ -53,7 +53,7 @@ public interface Utils {
 
     return cb.array();
   }
-  
+
   static byte[] clone(byte[] value) {
     byte[] clone = new byte[value.length];
     System.arraycopy(value, 0, clone, 0, value.length);

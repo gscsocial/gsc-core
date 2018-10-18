@@ -30,12 +30,12 @@ public class ExchangeTransactionOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       final ExchangeTransactionContract exchangeTransactionContract = this.contract
-          .unpack(ExchangeTransactionContract.class);
+              .unpack(ExchangeTransactionContract.class);
       AccountWrapper accountWrapper = dbManager.getAccountStore()
-          .get(exchangeTransactionContract.getOwnerAddress().toByteArray());
+              .get(exchangeTransactionContract.getOwnerAddress().toByteArray());
 
       ExchangeWrapper exchangeWrapper = dbManager.getExchangeStore().
-          get(ByteArray.fromLong(exchangeTransactionContract.getExchangeId()));
+              get(ByteArray.fromLong(exchangeTransactionContract.getExchangeId()));
 
       byte[] firstTokenID = exchangeWrapper.getFirstTokenId();
       byte[] secondTokenID = exchangeWrapper.getSecondTokenId();
@@ -93,8 +93,8 @@ public class ExchangeTransactionOperator extends AbstractOperator {
     }
     if (!this.contract.is(ExchangeTransactionContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [ExchangeTransactionContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [ExchangeTransactionContract],real type[" + contract
+                      .getClass() + "]");
     }
     final ExchangeTransactionContract contract;
     try {
@@ -123,7 +123,7 @@ public class ExchangeTransactionOperator extends AbstractOperator {
     ExchangeWrapper exchangeWrapper;
     try {
       exchangeWrapper = dbManager.getExchangeStore().
-          get(ByteArray.fromLong(contract.getExchangeId()));
+              get(ByteArray.fromLong(contract.getExchangeId()));
     } catch (ItemNotFoundException ex) {
       throw new ContractValidateException("Exchange[" + contract.getExchangeId() + "] not exists");
     }
@@ -146,12 +146,12 @@ public class ExchangeTransactionOperator extends AbstractOperator {
 
     if (firstTokenBalance == 0 || secondTokenBalance == 0) {
       throw new ContractValidateException("Token balance in exchange is equal with 0,"
-          + "the exchange has been closed");
+              + "the exchange has been closed");
     }
 
     long balanceLimit = dbManager.getDynamicPropertiesStore().getExchangeBalanceLimit();
     long tokenBalance = (Arrays.equals(tokenID, firstTokenID) ? firstTokenBalance
-        : secondTokenBalance);
+            : secondTokenBalance);
     tokenBalance += tokenQuant;
     if (tokenBalance > balanceLimit) {
       throw new ContractValidateException("token balance must less than " + balanceLimit);

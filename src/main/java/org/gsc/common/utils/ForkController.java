@@ -55,8 +55,8 @@ public class ForkController {
 
   public synchronized void hardFork(TransactionWrapper capsule) throws ContractExeException {
     boolean hardFork = shouldBeForked()
-        || capsule.getInstance().getRawData().getContractList().get(0).getType().getNumber()
-        <= DISCARD_SCOPE;
+            || capsule.getInstance().getRawData().getContractList().get(0).getType().getNumber()
+            <= DISCARD_SCOPE;
     logger.info("*****hardFork:" + hardFork);
     if (!hardFork) {
       throw new ContractExeException("not yet hard forked");
@@ -83,11 +83,11 @@ public class ForkController {
     slots[slot] = version;
 
     logger.info(
-        "*******update fork:" + Arrays.toString(slots)
-            + ",witness size:" + witnesses.size()
-            + ",slot:" + slot
-            + ",witness:" + ByteUtil.toHexString(witness.toByteArray())
-            + ",version:" + version
+            "*******update fork:" + Arrays.toString(slots)
+                    + ",witness size:" + witnesses.size()
+                    + ",slot:" + slot
+                    + ",witness:" + ByteUtil.toHexString(witness.toByteArray())
+                    + ",version:" + version
     );
   }
 

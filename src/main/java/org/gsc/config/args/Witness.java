@@ -43,7 +43,7 @@ public class Witness implements Serializable {
   public void setAddress(final byte[] address) {
     if ( !Wallet.addressValid(address)){
       throw new IllegalArgumentException(
-          "The address(" + StringUtil.createReadableString(address) + ") must be a 21 bytes.");
+              "The address(" + StringUtil.createReadableString(address) + ") must be a 21 bytes.");
     }
     this.address = address;
   }
@@ -54,7 +54,7 @@ public class Witness implements Serializable {
   public void setUrl(final String url) {
     if (StringUtils.isBlank(url)) {
       throw new IllegalArgumentException(
-          "The url(" + url + ") format error.");
+              "The url(" + url + ") format error.");
     }
 
     this.url = url;

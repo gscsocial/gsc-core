@@ -31,9 +31,9 @@ public class TxOutputWrapper implements ProtoWrapper<TXOutput> {
    */
   public TxOutputWrapper(long value, String address) {
     this.txOutput = TXOutput.newBuilder()
-        .setValue(value)
-        .setPubKeyHash(ByteString.copyFrom(ByteArray.fromHexString(address)))
-        .build();
+            .setValue(value)
+            .setPubKeyHash(ByteString.copyFrom(ByteArray.fromHexString(address)))
+            .build();
   }
 
   public TXOutput getTxOutput() {

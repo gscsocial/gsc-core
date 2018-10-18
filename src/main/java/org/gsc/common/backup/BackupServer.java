@@ -58,20 +58,20 @@ public class BackupServer {
       while (!shutdown) {
         Bootstrap b = new Bootstrap();
         b.group(group)
-            .channel(NioDatagramChannel.class)
-            .handler(new ChannelInitializer<NioDatagramChannel>() {
-              @Override
-              public void initChannel(NioDatagramChannel ch)
-                  throws Exception {
-                ch.pipeline().addLast(stats.udp);
-                ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
-                ch.pipeline().addLast(new ProtobufVarint32FrameDecoder());
-                ch.pipeline().addLast(new PacketDecoder());
-                MessageHandler messageHandler = new MessageHandler(ch, backupManager);
-                backupManager.setMessageHandler(messageHandler);
-                ch.pipeline().addLast(messageHandler);
-              }
-            });
+                .channel(NioDatagramChannel.class)
+                .handler(new ChannelInitializer<NioDatagramChannel>() {
+                  @Override
+                  public void initChannel(NioDatagramChannel ch)
+                          throws Exception {
+                    ch.pipeline().addLast(stats.udp);
+                    ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
+                    ch.pipeline().addLast(new ProtobufVarint32FrameDecoder());
+                    ch.pipeline().addLast(new PacketDecoder());
+                    MessageHandler messageHandler = new MessageHandler(ch, backupManager);
+                    backupManager.setMessageHandler(messageHandler);
+                    ch.pipeline().addLast(messageHandler);
+                  }
+                });
 
         channel = b.bind(port).sync().channel();
 

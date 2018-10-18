@@ -57,8 +57,8 @@ public class UpdateAccountOperator extends AbstractOperator {
     }
     if (!this.contract.is(AccountUpdateContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [AccountUpdateContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [AccountUpdateContract],real type[" + contract
+                      .getClass() + "]");
     }
     final AccountUpdateContract accountUpdateContract;
     try {

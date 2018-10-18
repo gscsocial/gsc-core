@@ -47,8 +47,8 @@ public class ChainInventoryMessage extends GSCMessage {
 
     try {
       return getChainInventory().getIdsList().stream()
-          .map(blockId -> new BlockId(blockId.getHash(), blockId.getNumber()))
-          .collect(Collectors.toCollection(ArrayList::new));
+              .map(blockId -> new BlockId(blockId.getHash(), blockId.getNumber()))
+              .collect(Collectors.toCollection(ArrayList::new));
     } catch (Exception e) {
       logger.info("breakPoint");
     }

@@ -29,7 +29,7 @@ public abstract class Message {
   }
 
   public ByteBuf getSendData(){
-     return Unpooled.wrappedBuffer(ArrayUtils.add(this.getData(), 0 ,type));
+    return Unpooled.wrappedBuffer(ArrayUtils.add(this.getData(), 0 ,type));
   }
 
   public Sha256Hash getMessageId() {

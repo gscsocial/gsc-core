@@ -79,7 +79,7 @@ public class StoreAPI {
     }
     Index.Iface<Transaction> index = indexHelper.getTransactionIndex();
     try (ResultSet<Transaction> resultSet = index
-        .retrieve(equal(TransactionIndex.Transaction_ID, id))) {
+            .retrieve(equal(TransactionIndex.Transaction_ID, id))) {
       if (resultSet.isEmpty()) {
         return null;
       }
@@ -89,7 +89,7 @@ public class StoreAPI {
       throw new NonUniqueObjectException(e);
     }
   }
-  
+
   public List<Transaction> getTransactionsFromThis(String address, long offset, long limit) {
     if (StringUtils.isEmpty(address)) {
       logger.info("address is empty");
@@ -97,10 +97,10 @@ public class StoreAPI {
     }
     Index.Iface<Transaction> index = indexHelper.getTransactionIndex();
     try (ResultSet<Transaction> resultSet =
-        index.retrieve(
-            equal(TransactionIndex.OWNERS, address),
-            queryOptions(
-                orderBy(ascending(TransactionIndex.TIMESTAMP))))) {
+                 index.retrieve(
+                         equal(TransactionIndex.OWNERS, address),
+                         queryOptions(
+                                 orderBy(ascending(TransactionIndex.TIMESTAMP))))) {
       if (limit > TRANSACTIONS_COUNT_LIMIT_MAX) {
         limit = TRANSACTIONS_COUNT_LIMIT_MAX;
       }
@@ -115,10 +115,10 @@ public class StoreAPI {
     }
     Index.Iface<Transaction> index = indexHelper.getTransactionIndex();
     try (ResultSet<Transaction> resultSet =
-        index.retrieve(
-            equal(TransactionIndex.TOS, address),
-            queryOptions(
-                orderBy(ascending(TransactionIndex.TIMESTAMP))))) {
+                 index.retrieve(
+                         equal(TransactionIndex.TOS, address),
+                         queryOptions(
+                                 orderBy(ascending(TransactionIndex.TIMESTAMP))))) {
       if (limit > TRANSACTIONS_COUNT_LIMIT_MAX) {
         limit = TRANSACTIONS_COUNT_LIMIT_MAX;
       }

@@ -31,38 +31,38 @@ import org.gsc.core.exception.BadItemException;
 @Component
 public class BlockStore extends GSCStoreWithRevoking<BlockWrapper> {
 
-  @Autowired
-  private BlockStore(@Value("block") String dbName) {
-    super(dbName);
-  }
+    @Autowired
+    private BlockStore(@Value("block") String dbName) {
+        super(dbName);
+    }
 
-  public List<BlockWrapper> getLimitNumber(long startNumber, long limit) {
-    BlockId startBlockId = new BlockId(Sha256Hash.ZERO_HASH, startNumber);
-    return revokingDB.getValuesNext(startBlockId.getBytes(), limit).stream()
-        .map(bytes -> {
-          try {
-            return new BlockWrapper(bytes);
-          } catch (BadItemException e) {
-            e.printStackTrace();
-          }
-          return null;
-        })
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
-  }
+    public List<BlockWrapper> getLimitNumber(long startNumber, long limit) {
+        BlockId startBlockId = new BlockId(Sha256Hash.ZERO_HASH, startNumber);
+        return revokingDB.getValuesNext(startBlockId.getBytes(), limit).stream()
+                .map(bytes -> {
+                    try {
+                        return new BlockWrapper(bytes);
+                    } catch (BadItemException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
 
-  public List<BlockWrapper> getBlockByLatestNum(long getNum) {
+    public List<BlockWrapper> getBlockByLatestNum(long getNum) {
 
-    return revokingDB.getlatestValues(getNum).stream()
-        .map(bytes -> {
-          try {
-            return new BlockWrapper(bytes);
-          } catch (BadItemException e) {
-            e.printStackTrace();
-          }
-          return null;
-        })
-        .filter(Objects::nonNull)
-        .collect(Collectors.toList());
-  }
+        return revokingDB.getlatestValues(getNum).stream()
+                .map(bytes -> {
+                    try {
+                        return new BlockWrapper(bytes);
+                    } catch (BadItemException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
 }

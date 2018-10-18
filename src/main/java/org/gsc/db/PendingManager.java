@@ -43,6 +43,6 @@ public class PendingManager implements AutoCloseable {
       }
     }
     dbManager.getPoppedTransactions().clear();
-    
+
   }
 }

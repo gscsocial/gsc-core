@@ -38,7 +38,7 @@ public class SellStorageOperator extends AbstractOperator {
     }
 
     AccountWrapper accountWrapper = dbManager.getAccountStore()
-        .get(sellStorageContract.getOwnerAddress().toByteArray());
+            .get(sellStorageContract.getOwnerAddress().toByteArray());
 
     long bytes = sellStorageContract.getStorageBytes();
 
@@ -60,8 +60,8 @@ public class SellStorageOperator extends AbstractOperator {
     }
     if (!contract.is(SellStorageContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [SellStorageContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [SellStorageContract],real type[" + contract
+                      .getClass() + "]");
     }
 
     final SellStorageContract sellStorageContract;
@@ -80,7 +80,7 @@ public class SellStorageOperator extends AbstractOperator {
     if (accountWrapper == null) {
       String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
       throw new ContractValidateException(
-          "Account[" + readableOwnerAddress + "] not exists");
+              "Account[" + readableOwnerAddress + "] not exists");
     }
 
     long bytes = sellStorageContract.getStorageBytes();
@@ -93,13 +93,13 @@ public class SellStorageOperator extends AbstractOperator {
 
     if (bytes > currentUnusedStorage) {
       throw new ContractValidateException(
-          "bytes must be less than currentUnusedStorage[" + currentUnusedStorage + "]");
+              "bytes must be less than currentUnusedStorage[" + currentUnusedStorage + "]");
     }
 
     long quantity = storageMarket.trySellStorage(bytes);
     if (quantity <= 1_000_000L) {
       throw new ContractValidateException(
-          "quantity must be larger than 1TRX,current quantity[" + quantity + "]");
+              "quantity must be larger than 1TRX,current quantity[" + quantity + "]");
     }
 
     return true;

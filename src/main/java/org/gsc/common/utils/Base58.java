@@ -6,7 +6,7 @@ import java.math.BigInteger;
 public class Base58 {
 
   public static final char[] ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-      .toCharArray();
+          .toCharArray();
   private static final int[] INDEXES = new int[128];
 
   static {

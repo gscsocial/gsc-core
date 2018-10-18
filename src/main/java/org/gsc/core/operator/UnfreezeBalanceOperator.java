@@ -59,20 +59,20 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
         }
 
         accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-            .setBalance(oldBalance + unfreezeBalance)
-            .clearFrozen().addAllFrozen(frozenList).build());
+                .setBalance(oldBalance + unfreezeBalance)
+                .clearFrozen().addAllFrozen(frozenList).build());
 
         dbManager.getDynamicPropertiesStore().addTotalNetWeight(-unfreezeBalance / 1000_000L);
         break;
       case ENERGY:
         unfreezeBalance = accountWrapper.getAccountResource().getFrozenBalanceForEnergy()
-            .getFrozenBalance();
+                .getFrozenBalance();
 
         AccountResource newAccountResource = accountWrapper.getAccountResource().toBuilder()
-            .clearFrozenBalanceForEnergy().build();
+                .clearFrozenBalanceForEnergy().build();
         accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-            .setBalance(oldBalance + unfreezeBalance)
-            .setAccountResource(newAccountResource).build());
+                .setBalance(oldBalance + unfreezeBalance)
+                .setAccountResource(newAccountResource).build());
 
         dbManager.getDynamicPropertiesStore().addTotalEnergyWeight(-unfreezeBalance / 1000_000L);
         break;
@@ -81,7 +81,7 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
     VotesWrapper votesCapsule;
     if (!dbManager.getVotesStore().has(ownerAddress)) {
       votesCapsule = new VotesWrapper(unfreezeBalanceContract.getOwnerAddress(),
-          accountWrapper.getVotesList());
+              accountWrapper.getVotesList());
     } else {
       votesCapsule = dbManager.getVotesStore().get(ownerAddress);
     }
@@ -108,8 +108,8 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
     }
     if (!this.contract.is(UnfreezeBalanceContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [UnfreezeBalanceContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [UnfreezeBalanceContract],real type[" + contract
+                      .getClass() + "]");
     }
     final UnfreezeBalanceContract unfreezeBalanceContract;
     try {
@@ -127,7 +127,7 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
     if (accountWrapper == null) {
       String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
       throw new ContractValidateException(
-          "Account[" + readableOwnerAddress + "] not exists");
+              "Account[" + readableOwnerAddress + "] not exists");
     }
 
     long now = dbManager.getHeadBlockTimeStamp();
@@ -139,14 +139,14 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
         }
 
         long allowedUnfreezeCount = accountWrapper.getFrozenList().stream()
-            .filter(frozen -> frozen.getExpireTime() <= now).count();
+                .filter(frozen -> frozen.getExpireTime() <= now).count();
         if (allowedUnfreezeCount <= 0) {
           throw new ContractValidateException("It's not time to unfreeze.");
         }
         break;
       case ENERGY:
         Frozen frozenBalanceForEnergy = accountWrapper.getAccountResource()
-            .getFrozenBalanceForEnergy();
+                .getFrozenBalanceForEnergy();
         if (frozenBalanceForEnergy.getFrozenBalance() <= 0) {
           throw new ContractValidateException("no frozenBalance");
         }
@@ -157,7 +157,7 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
         break;
       default:
         throw new ContractValidateException(
-            "ResourceCode error.valid ResourceCode[BANDWIDTH、ENERGY]");
+                "ResourceCode error.valid ResourceCode[BANDWIDTH、ENERGY]");
     }
 
     return true;

@@ -24,14 +24,14 @@ public class CreateAccountOperator extends AbstractOperator {
 
   @Override
   public boolean execute(TransactionResultWrapper ret)
-      throws ContractExeException {
+          throws ContractExeException {
     long fee = calcFee();
     try {
       AccountCreateContract accountCreateContract = contract.unpack(AccountCreateContract.class);
       AccountWrapper accountWrapper = new AccountWrapper(accountCreateContract,
-          dbManager.getHeadBlockTimeStamp());
+              dbManager.getHeadBlockTimeStamp());
       dbManager.getAccountStore()
-          .put(accountCreateContract.getAccountAddress().toByteArray(), accountWrapper);
+              .put(accountCreateContract.getAccountAddress().toByteArray(), accountWrapper);
 
       dbManager.adjustBalance(accountCreateContract.getOwnerAddress().toByteArray(), -fee);
       ret.setStatus(fee, code.SUCESS);
@@ -58,8 +58,8 @@ public class CreateAccountOperator extends AbstractOperator {
     }
     if (!contract.is(AccountCreateContract.class)) {
       throw new ContractValidateException(
-          "contract type error,expected type [AccountCreateContract],real type[" + contract
-              .getClass() + "]");
+              "contract type error,expected type [AccountCreateContract],real type[" + contract
+                      .getClass() + "]");
     }
     final AccountCreateContract contract;
     try {
@@ -80,13 +80,13 @@ public class CreateAccountOperator extends AbstractOperator {
     if (accountWrapper == null) {
       String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
       throw new ContractValidateException(
-          "Account[" + readableOwnerAddress + "] not exists");
+              "Account[" + readableOwnerAddress + "] not exists");
     }
 
     final long fee = calcFee();
     if (accountWrapper.getBalance() < fee) {
       throw new ContractValidateException(
-          "Validate CreateAccountOperator error, insufficient fee.");
+              "Validate CreateAccountOperator error, insufficient fee.");
     }
 
     byte[] accountAddress = contract.getAccountAddress().toByteArray();

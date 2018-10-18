@@ -30,10 +30,10 @@ public class ExchangeStore extends GSCStoreWithRevoking<ExchangeWrapper> {
    */
   public List<ExchangeWrapper> getAllExchanges() {
     return Streams.stream(iterator())
-        .map(Map.Entry::getValue)
-        .sorted(
-            (ExchangeWrapper a, ExchangeWrapper b) -> a.getCreateTime() <= b.getCreateTime() ? 1
-                : -1)
-        .collect(Collectors.toList());
+            .map(Map.Entry::getValue)
+            .sorted(
+                    (ExchangeWrapper a, ExchangeWrapper b) -> a.getCreateTime() <= b.getCreateTime() ? 1
+                            : -1)
+            .collect(Collectors.toList());
   }
 }

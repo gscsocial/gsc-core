@@ -36,7 +36,7 @@ import org.gsc.net.node.Item;
 public class PeerConnection extends Channel {
 
   private Cache<Sha256Hash, Integer> syncBlockIdCache = CacheBuilder.newBuilder()
-      .maximumSize(2 * NodeConstant.SYNC_FETCH_BATCH_NUM).build();
+          .maximumSize(2 * NodeConstant.SYNC_FETCH_BATCH_NUM).build();
 
   @Setter
   @Getter
@@ -99,7 +99,7 @@ public class PeerConnection extends Channel {
   }
 
   public void setSyncChainRequested(
-      Pair<Deque<BlockId>, Long> syncChainRequested) {
+          Pair<Deque<BlockId>, Long> syncChainRequested) {
     this.syncChainRequested = syncChainRequested;
   }
 
@@ -155,7 +155,7 @@ public class PeerConnection extends Channel {
 
   public void cleanInvGarbage() {
     long oldestTimestamp =
-        Time.getCurrentMillis() - MAX_INVENTORY_SIZE_IN_MINUTES * 60 * 1000;
+            Time.getCurrentMillis() - MAX_INVENTORY_SIZE_IN_MINUTES * 60 * 1000;
 
     Iterator<Entry<Sha256Hash, Long>> iterator = this.advObjSpreadToUs.entrySet().iterator();
 
@@ -251,31 +251,31 @@ public class PeerConnection extends Channel {
 
   public String logSyncStats() {
     return String.format(
-        "Peer %s: [ %18s, ping %6s ms]-----------\n"
-            + "connect time: %s\n"
-            + "last know block num: %s\n"
-            + "needSyncFromPeer:%b\n"
-            + "needSyncFromUs:%b\n"
-            + "syncToFetchSize:%d\n"
-            + "syncToFetchSizePeekNum:%d\n"
-            + "syncBlockRequestedSize:%d\n"
-            + "unFetchSynNum:%d\n"
-            + "syncChainRequested:%s\n"
-            + "blockInPorc:%d\n",
-        this.getNode().getHost() + ":" + this.getNode().getPort(),
-        this.getNode().getHexIdShort(),
-        (int) this.getPeerStats().getAvgLatency(),
-        Time.getTimeString(super.getStartTime()),
-        headBlockWeBothHave.getNum(),
-        isNeedSyncFromPeer(),
-        isNeedSyncFromUs(),
-        syncBlockToFetch.size(),
-        syncBlockToFetch.size() > 0 ? syncBlockToFetch.peek().getNum() : -1,
-        syncBlockRequested.size(),
-        unfetchSyncNum,
-        syncChainRequested == null ? "NULL" : Time.getTimeString(syncChainRequested.getValue()),
-        blockInProc.size())
-        + nodeStatistics.toString() + "\n";
+            "Peer %s: [ %18s, ping %6s ms]-----------\n"
+                    + "connect time: %s\n"
+                    + "last know block num: %s\n"
+                    + "needSyncFromPeer:%b\n"
+                    + "needSyncFromUs:%b\n"
+                    + "syncToFetchSize:%d\n"
+                    + "syncToFetchSizePeekNum:%d\n"
+                    + "syncBlockRequestedSize:%d\n"
+                    + "unFetchSynNum:%d\n"
+                    + "syncChainRequested:%s\n"
+                    + "blockInPorc:%d\n",
+            this.getNode().getHost() + ":" + this.getNode().getPort(),
+            this.getNode().getHexIdShort(),
+            (int) this.getPeerStats().getAvgLatency(),
+            Time.getTimeString(super.getStartTime()),
+            headBlockWeBothHave.getNum(),
+            isNeedSyncFromPeer(),
+            isNeedSyncFromUs(),
+            syncBlockToFetch.size(),
+            syncBlockToFetch.size() > 0 ? syncBlockToFetch.peek().getNum() : -1,
+            syncBlockRequested.size(),
+            unfetchSyncNum,
+            syncChainRequested == null ? "NULL" : Time.getTimeString(syncChainRequested.getValue()),
+            blockInProc.size())
+            + nodeStatistics.toString() + "\n";
   }
 
   public boolean isBusy() {
@@ -284,8 +284,8 @@ public class PeerConnection extends Channel {
 
   public boolean idle() {
     return advObjWeRequested.isEmpty()
-        && syncBlockRequested.isEmpty()
-        && syncChainRequested == null;
+            && syncBlockRequested.isEmpty()
+            && syncChainRequested == null;
   }
 
   public void sendMessage(Message message) {
