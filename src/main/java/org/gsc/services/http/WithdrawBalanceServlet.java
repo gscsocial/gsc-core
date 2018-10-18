@@ -31,6 +31,12 @@ public class WithdrawBalanceServlet extends HttpServlet {
           .collect(Collectors.joining(System.lineSeparator()));
       WithdrawBalanceContract.Builder build = WithdrawBalanceContract.newBuilder();
       JsonFormat.merge(contract, build);
+
+      /**
+       * message WithdrawBalanceContract {
+       *   bytes owner_address = 1;
+       * }
+       */
       Transaction tx = wallet
           .createTransactionCapsule(build.build(), ContractType.WithdrawBalanceContract)
           .getInstance();
