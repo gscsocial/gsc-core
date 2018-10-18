@@ -63,7 +63,7 @@ public class HandshakeHandler extends ByteToMessageDecoder {
 
   @Autowired
   public HandshakeHandler(final NodeManager nodeManager, final ChannelManager channelManager,
-                          final Manager manager) {
+      final Manager manager) {
     this.nodeManager = nodeManager;
     this.channelManager = channelManager;
     this.manager = manager;
@@ -94,7 +94,7 @@ public class HandshakeHandler extends ByteToMessageDecoder {
       case P2P_DISCONNECT:
         if (channel.getNodeStatistics() != null){
           channel.getNodeStatistics()
-                  .nodeDisconnectedRemote(((DisconnectMessage) msg).getReasonCode());
+              .nodeDisconnectedRemote(((DisconnectMessage) msg).getReasonCode());
         }
         channel.close();
         break;

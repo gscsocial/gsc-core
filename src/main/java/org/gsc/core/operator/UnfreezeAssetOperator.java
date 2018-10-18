@@ -30,7 +30,7 @@ public class UnfreezeAssetOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       final UnfreezeAssetContract unfreezeAssetContract = contract
-              .unpack(UnfreezeAssetContract.class);
+          .unpack(UnfreezeAssetContract.class);
       byte[] ownerAddress = unfreezeAssetContract.getOwnerAddress().toByteArray();
 
       AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
@@ -48,9 +48,9 @@ public class UnfreezeAssetOperator extends AbstractOperator {
       }
 
       accountWrapper
-              .addAssetAmount(accountWrapper.getAssetIssuedName().toByteArray(), unfreezeAsset);
+          .addAssetAmount(accountWrapper.getAssetIssuedName().toByteArray(), unfreezeAsset);
       accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-              .clearFrozenSupply().addAllFrozenSupply(frozenList).build());
+          .clearFrozenSupply().addAllFrozenSupply(frozenList).build());
       dbManager.getAccountStore().put(ownerAddress, accountWrapper);
       ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
@@ -76,8 +76,8 @@ public class UnfreezeAssetOperator extends AbstractOperator {
     }
     if (!this.contract.is(UnfreezeAssetContract.class)) {
       throw new ContractValidateException(
-              "contract type error,expected type [UnfreezeAssetContract],real type[" + contract
-                      .getClass() + "]");
+          "contract type error,expected type [UnfreezeAssetContract],real type[" + contract
+              .getClass() + "]");
     }
     final UnfreezeAssetContract unfreezeAssetContract;
     try {
@@ -95,7 +95,7 @@ public class UnfreezeAssetOperator extends AbstractOperator {
     if (accountWrapper == null) {
       String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
       throw new ContractValidateException(
-              "Account[" + readableOwnerAddress + "] not exists");
+          "Account[" + readableOwnerAddress + "] not exists");
     }
 
     if (accountWrapper.getFrozenSupplyCount() <= 0) {
@@ -108,7 +108,7 @@ public class UnfreezeAssetOperator extends AbstractOperator {
 
     long now = dbManager.getHeadBlockTimeStamp();
     long allowedUnfreezeCount = accountWrapper.getFrozenSupplyList().stream()
-            .filter(frozen -> frozen.getExpireTime() <= now).count();
+        .filter(frozen -> frozen.getExpireTime() <= now).count();
     if (allowedUnfreezeCount <= 0) {
       throw new ContractValidateException("It's not time to unfreeze asset supply");
     }

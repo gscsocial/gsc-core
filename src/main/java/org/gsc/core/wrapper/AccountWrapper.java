@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -59,11 +59,11 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
   public AccountWrapper(ByteString accountName, ByteString address, AccountType accountType,
                         long balance) {
     this.account = Account.newBuilder()
-            .setAccountName(accountName)
-            .setType(accountType)
-            .setAddress(address)
-            .setBalance(balance)
-            .build();
+        .setAccountName(accountName)
+        .setType(accountType)
+        .setAddress(address)
+        .setBalance(balance)
+        .build();
   }
 
   /**
@@ -71,10 +71,10 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
    */
   public AccountWrapper(final AccountCreateContract contract) {
     this.account = Account.newBuilder()
-            .setType(contract.getType())
-            .setAddress(contract.getAccountAddress())
-            .setTypeValue(contract.getTypeValue())
-            .build();
+        .setType(contract.getType())
+        .setAddress(contract.getAccountAddress())
+        .setTypeValue(contract.getTypeValue())
+        .build();
   }
 
   /**
@@ -82,11 +82,11 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
    */
   public AccountWrapper(final AccountCreateContract contract, long createTime) {
     this.account = Account.newBuilder()
-            .setType(contract.getType())
-            .setAddress(contract.getAccountAddress())
-            .setTypeValue(contract.getTypeValue())
-            .setCreateTime(createTime)
-            .build();
+        .setType(contract.getType())
+        .setAddress(contract.getAccountAddress())
+        .setTypeValue(contract.getTypeValue())
+        .setCreateTime(createTime)
+        .build();
   }
 
   /**
@@ -102,10 +102,10 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
   public AccountWrapper(ByteString address, ByteString accountName,
                         AccountType accountType) {
     this.account = Account.newBuilder()
-            .setType(accountType)
-            .setAccountName(accountName)
-            .setAddress(address)
-            .build();
+        .setType(accountType)
+        .setAccountName(accountName)
+        .setAddress(address)
+        .build();
   }
 
   /**
@@ -114,9 +114,9 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
   public AccountWrapper(ByteString address,
                         AccountType accountType) {
     this.account = Account.newBuilder()
-            .setType(accountType)
-            .setAddress(address)
-            .build();
+        .setType(accountType)
+        .setAddress(address)
+        .build();
   }
 
   /**
@@ -125,10 +125,10 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
   public AccountWrapper(ByteString address,
                         AccountType accountType, long createTime) {
     this.account = Account.newBuilder()
-            .setType(accountType)
-            .setAddress(address)
-            .setCreateTime(createTime)
-            .build();
+        .setType(accountType)
+        .setAddress(address)
+        .setCreateTime(createTime)
+        .build();
   }
 
   public AccountWrapper(Account account) {
@@ -220,14 +220,14 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
    */
   public void addVotes(ByteString voteAddress, long voteAdd) {
     this.account = this.account.toBuilder()
-            .addVotes(Vote.newBuilder().setVoteAddress(voteAddress).setVoteCount(voteAdd).build())
-            .build();
+        .addVotes(Vote.newBuilder().setVoteAddress(voteAddress).setVoteCount(voteAdd).build())
+        .build();
   }
 
   public void clearVotes() {
     this.account = this.account.toBuilder()
-            .clearVotes()
-            .build();
+        .clearVotes()
+        .build();
   }
 
   /**
@@ -274,7 +274,7 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     Long currentAmount = assetMap.get(nameKey);
     if (amount > 0 && null != currentAmount && amount <= currentAmount) {
       this.account = this.account.toBuilder()
-              .putAsset(nameKey, Math.subtractExact(currentAmount, amount)).build();
+          .putAsset(nameKey, Math.subtractExact(currentAmount, amount)).build();
       return true;
     }
 
@@ -292,7 +292,7 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
       currentAmount = 0L;
     }
     this.account = this.account.toBuilder().putAsset(nameKey, Math.addExact(currentAmount, amount))
-            .build();
+        .build();
     return true;
   }
 
@@ -361,7 +361,7 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     List<Frozen> frozenList = getFrozenList();
     final long[] frozenBalance = {0};
     frozenList.forEach(frozen -> frozenBalance[0] = Long.sum(frozenBalance[0],
-            frozen.getFrozenBalance()));
+        frozen.getFrozenBalance()));
     return frozenBalance[0];
   }
 
@@ -377,7 +377,7 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     List<Frozen> frozenSupplyList = getFrozenSupplyList();
     final long[] frozenSupplyBalance = {0};
     frozenSupplyList.forEach(frozen -> frozenSupplyBalance[0] = Long.sum(frozenSupplyBalance[0],
-            frozen.getFrozenBalance()));
+        frozen.getFrozenBalance()));
     return frozenSupplyBalance[0];
   }
 
@@ -417,20 +417,20 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
   //for test only
   public void setFrozen(long frozenBalance, long expireTime) {
     Frozen newFrozen = Frozen.newBuilder()
-            .setFrozenBalance(frozenBalance)
-            .setExpireTime(expireTime)
-            .build();
+        .setFrozenBalance(frozenBalance)
+        .setExpireTime(expireTime)
+        .build();
 
     this.account = this.account.toBuilder()
-            .addFrozen(newFrozen)
-            .build();
+        .addFrozen(newFrozen)
+        .build();
   }
 
   //for test only
   public void setLatestWithdrawTime(long latestWithdrawTime) {
     this.account = this.account.toBuilder()
-            .setLatestWithdrawTime(latestWithdrawTime)
-            .build();
+        .setLatestWithdrawTime(latestWithdrawTime)
+        .build();
   }
 
   public long getNetUsage() {
@@ -439,7 +439,7 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
 
   public void setNetUsage(long netUsage) {
     this.account = this.account.toBuilder()
-            .setNetUsage(netUsage).build();
+        .setNetUsage(netUsage).build();
   }
 
   public AccountResource getAccountResource() {
@@ -449,16 +449,16 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
 
   public void setFrozenForEnergy(long newFrozenBalanceForEnergy, long time) {
     Frozen newFrozenForEnergy = Frozen.newBuilder()
-            .setFrozenBalance(newFrozenBalanceForEnergy)
-            .setExpireTime(time)
-            .build();
+        .setFrozenBalance(newFrozenBalanceForEnergy)
+        .setExpireTime(time)
+        .build();
 
     AccountResource newAccountResource = getAccountResource().toBuilder()
-            .setFrozenBalanceForEnergy(newFrozenForEnergy).build();
+        .setFrozenBalanceForEnergy(newFrozenForEnergy).build();
 
     this.account = this.account.toBuilder()
-            .setAccountResource(newAccountResource)
-            .build();
+        .setAccountResource(newAccountResource)
+        .build();
   }
 
 
@@ -472,16 +472,16 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
 
   public void setEnergyUsage(long energyUsage) {
     this.account = this.account.toBuilder()
-            .setAccountResource(
-                    this.account.getAccountResource().toBuilder().setEnergyUsage(energyUsage).build())
-            .build();
+        .setAccountResource(
+            this.account.getAccountResource().toBuilder().setEnergyUsage(energyUsage).build())
+        .build();
   }
 
   public void setLatestConsumeTimeForEnergy(long latest_time) {
     this.account = this.account.toBuilder()
-            .setAccountResource(
-                    this.account.getAccountResource().toBuilder().setLatestConsumeTimeForEnergy(latest_time)
-                            .build()).build();
+        .setAccountResource(
+            this.account.getAccountResource().toBuilder().setLatestConsumeTimeForEnergy(latest_time)
+                .build()).build();
   }
 
   public long getLatestConsumeTimeForEnergy() {
@@ -494,7 +494,7 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
 
   public void setFreeNetUsage(long freeNetUsage) {
     this.account = this.account.toBuilder()
-            .setFreeNetUsage(freeNetUsage).build();
+        .setFreeNetUsage(freeNetUsage).build();
   }
 
   public long getFreeAssetNetUsage(String assetName) {
@@ -507,7 +507,7 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
 
   public void putFreeAssetNetUsage(String s, long freeAssetNetUsage) {
     this.account = this.account.toBuilder()
-            .putFreeAssetNetUsage(s, freeAssetNetUsage).build();
+        .putFreeAssetNetUsage(s, freeAssetNetUsage).build();
   }
 
   public long getStorageLimit() {
@@ -519,8 +519,8 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     accountResource = accountResource.toBuilder().setStorageLimit(limit).build();
 
     this.account = this.account.toBuilder()
-            .setAccountResource(accountResource)
-            .build();
+        .setAccountResource(accountResource)
+        .build();
   }
 
   public long getStorageUsage() {
@@ -536,8 +536,8 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     accountResource = accountResource.toBuilder().setStorageUsage(usage).build();
 
     this.account = this.account.toBuilder()
-            .setAccountResource(accountResource)
-            .build();
+        .setAccountResource(accountResource)
+        .build();
   }
 
   public long getLatestExchangeStorageTime() {
@@ -549,8 +549,8 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     accountResource = accountResource.toBuilder().setLatestExchangeStorageTime(time).build();
 
     this.account = this.account.toBuilder()
-            .setAccountResource(accountResource)
-            .build();
+        .setAccountResource(accountResource)
+        .build();
   }
 
   public void addStorageUsage(long storageUsage) {
@@ -559,10 +559,10 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     }
     AccountResource accountResource = this.account.getAccountResource();
     accountResource = accountResource.toBuilder()
-            .setStorageUsage(accountResource.getStorageUsage() + storageUsage).build();
+        .setStorageUsage(accountResource.getStorageUsage() + storageUsage).build();
 
     this.account = this.account.toBuilder()
-            .setAccountResource(accountResource)
-            .build();
+        .setAccountResource(accountResource)
+        .build();
   }
 }

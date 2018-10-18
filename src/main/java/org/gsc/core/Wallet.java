@@ -125,7 +125,7 @@ public class Wallet {
   }
 
   public static boolean isConstant(ABI abi, TriggerSmartContract triggerSmartContract)
-          throws ContractValidateException {
+      throws ContractValidateException {
     try {
       boolean constant = isConstant(abi, getSelector(triggerSmartContract.getData().toByteArray()));
       if (constant) {
@@ -168,13 +168,13 @@ public class Wallet {
     }
     if (address.length != Constant.ADDRESS_SIZE / 2) {
       logger.warn(
-              "Warning: Address length need " + Constant.ADDRESS_SIZE + " but " + address.length
-                      + " !!");
+          "Warning: Address length need " + Constant.ADDRESS_SIZE + " but " + address.length
+              + " !!");
       return false;
     }
     if (address[0] != addressPreFixByte) {
       logger.warn("Warning: Address need prefix with " + addressPreFixByte + " but "
-              + address[0] + " !!");
+          + address[0] + " !!");
       return false;
     }
     //Other rule;
@@ -200,9 +200,9 @@ public class Wallet {
     byte[] hash0 = Sha256Hash.hash(decodeData);
     byte[] hash1 = Sha256Hash.hash(hash0);
     if (hash1[0] == decodeCheck[decodeData.length] &&
-            hash1[1] == decodeCheck[decodeData.length + 1] &&
-            hash1[2] == decodeCheck[decodeData.length + 2] &&
-            hash1[3] == decodeCheck[decodeData.length + 3]) {
+        hash1[1] == decodeCheck[decodeData.length + 1] &&
+        hash1[2] == decodeCheck[decodeData.length + 2] &&
+        hash1[3] == decodeCheck[decodeData.length + 3]) {
       return decodeData;
     }
     return null;
@@ -274,11 +274,11 @@ public class Wallet {
 
     long genesisTimeStamp = dbManager.getGenesisBlock().getTimeStamp();
     accountWrapper.setLatestConsumeTime(genesisTimeStamp
-            + ChainConstant.BLOCK_PRODUCED_INTERVAL * accountWrapper.getLatestConsumeTime());
+        + ChainConstant.BLOCK_PRODUCED_INTERVAL * accountWrapper.getLatestConsumeTime());
     accountWrapper.setLatestConsumeFreeTime(genesisTimeStamp
-            + ChainConstant.BLOCK_PRODUCED_INTERVAL * accountWrapper.getLatestConsumeFreeTime());
+        + ChainConstant.BLOCK_PRODUCED_INTERVAL * accountWrapper.getLatestConsumeFreeTime());
     accountWrapper.setLatestConsumeTimeForEnergy(genesisTimeStamp
-            + ChainConstant.BLOCK_PRODUCED_INTERVAL * accountWrapper.getLatestConsumeTimeForEnergy());
+        + ChainConstant.BLOCK_PRODUCED_INTERVAL * accountWrapper.getLatestConsumeTimeForEnergy());
 
     return accountWrapper.getInstance();
   }
@@ -326,7 +326,7 @@ public class Wallet {
                                                      ContractType contractType) throws ContractValidateException {
     TransactionWrapper trx = new TransactionWrapper(message, contractType);
     if (contractType != ContractType.CreateSmartContract
-            && contractType != ContractType.TriggerSmartContract) {
+        && contractType != ContractType.TriggerSmartContract) {
       List<Operator> actList = OperatorFactory.createActuator(trx, dbManager);
       for (Operator act : actList) {
         act.validate();
@@ -336,7 +336,7 @@ public class Wallet {
     if (contractType == ContractType.CreateSmartContract) {
 
       CreateSmartContract contract = ContractWrapper
-              .getSmartContractFromTransaction(trx.getInstance());
+          .getSmartContractFromTransaction(trx.getInstance());
       long percent = contract.getNewContract().getConsumeUserResourcePercent();
       if (percent < 0 || percent > 100) {
         throw new ContractValidateException("percent must be >= 0 and <= 100");
@@ -377,9 +377,9 @@ public class Wallet {
 
       if (dbManager.isTooManyPending()) {
         logger.debug(
-                "Manager is busy, pending transaction count:{}, discard the new coming transaction",
-                (dbManager.getPendingTransactions().size() + PendingManager.getTmpTransactions()
-                        .size()));
+            "Manager is busy, pending transaction count:{}, discard the new coming transaction",
+            (dbManager.getPendingTransactions().size() + PendingManager.getTmpTransactions()
+                .size()));
         return builder.setResult(false).setCode(response_code.SERVER_BUSY).build();
       }
 
@@ -404,48 +404,48 @@ public class Wallet {
     } catch (ValidateSignatureException e) {
       logger.info(e.getMessage());
       return builder.setResult(false).setCode(response_code.SIGERROR)
-              .setMessage(ByteString.copyFromUtf8("validate signature error"))
-              .build();
+          .setMessage(ByteString.copyFromUtf8("validate signature error"))
+          .build();
     } catch (ContractValidateException e) {
       logger.info(e.getMessage());
       return builder.setResult(false).setCode(response_code.CONTRACT_VALIDATE_ERROR)
-              .setMessage(ByteString.copyFromUtf8("contract validate error : " + e.getMessage()))
-              .build();
+          .setMessage(ByteString.copyFromUtf8("contract validate error : " + e.getMessage()))
+          .build();
     } catch (ContractExeException e) {
       logger.info(e.getMessage());
       return builder.setResult(false).setCode(response_code.CONTRACT_EXE_ERROR)
-              .setMessage(ByteString.copyFromUtf8("contract execute error : " + e.getMessage()))
-              .build();
+          .setMessage(ByteString.copyFromUtf8("contract execute error : " + e.getMessage()))
+          .build();
     } catch (AccountResourceInsufficientException e) {
       logger.info(e.getMessage());
       return builder.setResult(false).setCode(response_code.BANDWITH_ERROR)
-              .setMessage(ByteString.copyFromUtf8("AccountResourceInsufficient error"))
-              .build();
+          .setMessage(ByteString.copyFromUtf8("AccountResourceInsufficient error"))
+          .build();
     } catch (DupTransactionException e) {
       logger.info("dup trans" + e.getMessage());
       return builder.setResult(false).setCode(response_code.DUP_TRANSACTION_ERROR)
-              .setMessage(ByteString.copyFromUtf8("dup transaction"))
-              .build();
+          .setMessage(ByteString.copyFromUtf8("dup transaction"))
+          .build();
     } catch (TaposException e) {
       logger.info("tapos error" + e.getMessage());
       return builder.setResult(false).setCode(response_code.TAPOS_ERROR)
-              .setMessage(ByteString.copyFromUtf8("Tapos check error"))
-              .build();
+          .setMessage(ByteString.copyFromUtf8("Tapos check error"))
+          .build();
     } catch (TooBigTransactionException e) {
       logger.info("transaction error" + e.getMessage());
       return builder.setResult(false).setCode(response_code.TOO_BIG_TRANSACTION_ERROR)
-              .setMessage(ByteString.copyFromUtf8("transaction size is too big"))
-              .build();
+          .setMessage(ByteString.copyFromUtf8("transaction size is too big"))
+          .build();
     } catch (TransactionExpirationException e) {
       logger.info("transaction expired" + e.getMessage());
       return builder.setResult(false).setCode(response_code.TRANSACTION_EXPIRATION_ERROR)
-              .setMessage(ByteString.copyFromUtf8("transaction expired"))
-              .build();
+          .setMessage(ByteString.copyFromUtf8("transaction expired"))
+          .build();
     } catch (Exception e) {
       logger.info("exception caught" + e.getMessage());
       return builder.setResult(false).setCode(response_code.OTHER_ERROR)
-              .setMessage(ByteString.copyFromUtf8("other error : " + e.getMessage()))
-              .build();
+          .setMessage(ByteString.copyFromUtf8("other error : " + e.getMessage()))
+          .build();
     }
   }
 
@@ -488,7 +488,7 @@ public class Wallet {
     WitnessList.Builder builder = WitnessList.newBuilder();
     List<WitnessWrapper> witnessCapsuleList = dbManager.getWitnessStore().getAllWitnesses();
     witnessCapsuleList
-            .forEach(witnessCapsule -> builder.addWitnesses(witnessCapsule.getInstance()));
+        .forEach(witnessCapsule -> builder.addWitnesses(witnessCapsule.getInstance()));
     return builder.build();
   }
 
@@ -496,7 +496,7 @@ public class Wallet {
     ProposalList.Builder builder = ProposalList.newBuilder();
     List<ProposalWrapper> proposalWrapperList = dbManager.getProposalStore().getAllProposals();
     proposalWrapperList
-            .forEach(proposalCapsule -> builder.addProposals(proposalCapsule.getInstance()));
+        .forEach(proposalCapsule -> builder.addProposals(proposalCapsule.getInstance()));
     return builder.build();
   }
 
@@ -504,7 +504,7 @@ public class Wallet {
     ExchangeList.Builder builder = ExchangeList.newBuilder();
     List<ExchangeWrapper> exchangeWrapperList = dbManager.getExchangeStore().getAllExchanges();
     exchangeWrapperList
-            .forEach(exchangeCapsule -> builder.addExchanges(exchangeCapsule.getInstance()));
+        .forEach(exchangeCapsule -> builder.addExchanges(exchangeCapsule.getInstance()));
     return builder.build();
   }
 
@@ -513,83 +513,83 @@ public class Wallet {
     DynamicPropertiesStore dynamicPropertiesStore = dbManager.getDynamicPropertiesStore();
 
     Protocol.ChainParameters.ChainParameter.Builder builder1
-            = Protocol.ChainParameters.ChainParameter.newBuilder();
+        = Protocol.ChainParameters.ChainParameter.newBuilder();
 
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.MAINTENANCE_TIME_INTERVAL.name())
-            .setValue(
-                    dynamicPropertiesStore.getMaintenanceTimeInterval())
-            .build());
+        .setKey(ChainParameters.MAINTENANCE_TIME_INTERVAL.name())
+        .setValue(
+            dynamicPropertiesStore.getMaintenanceTimeInterval())
+        .build());
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.ACCOUNT_UPGRADE_COST.name())
-            .setValue(
-                    dynamicPropertiesStore.getAccountUpgradeCost())
-            .build());
+        .setKey(ChainParameters.ACCOUNT_UPGRADE_COST.name())
+        .setValue(
+            dynamicPropertiesStore.getAccountUpgradeCost())
+        .build());
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.CREATE_ACCOUNT_FEE.name())
-            .setValue(
-                    dynamicPropertiesStore.getCreateAccountFee())
-            .build());
+        .setKey(ChainParameters.CREATE_ACCOUNT_FEE.name())
+        .setValue(
+            dynamicPropertiesStore.getCreateAccountFee())
+        .build());
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.TRANSACTION_FEE.name())
-            .setValue(
-                    dynamicPropertiesStore.getTransactionFee())
-            .build());
+        .setKey(ChainParameters.TRANSACTION_FEE.name())
+        .setValue(
+            dynamicPropertiesStore.getTransactionFee())
+        .build());
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.ASSET_ISSUE_FEE.name())
-            .setValue(
-                    dynamicPropertiesStore.getAssetIssueFee())
-            .build());
+        .setKey(ChainParameters.ASSET_ISSUE_FEE.name())
+        .setValue(
+            dynamicPropertiesStore.getAssetIssueFee())
+        .build());
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.WITNESS_PAY_PER_BLOCK.name())
-            .setValue(
-                    dynamicPropertiesStore.getWitnessPayPerBlock())
-            .build());
+        .setKey(ChainParameters.WITNESS_PAY_PER_BLOCK.name())
+        .setValue(
+            dynamicPropertiesStore.getWitnessPayPerBlock())
+        .build());
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.WITNESS_STANDBY_ALLOWANCE.name())
-            .setValue(
-                    dynamicPropertiesStore.getWitnessStandbyAllowance())
-            .build());
+        .setKey(ChainParameters.WITNESS_STANDBY_ALLOWANCE.name())
+        .setValue(
+            dynamicPropertiesStore.getWitnessStandbyAllowance())
+        .build());
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.CREATE_NEW_ACCOUNT_FEE_IN_SYSTEM_CONTRACT.name())
-            .setValue(
-                    dynamicPropertiesStore.getCreateNewAccountFeeInSystemContract())
-            .build());
+        .setKey(ChainParameters.CREATE_NEW_ACCOUNT_FEE_IN_SYSTEM_CONTRACT.name())
+        .setValue(
+            dynamicPropertiesStore.getCreateNewAccountFeeInSystemContract())
+        .build());
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.CREATE_NEW_ACCOUNT_BANDWIDTH_RATE.name())
-            .setValue(
-                    dynamicPropertiesStore.getCreateNewAccountBandwidthRate())
-            .build());
+        .setKey(ChainParameters.CREATE_NEW_ACCOUNT_BANDWIDTH_RATE.name())
+        .setValue(
+            dynamicPropertiesStore.getCreateNewAccountBandwidthRate())
+        .build());
 
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.ALLOW_CREATION_OF_CONTRACTS.name())
-            .setValue(
-                    dynamicPropertiesStore.getAllowCreationOfContracts())
-            .build());
+        .setKey(ChainParameters.ALLOW_CREATION_OF_CONTRACTS.name())
+        .setValue(
+            dynamicPropertiesStore.getAllowCreationOfContracts())
+        .build());
 
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.REMOVE_THE_POWER_OF_THE_GR.name())
-            .setValue(
-                    dynamicPropertiesStore.getRemoveThePowerOfTheGr())
-            .build());
+        .setKey(ChainParameters.REMOVE_THE_POWER_OF_THE_GR.name())
+        .setValue(
+            dynamicPropertiesStore.getRemoveThePowerOfTheGr())
+        .build());
 
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.ENERGY_FEE.name())
-            .setValue(
-                    dynamicPropertiesStore.getEnergyFee())
-            .build());
+        .setKey(ChainParameters.ENERGY_FEE.name())
+        .setValue(
+            dynamicPropertiesStore.getEnergyFee())
+        .build());
 
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.EXCHANGE_CREATE_FEE.name())
-            .setValue(
-                    dynamicPropertiesStore.getExchangeCreateFee())
-            .build());
+        .setKey(ChainParameters.EXCHANGE_CREATE_FEE.name())
+        .setValue(
+            dynamicPropertiesStore.getExchangeCreateFee())
+        .build());
 
     builder.addChainParameter(builder1
-            .setKey(ChainParameters.MAX_CPU_TIME_OF_ONE_TX.name())
-            .setValue(
-                    dynamicPropertiesStore.getMaxCpuTimeOfOneTX())
-            .build());
+        .setKey(ChainParameters.MAX_CPU_TIME_OF_ONE_TX.name())
+        .setValue(
+            dynamicPropertiesStore.getMaxCpuTimeOfOneTX())
+        .build());
 
     return builder.build();
   }
@@ -597,7 +597,7 @@ public class Wallet {
   public AssetIssueList getAssetIssueList() {
     AssetIssueList.Builder builder = AssetIssueList.newBuilder();
     dbManager.getAssetIssueStore().getAllAssetIssues()
-            .forEach(issueCapsule -> builder.addAssetIssue(issueCapsule.getInstance()));
+        .forEach(issueCapsule -> builder.addAssetIssue(issueCapsule.getInstance()));
     return builder.build();
   }
 
@@ -605,7 +605,7 @@ public class Wallet {
   public AssetIssueList getAssetIssueList(long offset, long limit) {
     AssetIssueList.Builder builder = AssetIssueList.newBuilder();
     List<AssetIssueWrapper> assetIssueList = dbManager.getAssetIssueStore()
-            .getAssetIssuesPaginated(offset, limit);
+        .getAssetIssuesPaginated(offset, limit);
 
     if (CollectionUtils.isEmpty(assetIssueList)) {
       return null;
@@ -620,13 +620,13 @@ public class Wallet {
       return null;
     }
     List<AssetIssueWrapper> assetIssueWrapperList = dbManager.getAssetIssueStore()
-            .getAllAssetIssues();
+        .getAllAssetIssues();
     AssetIssueList.Builder builder = AssetIssueList.newBuilder();
     assetIssueWrapperList.stream()
-            .filter(assetIssueCapsule -> assetIssueCapsule.getOwnerAddress().equals(accountAddress))
-            .forEach(issueCapsule -> {
-              builder.addAssetIssue(issueCapsule.getInstance());
-            });
+        .filter(assetIssueCapsule -> assetIssueCapsule.getOwnerAddress().equals(accountAddress))
+        .forEach(issueCapsule -> {
+          builder.addAssetIssue(issueCapsule.getInstance());
+        });
     return builder.build();
   }
 
@@ -655,13 +655,13 @@ public class Wallet {
     });
 
     builder.setFreeNetUsed(accountWrapper.getFreeNetUsage())
-            .setFreeNetLimit(freeNetLimit)
-            .setNetUsed(accountWrapper.getNetUsage())
-            .setNetLimit(netLimit)
-            .setTotalNetLimit(totalNetLimit)
-            .setTotalNetWeight(totalNetWeight)
-            .putAllAssetNetUsed(accountWrapper.getAllFreeAssetNetUsage())
-            .putAllAssetNetLimit(assetNetLimitMap);
+        .setFreeNetLimit(freeNetLimit)
+        .setNetUsed(accountWrapper.getNetUsage())
+        .setNetLimit(netLimit)
+        .setTotalNetLimit(totalNetLimit)
+        .setTotalNetWeight(totalNetWeight)
+        .putAllAssetNetUsed(accountWrapper.getAllFreeAssetNetUsage())
+        .putAllAssetNetLimit(assetNetLimitMap);
     return builder.build();
   }
 
@@ -686,7 +686,7 @@ public class Wallet {
     long totalNetLimit = dbManager.getDynamicPropertiesStore().getTotalNetLimit();
     long totalNetWeight = dbManager.getDynamicPropertiesStore().getTotalNetWeight();
     long energyLimit = energyProcessor
-            .calculateGlobalEnergyLimit(accountWrapper.getEnergyFrozenBalance());
+        .calculateGlobalEnergyLimit(accountWrapper.getEnergyFrozenBalance());
     long totalEnergyLimit = dbManager.getDynamicPropertiesStore().getTotalEnergyLimit();
     long totalEnergyWeight = dbManager.getDynamicPropertiesStore().getTotalEnergyWeight();
 
@@ -700,19 +700,19 @@ public class Wallet {
     });
 
     builder.setFreeNetUsed(accountWrapper.getFreeNetUsage())
-            .setFreeNetLimit(freeNetLimit)
-            .setNetUsed(accountWrapper.getNetUsage())
-            .setNetLimit(netLimit)
-            .setTotalNetLimit(totalNetLimit)
-            .setTotalNetWeight(totalNetWeight)
-            .setEnergyLimit(energyLimit)
-            .setEnergyUsed(accountWrapper.getAccountResource().getEnergyUsage())
-            .setTotalEnergyLimit(totalEnergyLimit)
-            .setTotalEnergyWeight(totalEnergyWeight)
-            .setStorageLimit(storageLimit)
-            .setStorageUsed(storageUsage)
-            .putAllAssetNetUsed(accountWrapper.getAllFreeAssetNetUsage())
-            .putAllAssetNetLimit(assetNetLimitMap);
+        .setFreeNetLimit(freeNetLimit)
+        .setNetUsed(accountWrapper.getNetUsage())
+        .setNetLimit(netLimit)
+        .setTotalNetLimit(totalNetLimit)
+        .setTotalNetWeight(totalNetWeight)
+        .setEnergyLimit(energyLimit)
+        .setEnergyUsed(accountWrapper.getAccountResource().getEnergyUsage())
+        .setTotalEnergyLimit(totalEnergyLimit)
+        .setTotalEnergyWeight(totalEnergyWeight)
+        .setStorageLimit(storageLimit)
+        .setStorageUsed(storageUsage)
+        .putAllAssetNetUsed(accountWrapper.getAllFreeAssetNetUsage())
+        .putAllAssetNetLimit(assetNetLimitMap);
     return builder.build();
   }
 
@@ -721,19 +721,19 @@ public class Wallet {
       return null;
     }
     AssetIssueWrapper assetIssueWrapper = dbManager.getAssetIssueStore()
-            .get(assetName.toByteArray());
+        .get(assetName.toByteArray());
     return assetIssueWrapper != null ? assetIssueWrapper.getInstance() : null;
   }
 
   public NumberMessage totalTransaction() {
     NumberMessage.Builder builder = NumberMessage.newBuilder()
-            .setNum(dbManager.getTransactionStore().getTotalTransactions());
+        .setNum(dbManager.getTransactionStore().getTotalTransactions());
     return builder.build();
   }
 
   public NumberMessage getNextMaintenanceTime() {
     NumberMessage.Builder builder = NumberMessage.newBuilder()
-            .setNum(dbManager.getDynamicPropertiesStore().getNextMaintenanceTime());
+        .setNum(dbManager.getDynamicPropertiesStore().getNextMaintenanceTime());
     return builder.build();
   }
 
@@ -755,14 +755,14 @@ public class Wallet {
     }
     BlockList.Builder blockListBuilder = BlockList.newBuilder();
     dbManager.getBlockStore().getLimitNumber(number, limit).forEach(
-            blockCapsule -> blockListBuilder.addBlock(blockCapsule.getInstance()));
+        blockCapsule -> blockListBuilder.addBlock(blockCapsule.getInstance()));
     return blockListBuilder.build();
   }
 
   public BlockList getBlockByLatestNum(long getNum) {
     BlockList.Builder blockListBuilder = BlockList.newBuilder();
     dbManager.getBlockStore().getBlockByLatestNum(getNum).forEach(
-            blockCapsule -> blockListBuilder.addBlock(blockCapsule.getInstance()));
+        blockCapsule -> blockListBuilder.addBlock(blockCapsule.getInstance()));
     return blockListBuilder.build();
   }
 
@@ -773,7 +773,7 @@ public class Wallet {
     TransactionWrapper transactionCapsule = null;
     try {
       transactionCapsule = dbManager.getTransactionStore()
-              .get(transactionId.toByteArray());
+          .get(transactionId.toByteArray());
     } catch (StoreException e) {
     }
     if (transactionCapsule != null) {
@@ -789,7 +789,7 @@ public class Wallet {
     ProposalWrapper proposalWrapper = null;
     try {
       proposalWrapper = dbManager.getProposalStore()
-              .get(proposalId.toByteArray());
+          .get(proposalId.toByteArray());
     } catch (StoreException e) {
     }
     if (proposalWrapper != null) {
@@ -805,7 +805,7 @@ public class Wallet {
     ExchangeWrapper exchangeWrapper = null;
     try {
       exchangeWrapper = dbManager.getExchangeStore()
-              .get(exchangeId.toByteArray());
+          .get(exchangeId.toByteArray());
     } catch (StoreException e) {
     }
     if (exchangeWrapper != null) {
@@ -827,18 +827,18 @@ public class Wallet {
     NodeList.Builder nodeListBuilder = NodeList.newBuilder();
 
     nodeHandlerMap.entrySet().stream()
-            .forEach(v -> {
-              org.gsc.common.overlay.discover.node.Node node = v.getValue().getNode();
-              nodeListBuilder.addNodes(Node.newBuilder().setAddress(
-                      Address.newBuilder()
-                              .setHost(ByteString.copyFrom(ByteArray.fromString(node.getHost())))
-                              .setPort(node.getPort())));
-            });
+        .forEach(v -> {
+          org.gsc.common.overlay.discover.node.Node node = v.getValue().getNode();
+          nodeListBuilder.addNodes(Node.newBuilder().setAddress(
+              Address.newBuilder()
+                  .setHost(ByteString.copyFrom(ByteArray.fromString(node.getHost())))
+                  .setPort(node.getPort())));
+        });
     return nodeListBuilder.build();
   }
 
   public Transaction deployContract(CreateSmartContract createSmartContract,
-                                    TransactionWrapper trxCap) {
+      TransactionWrapper trxCap) {
 
     // do nothing, so can add some useful function later
     // trxcap contract para cacheUnpackValue has value
@@ -847,8 +847,8 @@ public class Wallet {
   }
 
   public Transaction deployContract1(CreateSmartContract createSmartContract,
-                                     TransactionWrapper trxCap, DepositImpl deposit,
-                                     BlockWrapper block, Builder builder,Return.Builder retBuilder)
+                                    TransactionWrapper trxCap, DepositImpl deposit,
+                                    BlockWrapper block, Builder builder,Return.Builder retBuilder)
           throws TransactionTraceException, ContractValidateException, ContractExeException {
 
     // do nothing, so can add some useful function later
@@ -898,7 +898,7 @@ public class Wallet {
   public Transaction triggerContract(TriggerSmartContract triggerSmartContract,
                                      TransactionWrapper trxCap, Builder builder,
                                      Return.Builder retBuilder)
-          throws ContractValidateException, ContractExeException, HeaderNotFound {
+      throws ContractValidateException, ContractExeException, HeaderNotFound {
 
     ContractStore contractStore = dbManager.getContractStore();
     byte[] contractAddress = triggerSmartContract.getContractAddress().toByteArray();
@@ -926,7 +926,7 @@ public class Wallet {
       }
 
       Runtime runtime = new Runtime(trxCap.getInstance(), new BlockWrapper(headBlock), deposit,
-              new ProgramInvokeFactoryImpl());
+          new ProgramInvokeFactoryImpl());
       runtime.execute();
       runtime.go();
       runtime.finalization();
@@ -955,12 +955,12 @@ public class Wallet {
     AccountWrapper accountWrapper = dbManager.getAccountStore().get(address);
     if (accountWrapper == null) {
       logger.error(
-              "Get contract failed, the account is not exist or the account does not have code hash!");
+          "Get contract failed, the account is not exist or the account does not have code hash!");
       return null;
     }
 
     ContractWrapper contractWrapper = dbManager.getContractStore()
-            .get(bytesMessage.getValue().toByteArray());
+        .get(bytesMessage.getValue().toByteArray());
     if (Objects.nonNull(contractWrapper)) {
       return contractWrapper.getInstance();
     }
@@ -969,7 +969,7 @@ public class Wallet {
 
   private static byte[] getSelector(byte[] data) {
     if (data == null ||
-            data.length < 4) {
+        data.length < 4) {
       return null;
     }
 
@@ -1007,7 +1007,7 @@ public class Wallet {
       System.arraycopy(Hash.sha3(sb.toString().getBytes()), 0, funcSelector, 0, 4);
       if (Arrays.equals(funcSelector, selector)) {
         if (entry.getConstant() == true || entry.getStateMutability()
-                .equals(StateMutabilityType.View)) {
+            .equals(StateMutabilityType.View)) {
           return true;
         } else {
           return false;

@@ -68,7 +68,7 @@ public class Peer {
   @Override
   public String toString() {
     return String
-            .format("Peer {\n id=%s, \n host=%s, \n port=%d\n}", Hex.toHexString(id), host, port);
+        .format("Peer {\n id=%s, \n host=%s, \n port=%d\n}", Hex.toHexString(id), host, port);
   }
 
   public String toBinaryString() {

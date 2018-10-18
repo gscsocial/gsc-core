@@ -19,14 +19,14 @@ import org.gsc.net.message.MessageTypes;
 public interface NodeDelegate {
 
   LinkedList<Sha256Hash> handleBlock(BlockWrapper block, boolean syncMode)
-          throws BadBlockException, UnLinkedBlockException, InterruptedException, NonCommonBlockException;
+      throws BadBlockException, UnLinkedBlockException, InterruptedException, NonCommonBlockException;
 
   boolean handleTransaction(TransactionWrapper trx) throws BadTransactionException;
 
   LinkedList<BlockId> getLostBlockIds(List<BlockId> blockChainSummary) throws StoreException;
 
   Deque<BlockId> getBlockChainSummary(BlockId beginBLockId, Deque<BlockId> blockIds)
-          throws GSCException;
+      throws GSCException;
 
   Message getData(Sha256Hash msgId, MessageTypes type);
 

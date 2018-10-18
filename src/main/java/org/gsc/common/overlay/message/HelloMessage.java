@@ -23,10 +23,10 @@ public class HelloMessage extends P2pMessage {
                       BlockWrapper.BlockId solidBlockId, BlockWrapper.BlockId headBlockId){
 
     Endpoint fromEndpoint = Endpoint.newBuilder()
-            .setNodeId(ByteString.copyFrom(from.getId()))
-            .setPort(from.getPort())
-            .setAddress(ByteString.copyFrom(ByteArray.fromString(from.getHost())))
-            .build();
+        .setNodeId(ByteString.copyFrom(from.getId()))
+        .setPort(from.getPort())
+        .setAddress(ByteString.copyFrom(ByteArray.fromString(from.getHost())))
+        .build();
 
     Protocol.HelloMessage.BlockId gBlockId = Protocol.HelloMessage.BlockId.newBuilder()
             .setHash(genesisBlockId.getByteString())

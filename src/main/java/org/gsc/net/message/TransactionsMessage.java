@@ -30,7 +30,7 @@ public class TransactionsMessage extends GSCMessage {
   @Override
   public String toString() {
     return new StringBuilder().append(super.toString()).append("trx size: ")
-            .append(this.transactions.getTransactionsList().size()).toString();
+        .append(this.transactions.getTransactionsList().size()).toString();
   }
 
   @Override

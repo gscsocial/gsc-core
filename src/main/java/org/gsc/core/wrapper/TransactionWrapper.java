@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -163,7 +163,7 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
 
   public TransactionWrapper(raw rawData, List<ByteString> signatureList) {
     this.transaction = Transaction.newBuilder().setRawData(rawData).addAllSignature(signatureList)
-            .build();
+        .build();
   }
 
   public void resetResult() {
@@ -174,15 +174,15 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
 
   public void setResult(TransactionResultWrapper transactionResultCapsule) {
     this.transaction = this.getInstance().toBuilder().addRet(transactionResultCapsule.getInstance())
-            .build();
+        .build();
   }
 
   public void setReference(long blockNum, byte[] blockHash) {
     byte[] refBlockNum = ByteArray.fromLong(blockNum);
     Transaction.raw rawData = this.transaction.getRawData().toBuilder()
-            .setRefBlockHash(ByteString.copyFrom(ByteArray.subArray(blockHash, 8, 16)))
-            .setRefBlockBytes(ByteString.copyFrom(ByteArray.subArray(refBlockNum, 6, 8)))
-            .build();
+        .setRefBlockHash(ByteString.copyFrom(ByteArray.subArray(blockHash, 8, 16)))
+        .setRefBlockBytes(ByteString.copyFrom(ByteArray.subArray(refBlockNum, 6, 8)))
+        .build();
     this.transaction = this.transaction.toBuilder().setRawData(rawData).build();
   }
 
@@ -191,7 +191,7 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
    */
   public void setExpiration(long expiration) {
     Transaction.raw rawData = this.transaction.getRawData().toBuilder().setExpiration(expiration)
-            .build();
+        .build();
     this.transaction = this.transaction.toBuilder().setRawData(rawData).build();
   }
 
@@ -201,8 +201,8 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
 
   public void setTimestamp() {
     Transaction.raw rawData = this.transaction.getRawData().toBuilder()
-            .setTimestamp(System.currentTimeMillis())
-            .build();
+        .setTimestamp(System.currentTimeMillis())
+        .build();
     this.transaction = this.transaction.toBuilder().setRawData(rawData).build();
   }
 
@@ -219,12 +219,12 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
 
     Transaction.raw.Builder transactionBuilder = Transaction.raw.newBuilder().addContract
             (
-                    Transaction.Contract.newBuilder().setType(contractType).setParameter(Any.pack(message))
-                            .build()
-            );
+        Transaction.Contract.newBuilder().setType(contractType).setParameter(Any.pack(message))
+                .build()
+    );
 
     //Transaction.raw.Builder transactionBuilder2 = Transaction.raw.newBuilder().addContract(
-    //       Transaction.Contract.newBuilder().setType(ContractType.CreateSmartContract).setParameter(Any.pack(message)).build()
+     //       Transaction.Contract.newBuilder().setType(ContractType.CreateSmartContract).setParameter(Any.pack(message)).build()
     //);
     //transaction = Transaction.newBuilder().setRawData(transactionBuilder2.build()).build();
     transaction = Transaction.newBuilder().setRawData(transactionBuilder.build()).build();
@@ -233,8 +233,8 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
   @Deprecated
   public void createTransaction(com.google.protobuf.Message message, ContractType contractType) {
     Transaction.raw.Builder transactionBuilder = Transaction.raw.newBuilder().addContract(
-            Transaction.Contract.newBuilder().setType(contractType).setParameter(
-                    Any.pack(message)).build());
+        Transaction.Contract.newBuilder().setType(contractType).setParameter(
+            Any.pack(message)).build());
     transaction = Transaction.newBuilder().setRawData(transactionBuilder.build()).build();
   }
 
@@ -361,7 +361,7 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
 //          break;
         case UpdateSettingContract:
           owner = contractParameter.unpack(UpdateSettingContract.class)
-                  .getOwnerAddress();
+              .getOwnerAddress();
           break;
         case ExchangeCreateContract:
           owner = contractParameter.unpack(ExchangeCreateContract.class).getOwnerAddress();
@@ -425,7 +425,7 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
 
         case CreateSmartContract:
           return contractParameter.unpack(CreateSmartContract.class).getNewContract()
-                  .getCallValue();
+              .getCallValue();
         default:
           return 0L;
       }
@@ -456,7 +456,7 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
     }
 
     if (this.getInstance().getSignatureCount() !=
-            this.getInstance().getRawData().getContractCount()) {
+        this.getInstance().getRawData().getContractCount()) {
       throw new ValidateSignatureException("miss sig or contract");
     }
 
@@ -466,7 +466,7 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
         Transaction.Contract contract = listContract.get(i);
         byte[] owner = getOwner(contract);
         byte[] address = ECKey.signatureToAddress(getRawHash().getBytes(),
-                getBase64FromByteString(this.transaction.getSignature(i)));
+            getBase64FromByteString(this.transaction.getSignature(i)));
         logger.info("check sig owner={} address={}",Hex.toHexString(owner),Hex.toHexString(address));
         if (!Arrays.equals(owner, address)) {
           isVerified = false;
@@ -522,16 +522,16 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
       toStringBuff.append("contract list:{ ");
       getInstance().getRawData().getContractList().forEach(contract -> {
         toStringBuff.append("[" + i + "] ").append("type: ").append(contract.getType())
-                .append("\n");
+            .append("\n");
         toStringBuff.append("from address=").append(getOwner(contract)).append("\n");
         toStringBuff.append("to address=").append(getToAddress(contract)).append("\n");
         if (contract.getType().equals(ContractType.TransferContract)) {
           TransferContract transferContract;
           try {
             transferContract = contract.getParameter()
-                    .unpack(TransferContract.class);
+                .unpack(TransferContract.class);
             toStringBuff.append("transfer amount=").append(transferContract.getAmount())
-                    .append("\n");
+                .append("\n");
           } catch (InvalidProtocolBufferException e) {
             e.printStackTrace();
           }
@@ -539,18 +539,18 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
           TransferAssetContract transferAssetContract;
           try {
             transferAssetContract = contract.getParameter()
-                    .unpack(TransferAssetContract.class);
+                .unpack(TransferAssetContract.class);
             toStringBuff.append("transfer asset=").append(transferAssetContract.getAssetName())
-                    .append("\n");
+                .append("\n");
             toStringBuff.append("transfer amount=").append(transferAssetContract.getAmount())
-                    .append("\n");
+                .append("\n");
           } catch (InvalidProtocolBufferException e) {
             e.printStackTrace();
           }
         }
         if (this.transaction.getSignatureList().size() >= i.get() + 1) {
           toStringBuff.append("sign=").append(getBase64FromByteString(
-                  this.transaction.getSignature(i.getAndIncrement()))).append("\n");
+              this.transaction.getSignature(i.getAndIncrement()))).append("\n");
         }
       });
       toStringBuff.append("}\n");
@@ -565,7 +565,7 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
   public void setResult(Runtime runtime) {
     RuntimeException exception = runtime.getResult().getException();
     if (Objects.isNull(exception) && StringUtils
-            .isEmpty(runtime.getRuntimeError()) && !runtime.getResult().isRevert()) {
+        .isEmpty(runtime.getRuntimeError()) && !runtime.getResult().isRevert()) {
       this.setResultCode(contractResult.SUCCESS);
       return;
     }

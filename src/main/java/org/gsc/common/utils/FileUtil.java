@@ -73,8 +73,8 @@ public class FileUtil {
       if (file.isDirectory()) {
         // call deletion of file individually
         Arrays.stream(Objects.requireNonNull(file.list()))
-                .map(s -> fileName + System.getProperty("file.separator") + s)
-                .forEachOrdered(FileUtil::recursiveDelete);
+            .map(s -> fileName + System.getProperty("file.separator") + s)
+            .forEachOrdered(FileUtil::recursiveDelete);
       }
 
       file.setWritable(true);

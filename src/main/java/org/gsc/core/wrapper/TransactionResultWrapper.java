@@ -42,8 +42,8 @@ public class TransactionResultWrapper implements ProtoWrapper<Result> {
   public void setStatus(long fee, Transaction.Result.code code) {
     long oldValue = transactionResult.getFee();
     this.transactionResult = this.transactionResult.toBuilder()
-            .setFee(oldValue + fee)
-            .setRet(code).build();
+        .setFee(oldValue + fee)
+        .setRet(code).build();
   }
 
   public long getFee() {
@@ -72,7 +72,7 @@ public class TransactionResultWrapper implements ProtoWrapper<Result> {
 
   public void addFee(long fee) {
     this.transactionResult = this.transactionResult.toBuilder()
-            .setFee(this.transactionResult.getFee() + fee).build();
+        .setFee(this.transactionResult.getFee() + fee).build();
   }
 
   public void setErrorCode(Transaction.Result.code code) {

@@ -55,7 +55,7 @@ public class GetAccountServlet extends HttpServlet {
   protected void doPost(HttpServletRequest request, HttpServletResponse response) {
     try {
       String account = request.getReader().lines()
-              .collect(Collectors.joining(System.lineSeparator()));
+          .collect(Collectors.joining(System.lineSeparator()));
       Account.Builder build = Account.newBuilder();
       JsonFormat.merge(account, build);
       Account reply = wallet.getAccount(build.build());

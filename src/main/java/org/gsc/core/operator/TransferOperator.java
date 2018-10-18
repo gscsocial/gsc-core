@@ -38,7 +38,7 @@ public class TransferOperator extends AbstractOperator {
       AccountWrapper toAccount = dbManager.getAccountStore().get(toAddress);
       if (toAccount == null) {
         toAccount = new AccountWrapper(ByteString.copyFrom(toAddress), AccountType.Normal,
-                dbManager.getHeadBlockTimeStamp());
+            dbManager.getHeadBlockTimeStamp());
         dbManager.getAccountStore().put(toAddress, toAccount);
 
         fee = fee + dbManager.getDynamicPropertiesStore().getCreateNewAccountFeeInSystemContract();
@@ -73,8 +73,8 @@ public class TransferOperator extends AbstractOperator {
     }
     if (!this.contract.is(TransferContract.class)) {
       throw new ContractValidateException(
-              "contract type error,expected type [TransferContract],real type[" + contract
-                      .getClass() + "]");
+          "contract type error,expected type [TransferContract],real type[" + contract
+              .getClass() + "]");
     }
     long fee = calcFee();
     final TransferContract transferContract;
@@ -120,7 +120,7 @@ public class TransferOperator extends AbstractOperator {
 
       if (balance < Math.addExact(amount, fee)) {
         throw new ContractValidateException(
-                "Validate TransferContract error, balance is not sufficient.");
+            "Validate TransferContract error, balance is not sufficient.");
       }
 
       if (toAccount != null) {
@@ -135,7 +135,7 @@ public class TransferOperator extends AbstractOperator {
   }
 
   public static boolean validateForSmartContract(Deposit deposit, byte[] ownerAddress,
-                                                 byte[] toAddress, long amount) throws ContractValidateException {
+      byte[] toAddress, long amount) throws ContractValidateException {
     if (!Wallet.addressValid(ownerAddress)) {
       throw new ContractValidateException("Invalid ownerAddress");
     }
@@ -155,7 +155,7 @@ public class TransferOperator extends AbstractOperator {
     AccountWrapper toAccount = deposit.getAccount(toAddress);
     if (toAccount == null) {
       throw new ContractValidateException(
-              "Validate InternalTransfer error, no ToAccount. And not allowed to create account in smart contract.");
+          "Validate InternalTransfer error, no ToAccount. And not allowed to create account in smart contract.");
     }
 
     long balance = ownerAccount.getBalance();
@@ -167,7 +167,7 @@ public class TransferOperator extends AbstractOperator {
     try {
       if (balance < amount) {
         throw new ContractValidateException(
-                "Validate InternalTransfer error, balance is not sufficient.");
+            "Validate InternalTransfer error, balance is not sufficient.");
       }
 
       if (toAccount != null) {

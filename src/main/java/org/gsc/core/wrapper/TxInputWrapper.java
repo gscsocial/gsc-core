@@ -31,16 +31,16 @@ public class TxInputWrapper implements ProtoWrapper<TXInput> {
    * @param pubKey byte[] pubKey
    */
   public TxInputWrapper(byte[] txId, long vout, byte[]
-          signature, byte[] pubKey) {
+      signature, byte[] pubKey) {
     TXInput.raw txInputRaw = TXInput.raw.newBuilder()
-            .setTxID(ByteString.copyFrom(txId))
-            .setVout(vout)
-            .setPubKey(ByteString.copyFrom(pubKey)).build();
+        .setTxID(ByteString.copyFrom(txId))
+        .setVout(vout)
+        .setPubKey(ByteString.copyFrom(pubKey)).build();
 
     this.txInput = TXInput.newBuilder()
-            .setRawData(txInputRaw)
-            .setSignature(ByteString.copyFrom(signature))
-            .build();
+        .setRawData(txInputRaw)
+        .setSignature(ByteString.copyFrom(signature))
+        .build();
 
   }
 

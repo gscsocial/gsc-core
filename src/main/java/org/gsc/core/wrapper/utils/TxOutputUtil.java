@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -30,8 +30,8 @@ public class TxOutputUtil {
    */
   public static TXOutput newTxOutput(long value, String address) {
     return TXOutput.newBuilder()
-            .setValue(value)
-            .setPubKeyHash(ByteString.copyFrom(ByteArray.fromHexString(address)))
-            .build();
+        .setValue(value)
+        .setPubKeyHash(ByteString.copyFrom(ByteArray.fromHexString(address)))
+        .build();
   }
 }

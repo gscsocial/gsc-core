@@ -36,6 +36,6 @@ public class AccountIndex extends AbstractIndex<AccountWrapper, Account> {
   @Override
   protected void setAttribute() {
     Account_ADDRESS = attribute("account address",
-            bytes -> ByteArray.toHexString(bytes.getBytes()));
+        bytes -> ByteArray.toHexString(bytes.getBytes()));
   }
 }

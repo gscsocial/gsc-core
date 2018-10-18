@@ -110,8 +110,8 @@ public class DepositImpl implements Deposit {
   public AccountWrapper createAccount(byte[] address, String accountName, AccountType type) {
     Key key = new Key(address);
     AccountWrapper account = new AccountWrapper(ByteString.copyFrom(address),
-            ByteString.copyFromUtf8(accountName),
-            type);
+        ByteString.copyFromUtf8(accountName),
+        type);
 
     accountCache.put(key, new Value(account.getData(), Type.VALUE_TYPE_CREATE));
     return account;
@@ -271,13 +271,13 @@ public class DepositImpl implements Deposit {
 
     if (value < 0 && balance < -value) {
       throw new RuntimeException(
-              StringUtil.createReadableString(accountWrapper.createDbKey())
-                      + " insufficient balance");
+          StringUtil.createReadableString(accountWrapper.createDbKey())
+              + " insufficient balance");
     }
     accountWrapper.setBalance(Math.addExact(balance, value));
     Key key = Key.create(address);
     Value V = Value.create(accountWrapper.getData(),
-            Type.VALUE_TYPE_DIRTY | accountCache.get(key).getType().getType());
+        Type.VALUE_TYPE_DIRTY | accountCache.get(key).getType().getType());
     accountCache.put(key, V);
     return accountWrapper.getBalance();
   }

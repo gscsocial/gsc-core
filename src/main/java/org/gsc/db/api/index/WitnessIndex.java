@@ -28,7 +28,7 @@ public class WitnessIndex extends AbstractIndex<WitnessWrapper, Witness> {
 
   @Autowired
   public WitnessIndex(
-          @Qualifier("witnessStore") final IGSCChainBase<WitnessWrapper> database) {
+      @Qualifier("witnessStore") final IGSCChainBase<WitnessWrapper> database) {
     super(database);
   }
 
@@ -43,13 +43,13 @@ public class WitnessIndex extends AbstractIndex<WitnessWrapper, Witness> {
   @Override
   public void setAttribute() {
     Witness_ADDRESS =
-            attribute("witness address",
-                    bytes -> ByteArray.toHexString(getObject(bytes).getAddress().toByteArray()));
+        attribute("witness address",
+            bytes -> ByteArray.toHexString(getObject(bytes).getAddress().toByteArray()));
     PUBLIC_KEY =
-            attribute("public key",
-                    bytes -> ByteArray.toHexString(getObject(bytes).getPubKey().toByteArray()));
+        attribute("public key",
+            bytes -> ByteArray.toHexString(getObject(bytes).getPubKey().toByteArray()));
     Witness_URL =
-            attribute("witness url", bytes -> getObject(bytes).getUrl());
+        attribute("witness url", bytes -> getObject(bytes).getUrl());
 
   }
 

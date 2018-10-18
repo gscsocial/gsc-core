@@ -29,7 +29,7 @@ public class UpdateAssetOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       final UpdateAssetContract updateAssetContract = this.contract
-              .unpack(UpdateAssetContract.class);
+          .unpack(UpdateAssetContract.class);
 
       long newLimit = updateAssetContract.getNewLimit();
       long newPublicLimit = updateAssetContract.getNewPublicLimit();
@@ -40,7 +40,7 @@ public class UpdateAssetOperator extends AbstractOperator {
       AssetIssueStore assetIssueStore = dbManager.getAssetIssueStore();
       AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
       AssetIssueWrapper assetIssueWrapper =
-              assetIssueStore.get(accountWrapper.getAssetIssuedName().toByteArray());
+          assetIssueStore.get(accountWrapper.getAssetIssuedName().toByteArray());
 
       assetIssueWrapper.setFreeAssetNetLimit(newLimit);
       assetIssueWrapper.setPublicFreeAssetNetLimit(newPublicLimit);
@@ -69,8 +69,8 @@ public class UpdateAssetOperator extends AbstractOperator {
     }
     if (!this.contract.is(UpdateAssetContract.class)) {
       throw new ContractValidateException(
-              "contract type error,expected type [UpdateAssetContract],real type[" + contract
-                      .getClass() + "]");
+          "contract type error,expected type [UpdateAssetContract],real type[" + contract
+              .getClass() + "]");
     }
     final UpdateAssetContract updateAssetContract;
     try {
@@ -114,7 +114,7 @@ public class UpdateAssetOperator extends AbstractOperator {
     }
 
     if (newPublicLimit < 0 || newPublicLimit >=
-            dbManager.getDynamicPropertiesStore().getOneDayNetLimit()) {
+        dbManager.getDynamicPropertiesStore().getOneDayNetLimit()) {
       throw new ContractValidateException("Invalid PublicFreeAssetNetLimit");
     }
 

@@ -52,6 +52,6 @@ public class BlockMessage extends GSCMessage {
   @Override
   public String toString() {
     return new StringBuilder().append(super.toString()).append(block.getBlockId().getString())
-            .append(", trx size: ").append(block.getTransactions().size()).append("\n").toString();
+        .append(", trx size: ").append(block.getTransactions().size()).append("\n").toString();
   }
 }

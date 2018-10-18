@@ -97,7 +97,7 @@ public class ReceiptWrapper {
     } else {
       long originUsage = Math.multiplyExact(receipt.getEnergyUsageTotal(), percent) / 100;
       originUsage = Math
-              .min(originUsage, energyProcessor.getAccountLeftEnergyFromFreeze(origin));
+          .min(originUsage, energyProcessor.getAccountLeftEnergyFromFreeze(origin));
       long callerUsage = receipt.getEnergyUsageTotal() - originUsage;
       energyProcessor.useEnergy(origin, originUsage, now);
       this.setOriginEnergyUsage(originUsage);
@@ -106,11 +106,11 @@ public class ReceiptWrapper {
   }
 
   private void payEnergyBill(
-          Manager manager,
-          AccountWrapper account,
-          long usage,
-          EnergyProcessor energyProcessor,
-          long now) {
+      Manager manager,
+      AccountWrapper account,
+      long usage,
+      EnergyProcessor energyProcessor,
+      long now) {
     long accountEnergyLeft = energyProcessor.getAccountLeftEnergyFromFreeze(account);
     if (accountEnergyLeft >= usage) {
       energyProcessor.useEnergy(account, usage, now);
@@ -118,10 +118,10 @@ public class ReceiptWrapper {
     } else {
       energyProcessor.useEnergy(account, accountEnergyLeft, now);
       long SUN_PER_ENERGY = manager.getDynamicPropertiesStore().getEnergyFee() == 0
-              ? Constant.SUN_PER_ENERGY
-              : manager.getDynamicPropertiesStore().getEnergyFee();
+          ? Constant.SUN_PER_ENERGY
+          : manager.getDynamicPropertiesStore().getEnergyFee();
       long energyFee =
-              (usage - accountEnergyLeft) * SUN_PER_ENERGY;
+          (usage - accountEnergyLeft) * SUN_PER_ENERGY;
       this.setEnergyUsage(accountEnergyLeft);
       this.setEnergyFee(energyFee);
       account.setBalance(account.getBalance() - energyFee);

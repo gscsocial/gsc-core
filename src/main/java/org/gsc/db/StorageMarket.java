@@ -17,7 +17,7 @@ public class StorageMarket {
   private long exchange_to_supply(boolean isTRX, long quant) {
     logger.info("isTRX: " + isTRX);
     long balance = isTRX ? dbManager.getDynamicPropertiesStore().getTotalStoragePool() :
-            dbManager.getDynamicPropertiesStore().getTotalStorageReserved();
+        dbManager.getDynamicPropertiesStore().getTotalStorageReserved();
     logger.info("balance: " + balance);
     long newBalance = balance + quant;
     logger.info("balance + quant: " + (balance + quant));
@@ -39,7 +39,7 @@ public class StorageMarket {
   private long exchange_to_supply2(boolean isTRX, long quant) {
     logger.info("isTRX: " + isTRX);
     long balance = isTRX ? dbManager.getDynamicPropertiesStore().getTotalStoragePool() :
-            dbManager.getDynamicPropertiesStore().getTotalStorageReserved();
+        dbManager.getDynamicPropertiesStore().getTotalStorageReserved();
     logger.info("balance: " + balance);
     long newBalance = balance - quant;
     logger.info("balance - quant: " + (balance - quant));
@@ -60,11 +60,11 @@ public class StorageMarket {
 
   private long exchange_from_supply(boolean isTRX, long supplyQuant) {
     long balance = isTRX ? dbManager.getDynamicPropertiesStore().getTotalStoragePool() :
-            dbManager.getDynamicPropertiesStore().getTotalStorageReserved();
+        dbManager.getDynamicPropertiesStore().getTotalStorageReserved();
     supply -= supplyQuant;
 
     double exchangeBalance =
-            balance * (Math.pow(1.0 + (double) supplyQuant / supply, 2000.0) - 1.0);
+        balance * (Math.pow(1.0 + (double) supplyQuant / supply, 2000.0) - 1.0);
     logger.info("exchangeBalance: " + exchangeBalance);
     long out = (long) exchangeBalance;
     long newBalance = balance - out;
@@ -101,13 +101,13 @@ public class StorageMarket {
     long newTotalTax = dbManager.getDynamicPropertiesStore().getTotalStorageTax() + tax;
     long newTotalPool = dbManager.getDynamicPropertiesStore().getTotalStoragePool() - tax;
     long newTotalReserved = dbManager.getDynamicPropertiesStore().getTotalStorageReserved()
-            + storageTax;
+        + storageTax;
     logger.info("reserved: " + dbManager.getDynamicPropertiesStore().getTotalStorageReserved());
     boolean eq = dbManager.getDynamicPropertiesStore().getTotalStorageReserved()
-            == 128L * 1024 * 1024 * 1024;
+        == 128L * 1024 * 1024 * 1024;
     logger.info("reserved == 128GB: " + eq);
     logger.info("newTotalTax: " + newTotalTax + "  newTotalPool: " + newTotalPool
-            + "  newTotalReserved: " + newTotalReserved);
+        + "  newTotalReserved: " + newTotalReserved);
 
     return storageTax;
   }
@@ -120,13 +120,13 @@ public class StorageMarket {
     long newTotalTax = dbManager.getDynamicPropertiesStore().getTotalStorageTax() + tax;
     long newTotalPool = dbManager.getDynamicPropertiesStore().getTotalStoragePool() - tax;
     long newTotalReserved = dbManager.getDynamicPropertiesStore().getTotalStorageReserved()
-            + storageTax;
+        + storageTax;
     logger.info("reserved: " + dbManager.getDynamicPropertiesStore().getTotalStorageReserved());
     boolean eq = dbManager.getDynamicPropertiesStore().getTotalStorageReserved()
-            == 128L * 1024 * 1024 * 1024;
+        == 128L * 1024 * 1024 * 1024;
     logger.info("reserved == 128GB: " + eq);
     logger.info("newTotalTax: " + newTotalTax + "  newTotalPool: " + newTotalPool
-            + "  newTotalReserved: " + newTotalReserved);
+        + "  newTotalReserved: " + newTotalReserved);
     dbManager.getDynamicPropertiesStore().saveTotalStorageTax(newTotalTax);
     dbManager.getDynamicPropertiesStore().saveTotalStoragePool(newTotalPool);
     dbManager.getDynamicPropertiesStore().saveTotalStorageReserved(newTotalReserved);
@@ -159,8 +159,8 @@ public class StorageMarket {
 
     long newStorageLimit = currentStorageLimit + storageBought;
     logger.info(
-            "storageBought: " + storageBought + "  newStorageLimit: "
-                    + newStorageLimit);
+        "storageBought: " + storageBought + "  newStorageLimit: "
+            + newStorageLimit);
 
     accountWrapper.setLatestExchangeStorageTime(now);
     accountWrapper.setStorageLimit(newStorageLimit);
@@ -169,7 +169,7 @@ public class StorageMarket {
 
     long newTotalPool = dbManager.getDynamicPropertiesStore().getTotalStoragePool() + quant;
     long newTotalReserved = dbManager.getDynamicPropertiesStore().getTotalStorageReserved()
-            - storageBought;
+        - storageBought;
     logger.info("newTotalPool: " + newTotalPool + "  newTotalReserved: " + newTotalReserved);
     dbManager.getDynamicPropertiesStore().saveTotalStoragePool(newTotalPool);
     dbManager.getDynamicPropertiesStore().saveTotalStorageReserved(newTotalReserved);
@@ -187,8 +187,8 @@ public class StorageMarket {
     long storageBought = exchange(quant, true);
     long newStorageLimit = currentStorageLimit + storageBought;
     logger.info(
-            "storageBought: " + storageBought + "  newStorageLimit: "
-                    + newStorageLimit);
+        "storageBought: " + storageBought + "  newStorageLimit: "
+            + newStorageLimit);
 
     accountWrapper.setLatestExchangeStorageTime(now);
     accountWrapper.setStorageLimit(newStorageLimit);
@@ -197,7 +197,7 @@ public class StorageMarket {
 
     long newTotalPool = dbManager.getDynamicPropertiesStore().getTotalStoragePool() + quant;
     long newTotalReserved = dbManager.getDynamicPropertiesStore().getTotalStorageReserved()
-            - storageBought;
+        - storageBought;
     logger.info("newTotalPool: " + newTotalPool + "  newTotalReserved: " + newTotalReserved);
     dbManager.getDynamicPropertiesStore().saveTotalStoragePool(newTotalPool);
     dbManager.getDynamicPropertiesStore().saveTotalStorageReserved(newTotalReserved);
@@ -221,7 +221,7 @@ public class StorageMarket {
 
     long newTotalPool = dbManager.getDynamicPropertiesStore().getTotalStoragePool() - quant;
     long newTotalReserved = dbManager.getDynamicPropertiesStore().getTotalStorageReserved()
-            + bytes;
+        + bytes;
     logger.info("newTotalPool: " + newTotalPool + "  newTotalReserved: " + newTotalReserved);
     dbManager.getDynamicPropertiesStore().saveTotalStoragePool(newTotalPool);
     dbManager.getDynamicPropertiesStore().saveTotalStorageReserved(newTotalReserved);

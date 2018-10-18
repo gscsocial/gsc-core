@@ -20,19 +20,19 @@ public class ExecutorLoop<In> {
   private AtomicInteger threadNumber = new AtomicInteger(1);
 
   public ExecutorLoop(
-          int threads,
-          int queueSize,
-          Consumer<In> consumer,
-          Consumer<Throwable> exceptionHandler) {
+      int threads,
+      int queueSize,
+      Consumer<In> consumer,
+      Consumer<Throwable> exceptionHandler) {
 
     this.queue = new LimitedQueue<>(queueSize);
     this.exec = new ThreadPoolExecutor(
-            threads,
-            threads,
-            0L,
-            TimeUnit.MILLISECONDS,
-            queue,
-            r -> new Thread(r, threadPoolName + "-" + threadNumber.getAndIncrement())
+      threads,
+      threads,
+      0L,
+      TimeUnit.MILLISECONDS,
+      queue,
+      r -> new Thread(r, threadPoolName + "-" + threadNumber.getAndIncrement())
     );
 
     this.consumer = consumer;

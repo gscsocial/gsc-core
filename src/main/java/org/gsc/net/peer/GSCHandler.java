@@ -24,7 +24,7 @@ public class GSCHandler extends SimpleChannelInboundHandler<GSCMessage> {
 
   @Override
   public void channelRead0(final ChannelHandlerContext ctx, GSCMessage msg)
-          throws InterruptedException {
+      throws InterruptedException {
     msgQueue.receivedMessage(msg);
     //handle message
     peerDel.onMessage(peer, msg);

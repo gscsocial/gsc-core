@@ -44,14 +44,14 @@ public class BandwidthProcessor extends ResourceProcessor {
       long oldFreeAssetNetUsage = accountWrapper.getFreeAssetNetUsage(assetName);
       long latestAssetOperationTime = accountWrapper.getLatestAssetOperationTime(assetName);
       accountWrapper.putFreeAssetNetUsage(assetName,
-              increase(oldFreeAssetNetUsage, 0, latestAssetOperationTime, now));
+          increase(oldFreeAssetNetUsage, 0, latestAssetOperationTime, now));
     });
   }
 
   @Override
   public void consume(TransactionWrapper trx, TransactionResultWrapper ret,
                       TransactionTrace trace)
-          throws ContractValidateException, AccountResourceInsufficientException, TooBigTransactionResultException {
+      throws ContractValidateException, AccountResourceInsufficientException, TooBigTransactionResultException {
     List<Contract> contracts = trx.getInstance().getRawData().getContractList();
     if (trx.getResultSerializedSize() > Constant.MAX_RESULT_SIZE_IN_TX * contracts.size()) {
       throw new TooBigTransactionResultException();
@@ -60,8 +60,8 @@ public class BandwidthProcessor extends ResourceProcessor {
       long bytes = 0;
       if (dbManager.getDynamicPropertiesStore().supportVM()) {
         TransactionWrapper txCapForEstimateBandWidth = new TransactionWrapper(
-                trx.getInstance().getRawData(),
-                trx.getInstance().getSignatureList());
+            trx.getInstance().getRawData(),
+            trx.getInstance().getSignatureList());
         bytes = txCapForEstimateBandWidth.getSerializedSize() + Constant.MAX_RESULT_SIZE_IN_TX;
       } else {
         bytes = trx.getSerializedSize();
@@ -102,8 +102,8 @@ public class BandwidthProcessor extends ResourceProcessor {
 
       long fee = dbManager.getDynamicPropertiesStore().getTransactionFee() * bytes;
       throw new AccountResourceInsufficientException(
-              "Account Insufficient bandwidth[" + bytes + "] and balance["
-                      + fee + "] to create new account");
+          "Account Insufficient bandwidth[" + bytes + "] and balance["
+              + fee + "] to create new account");
     }
   }
 
@@ -121,7 +121,7 @@ public class BandwidthProcessor extends ResourceProcessor {
 
   private void consumeForCreateNewAccount(AccountWrapper accountWrapper, long bytes,
                                           long now, TransactionResultWrapper resultCapsule)
-          throws AccountResourceInsufficientException {
+      throws AccountResourceInsufficientException {
     boolean ret = consumeBandwidthForCreateNewAccount(accountWrapper, bytes, now);
 
     if (!ret) {
@@ -136,7 +136,7 @@ public class BandwidthProcessor extends ResourceProcessor {
                                                      long now) {
 
     long createNewAccountBandwidthRatio = dbManager.getDynamicPropertiesStore()
-            .getCreateNewAccountBandwidthRate();
+        .getCreateNewAccountBandwidthRate();
 
     long netUsage = accountWrapper.getNetUsage();
     long latestConsumeTime = accountWrapper.getLatestConsumeTime();
@@ -148,7 +148,7 @@ public class BandwidthProcessor extends ResourceProcessor {
       latestConsumeTime = now;
       long latestOperationTime = dbManager.getHeadBlockTimeStamp();
       newNetUsage = increase(newNetUsage, bytes * createNewAccountBandwidthRatio, latestConsumeTime,
-              now);
+          now);
       accountWrapper.setLatestConsumeTime(latestConsumeTime);
       accountWrapper.setLatestOperationTime(latestOperationTime);
       accountWrapper.setNetUsage(newNetUsage);
@@ -192,7 +192,7 @@ public class BandwidthProcessor extends ResourceProcessor {
           throw new RuntimeException(ex.getMessage());
         }
         toAccount = dbManager.getAccountStore()
-                .get(transferAssetContract.getToAddress().toByteArray());
+            .get(transferAssetContract.getToAddress().toByteArray());
         return toAccount == null;
       default:
         return false;
@@ -202,7 +202,7 @@ public class BandwidthProcessor extends ResourceProcessor {
 
   private boolean useAssetAccountNet(Contract contract, AccountWrapper accountWrapper, long now,
                                      long bytes)
-          throws ContractValidateException {
+      throws ContractValidateException {
 
     ByteString assetName;
     try {
@@ -212,7 +212,7 @@ public class BandwidthProcessor extends ResourceProcessor {
     }
     String assetNameString = ByteArray.toStr(assetName.toByteArray());
     AssetIssueWrapper assetIssueWrapper
-            = dbManager.getAssetIssueStore().get(assetName.toByteArray());
+        = dbManager.getAssetIssueStore().get(assetName.toByteArray());
     if (assetIssueWrapper == null) {
       throw new ContractValidateException("asset not exists");
     }
@@ -226,7 +226,7 @@ public class BandwidthProcessor extends ResourceProcessor {
     long publicLatestFreeNetTime = assetIssueWrapper.getPublicLatestFreeNetTime();
 
     long newPublicFreeAssetNetUsage = increase(publicFreeAssetNetUsage, 0,
-            publicLatestFreeNetTime, now);
+        publicLatestFreeNetTime, now);
 
     if (bytes > (publicFreeAssetNetLimit - newPublicFreeAssetNetUsage)) {
       logger.debug("The " + assetNameString + " public free bandwidth is not enough");
@@ -236,12 +236,12 @@ public class BandwidthProcessor extends ResourceProcessor {
     long freeAssetNetLimit = assetIssueWrapper.getFreeAssetNetLimit();
 
     long freeAssetNetUsage = accountWrapper
-            .getFreeAssetNetUsage(assetNameString);
+        .getFreeAssetNetUsage(assetNameString);
     long latestAssetOperationTime = accountWrapper
-            .getLatestAssetOperationTime(assetNameString);
+        .getLatestAssetOperationTime(assetNameString);
 
     long newFreeAssetNetUsage = increase(freeAssetNetUsage, 0,
-            latestAssetOperationTime, now);
+        latestAssetOperationTime, now);
 
     if (bytes > (freeAssetNetLimit - newFreeAssetNetUsage)) {
       logger.debug("The " + assetNameString + " free bandwidth is not enough");
@@ -249,7 +249,7 @@ public class BandwidthProcessor extends ResourceProcessor {
     }
 
     AccountWrapper issuerAccountWrapper = dbManager.getAccountStore()
-            .get(assetIssueWrapper.getOwnerAddress().toByteArray());
+        .get(assetIssueWrapper.getOwnerAddress().toByteArray());
 
     long issuerNetUsage = issuerAccountWrapper.getNetUsage();
     long latestConsumeTime = issuerAccountWrapper.getLatestConsumeTime();
@@ -268,16 +268,16 @@ public class BandwidthProcessor extends ResourceProcessor {
     long latestOperationTime = dbManager.getHeadBlockTimeStamp();
     newIssuerNetUsage = increase(newIssuerNetUsage, bytes, latestConsumeTime, now);
     newFreeAssetNetUsage = increase(newFreeAssetNetUsage,
-            bytes, latestAssetOperationTime, now);
+        bytes, latestAssetOperationTime, now);
     newPublicFreeAssetNetUsage = increase(newPublicFreeAssetNetUsage, bytes,
-            publicLatestFreeNetTime, now);
+        publicLatestFreeNetTime, now);
 
     issuerAccountWrapper.setNetUsage(newIssuerNetUsage);
     issuerAccountWrapper.setLatestConsumeTime(latestConsumeTime);
 
     accountWrapper.setLatestOperationTime(latestOperationTime);
     accountWrapper.putLatestAssetOperationTimeMap(assetNameString,
-            latestAssetOperationTime);
+        latestAssetOperationTime);
     accountWrapper.putFreeAssetNetUsage(assetNameString, newFreeAssetNetUsage);
 
     assetIssueWrapper.setPublicFreeAssetNetUsage(newPublicFreeAssetNetUsage);

@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -63,8 +63,8 @@ public class AssetIssueWrapper implements ProtoWrapper<AssetIssueContract> {
 
   public void setOrder(long order) {
     this.assetIssueContract = this.assetIssueContract.toBuilder()
-            .setOrder(order)
-            .build();
+        .setOrder(order)
+        .build();
   }
 
   public long getOrder() {
@@ -117,7 +117,7 @@ public class AssetIssueWrapper implements ProtoWrapper<AssetIssueContract> {
     List<FrozenSupply> frozenList = getFrozenSupplyList();
     final long[] frozenBalance = {0};
     frozenList.forEach(frozen -> frozenBalance[0] = Long.sum(frozenBalance[0],
-            frozen.getFrozenAmount()));
+        frozen.getFrozenAmount()));
     return frozenBalance[0];
   }
 
@@ -127,7 +127,7 @@ public class AssetIssueWrapper implements ProtoWrapper<AssetIssueContract> {
 
   public void setFreeAssetNetLimit(long newLimit) {
     this.assetIssueContract = this.assetIssueContract.toBuilder()
-            .setFreeAssetNetLimit(newLimit).build();
+        .setFreeAssetNetLimit(newLimit).build();
   }
 
   public long getPublicFreeAssetNetLimit() {
@@ -136,7 +136,7 @@ public class AssetIssueWrapper implements ProtoWrapper<AssetIssueContract> {
 
   public void setPublicFreeAssetNetLimit(long newPublicLimit) {
     this.assetIssueContract = this.assetIssueContract.toBuilder()
-            .setPublicFreeAssetNetLimit(newPublicLimit).build();
+        .setPublicFreeAssetNetLimit(newPublicLimit).build();
   }
 
   public long getPublicFreeAssetNetUsage() {
@@ -145,7 +145,7 @@ public class AssetIssueWrapper implements ProtoWrapper<AssetIssueContract> {
 
   public void setPublicFreeAssetNetUsage(long value) {
     this.assetIssueContract = this.assetIssueContract.toBuilder()
-            .setPublicFreeAssetNetUsage(value).build();
+        .setPublicFreeAssetNetUsage(value).build();
   }
 
   public long getPublicLatestFreeNetTime() {
@@ -154,16 +154,16 @@ public class AssetIssueWrapper implements ProtoWrapper<AssetIssueContract> {
 
   public void setPublicLatestFreeNetTime(long time) {
     this.assetIssueContract = this.assetIssueContract.toBuilder()
-            .setPublicLatestFreeNetTime(time).build();
+        .setPublicLatestFreeNetTime(time).build();
   }
 
   public void setUrl(ByteString newUrl) {
     this.assetIssueContract = this.assetIssueContract.toBuilder()
-            .setUrl(newUrl).build();
+        .setUrl(newUrl).build();
   }
 
   public void setDescription(ByteString description) {
     this.assetIssueContract = this.assetIssueContract.toBuilder()
-            .setDescription(description).build();
+        .setDescription(description).build();
   }
 }

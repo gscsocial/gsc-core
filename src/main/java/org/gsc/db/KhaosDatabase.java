@@ -82,23 +82,23 @@ public class KhaosDatabase extends GSCDatabase {
 
     @Getter
     private LinkedHashMap<Long, ArrayList<KhaosBlock>> numKblkMap =
-            new LinkedHashMap<Long, ArrayList<KhaosBlock>>() {
+        new LinkedHashMap<Long, ArrayList<KhaosBlock>>() {
 
-              @Override
-              protected boolean removeEldestEntry(Map.Entry<Long, ArrayList<KhaosBlock>> entry) {
-                long minNum = Long.max(0L, head.num - maxCapcity);
-                Map<Long, ArrayList<KhaosBlock>> minNumMap = numKblkMap.entrySet().stream()
-                        .filter(e -> e.getKey() < minNum)
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+          @Override
+          protected boolean removeEldestEntry(Map.Entry<Long, ArrayList<KhaosBlock>> entry) {
+            long minNum = Long.max(0L, head.num - maxCapcity);
+            Map<Long, ArrayList<KhaosBlock>> minNumMap = numKblkMap.entrySet().stream()
+                .filter(e -> e.getKey() < minNum)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-                minNumMap.forEach((k, v) -> {
-                  numKblkMap.remove(k);
-                  v.forEach(b -> hashKblkMap.remove(b.id));
-                });
+            minNumMap.forEach((k, v) -> {
+              numKblkMap.remove(k);
+              v.forEach(b -> hashKblkMap.remove(b.id));
+            });
 
-                return false;
-              }
-            };
+            return false;
+          }
+        };
 
     public void setMaxCapcity(int maxCapcity) {
       this.maxCapcity = maxCapcity;
@@ -190,10 +190,10 @@ public class KhaosDatabase extends GSCDatabase {
     }
 
     head = miniStore.numKblkMap.entrySet().stream()
-            .max(Comparator.comparingLong(Map.Entry::getKey))
-            .map(Map.Entry::getValue)
-            .map(list -> list.get(0))
-            .orElseThrow(() -> new RuntimeException("khaosDB head should not be null."));
+        .max(Comparator.comparingLong(Map.Entry::getKey))
+        .map(Map.Entry::getValue)
+        .map(list -> list.get(0))
+        .orElseThrow(() -> new RuntimeException("khaosDB head should not be null."));
   }
 
   /**
@@ -212,24 +212,24 @@ public class KhaosDatabase extends GSCDatabase {
    */
   public BlockWrapper getBlock(Sha256Hash hash) {
     return Stream.of(miniStore.getByHash(hash), miniUnlinkedStore.getByHash(hash))
-            .filter(Objects::nonNull)
-            .map(block -> block.blk)
-            .findFirst()
-            .orElse(null);
+        .filter(Objects::nonNull)
+        .map(block -> block.blk)
+        .findFirst()
+        .orElse(null);
   }
 
   /**
    * Push the block in the KhoasDB.
    */
   public BlockWrapper push(BlockWrapper blk)
-          throws UnLinkedBlockException, BadNumberBlockException {
+      throws UnLinkedBlockException, BadNumberBlockException {
     KhaosBlock block = new KhaosBlock(blk);
     if (head != null && block.getParentHash() != Sha256Hash.ZERO_HASH) {
       KhaosBlock kblock = miniStore.getByHash(block.getParentHash());
       if (kblock != null) {
         if (blk.getNum() != kblock.num + 1) {
           throw new BadNumberBlockException(
-                  "parent number :" + kblock.num + ",block number :" + blk.getNum());
+              "parent number :" + kblock.num + ",block number :" + blk.getNum());
         }
         block.setParent(kblock);
       } else {
@@ -271,7 +271,7 @@ public class KhaosDatabase extends GSCDatabase {
    * Find two block's most recent common parent block.
    */
   public Pair<LinkedList<KhaosBlock>, LinkedList<KhaosBlock>> getBranch(Sha256Hash block1, Sha256Hash block2)
-          throws NonCommonBlockException {
+      throws NonCommonBlockException {
     LinkedList<KhaosBlock> list1 = new LinkedList<>();
     LinkedList<KhaosBlock> list2 = new LinkedList<>();
     KhaosBlock kblk1 = miniStore.getByHash(block1);
@@ -317,7 +317,7 @@ public class KhaosDatabase extends GSCDatabase {
    */
   @Deprecated
   public Pair<LinkedList<BlockWrapper>, LinkedList<BlockWrapper>> getBranch(
-          BlockId block1, BlockId block2) {
+      BlockId block1, BlockId block2) {
     LinkedList<BlockWrapper> list1 = new LinkedList<>();
     LinkedList<BlockWrapper> list2 = new LinkedList<>();
     KhaosBlock kblk1 = miniStore.getByHash(block1);
@@ -347,13 +347,13 @@ public class KhaosDatabase extends GSCDatabase {
   // only for unittest
   public BlockWrapper getParentBlock(Sha256Hash hash) {
     return Stream.of(miniStore.getByHash(hash), miniUnlinkedStore.getByHash(hash))
-            .filter(Objects::nonNull)
-            .map(KhaosBlock::getParent)
-            .map(khaosBlock -> khaosBlock == null ? null : khaosBlock.blk)
-            .filter(Objects::nonNull)
-            .filter(b -> containBlock(b.getBlockId()))
-            .findFirst()
-            .orElse(null);
+        .filter(Objects::nonNull)
+        .map(KhaosBlock::getParent)
+        .map(khaosBlock -> khaosBlock == null ? null : khaosBlock.blk)
+        .filter(Objects::nonNull)
+        .filter(b -> containBlock(b.getBlockId()))
+        .findFirst()
+        .orElse(null);
   }
 
   public boolean hasData() {

@@ -38,7 +38,7 @@ public class BuyStorageBytesOperator extends AbstractOperator {
     }
 
     AccountWrapper accountWrapper = dbManager.getAccountStore()
-            .get(BuyStorageBytesContract.getOwnerAddress().toByteArray());
+        .get(BuyStorageBytesContract.getOwnerAddress().toByteArray());
     long bytes = BuyStorageBytesContract.getBytes();
 
     storageMarket.buyStorageBytes(accountWrapper, bytes);
@@ -59,8 +59,8 @@ public class BuyStorageBytesOperator extends AbstractOperator {
     }
     if (!contract.is(BuyStorageBytesContract.class)) {
       throw new ContractValidateException(
-              "contract type error,expected type [BuyStorageBytesContract],real type[" + contract
-                      .getClass() + "]");
+          "contract type error,expected type [BuyStorageBytesContract],real type[" + contract
+              .getClass() + "]");
     }
 
     final BuyStorageBytesContract BuyStorageBytesContract;
@@ -79,7 +79,7 @@ public class BuyStorageBytesOperator extends AbstractOperator {
     if (accountWrapper == null) {
       String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
       throw new ContractValidateException(
-              "Account[" + readableOwnerAddress + "] not exists");
+          "Account[" + readableOwnerAddress + "] not exists");
     }
 
     long bytes = BuyStorageBytesContract.getBytes();
@@ -89,7 +89,7 @@ public class BuyStorageBytesOperator extends AbstractOperator {
 
     if (bytes < 1L) {
       throw new ContractValidateException(
-              "bytes must be larger than 1, current storage_bytes[" + bytes + "]");
+          "bytes must be larger than 1, current storage_bytes[" + bytes + "]");
     }
 
     long quant = storageMarket.tryBuyStorageBytes(bytes);

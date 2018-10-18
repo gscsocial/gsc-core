@@ -29,9 +29,9 @@ public class ProposalApproveOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       final ProposalApproveContract proposalApproveContract =
-              this.contract.unpack(ProposalApproveContract.class);
+          this.contract.unpack(ProposalApproveContract.class);
       ProposalWrapper proposalWrapper = dbManager.getProposalStore().
-              get(ByteArray.fromLong(proposalApproveContract.getProposalId()));
+          get(ByteArray.fromLong(proposalApproveContract.getProposalId()));
 
       ByteString committeeAddress = proposalApproveContract.getOwnerAddress();
       if (proposalApproveContract.getIsAddApproval()) {
@@ -63,8 +63,8 @@ public class ProposalApproveOperator extends AbstractOperator {
     }
     if (!this.contract.is(ProposalApproveContract.class)) {
       throw new ContractValidateException(
-              "contract type error,expected type [ProposalApproveContract],real type[" + contract
-                      .getClass() + "]");
+          "contract type error,expected type [ProposalApproveContract],real type[" + contract
+              .getClass() + "]");
     }
     final ProposalApproveContract contract;
     try {
@@ -96,7 +96,7 @@ public class ProposalApproveOperator extends AbstractOperator {
     ProposalWrapper proposalWrapper;
     try {
       proposalWrapper = dbManager.getProposalStore().
-              get(ByteArray.fromLong(contract.getProposalId()));
+          get(ByteArray.fromLong(contract.getProposalId()));
     } catch (ItemNotFoundException ex) {
       throw new ContractValidateException("Proposal[" + contract.getProposalId() + "] not exists");
     }
@@ -110,14 +110,14 @@ public class ProposalApproveOperator extends AbstractOperator {
     if (!contract.getIsAddApproval()) {
       if (!proposalWrapper.getApprovals().contains(contract.getOwnerAddress())) {
         throw new ContractValidateException(
-                "witness [" + readableOwnerAddress + "]has not approved proposal[" + contract
-                        .getProposalId() + "] before");
+            "witness [" + readableOwnerAddress + "]has not approved proposal[" + contract
+                .getProposalId() + "] before");
       }
     } else {
       if (proposalWrapper.getApprovals().contains(contract.getOwnerAddress())) {
         throw new ContractValidateException(
-                "witness [" + readableOwnerAddress + "]has approved proposal[" + contract
-                        .getProposalId() + "] before");
+            "witness [" + readableOwnerAddress + "]has approved proposal[" + contract
+                .getProposalId() + "] before");
       }
     }
 

@@ -28,9 +28,9 @@ public class ExchangeCreateOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       final ExchangeCreateContract exchangeCreateContract = this.contract
-              .unpack(ExchangeCreateContract.class);
+          .unpack(ExchangeCreateContract.class);
       AccountWrapper accountWrapper = dbManager.getAccountStore()
-              .get(exchangeCreateContract.getOwnerAddress().toByteArray());
+          .get(exchangeCreateContract.getOwnerAddress().toByteArray());
 
       byte[] firstTokenID = exchangeCreateContract.getFirstTokenId().toByteArray();
       byte[] secondTokenID = exchangeCreateContract.getSecondTokenId().toByteArray();
@@ -56,13 +56,13 @@ public class ExchangeCreateOperator extends AbstractOperator {
       long id = dbManager.getDynamicPropertiesStore().getLatestExchangeNum() + 1;
       long now = dbManager.getHeadBlockTimeStamp();
       ExchangeWrapper exchangeWrapper =
-              new ExchangeWrapper(
-                      exchangeCreateContract.getOwnerAddress(),
-                      id,
-                      now,
-                      firstTokenID,
-                      secondTokenID
-              );
+          new ExchangeWrapper(
+              exchangeCreateContract.getOwnerAddress(),
+              id,
+              now,
+              firstTokenID,
+              secondTokenID
+          );
 
       exchangeWrapper.setBalance(firstTokenBalance, secondTokenBalance);
 
@@ -89,8 +89,8 @@ public class ExchangeCreateOperator extends AbstractOperator {
     }
     if (!this.contract.is(ExchangeCreateContract.class)) {
       throw new ContractValidateException(
-              "contract type error,expected type [ExchangeCreateContract],real type[" + contract
-                      .getClass() + "]");
+          "contract type error,expected type [ExchangeCreateContract],real type[" + contract
+              .getClass() + "]");
     }
     final ExchangeCreateContract contract;
     try {

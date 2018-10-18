@@ -31,7 +31,7 @@ public class PeersStore extends GSCDatabase<Set<Node>> {
   public void put(byte[] key, Set<Node> nodes) {
     StringBuffer sb = new StringBuffer();
     nodes.forEach(node -> sb.append(node.getEnodeURL()).append("&").append(node.getReputation())
-            .append("||"));
+        .append("||"));
     dbSource.putData(key, sb.toString().getBytes());
   }
 

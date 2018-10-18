@@ -37,16 +37,16 @@ public class PeerConnectionCheckService {
   private Manager manager;
 
   private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(2,
-          r -> new Thread(r, "check-peer-connect"));
+      r -> new Thread(r, "check-peer-connect"));
 
   @PostConstruct
   public void check() {
     logger.info("start the PeerConnectionCheckService");
     scheduledExecutorService
-            .scheduleWithFixedDelay(new CheckDataTransferTask(), 5, 5, TimeUnit.MINUTES);
+        .scheduleWithFixedDelay(new CheckDataTransferTask(), 5, 5, TimeUnit.MINUTES);
     if (Args.getInstance().isOpenFullTcpDisconnect()) {
       scheduledExecutorService
-              .scheduleWithFixedDelay(new CheckConnectNumberTask(), 4, 1, TimeUnit.MINUTES);
+          .scheduleWithFixedDelay(new CheckConnectNumberTask(), 4, 1, TimeUnit.MINUTES);
     }
   }
 
@@ -64,9 +64,9 @@ public class PeerConnectionCheckService {
       for (PeerConnection peerConnection : peerConnectionList) {
         NodeStatistics nodeStatistics = peerConnection.getNodeStatistics();
         if (!nodeStatistics.nodeIsHaveDataTransfer()
-                && System.currentTimeMillis() - peerConnection.getStartTime() >= CHECK_TIME
-                && !peerConnection.isTrustPeer()
-                && !nodeStatistics.isPredefined()) {
+            && System.currentTimeMillis() - peerConnection.getStartTime() >= CHECK_TIME
+            && !peerConnection.isTrustPeer()
+            && !nodeStatistics.isPredefined()) {
           //&& !peerConnection.isActive()
           //if xxx minutes not have data transfer,disconnect the peer,exclude trust peer and active peer
           willDisconnectPeerList.add(peerConnection);
@@ -74,11 +74,11 @@ public class PeerConnectionCheckService {
         nodeStatistics.resetTcpFlow();
       }
       if (!willDisconnectPeerList.isEmpty() && peerConnectionList.size()
-              > Args.getInstance().getNodeMaxActiveNodes() * maxConnectNumberFactor) {
+          > Args.getInstance().getNodeMaxActiveNodes() * maxConnectNumberFactor) {
         Collections.shuffle(willDisconnectPeerList);
         for (int i = 0; i < willDisconnectPeerList.size() * disconnectNumberFactor; i++) {
           logger.error("{} not have data transfer, disconnect the peer",
-                  willDisconnectPeerList.get(i).getInetAddress());
+              willDisconnectPeerList.get(i).getInetAddress());
           willDisconnectPeerList.get(i).disconnect(ReasonCode.TOO_MANY_PEERS);
         }
       }
@@ -107,12 +107,12 @@ public class PeerConnectionCheckService {
         }
         if (peerList.size() >= 2) {
           peerList.sort(
-                  Comparator.comparingInt((PeerConnection o) -> o.getNodeStatistics().getReputation()));
+              Comparator.comparingInt((PeerConnection o) -> o.getNodeStatistics().getReputation()));
           peerList = CollectionUtils.truncateRandom(peerList, 2, 1);
         }
         for (PeerConnection peerConnection : peerList) {
           logger.warn("connection pool is full, disconnect the peer : {}",
-                  peerConnection.getInetAddress());
+              peerConnection.getInetAddress());
           peerConnection.disconnect(ReasonCode.RESET);
         }
       }

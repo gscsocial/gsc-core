@@ -27,9 +27,9 @@ public class VotesWrapper implements ProtoWrapper<Votes> {
 
   public VotesWrapper(ByteString address, List<Vote> oldVotes) {
     this.votes = Votes.newBuilder()
-            .setAddress(address)
-            .addAllOldVotes(oldVotes)
-            .build();
+        .setAddress(address)
+        .addAllOldVotes(oldVotes)
+        .build();
   }
 
   public ByteString getAddress() {
@@ -46,8 +46,8 @@ public class VotesWrapper implements ProtoWrapper<Votes> {
 
   public void setOldVotes(List<Vote> oldVotes) {
     this.votes = this.votes.toBuilder()
-            .addAllOldVotes(oldVotes)
-            .build();
+        .addAllOldVotes(oldVotes)
+        .build();
   }
 
   public List<Vote> getNewVotes() {
@@ -56,14 +56,14 @@ public class VotesWrapper implements ProtoWrapper<Votes> {
 
   public void clearNewVotes() {
     this.votes = this.votes.toBuilder()
-            .clearNewVotes()
-            .build();
+        .clearNewVotes()
+        .build();
   }
 
   public void addNewVotes(ByteString voteAddress, long voteCount) {
     this.votes = this.votes.toBuilder()
-            .addNewVotes(Vote.newBuilder().setVoteAddress(voteAddress).setVoteCount(voteCount).build())
-            .build();
+        .addNewVotes(Vote.newBuilder().setVoteAddress(voteAddress).setVoteCount(voteCount).build())
+        .build();
   }
 
   public byte[] createDbKey() {

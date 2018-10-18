@@ -38,16 +38,16 @@ public class WithdrawBalanceOperator extends AbstractOperator {
     }
 
     AccountWrapper accountWrapper = dbManager.getAccountStore()
-            .get(withdrawBalanceContract.getOwnerAddress().toByteArray());
+        .get(withdrawBalanceContract.getOwnerAddress().toByteArray());
     long oldBalance = accountWrapper.getBalance();
     long allowance = accountWrapper.getAllowance();
 
     long now = dbManager.getHeadBlockTimeStamp();
     accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-            .setBalance(oldBalance + allowance)
-            .setAllowance(0L)
-            .setLatestWithdrawTime(now)
-            .build());
+        .setBalance(oldBalance + allowance)
+        .setAllowance(0L)
+        .setLatestWithdrawTime(now)
+        .build());
     dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     ret.setWithdrawAmount(allowance);
     ret.setStatus(fee, code.SUCESS);
@@ -65,8 +65,8 @@ public class WithdrawBalanceOperator extends AbstractOperator {
     }
     if (!this.contract.is(WithdrawBalanceContract.class)) {
       throw new ContractValidateException(
-              "contract type error,expected type [WithdrawBalanceContract],real type[" + contract
-                      .getClass() + "]");
+          "contract type error,expected type [WithdrawBalanceContract],real type[" + contract
+              .getClass() + "]");
     }
     final WithdrawBalanceContract withdrawBalanceContract;
     try {
@@ -84,31 +84,31 @@ public class WithdrawBalanceOperator extends AbstractOperator {
     if (accountWrapper == null) {
       String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
       throw new ContractValidateException(
-              "Account[" + readableOwnerAddress + "] not exists");
+          "Account[" + readableOwnerAddress + "] not exists");
     }
 
     String readableOwnerAddress = StringUtil.createReadableString(ownerAddress);
     if (!dbManager.getWitnessStore().has(ownerAddress)) {
       throw new ContractValidateException(
-              "Account[" + readableOwnerAddress + "] is not a witnessAccount");
+          "Account[" + readableOwnerAddress + "] is not a witnessAccount");
     }
 
     boolean isGP = Args.getInstance().getGenesisBlock().getWitnesses().stream().anyMatch(witness ->
-            Arrays.equals(ownerAddress, witness.getAddress()));
+        Arrays.equals(ownerAddress, witness.getAddress()));
     if (isGP) {
       throw new ContractValidateException(
-              "Account[" + readableOwnerAddress
-                      + "] is a guard representative and is not allowed to withdraw Balance");
+          "Account[" + readableOwnerAddress
+              + "] is a guard representative and is not allowed to withdraw Balance");
     }
 
     long latestWithdrawTime = accountWrapper.getLatestWithdrawTime();
     long now = dbManager.getHeadBlockTimeStamp();
     long witnessAllowanceFrozenTime =
-            dbManager.getDynamicPropertiesStore().getWitnessAllowanceFrozenTime() * 86_400_000L;
+        dbManager.getDynamicPropertiesStore().getWitnessAllowanceFrozenTime() * 86_400_000L;
 
     if (now - latestWithdrawTime < witnessAllowanceFrozenTime) {
       throw new ContractValidateException("The last withdraw time is "
-              + latestWithdrawTime + ",less than 24 hours");
+          + latestWithdrawTime + ",less than 24 hours");
     }
 
     if (accountWrapper.getAllowance() <= 0) {

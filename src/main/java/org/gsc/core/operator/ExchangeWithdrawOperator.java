@@ -31,12 +31,12 @@ public class ExchangeWithdrawOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       final ExchangeWithdrawContract exchangeWithdrawContract = this.contract
-              .unpack(ExchangeWithdrawContract.class);
+          .unpack(ExchangeWithdrawContract.class);
       AccountWrapper accountWrapper = dbManager.getAccountStore()
-              .get(exchangeWithdrawContract.getOwnerAddress().toByteArray());
+          .get(exchangeWithdrawContract.getOwnerAddress().toByteArray());
 
       ExchangeWrapper exchangeWrapper = dbManager.getExchangeStore().
-              get(ByteArray.fromLong(exchangeWithdrawContract.getExchangeId()));
+          get(ByteArray.fromLong(exchangeWithdrawContract.getExchangeId()));
 
       byte[] firstTokenID = exchangeWrapper.getFirstTokenId();
       byte[] secondTokenID = exchangeWrapper.getSecondTokenId();
@@ -57,17 +57,17 @@ public class ExchangeWithdrawOperator extends AbstractOperator {
 //        anotherTokenQuant = Math
 //            .floorDiv(Math.multiplyExact(secondTokenBalance, tokenQuant), firstTokenBalance);
         anotherTokenQuant = bigSecondTokenBalance.multiply(bigTokenQuant)
-                .divide(bigFirstTokenBalance).longValueExact();
+            .divide(bigFirstTokenBalance).longValueExact();
         exchangeWrapper.setBalance(firstTokenBalance - tokenQuant,
-                secondTokenBalance - anotherTokenQuant);
+            secondTokenBalance - anotherTokenQuant);
       } else {
         anotherTokenID = firstTokenID;
 //        anotherTokenQuant = Math
 //            .floorDiv(Math.multiplyExact(firstTokenBalance, tokenQuant), secondTokenBalance);
         anotherTokenQuant = bigFirstTokenBalance.multiply(bigTokenQuant)
-                .divide(bigSecondTokenBalance).longValueExact();
+            .divide(bigSecondTokenBalance).longValueExact();
         exchangeWrapper.setBalance(firstTokenBalance - anotherTokenQuant,
-                secondTokenBalance - tokenQuant);
+            secondTokenBalance - tokenQuant);
       }
 
       long newBalance = accountWrapper.getBalance() - calcFee();
@@ -111,8 +111,8 @@ public class ExchangeWithdrawOperator extends AbstractOperator {
     }
     if (!this.contract.is(ExchangeWithdrawContract.class)) {
       throw new ContractValidateException(
-              "contract type error,expected type [ExchangeWithdrawContract],real type[" + contract
-                      .getClass() + "]");
+          "contract type error,expected type [ExchangeWithdrawContract],real type[" + contract
+              .getClass() + "]");
     }
     final ExchangeWithdrawContract contract;
     try {
@@ -141,7 +141,7 @@ public class ExchangeWithdrawOperator extends AbstractOperator {
     ExchangeWrapper exchangeWrapper;
     try {
       exchangeWrapper = dbManager.getExchangeStore().
-              get(ByteArray.fromLong(contract.getExchangeId()));
+          get(ByteArray.fromLong(contract.getExchangeId()));
     } catch (ItemNotFoundException ex) {
       throw new ContractValidateException("Exchange[" + contract.getExchangeId() + "] not exists");
     }
@@ -170,7 +170,7 @@ public class ExchangeWithdrawOperator extends AbstractOperator {
 
     if (firstTokenBalance == 0 || secondTokenBalance == 0) {
       throw new ContractValidateException("Token balance in exchange is equal with 0,"
-              + "the exchange has been closed");
+          + "the exchange has been closed");
     }
 
     BigInteger bigFirstTokenBalance = new BigInteger(String.valueOf(firstTokenBalance));
@@ -180,7 +180,7 @@ public class ExchangeWithdrawOperator extends AbstractOperator {
 //      anotherTokenQuant = Math
 //          .floorDiv(Math.multiplyExact(secondTokenBalance, tokenQuant), firstTokenBalance);
       anotherTokenQuant = bigSecondTokenBalance.multiply(bigTokenQuant)
-              .divide(bigFirstTokenBalance).longValueExact();
+          .divide(bigFirstTokenBalance).longValueExact();
       if (firstTokenBalance < tokenQuant || secondTokenBalance < anotherTokenQuant) {
         throw new ContractValidateException("exchange balance is not enough");
       }
@@ -188,7 +188,7 @@ public class ExchangeWithdrawOperator extends AbstractOperator {
 //      anotherTokenQuant = Math
 //          .floorDiv(Math.multiplyExact(firstTokenBalance, tokenQuant), secondTokenBalance);
       anotherTokenQuant = bigFirstTokenBalance.multiply(bigTokenQuant)
-              .divide(bigSecondTokenBalance).longValueExact();
+          .divide(bigSecondTokenBalance).longValueExact();
       if (secondTokenBalance < tokenQuant || firstTokenBalance < anotherTokenQuant) {
         throw new ContractValidateException("exchange balance is not enough");
       }

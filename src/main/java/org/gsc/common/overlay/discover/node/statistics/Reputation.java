@@ -47,18 +47,18 @@ public class Reputation {
     int calculate(int baseScore) {
       int discoverReput = baseScore;
       discoverReput +=
-              min(t.discoverInPong.getTotalCount(), 1) * (t.discoverOutPing.getTotalCount()
-                      == t.discoverInPong.getTotalCount() ? 101 : 1);
+          min(t.discoverInPong.getTotalCount(), 1) * (t.discoverOutPing.getTotalCount()
+              == t.discoverInPong.getTotalCount() ? 101 : 1);
       discoverReput +=
-              min(t.discoverInNeighbours.getTotalCount(), 1) * (t.discoverOutFindNode.getTotalCount()
-                      == t.discoverInNeighbours.getTotalCount() ? 10 : 1);
+          min(t.discoverInNeighbours.getTotalCount(), 1) * (t.discoverOutFindNode.getTotalCount()
+              == t.discoverInNeighbours.getTotalCount() ? 10 : 1);
       return discoverReput;
     }
 
     @Override
     public boolean isContinue() {
       return t.discoverOutPing.getTotalCount() == t.discoverInPong.getTotalCount()
-              && t.discoverInNeighbours.getTotalCount() <= t.discoverOutFindNode.getTotalCount();
+          && t.discoverInNeighbours.getTotalCount() <= t.discoverOutFindNode.getTotalCount();
     }
   }
 
@@ -74,7 +74,7 @@ public class Reputation {
       reput += t.p2pHandShake.getTotalCount() > 0 ? 10 : 0;
       reput += min(t.tcpFlow.getTotalCount() / 10240, 20);
       reput += t.messageStatistics.p2pOutPing.getTotalCount() == t.messageStatistics.p2pInPong
-              .getTotalCount() ? 10 : 0;
+          .getTotalCount() ? 10 : 0;
       return reput;
     }
   }
@@ -89,23 +89,23 @@ public class Reputation {
     int calculate(int baseScore) {
       if (t.wasDisconnected()) {
         if (t.getGscLastLocalDisconnectReason() == null
-                && t.getGscLastRemoteDisconnectReason() == null) {
+            && t.getGscLastRemoteDisconnectReason() == null) {
           // means connection was dropped without reporting any reason - bad
           baseScore *= 0.8;
         } else if (t.getGscLastLocalDisconnectReason() != ReasonCode.REQUESTED) {
           // the disconnect was not initiated by discover mode
           if (t.getGscLastRemoteDisconnectReason() == ReasonCode.TOO_MANY_PEERS
-                  || t.getGscLastLocalDisconnectReason() == ReasonCode.TOO_MANY_PEERS
-                  || t.getGscLastRemoteDisconnectReason() == ReasonCode.TOO_MANY_PEERS_WITH_SAME_IP
-                  || t.getGscLastLocalDisconnectReason() == ReasonCode.TOO_MANY_PEERS_WITH_SAME_IP
-                  || t.getGscLastRemoteDisconnectReason() == ReasonCode.DUPLICATE_PEER
-                  || t.getGscLastLocalDisconnectReason() == ReasonCode.DUPLICATE_PEER
-                  || t.getGscLastRemoteDisconnectReason() == ReasonCode.TIME_OUT
-                  || t.getGscLastLocalDisconnectReason() == ReasonCode.TIME_OUT
-                  || t.getGscLastRemoteDisconnectReason() == ReasonCode.PING_TIMEOUT
-                  || t.getGscLastLocalDisconnectReason() == ReasonCode.PING_TIMEOUT
-                  || t.getGscLastRemoteDisconnectReason() == ReasonCode.CONNECT_FAIL
-                  || t.getGscLastLocalDisconnectReason() == ReasonCode.CONNECT_FAIL) {
+              || t.getGscLastLocalDisconnectReason() == ReasonCode.TOO_MANY_PEERS
+              || t.getGscLastRemoteDisconnectReason() == ReasonCode.TOO_MANY_PEERS_WITH_SAME_IP
+              || t.getGscLastLocalDisconnectReason() == ReasonCode.TOO_MANY_PEERS_WITH_SAME_IP
+              || t.getGscLastRemoteDisconnectReason() == ReasonCode.DUPLICATE_PEER
+              || t.getGscLastLocalDisconnectReason() == ReasonCode.DUPLICATE_PEER
+              || t.getGscLastRemoteDisconnectReason() == ReasonCode.TIME_OUT
+              || t.getGscLastLocalDisconnectReason() == ReasonCode.TIME_OUT
+              || t.getGscLastRemoteDisconnectReason() == ReasonCode.PING_TIMEOUT
+              || t.getGscLastLocalDisconnectReason() == ReasonCode.PING_TIMEOUT
+              || t.getGscLastRemoteDisconnectReason() == ReasonCode.CONNECT_FAIL
+              || t.getGscLastLocalDisconnectReason() == ReasonCode.CONNECT_FAIL) {
             // The peer is popular, but we were unlucky
             baseScore *= 0.9;
           } else if (t.getGscLastLocalDisconnectReason() == ReasonCode.RESET) {
@@ -120,7 +120,7 @@ public class Reputation {
         return 0;
       }
       int score = baseScore - (int) Math.pow(2, t.getDisconnectTimes())
-              * (t.getDisconnectTimes() > 0 ? 10 : 0);
+          * (t.getDisconnectTimes() > 0 ? 10 : 0);
       return score;
     }
   }
@@ -134,7 +134,7 @@ public class Reputation {
     @Override
     int calculate(int baseScore) {
       baseScore += (int) t.discoverMessageLatency.getAvrg() == 0 ? 0
-              : min(1000 / t.discoverMessageLatency.getAvrg(), 20);
+          : min(1000 / t.discoverMessageLatency.getAvrg(), 20);
       return baseScore;
     }
   }

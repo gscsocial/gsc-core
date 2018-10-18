@@ -25,7 +25,7 @@ public class GetTransactionByIdServlet extends HttpServlet {
     try {
       String input = request.getParameter("value");
       Transaction reply = wallet
-              .getTransactionById(ByteString.copyFrom(ByteArray.fromHexString(input)));
+          .getTransactionById(ByteString.copyFrom(ByteArray.fromHexString(input)));
       if (reply != null) {
         response.getWriter().println(Util.printTransaction(reply));
       } else {
@@ -44,7 +44,7 @@ public class GetTransactionByIdServlet extends HttpServlet {
   protected void doPost(HttpServletRequest request, HttpServletResponse response) {
     try {
       String input = request.getReader().lines()
-              .collect(Collectors.joining(System.lineSeparator()));
+          .collect(Collectors.joining(System.lineSeparator()));
       BytesMessage.Builder build = BytesMessage.newBuilder();
       JsonFormat.merge(input, build);
       Transaction reply = wallet.getTransactionById(build.getValue());

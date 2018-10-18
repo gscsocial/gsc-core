@@ -70,7 +70,7 @@ public class ValidateAddressServlet extends HttpServlet {
   protected void doPost(HttpServletRequest request, HttpServletResponse response) {
     try {
       String input = request.getReader().lines()
-              .collect(Collectors.joining(System.lineSeparator()));
+          .collect(Collectors.joining(System.lineSeparator()));
       JSONObject jsonAddress = JSON.parseObject(input);
       response.getWriter().println(validAddress(jsonAddress.getString("address")));
     } catch (IOException e) {

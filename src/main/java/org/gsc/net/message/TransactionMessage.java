@@ -24,7 +24,7 @@ public class TransactionMessage extends GSCMessage {
   @Override
   public String toString() {
     return new StringBuilder().append(super.toString())
-            .append("messageId: ").append(super.getMessageId()).toString();
+        .append("messageId: ").append(super.getMessageId()).toString();
   }
 
   @Override

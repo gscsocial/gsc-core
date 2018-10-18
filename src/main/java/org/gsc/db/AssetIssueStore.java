@@ -33,8 +33,8 @@ public class AssetIssueStore extends GSCStoreWithRevoking<AssetIssueWrapper> {
    */
   public List<AssetIssueWrapper> getAllAssetIssues() {
     return Streams.stream(iterator())
-            .map(Entry::getValue)
-            .collect(Collectors.toList());
+        .map(Entry::getValue)
+        .collect(Collectors.toList());
   }
 
   public List<AssetIssueWrapper> getAssetIssuesPaginated(long offset, long limit) {

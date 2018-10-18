@@ -25,7 +25,7 @@ public class BlocksMessage extends GSCMessage {
   @Override
   public String toString() {
     return super.toString() + "size: " + (CollectionUtils.isNotEmpty(blocks) ? blocks
-            .size() : 0);
+        .size() : 0);
   }
 
   @Override

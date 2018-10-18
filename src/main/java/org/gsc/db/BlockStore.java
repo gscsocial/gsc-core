@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -31,38 +31,38 @@ import org.gsc.core.exception.BadItemException;
 @Component
 public class BlockStore extends GSCStoreWithRevoking<BlockWrapper> {
 
-    @Autowired
-    private BlockStore(@Value("block") String dbName) {
-        super(dbName);
-    }
+  @Autowired
+  private BlockStore(@Value("block") String dbName) {
+    super(dbName);
+  }
 
-    public List<BlockWrapper> getLimitNumber(long startNumber, long limit) {
-        BlockId startBlockId = new BlockId(Sha256Hash.ZERO_HASH, startNumber);
-        return revokingDB.getValuesNext(startBlockId.getBytes(), limit).stream()
-                .map(bytes -> {
-                    try {
-                        return new BlockWrapper(bytes);
-                    } catch (BadItemException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
+  public List<BlockWrapper> getLimitNumber(long startNumber, long limit) {
+    BlockId startBlockId = new BlockId(Sha256Hash.ZERO_HASH, startNumber);
+    return revokingDB.getValuesNext(startBlockId.getBytes(), limit).stream()
+        .map(bytes -> {
+          try {
+            return new BlockWrapper(bytes);
+          } catch (BadItemException e) {
+            e.printStackTrace();
+          }
+          return null;
+        })
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+  }
 
-    public List<BlockWrapper> getBlockByLatestNum(long getNum) {
+  public List<BlockWrapper> getBlockByLatestNum(long getNum) {
 
-        return revokingDB.getlatestValues(getNum).stream()
-                .map(bytes -> {
-                    try {
-                        return new BlockWrapper(bytes);
-                    } catch (BadItemException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
+    return revokingDB.getlatestValues(getNum).stream()
+        .map(bytes -> {
+          try {
+            return new BlockWrapper(bytes);
+          } catch (BadItemException e) {
+            e.printStackTrace();
+          }
+          return null;
+        })
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+  }
 }

@@ -55,12 +55,12 @@ public class SyncPool {
   private double activeFactor = Args.getInstance().getActiveConnectFactor();
 
   private final List<PeerConnection> activePeers = Collections
-          .synchronizedList(new ArrayList<PeerConnection>());
+      .synchronizedList(new ArrayList<PeerConnection>());
   private final AtomicInteger passivePeersCount = new AtomicInteger(0);
   private final AtomicInteger activePeersCount = new AtomicInteger(0);
 
   private Cache<NodeHandler, Long> nodeHandlerCache = CacheBuilder.newBuilder()
-          .maximumSize(1000).expireAfterWrite(180, TimeUnit.SECONDS).recordStats().build();
+      .maximumSize(1000).expireAfterWrite(180, TimeUnit.SECONDS).recordStats().build();
 
   @Autowired
   private NodeManager nodeManager;
@@ -113,7 +113,7 @@ public class SyncPool {
 
   private void fillUp() {
     int lackSize = Math.max((int) (maxActiveNodes * factor) - activePeers.size(),
-            (int) (maxActiveNodes * activeFactor - activePeersCount.get()));
+        (int) (maxActiveNodes * activeFactor - activePeersCount.get()));
     if (lackSize <= 0) {
       return;
     }
@@ -227,7 +227,7 @@ public class SyncPool {
     public boolean test(NodeHandler handler) {
 
       if (handler.getNode().getHost().equals(nodeManager.getPublicHomeNode().getHost()) &&
-              handler.getNode().getPort() == nodeManager.getPublicHomeNode().getPort()) {
+          handler.getNode().getPort() == nodeManager.getPublicHomeNode().getPort()) {
         return false;
       }
 

@@ -50,7 +50,7 @@ import org.gsc.db.common.iterator.StoreIterator;
 @Slf4j
 @NoArgsConstructor
 public class LevelDbDataSourceImpl implements DbSourceInter<byte[]>,
-        Iterable<Map.Entry<byte[], byte[]>> {
+    Iterable<Map.Entry<byte[], byte[]>> {
 
   String dataBaseName;
   DB database;

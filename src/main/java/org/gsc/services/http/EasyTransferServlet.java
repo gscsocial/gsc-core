@@ -38,7 +38,7 @@ public class EasyTransferServlet extends HttpServlet {
     EasyTransferResponse.Builder responseBuild = EasyTransferResponse.newBuilder();
     try {
       String input = request.getReader().lines()
-              .collect(Collectors.joining(System.lineSeparator()));
+          .collect(Collectors.joining(System.lineSeparator()));
       EasyTransferMessage.Builder build = EasyTransferMessage.newBuilder();
       JsonFormat.merge(input, build);
       byte[] privateKey = wallet.pass2Key(build.getPassPhrase().toByteArray());
@@ -51,7 +51,7 @@ public class EasyTransferServlet extends HttpServlet {
 
       TransactionWrapper transactionCapsule;
       transactionCapsule = wallet
-              .createTransactionCapsule(builder.build(), ContractType.TransferContract);
+          .createTransactionCapsule(builder.build(), ContractType.TransferContract);
       transactionCapsule.sign(privateKey);
       GrpcAPI.Return retur = wallet.broadcastTransaction(transactionCapsule.getInstance());
       responseBuild.setTransaction(transactionCapsule.getInstance());
@@ -63,7 +63,7 @@ public class EasyTransferServlet extends HttpServlet {
       logger.debug("IOException: {}", e.getMessage());
     } catch (ContractValidateException e) {
       returnBuilder.setResult(false).setCode(response_code.CONTRACT_VALIDATE_ERROR)
-              .setMessage(ByteString.copyFromUtf8(e.getMessage()));
+          .setMessage(ByteString.copyFromUtf8(e.getMessage()));
       responseBuild.setResult(returnBuilder.build());
       try {
         response.getWriter().println(JsonFormat.printToString(responseBuild.build()));

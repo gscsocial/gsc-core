@@ -90,7 +90,7 @@ public class NodeManager implements EventHandler {
     discoveryEnabled = args.isNodeDiscoveryEnable();
 
     homeNode = new Node(Args.getInstance().getMyKey().getNodeId(), args.getNodeExternalIp(),
-            args.getNodeListenPort());
+        args.getNodeListenPort());
 
     for (String boot : args.getSeedNode().getIpList()) {
       bootNodes.add(Node.instanceOf(boot));
@@ -144,15 +144,15 @@ public class NodeManager implements EventHandler {
 
   public boolean isNodeAlive(NodeHandler nodeHandler) {
     return nodeHandler.getState().equals(State.Alive) ||
-            nodeHandler.getState().equals(State.Active) ||
-            nodeHandler.getState().equals(State.EvictCandidate);
+        nodeHandler.getState().equals(State.Active) ||
+        nodeHandler.getState().equals(State.EvictCandidate);
   }
 
   private void dbRead() {
     Set<Node> Nodes = this.dbManager.readNeighbours();
     logger.info("Reading Node statistics from PeersStore: " + Nodes.size() + " nodes.");
     Nodes.forEach(node -> getNodeHandler(node).getNodeStatistics()
-            .setPersistedReputation(node.getReputation()));
+        .setPersistedReputation(node.getReputation()));
   }
 
   private void dbWrite() {
@@ -179,7 +179,7 @@ public class NodeManager implements EventHandler {
   private String getKey(InetSocketAddress address) {
     InetAddress addr = address.getAddress();
     return (addr == null ? address.getHostString() : addr.getHostAddress()) + ":" + address
-            .getPort();
+        .getPort();
   }
 
   public synchronized NodeHandler getNodeHandler(Node n) {
@@ -278,11 +278,11 @@ public class NodeManager implements EventHandler {
     }
 
     logger.debug("nodeHandlerMap size {} filter peer  size {}", nodeHandlerMap.size(),
-            filtered.size());
+        filtered.size());
 
     //TODO: here can use head num sort.
     filtered.sort(Comparator.comparingInt((NodeHandler o) -> o.getNodeStatistics().getReputation())
-            .reversed());
+        .reversed());
 
     return CollectionUtils.truncate(filtered, limit);
   }
@@ -290,7 +290,7 @@ public class NodeManager implements EventHandler {
   public List<NodeHandler> dumpActiveNodes() {
     List<NodeHandler> handlers = new ArrayList<>();
     for (NodeHandler handler :
-            this.nodeHandlerMap.values()) {
+        this.nodeHandlerMap.values()) {
       if (isNodeAlive(handler)) {
         handlers.add(handler);
       }
@@ -310,14 +310,14 @@ public class NodeManager implements EventHandler {
   }
 
   public synchronized void addDiscoverListener(DiscoverListener listener,
-                                               Predicate<NodeStatistics> filter) {
+      Predicate<NodeStatistics> filter) {
     listeners.put(listener, new ListenerHandler(listener, filter));
   }
 
   public synchronized String dumpAllStatistics() {
     List<NodeHandler> l = new ArrayList<>(nodeHandlerMap.values());
     l.sort(Comparator.comparingInt((NodeHandler o) -> o.getNodeStatistics().getReputation())
-            .reversed());
+        .reversed());
 
     StringBuilder sb = new StringBuilder();
     int zeroReputCount = 0;

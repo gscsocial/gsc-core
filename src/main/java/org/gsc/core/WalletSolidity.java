@@ -28,7 +28,7 @@ public class WalletSolidity {
   public Transaction getTransactionById(ByteString id) {
     try {
       Transaction transactionById = storeAPI
-              .getTransactionById(ByteArray.toHexString(id.toByteArray()));
+          .getTransactionById(ByteArray.toHexString(id.toByteArray()));
       return transactionById;
     } catch (NonUniqueObjectException e) {
       e.printStackTrace();
@@ -43,7 +43,7 @@ public class WalletSolidity {
     TransactionInfoWrapper transactionInfoCapsule = null;
     try {
       transactionInfoCapsule = dbManager.getTransactionHistoryStore()
-              .get(id.toByteArray());
+          .get(id.toByteArray());
     } catch (BadItemException e) {
     }
     if (transactionInfoCapsule != null) {
@@ -54,17 +54,17 @@ public class WalletSolidity {
 
   public TransactionList getTransactionsFromThis(ByteString thisAddress, long offset, long limit) {
     List<Transaction> transactionsFromThis = storeAPI
-            .getTransactionsFromThis(ByteArray.toHexString(thisAddress.toByteArray()), offset, limit);
+        .getTransactionsFromThis(ByteArray.toHexString(thisAddress.toByteArray()), offset, limit);
     TransactionList transactionList = TransactionList.newBuilder()
-            .addAllTransaction(transactionsFromThis).build();
+        .addAllTransaction(transactionsFromThis).build();
     return transactionList;
   }
 
   public TransactionList getTransactionsToThis(ByteString toAddress, long offset, long limit) {
     List<Transaction> transactionsToThis = storeAPI
-            .getTransactionsToThis(ByteArray.toHexString(toAddress.toByteArray()), offset, limit);
+        .getTransactionsToThis(ByteArray.toHexString(toAddress.toByteArray()), offset, limit);
     TransactionList transactionList = TransactionList.newBuilder()
-            .addAllTransaction(transactionsToThis).build();
+        .addAllTransaction(transactionsToThis).build();
     return transactionList;
   }
 }

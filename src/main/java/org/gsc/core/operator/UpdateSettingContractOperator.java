@@ -29,14 +29,14 @@ public class UpdateSettingContractOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       UpdateSettingContract usContract = contract
-              .unpack(UpdateSettingContract.class);
+          .unpack(UpdateSettingContract.class);
       long newPercent = usContract.getConsumeUserResourcePercent();
       byte[] contractAddress = usContract.getContractAddress().toByteArray();
       ContractWrapper deployedContract = dbManager.getContractStore().get(contractAddress);
 
       dbManager.getContractStore().put(contractAddress, new ContractWrapper(
-              deployedContract.getInstance().toBuilder().setConsumeUserResourcePercent(newPercent)
-                      .build()));
+          deployedContract.getInstance().toBuilder().setConsumeUserResourcePercent(newPercent)
+              .build()));
 
       ret.setStatus(fee, code.SUCESS);
     } catch (InvalidProtocolBufferException e) {
@@ -57,9 +57,9 @@ public class UpdateSettingContractOperator extends AbstractOperator {
     }
     if (!this.contract.is(UpdateSettingContract.class)) {
       throw new ContractValidateException(
-              "contract type error,expected type [UpdateSettingContract],real type["
-                      + contract
-                      .getClass() + "]");
+          "contract type error,expected type [UpdateSettingContract],real type["
+              + contract
+              .getClass() + "]");
     }
     final UpdateSettingContract contract;
     try {
@@ -79,13 +79,13 @@ public class UpdateSettingContractOperator extends AbstractOperator {
     AccountWrapper accountWrapper = accountStore.get(ownerAddress);
     if (accountWrapper == null) {
       throw new ContractValidateException(
-              "Account[" + readableOwnerAddress + "] not exists");
+          "Account[" + readableOwnerAddress + "] not exists");
     }
 
     long newPercent = contract.getConsumeUserResourcePercent();
     if (newPercent > 100 || newPercent < 0) {
       throw new ContractValidateException(
-              "percent not in [0, 100]");
+          "percent not in [0, 100]");
     }
 
     byte[] contractAddress = contract.getContractAddress().toByteArray();
@@ -93,15 +93,15 @@ public class UpdateSettingContractOperator extends AbstractOperator {
 
     if (deployedContract == null) {
       throw new ContractValidateException(
-              "Contract not exists");
+          "Contract not exists");
     }
 
     byte[] deployedContractOwnerAddress = deployedContract.getInstance().getOriginAddress()
-            .toByteArray();
+        .toByteArray();
 
     if (!Arrays.equals(ownerAddress, deployedContractOwnerAddress)) {
       throw new ContractValidateException(
-              "Account[" + readableOwnerAddress + "] is not the owner of the contract");
+          "Account[" + readableOwnerAddress + "] is not the owner of the contract");
     }
 
     return true;

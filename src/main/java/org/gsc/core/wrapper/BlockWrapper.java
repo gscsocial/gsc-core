@@ -126,12 +126,12 @@ public class BlockWrapper implements ProtoWrapper<Block> {
     // blockheader raw
     BlockHeader.raw.Builder blockHeaderRawBuild = BlockHeader.raw.newBuilder();
     BlockHeader.raw blockHeaderRaw = blockHeaderRawBuild
-            .setNumber(number)
-            .setParentHash(hash.getByteString())
-            .setTimestamp(when)
-            .setVersion(ChainConstant.version)
-            .setWitnessAddress(witnessAddress)
-            .build();
+        .setNumber(number)
+        .setParentHash(hash.getByteString())
+        .setTimestamp(when)
+        .setVersion(ChainConstant.version)
+        .setWitnessAddress(witnessAddress)
+        .build();
 
     // block header
     BlockHeader.Builder blockHeaderBuild = BlockHeader.newBuilder();
@@ -149,10 +149,10 @@ public class BlockWrapper implements ProtoWrapper<Block> {
     // blockheader raw
     BlockHeader.raw.Builder blockHeaderRawBuild = BlockHeader.raw.newBuilder();
     BlockHeader.raw blockHeaderRaw = blockHeaderRawBuild
-            .setTimestamp(timestamp)
-            .setParentHash(parentHash)
-            .setNumber(number)
-            .build();
+        .setTimestamp(timestamp)
+        .setParentHash(parentHash)
+        .setNumber(number)
+        .build();
 
     // block header
     BlockHeader.Builder blockHeaderBuild = BlockHeader.newBuilder();
@@ -190,8 +190,8 @@ public class BlockWrapper implements ProtoWrapper<Block> {
 
   private void initTxs() {
     transactions = this.block.getTransactionsList().stream()
-            .map(trx -> new TransactionWrapper(trx))
-            .collect(Collectors.toList());
+        .map(trx -> new TransactionWrapper(trx))
+        .collect(Collectors.toList());
   }
 
   public void sign(byte[] privateKey) {
@@ -201,7 +201,7 @@ public class BlockWrapper implements ProtoWrapper<Block> {
     ByteString sig = ByteString.copyFrom(signature.toByteArray());
 
     BlockHeader blockHeader = this.block.getBlockHeader().toBuilder().setWitnessSignature(sig)
-            .build();
+        .build();
 
     this.block = this.block.toBuilder().setBlockHeader(blockHeader).build();
   }
@@ -213,10 +213,10 @@ public class BlockWrapper implements ProtoWrapper<Block> {
   public boolean validateSignature() throws ValidateSignatureException {
     try {
       return Arrays
-              .equals(ECKey.signatureToAddress(getRawHash().getBytes(),
-                      TransactionWrapper
-                              .getBase64FromByteString(block.getBlockHeader().getWitnessSignature())),
-                      block.getBlockHeader().getRawData().getWitnessAddress().toByteArray());
+          .equals(ECKey.signatureToAddress(getRawHash().getBytes(),
+              TransactionWrapper
+                  .getBase64FromByteString(block.getBlockHeader().getWitnessSignature())),
+              block.getBlockHeader().getRawData().getWitnessAddress().toByteArray());
     } catch (SignatureException e) {
       throw new ValidateSignatureException(e.getMessage());
     }
@@ -237,29 +237,29 @@ public class BlockWrapper implements ProtoWrapper<Block> {
     }
 
     Vector<Sha256Hash> ids = transactionsList.stream()
-            .map(TransactionWrapper::new)
-            .map(TransactionWrapper::getMerkleHash)
-            .collect(Collectors.toCollection(Vector::new));
+        .map(TransactionWrapper::new)
+        .map(TransactionWrapper::getMerkleHash)
+        .collect(Collectors.toCollection(Vector::new));
 
     return MerkleTree.getInstance().createTree(ids).getRoot().getHash();
   }
 
   public void setMerkleRoot() {
     BlockHeader.raw blockHeaderRaw =
-            this.block.getBlockHeader().getRawData().toBuilder()
-                    .setTxTrieRoot(calcMerkleRoot().getByteString()).build();
+        this.block.getBlockHeader().getRawData().toBuilder()
+            .setTxTrieRoot(calcMerkleRoot().getByteString()).build();
 
     this.block = this.block.toBuilder().setBlockHeader(
-            this.block.getBlockHeader().toBuilder().setRawData(blockHeaderRaw)).build();
+        this.block.getBlockHeader().toBuilder().setRawData(blockHeaderRaw)).build();
   }
   /* only for genisis */
   public void  setWitness(String witness) {
     BlockHeader.raw blockHeaderRaw =
-            this.block.getBlockHeader().getRawData().toBuilder().setWitnessAddress(
-                    ByteString.copyFrom(witness.getBytes())).build();
+        this.block.getBlockHeader().getRawData().toBuilder().setWitnessAddress(
+            ByteString.copyFrom(witness.getBytes())).build();
 
     this.block = this.block.toBuilder().setBlockHeader(
-            this.block.getBlockHeader().toBuilder().setRawData(blockHeaderRaw)).build();
+        this.block.getBlockHeader().toBuilder().setRawData(blockHeaderRaw)).build();
   }
 
   public Sha256Hash getMerkleRoot() {
@@ -310,7 +310,7 @@ public class BlockWrapper implements ProtoWrapper<Block> {
     toStringBuff.append("number=").append(getNum()).append("\n");
     toStringBuff.append("parentId=").append(getParentHash()).append("\n");
     toStringBuff.append("witness address=")
-            .append(ByteUtil.toHexString(getWitnessAddress().toByteArray())).append("\n");
+        .append(ByteUtil.toHexString(getWitnessAddress().toByteArray())).append("\n");
 
     toStringBuff.append("generated by myself=").append(generatedByMyself).append("\n");
     toStringBuff.append("generate time=").append(Time.getTimeString(getTimeStamp())).append("\n");
@@ -334,7 +334,7 @@ public class BlockWrapper implements ProtoWrapper<Block> {
     toStringBuff.append("number=").append(getNum()).append("\n");
     toStringBuff.append("parentId=").append(getParentHash()).append("\n");
     toStringBuff.append("witness address=")
-            .append(ByteUtil.toHexString(getWitnessAddress().toByteArray())).append("\n");
+        .append(ByteUtil.toHexString(getWitnessAddress().toByteArray())).append("\n");
 
     toStringBuff.append("generated by myself=").append(generatedByMyself).append("\n");
     toStringBuff.append("generate time=").append(Time.getTimeString(getTimeStamp())).append("\n");

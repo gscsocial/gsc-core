@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -46,14 +46,14 @@ public class TransferAssetOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       TransferAssetContract transferAssetContract = this.contract
-              .unpack(TransferAssetContract.class);
+          .unpack(TransferAssetContract.class);
       AccountStore accountStore = this.dbManager.getAccountStore();
       byte[] ownerAddress = transferAssetContract.getOwnerAddress().toByteArray();
       byte[] toAddress = transferAssetContract.getToAddress().toByteArray();
       AccountWrapper toAccountWrapper = accountStore.get(toAddress);
       if (toAccountWrapper == null) {
         toAccountWrapper = new AccountWrapper(ByteString.copyFrom(toAddress), AccountType.Normal,
-                dbManager.getHeadBlockTimeStamp());
+            dbManager.getHeadBlockTimeStamp());
         dbManager.getAccountStore().put(toAddress, toAccountWrapper);
 
         fee = fee + dbManager.getDynamicPropertiesStore().getCreateNewAccountFeeInSystemContract();
@@ -98,8 +98,8 @@ public class TransferAssetOperator extends AbstractOperator {
     }
     if (!this.contract.is(TransferAssetContract.class)) {
       throw new ContractValidateException(
-              "contract type error,expected type [TransferAssetContract],real type[" + contract
-                      .getClass() + "]");
+          "contract type error,expected type [TransferAssetContract],real type[" + contract
+              .getClass() + "]");
     }
     final TransferAssetContract transferAssetContract;
     try {
@@ -169,7 +169,7 @@ public class TransferAssetOperator extends AbstractOperator {
       fee = fee + dbManager.getDynamicPropertiesStore().getCreateNewAccountFeeInSystemContract();
       if (ownerAccount.getBalance() < fee) {
         throw new ContractValidateException(
-                "Validate TransferAssetOperator error, insufficient fee.");
+            "Validate TransferAssetOperator error, insufficient fee.");
       }
     }
 

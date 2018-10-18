@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -34,17 +34,17 @@ public class BlockUtil {
     Args args = Args.getInstance();
     GenesisBlock genesisBlockArg = args.getGenesisBlock();
     List<Transaction> transactionList =
-            genesisBlockArg.getAssets().stream()
-                    .map(key -> {
-                      byte[] address = key.getAddress();
-                      long balance = key.getBalance();
-                      return TransactionUtil.newGenesisTransaction(address, balance);
-                    })
-                    .collect(Collectors.toList());
+        genesisBlockArg.getAssets().stream()
+            .map(key -> {
+              byte[] address = key.getAddress();
+              long balance = key.getBalance();
+              return TransactionUtil.newGenesisTransaction(address, balance);
+            })
+            .collect(Collectors.toList());
 
     long timestamp = Long.parseLong(genesisBlockArg.getTimestamp());
     ByteString parentHash =
-            ByteString.copyFrom(ByteArray.fromHexString(genesisBlockArg.getParentHash()));
+        ByteString.copyFrom(ByteArray.fromHexString(genesisBlockArg.getParentHash()));
     long number = Long.parseLong(genesisBlockArg.getNumber());
 
     BlockWrapper blockWrapper = new BlockWrapper(timestamp, parentHash, number, transactionList);

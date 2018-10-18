@@ -97,7 +97,7 @@ public class BackupManager implements EventHandler{
           return;
         }
         members.forEach(member -> messageHandler.accept(new UdpEvent(new KeepAliveMessage(status.equals(MASTER), priority),
-                new InetSocketAddress(member, port))));
+            new InetSocketAddress(member, port))));
       } catch (Throwable t) {
         logger.error("Exception in send keep alive message.", t.getMessage());
       }

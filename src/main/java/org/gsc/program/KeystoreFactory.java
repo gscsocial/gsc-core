@@ -156,9 +156,9 @@ public class KeystoreFactory {
     KeystoreFactory cli = new KeystoreFactory();
 
     JCommander.newBuilder()
-            .addObject(cli)
-            .build()
-            .parse(args);
+        .addObject(cli)
+        .build()
+        .parse(args);
 
     cli.run();
   }

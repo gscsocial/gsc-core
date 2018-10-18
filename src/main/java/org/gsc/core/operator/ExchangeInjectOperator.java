@@ -31,12 +31,12 @@ public class ExchangeInjectOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       final ExchangeInjectContract exchangeInjectContract = this.contract
-              .unpack(ExchangeInjectContract.class);
+          .unpack(ExchangeInjectContract.class);
       AccountWrapper accountWrapper = dbManager.getAccountStore()
-              .get(exchangeInjectContract.getOwnerAddress().toByteArray());
+          .get(exchangeInjectContract.getOwnerAddress().toByteArray());
 
       ExchangeWrapper exchangeWrapper = dbManager.getExchangeStore().
-              get(ByteArray.fromLong(exchangeInjectContract.getExchangeId()));
+          get(ByteArray.fromLong(exchangeInjectContract.getExchangeId()));
 
       byte[] firstTokenID = exchangeWrapper.getFirstTokenId();
       byte[] secondTokenID = exchangeWrapper.getSecondTokenId();
@@ -52,15 +52,15 @@ public class ExchangeInjectOperator extends AbstractOperator {
       if (Arrays.equals(tokenID, firstTokenID)) {
         anotherTokenID = secondTokenID;
         anotherTokenQuant = Math
-                .floorDiv(Math.multiplyExact(secondTokenBalance, tokenQuant), firstTokenBalance);
+            .floorDiv(Math.multiplyExact(secondTokenBalance, tokenQuant), firstTokenBalance);
         exchangeWrapper.setBalance(firstTokenBalance + tokenQuant,
-                secondTokenBalance + anotherTokenQuant);
+            secondTokenBalance + anotherTokenQuant);
       } else {
         anotherTokenID = firstTokenID;
         anotherTokenQuant = Math
-                .floorDiv(Math.multiplyExact(firstTokenBalance, tokenQuant), secondTokenBalance);
+            .floorDiv(Math.multiplyExact(firstTokenBalance, tokenQuant), secondTokenBalance);
         exchangeWrapper.setBalance(firstTokenBalance + anotherTokenQuant,
-                secondTokenBalance + tokenQuant);
+            secondTokenBalance + tokenQuant);
       }
 
       long newBalance = accountWrapper.getBalance() - calcFee();
@@ -104,8 +104,8 @@ public class ExchangeInjectOperator extends AbstractOperator {
     }
     if (!this.contract.is(ExchangeInjectContract.class)) {
       throw new ContractValidateException(
-              "contract type error,expected type [ExchangeInjectContract],real type[" + contract
-                      .getClass() + "]");
+          "contract type error,expected type [ExchangeInjectContract],real type[" + contract
+              .getClass() + "]");
     }
     final ExchangeInjectContract contract;
     try {
@@ -134,7 +134,7 @@ public class ExchangeInjectOperator extends AbstractOperator {
     ExchangeWrapper exchangeWrapper;
     try {
       exchangeWrapper = dbManager.getExchangeStore().
-              get(ByteArray.fromLong(contract.getExchangeId()));
+          get(ByteArray.fromLong(contract.getExchangeId()));
     } catch (ItemNotFoundException ex) {
       throw new ContractValidateException("Exchange[" + contract.getExchangeId() + "] not exists");
     }
@@ -160,7 +160,7 @@ public class ExchangeInjectOperator extends AbstractOperator {
 
     if (firstTokenBalance == 0 || secondTokenBalance == 0) {
       throw new ContractValidateException("Token balance in exchange is equal with 0,"
-              + "the exchange has been closed");
+          + "the exchange has been closed");
     }
 
     if (tokenQuant <= 0) {
@@ -176,7 +176,7 @@ public class ExchangeInjectOperator extends AbstractOperator {
 //      anotherTokenQuant = Math
 //          .floorDiv(Math.multiplyExact(secondTokenBalance, tokenQuant), firstTokenBalance);
       anotherTokenQuant = bigSecondTokenBalance.multiply(bigTokenQuant)
-              .divide(bigFirstTokenBalance).longValueExact();
+          .divide(bigFirstTokenBalance).longValueExact();
       newTokenBalance = firstTokenBalance + tokenQuant;
       newAnotherTokenBalance = secondTokenBalance + anotherTokenQuant;
     } else {
@@ -184,7 +184,7 @@ public class ExchangeInjectOperator extends AbstractOperator {
 //      anotherTokenQuant = Math
 //          .floorDiv(Math.multiplyExact(firstTokenBalance, tokenQuant), secondTokenBalance);
       anotherTokenQuant = bigFirstTokenBalance.multiply(bigTokenQuant)
-              .divide(bigSecondTokenBalance).longValueExact();
+          .divide(bigSecondTokenBalance).longValueExact();
       newTokenBalance = secondTokenBalance + tokenQuant;
       newAnotherTokenBalance = firstTokenBalance + anotherTokenQuant;
     }

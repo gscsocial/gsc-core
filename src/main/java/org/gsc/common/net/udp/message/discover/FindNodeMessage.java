@@ -24,15 +24,15 @@ public class FindNodeMessage extends Message {
   public FindNodeMessage(Node from, byte[] targetId) {
     super(DISCOVER_FIND_NODE, null);
     Endpoint fromEndpoint = Endpoint.newBuilder()
-            .setAddress(ByteString.copyFrom(ByteArray.fromString(from.getHost())))
-            .setPort(from.getPort())
-            .setNodeId(ByteString.copyFrom(from.getId()))
-            .build();
+        .setAddress(ByteString.copyFrom(ByteArray.fromString(from.getHost())))
+        .setPort(from.getPort())
+        .setNodeId(ByteString.copyFrom(from.getId()))
+        .build();
     this.findNeighbours = FindNeighbours.newBuilder()
-            .setFrom(fromEndpoint)
-            .setTargetId(ByteString.copyFrom(targetId))
-            .setTimestamp(System.currentTimeMillis())
-            .build();
+        .setFrom(fromEndpoint)
+        .setTargetId(ByteString.copyFrom(targetId))
+        .setTimestamp(System.currentTimeMillis())
+        .build();
     this.data = this.findNeighbours.toByteArray();
   }
 

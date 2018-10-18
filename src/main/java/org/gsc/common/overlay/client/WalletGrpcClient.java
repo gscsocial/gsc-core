@@ -25,15 +25,15 @@ public class WalletGrpcClient {
 
   public WalletGrpcClient(String host, int port) {
     channel = ManagedChannelBuilder.forAddress(host, port)
-            .usePlaintext(true)
-            .build();
+        .usePlaintext(true)
+        .build();
     walletBlockingStub = WalletGrpc.newBlockingStub(channel);
   }
 
   public WalletGrpcClient(String host) {
     channel = ManagedChannelBuilder.forTarget(host)
-            .usePlaintext(true)
-            .build();
+        .usePlaintext(true)
+        .build();
     walletBlockingStub = WalletGrpc.newBlockingStub(channel);
   }
 
@@ -56,7 +56,7 @@ public class WalletGrpcClient {
   }
 
   public Transaction createParticipateAssetIssueTransaction(
-          Contract.ParticipateAssetIssueContract contract) {
+      Contract.ParticipateAssetIssueContract contract) {
     return walletBlockingStub.participateAssetIssue(contract);
   }
 
@@ -88,7 +88,7 @@ public class WalletGrpcClient {
 
   public Optional<NodeList> listNodes() {
     NodeList nodeList = walletBlockingStub
-            .listNodes(EmptyMessage.newBuilder().build());
+        .listNodes(EmptyMessage.newBuilder().build());
     if (nodeList != null) {
       return Optional.of(nodeList);
     }
@@ -99,7 +99,7 @@ public class WalletGrpcClient {
     ByteString addressBS = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBS).build();
     AssetIssueList assetIssueList = walletBlockingStub
-            .getAssetIssueByAccount(request);
+        .getAssetIssueByAccount(request);
     if (assetIssueList != null) {
       return Optional.of(assetIssueList);
     }

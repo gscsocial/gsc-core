@@ -29,23 +29,23 @@ public class ProposalCreateOperator extends AbstractOperator {
     long fee = calcFee();
     try {
       final ProposalCreateContract proposalCreateContract = this.contract
-              .unpack(ProposalCreateContract.class);
+          .unpack(ProposalCreateContract.class);
       long id = dbManager.getDynamicPropertiesStore().getLatestProposalNum() + 1;
       ProposalWrapper proposalWrapper =
-              new ProposalWrapper(proposalCreateContract.getOwnerAddress(), id);
+          new ProposalWrapper(proposalCreateContract.getOwnerAddress(), id);
 
       proposalWrapper.setParameters(proposalCreateContract.getParametersMap());
 
       long now = dbManager.getHeadBlockTimeStamp();
       long maintenanceTimeInterval =
-              dbManager.getDynamicPropertiesStore().getMaintenanceTimeInterval();
+          dbManager.getDynamicPropertiesStore().getMaintenanceTimeInterval();
       proposalWrapper.setCreateTime(now);
 
       long currentMaintenanceTime = dbManager.getDynamicPropertiesStore().getNextMaintenanceTime();
       long now3 = now + Args.getInstance().getProposalExpireTime();
       long round = (now3 - currentMaintenanceTime) / maintenanceTimeInterval;
       long expirationTime =
-              currentMaintenanceTime + (round + 1) * maintenanceTimeInterval;
+          currentMaintenanceTime + (round + 1) * maintenanceTimeInterval;
       proposalWrapper.setExpirationTime(expirationTime);
 
       dbManager.getProposalStore().put(proposalWrapper.createDbKey(), proposalWrapper);
@@ -70,8 +70,8 @@ public class ProposalCreateOperator extends AbstractOperator {
     }
     if (!this.contract.is(ProposalCreateContract.class)) {
       throw new ContractValidateException(
-              "contract type error,expected type [ProposalCreateContract],real type[" + contract
-                      .getClass() + "]");
+          "contract type error,expected type [ProposalCreateContract],real type[" + contract
+              .getClass() + "]");
     }
     final ProposalCreateContract contract;
     try {
@@ -111,7 +111,7 @@ public class ProposalCreateOperator extends AbstractOperator {
       case (0): {
         if (entry.getValue() < 3 * 27 * 1000 || entry.getValue() > 24 * 3600 * 1000) {
           throw new ContractValidateException(
-                  "Bad chain parameter value,valid range is [3 * 27 * 1000,24 * 3600 * 1000]");
+              "Bad chain parameter value,valid range is [3 * 27 * 1000,24 * 3600 * 1000]");
         }
         return;
       }
@@ -125,26 +125,26 @@ public class ProposalCreateOperator extends AbstractOperator {
       case (8): {
         if (entry.getValue() < 0 || entry.getValue() > 100_000_000_000_000_000L) {
           throw new ContractValidateException(
-                  "Bad chain parameter value,valid range is [0,100_000_000_000_000_000L]");
+              "Bad chain parameter value,valid range is [0,100_000_000_000_000_000L]");
         }
         break;
       }
       case (9):{
         if(entry.getValue() != 1){
           throw new ContractValidateException(
-                  "This value[ALLOW_CREATION_OF_CONTRACTS] is only allowed to be 1");
+              "This value[ALLOW_CREATION_OF_CONTRACTS] is only allowed to be 1");
         }
         break;
       }
       case (10):{
         if(dbManager.getDynamicPropertiesStore().getRemoveThePowerOfTheGr() == -1){
           throw new ContractValidateException(
-                  "This proposal has been executed before and is only allowed to be executed once");
+              "This proposal has been executed before and is only allowed to be executed once");
         }
 
         if(entry.getValue() != 1){
           throw new ContractValidateException(
-                  "This value[REMOVE_THE_POWER_OF_THE_GR] is only allowed to be 1");
+              "This value[REMOVE_THE_POWER_OF_THE_GR] is only allowed to be 1");
         }
         break;
       }

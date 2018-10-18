@@ -80,17 +80,17 @@ public class NodeStatistics {
   public boolean isReputationPenalized() {
 
     if (wasDisconnected() && gscLastRemoteDisconnectReason == ReasonCode.TOO_MANY_PEERS &&
-            System.currentTimeMillis() - lastDisconnectedTime < TOO_MANY_PEERS_PENALIZE_TIMEOUT) {
+        System.currentTimeMillis() - lastDisconnectedTime < TOO_MANY_PEERS_PENALIZE_TIMEOUT) {
       return true;
     }
 
     if (wasDisconnected() && gscLastRemoteDisconnectReason == ReasonCode.DUPLICATE_PEER &&
-            System.currentTimeMillis() - lastDisconnectedTime < TOO_MANY_PEERS_PENALIZE_TIMEOUT) {
+        System.currentTimeMillis() - lastDisconnectedTime < TOO_MANY_PEERS_PENALIZE_TIMEOUT) {
       return true;
     }
 
     if (firstDisconnectedTime > 0
-            && (System.currentTimeMillis() - firstDisconnectedTime) > CLEAR_CYCLE_TIME) {
+        && (System.currentTimeMillis() - firstDisconnectedTime) > CLEAR_CYCLE_TIME) {
       gscLastLocalDisconnectReason = null;
       gscLastRemoteDisconnectReason = null;
       disconnectTimes = 0;
@@ -99,23 +99,23 @@ public class NodeStatistics {
     }
 
     if (gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
-            gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
-            gscLastLocalDisconnectReason == ReasonCode.BAD_PROTOCOL ||
-            gscLastRemoteDisconnectReason == ReasonCode.BAD_PROTOCOL ||
-            gscLastLocalDisconnectReason == ReasonCode.BAD_BLOCK ||
-            gscLastRemoteDisconnectReason == ReasonCode.BAD_BLOCK ||
-            gscLastLocalDisconnectReason == ReasonCode.BAD_TX ||
-            gscLastRemoteDisconnectReason == ReasonCode.BAD_TX ||
-            gscLastLocalDisconnectReason == ReasonCode.FORKED ||
-            gscLastRemoteDisconnectReason == ReasonCode.FORKED ||
-            gscLastLocalDisconnectReason == ReasonCode.UNLINKABLE ||
-            gscLastRemoteDisconnectReason == ReasonCode.UNLINKABLE ||
-            gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_CHAIN ||
-            gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_CHAIN ||
-            gscLastRemoteDisconnectReason == ReasonCode.SYNC_FAIL ||
-            gscLastLocalDisconnectReason == ReasonCode.SYNC_FAIL ||
-            gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_VERSION ||
-            gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_VERSION) {
+        gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_PROTOCOL ||
+        gscLastLocalDisconnectReason == ReasonCode.BAD_PROTOCOL ||
+        gscLastRemoteDisconnectReason == ReasonCode.BAD_PROTOCOL ||
+        gscLastLocalDisconnectReason == ReasonCode.BAD_BLOCK ||
+        gscLastRemoteDisconnectReason == ReasonCode.BAD_BLOCK ||
+        gscLastLocalDisconnectReason == ReasonCode.BAD_TX ||
+        gscLastRemoteDisconnectReason == ReasonCode.BAD_TX ||
+        gscLastLocalDisconnectReason == ReasonCode.FORKED ||
+        gscLastRemoteDisconnectReason == ReasonCode.FORKED ||
+        gscLastLocalDisconnectReason == ReasonCode.UNLINKABLE ||
+        gscLastRemoteDisconnectReason == ReasonCode.UNLINKABLE ||
+        gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_CHAIN ||
+        gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_CHAIN ||
+        gscLastRemoteDisconnectReason == ReasonCode.SYNC_FAIL ||
+        gscLastLocalDisconnectReason == ReasonCode.SYNC_FAIL ||
+        gscLastRemoteDisconnectReason == ReasonCode.INCOMPATIBLE_VERSION ||
+        gscLastLocalDisconnectReason == ReasonCode.INCOMPATIBLE_VERSION) {
       persistedReputation = 0;
       return true;
     }
@@ -163,17 +163,17 @@ public class NodeStatistics {
   @Override
   public String toString() {
     return "NodeStat[reput: " + getReputation() + "(" + persistedReputation + "), discover: " +
-            messageStatistics.discoverInPong + "/" + messageStatistics.discoverOutPing + " " +
-            messageStatistics.discoverOutPong + "/" + messageStatistics.discoverInPing + " " +
-            messageStatistics.discoverInNeighbours + "/" + messageStatistics.discoverOutFindNode + " " +
-            messageStatistics.discoverOutNeighbours + "/" + messageStatistics.discoverInFindNode + " " +
-            ((int) discoverMessageLatency.getAvrg()) + "ms" +
-            ", p2p: " + p2pHandShake + "/" + messageStatistics.p2pInHello + "/" + messageStatistics.p2pOutHello + " " +
-            ", gsc: " + messageStatistics.gscInMessage + "/" + messageStatistics.gscOutMessage + " " +
-            (wasDisconnected() ? "X " + disconnectTimes : "") +
-            (gscLastLocalDisconnectReason != null ? ("<=" + gscLastLocalDisconnectReason) : " ") +
-            (gscLastRemoteDisconnectReason != null ? ("=>" + gscLastRemoteDisconnectReason) : " ") +
-            ", tcp flow: " + tcpFlow.getTotalCount();
+        messageStatistics.discoverInPong + "/" + messageStatistics.discoverOutPing + " " +
+        messageStatistics.discoverOutPong + "/" + messageStatistics.discoverInPing + " " +
+        messageStatistics.discoverInNeighbours + "/" + messageStatistics.discoverOutFindNode + " " +
+        messageStatistics.discoverOutNeighbours + "/" + messageStatistics.discoverInFindNode + " " +
+        ((int) discoverMessageLatency.getAvrg()) + "ms" +
+        ", p2p: " + p2pHandShake + "/" + messageStatistics.p2pInHello + "/" + messageStatistics.p2pOutHello + " " +
+        ", gsc: " + messageStatistics.gscInMessage + "/" + messageStatistics.gscOutMessage + " " +
+        (wasDisconnected() ? "X " + disconnectTimes : "") +
+        (gscLastLocalDisconnectReason != null ? ("<=" + gscLastLocalDisconnectReason) : " ") +
+        (gscLastRemoteDisconnectReason != null ? ("=>" + gscLastRemoteDisconnectReason) : " ") +
+        ", tcp flow: " + tcpFlow.getTotalCount();
   }
 
   public class SimpleStatter {

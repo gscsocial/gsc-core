@@ -39,9 +39,9 @@ public class EnergyProcessor extends ResourceProcessor {
   @Override
   public void consume(TransactionWrapper trx, TransactionResultWrapper ret,
                       TransactionTrace trace)
-          throws ContractValidateException, AccountResourceInsufficientException {
+      throws ContractValidateException, AccountResourceInsufficientException {
     List<Contract> contracts =
-            trx.getInstance().getRawData().getContractList();
+        trx.getInstance().getRawData().getContractList();
 
     for (Contract contract : contracts) {
 
@@ -66,11 +66,11 @@ public class EnergyProcessor extends ResourceProcessor {
 
       long creatorEnergy = energy * creatorRatio / 100;
       AccountWrapper contractProvider = dbManager.getAccountStore()
-              .get(contract.getProvider().toByteArray());
+          .get(contract.getProvider().toByteArray());
 
       if (!useEnergy(contractProvider, creatorEnergy, now)) {
         throw new ContractValidateException(
-                "creator has not enough energy[" + creatorEnergy + "]");
+            "creator has not enough energy[" + creatorEnergy + "]");
       }
 
       long userEnergy = energy * (100 - creatorRatio) / 100;
@@ -84,8 +84,8 @@ public class EnergyProcessor extends ResourceProcessor {
       long fee = calculateFee(userEnergy);
       if (fee > feeLimit) {
         throw new AccountResourceInsufficientException(
-                "Account has Insufficient Energy[" + userEnergy + "] and feeLimit[" + feeLimit
-                        + "] is not enough to trigger this contract");
+            "Account has Insufficient Energy[" + userEnergy + "] and feeLimit[" + feeLimit
+                + "] is not enough to trigger this contract");
       }
 
       //2.The creator of this have sufficient resources
@@ -94,8 +94,8 @@ public class EnergyProcessor extends ResourceProcessor {
       }
 
       throw new AccountResourceInsufficientException(
-              "Account has insufficient Energy[" + userEnergy + "] and balance[" + fee
-                      + "] to trigger this contract");
+          "Account has insufficient Energy[" + userEnergy + "] and balance[" + fee
+              + "] to trigger this contract");
     }
   }
 
@@ -119,7 +119,7 @@ public class EnergyProcessor extends ResourceProcessor {
     long energyUsage = accountWrapper.getEnergyUsage();
     long latestConsumeTime = accountWrapper.getAccountResource().getLatestConsumeTimeForEnergy();
     long energyLimit = calculateGlobalEnergyLimit(
-            accountWrapper.getAccountResource().getFrozenBalanceForEnergy().getFrozenBalance());
+        accountWrapper.getAccountResource().getFrozenBalanceForEnergy().getFrozenBalance());
 
     long newEnergyUsage = increase(energyUsage, 0, latestConsumeTime, now);
 
@@ -157,7 +157,7 @@ public class EnergyProcessor extends ResourceProcessor {
     long energyUsage = accountWrapper.getEnergyUsage();
     long latestConsumeTime = accountWrapper.getAccountResource().getLatestConsumeTimeForEnergy();
     long energyLimit = calculateGlobalEnergyLimit(
-            accountWrapper.getAccountResource().getFrozenBalanceForEnergy().getFrozenBalance());
+        accountWrapper.getAccountResource().getFrozenBalanceForEnergy().getFrozenBalance());
 
     long newEnergyUsage = increase(energyUsage, 0, latestConsumeTime, now);
 

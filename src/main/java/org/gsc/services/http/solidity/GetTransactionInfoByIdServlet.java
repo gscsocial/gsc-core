@@ -28,7 +28,7 @@ public class GetTransactionInfoByIdServlet extends HttpServlet {
     try {
       String input = request.getParameter("value");
       TransactionInfo transInfo = walletSolidity.getTransactionInfoById(ByteString.copyFrom(
-              ByteArray.fromHexString(input)));
+          ByteArray.fromHexString(input)));
       if (transInfo == null) {
         response.getWriter().println("{}");
       } else {
@@ -48,7 +48,7 @@ public class GetTransactionInfoByIdServlet extends HttpServlet {
   protected void doPost(HttpServletRequest request, HttpServletResponse response) {
     try {
       String input = request.getReader().lines()
-              .collect(Collectors.joining(System.lineSeparator()));
+          .collect(Collectors.joining(System.lineSeparator()));
       BytesMessage.Builder build = BytesMessage.newBuilder();
       JsonFormat.merge(input, build);
       TransactionInfo transInfo = walletSolidity.getTransactionInfoById(build.build().getValue());

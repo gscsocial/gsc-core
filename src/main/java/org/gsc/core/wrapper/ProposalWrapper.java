@@ -32,9 +32,9 @@ public class ProposalWrapper implements ProtoWrapper<Proposal> {
 
   public ProposalWrapper(ByteString address, final long id) {
     this.proposal = Proposal.newBuilder()
-            .setProposerAddress(address)
-            .setProposalId(id)
-            .build();
+        .setProposerAddress(address)
+        .setProposalId(id)
+        .build();
   }
 
   public long getID() {
@@ -43,8 +43,8 @@ public class ProposalWrapper implements ProtoWrapper<Proposal> {
 
   public void setID(long id) {
     this.proposal = this.proposal.toBuilder()
-            .setProposalId(id)
-            .build();
+        .setProposalId(id)
+        .build();
   }
 
   public ByteString getProposalAddress() {
@@ -53,8 +53,8 @@ public class ProposalWrapper implements ProtoWrapper<Proposal> {
 
   public void setProposalAddress(ByteString address) {
     this.proposal = this.proposal.toBuilder()
-            .setProposerAddress(address)
-            .build();
+        .setProposerAddress(address)
+        .build();
   }
 
   public Map<Long, Long> getParameters() {
@@ -63,8 +63,8 @@ public class ProposalWrapper implements ProtoWrapper<Proposal> {
 
   public void setParameters(Map<Long, Long> parameters) {
     this.proposal = this.proposal.toBuilder()
-            .putAllParameters(parameters)
-            .build();
+        .putAllParameters(parameters)
+        .build();
   }
 
   public long getExpirationTime() {
@@ -73,8 +73,8 @@ public class ProposalWrapper implements ProtoWrapper<Proposal> {
 
   public void setExpirationTime(long time) {
     this.proposal = this.proposal.toBuilder()
-            .setExpirationTime(time)
-            .build();
+        .setExpirationTime(time)
+        .build();
   }
 
   public long getCreateTime() {
@@ -83,8 +83,8 @@ public class ProposalWrapper implements ProtoWrapper<Proposal> {
 
   public void setCreateTime(long time) {
     this.proposal = this.proposal.toBuilder()
-            .setCreateTime(time)
-            .build();
+        .setCreateTime(time)
+        .build();
   }
 
   public List<ByteString> getApprovals() {
@@ -96,9 +96,9 @@ public class ProposalWrapper implements ProtoWrapper<Proposal> {
     approvals.addAll(getApprovals());
     approvals.remove(address);
     this.proposal = this.proposal.toBuilder()
-            .clearApprovals()
-            .addAllApprovals(approvals)
-            .build();
+        .clearApprovals()
+        .addAllApprovals(approvals)
+        .build();
   }
 
   public void clearApproval() {
@@ -107,8 +107,8 @@ public class ProposalWrapper implements ProtoWrapper<Proposal> {
 
   public void addApproval(ByteString committeeAddress) {
     this.proposal = this.proposal.toBuilder()
-            .addApprovals(committeeAddress)
-            .build();
+        .addApprovals(committeeAddress)
+        .build();
   }
 
   public State getState() {
@@ -117,13 +117,13 @@ public class ProposalWrapper implements ProtoWrapper<Proposal> {
 
   public void setState(State state) {
     this.proposal = this.proposal.toBuilder()
-            .setState(state)
-            .build();
+        .setState(state)
+        .build();
   }
 
   public boolean hasProcessed() {
     return this.proposal.getState().equals(State.DISAPPROVED) || this.proposal.getState()
-            .equals(State.APPROVED);
+        .equals(State.APPROVED);
   }
 
   public boolean hasCanceled() {
@@ -155,10 +155,10 @@ public class ProposalWrapper implements ProtoWrapper<Proposal> {
 
   public boolean hasMostApprovals(List<ByteString> activeWitnesses) {
     long count = this.proposal.getApprovalsList().stream()
-            .filter(witness -> activeWitnesses.contains(witness)).count();
+        .filter(witness -> activeWitnesses.contains(witness)).count();
     if (count != this.proposal.getApprovalsCount()) {
       List<ByteString> InvalidApprovalList = this.proposal.getApprovalsList().stream()
-              .filter(witness -> !activeWitnesses.contains(witness)).collect(Collectors.toList());
+          .filter(witness -> !activeWitnesses.contains(witness)).collect(Collectors.toList());
       logger.info("InvalidApprovalList:" + StringUtil.getAddressStringList(InvalidApprovalList));
     }
     if (activeWitnesses.size() != ChainConstant.MAX_ACTIVE_WITNESS_NUM) {

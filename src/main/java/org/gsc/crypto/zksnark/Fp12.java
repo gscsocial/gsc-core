@@ -161,7 +161,7 @@ class Fp12 implements Field<Fp12> {
 
     @Override
     public Fp12 inverse() {
-
+        
         Fp6 t0 = a.squared();
         Fp6 t1 = b.squared();
         Fp6 t2 = t0.sub(t1.mulByNonResidue());
@@ -197,7 +197,7 @@ class Fp12 implements Field<Fp12> {
     }
 
     Fp12 cyclotomicSquared() {
-
+        
         Fp2 z0 = a.a;
         Fp2 z4 = a.b;
         Fp2 z3 = a.c;
@@ -255,7 +255,7 @@ class Fp12 implements Field<Fp12> {
         z5 = t3.add(z5);
         z5 = z5.add(z5);
         z5 = z5.add(t3);
-
+        
         return new Fp12(new Fp6(z0, z4, z3), new Fp6(z2, z1, z5));
     }
 
@@ -307,11 +307,11 @@ class Fp12 implements Field<Fp12> {
     public String toString() {
         return String.format(
                 "Fp12 (%s; %s)\n" +
-                        "     (%s; %s)\n" +
-                        "     (%s; %s)\n" +
-                        "     (%s; %s)\n" +
-                        "     (%s; %s)\n" +
-                        "     (%s; %s)\n",
+                "     (%s; %s)\n" +
+                "     (%s; %s)\n" +
+                "     (%s; %s)\n" +
+                "     (%s; %s)\n" +
+                "     (%s; %s)\n",
 
                 a.a.a, a.a.b,
                 a.b.a, a.b.b,

@@ -96,7 +96,7 @@ public class ByteArray {
   public static byte[] fromObject(Object obj) {
     byte[] bytes = null;
     try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-         ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
+        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
       objectOutputStream.writeObject(obj);
       objectOutputStream.flush();
       bytes = byteArrayOutputStream.toByteArray();

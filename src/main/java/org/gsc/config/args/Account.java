@@ -1,10 +1,10 @@
 /*
- * gsc-core is free software: you can redistribute it and/or modify
+ * java-gsc is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
+ * java-gsc is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -51,7 +51,7 @@ public class Account implements Serializable {
   public void setAddress(final byte[] address) {
     if (!Wallet.addressValid(address)){
       throw new IllegalArgumentException(
-              "The address(" + StringUtil.createReadableString(address) + ") must be a 21 bytes.");
+          "The address(" + StringUtil.createReadableString(address) + ") must be a 21 bytes.");
     }
     this.address = address;
   }

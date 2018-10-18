@@ -102,7 +102,7 @@ public class Channel {
   private boolean isTrustPeer;
 
   public void init(ChannelPipeline pipeline, String remoteId, boolean discoveryMode,
-                   ChannelManager channelManager, PeerConnectionDelegate peerDel) {
+      ChannelManager channelManager, PeerConnectionDelegate peerDel) {
 
     this.channelManager = channelManager;
 
@@ -176,7 +176,7 @@ public class Channel {
       logger.error("Read timeout, {}", address);
     } else if (baseThrowable instanceof P2pException) {
       logger.error("type: {}, info: {}, {}", ((P2pException) baseThrowable).getType(),
-              baseThrowable.getMessage(), address);
+          baseThrowable.getMessage(), address);
     } else if (errMsg != null && errMsg.contains("Connection reset by peer")) {
       logger.error("{}, {}", errMsg, address);
     } else {
@@ -281,7 +281,7 @@ public class Channel {
     }
     Channel channel = (Channel) o;
     if (inetSocketAddress != null ? !inetSocketAddress.equals(channel.inetSocketAddress)
-            : channel.inetSocketAddress != null) {
+        : channel.inetSocketAddress != null) {
       return false;
     }
     if (node != null ? !node.equals(channel.node) : channel.node != null) {
@@ -301,6 +301,6 @@ public class Channel {
   public String toString() {
     return String.format("%s | %s", inetSocketAddress, getPeerId());
   }
-
+  
 }
 

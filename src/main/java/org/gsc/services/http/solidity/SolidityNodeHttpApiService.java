@@ -71,26 +71,26 @@ public class SolidityNodeHttpApiService implements Service {
       context.addServlet(new ServletHolder(accountServlet), "/walletsolidity/getaccount");
       context.addServlet(new ServletHolder(listWitnessesServlet), "/walletsolidity/listwitnesses");
       context.addServlet(new ServletHolder(getAssetIssueListServlet),
-              "/walletsolidity/getassetissuelist");
+          "/walletsolidity/getassetissuelist");
       context.addServlet(new ServletHolder(getPaginatedAssetIssueListServlet),
-              "/walletsolidity/getpaginatedassetissuelist");
+          "/walletsolidity/getpaginatedassetissuelist");
       context.addServlet(new ServletHolder(getNowBlockServlet), "/walletsolidity/getnowblock");
       context.addServlet(new ServletHolder(getBlockByNumServlet), "/walletsolidity/getblockbynum");
 
       // only for SolidityNode
       context.addServlet(new ServletHolder(getTransactionByIdServlet),
-              "/walletsolidity/gettransactionbyid");
+          "/walletsolidity/gettransactionbyid");
       context
-              .addServlet(new ServletHolder(getTransactionInfoByIdServlet),
-                      "/walletsolidity/gettransactioninfobyid");
+          .addServlet(new ServletHolder(getTransactionInfoByIdServlet),
+              "/walletsolidity/gettransactioninfobyid");
 
       // for extension api
       if (args.isWalletExtensionApi()) {
         context.addServlet(new ServletHolder(getTransactionsFromThisServlet),
-                "/walletextension/gettransactionsfromthis");
+            "/walletextension/gettransactionsfromthis");
         context
-                .addServlet(new ServletHolder(getTransactionsToThisServlet),
-                        "/walletextension/gettransactionstothis");
+            .addServlet(new ServletHolder(getTransactionsToThisServlet),
+                "/walletextension/gettransactionstothis");
       }
 
       server.start();

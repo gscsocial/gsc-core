@@ -24,15 +24,15 @@ public class PongMessage extends Message {
   public PongMessage(Node from) {
     super(DISCOVER_PONG, null);
     Endpoint toEndpoint = Endpoint.newBuilder()
-            .setAddress(ByteString.copyFrom(ByteArray.fromString(from.getHost())))
-            .setPort(from.getPort())
-            .setNodeId(ByteString.copyFrom(from.getId()))
-            .build();
+        .setAddress(ByteString.copyFrom(ByteArray.fromString(from.getHost())))
+        .setPort(from.getPort())
+        .setNodeId(ByteString.copyFrom(from.getId()))
+        .build();
     this.pongMessage = Discover.PongMessage.newBuilder()
-            .setFrom(toEndpoint)
-            .setEcho(Args.getInstance().getNodeP2pVersion())
-            .setTimestamp(System.currentTimeMillis())
-            .build();
+        .setFrom(toEndpoint)
+        .setEcho(Args.getInstance().getNodeP2pVersion())
+        .setTimestamp(System.currentTimeMillis())
+        .build();
     this.data = this.pongMessage.toByteArray();
   }
 

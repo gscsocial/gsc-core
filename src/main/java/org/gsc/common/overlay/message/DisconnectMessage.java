@@ -15,9 +15,9 @@ public class DisconnectMessage extends P2pMessage {
 
   public DisconnectMessage(ReasonCode reasonCode) {
     this.disconnectMessage = Protocol.DisconnectMessage
-            .newBuilder()
-            .setReason(reasonCode)
-            .build();
+        .newBuilder()
+        .setReason(reasonCode)
+        .build();
     this.type = MessageTypes.P2P_DISCONNECT.asByte();
     this.data = this.disconnectMessage.toByteArray();
   }

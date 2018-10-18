@@ -47,7 +47,7 @@ public class Hash {
     MessageDigest digest;
     try {
       digest = MessageDigest.getInstance(HASH_256_ALGORITHM_NAME,
-              CRYPTO_PROVIDER);
+          CRYPTO_PROVIDER);
       digest.update(input);
       return digest.digest();
     } catch (NoSuchAlgorithmException e) {
@@ -61,7 +61,7 @@ public class Hash {
     MessageDigest digest;
     try {
       digest = MessageDigest.getInstance(HASH_256_ALGORITHM_NAME,
-              CRYPTO_PROVIDER);
+          CRYPTO_PROVIDER);
       digest.update(input1, 0, input1.length);
       digest.update(input2, 0, input2.length);
       return digest.digest();
@@ -83,7 +83,7 @@ public class Hash {
     MessageDigest digest;
     try {
       digest = MessageDigest.getInstance(HASH_256_ALGORITHM_NAME,
-              CRYPTO_PROVIDER);
+          CRYPTO_PROVIDER);
       digest.update(input, start, length);
       return digest.digest();
     } catch (NoSuchAlgorithmException e) {
@@ -96,7 +96,7 @@ public class Hash {
     MessageDigest digest;
     try {
       digest = MessageDigest.getInstance(HASH_512_ALGORITHM_NAME,
-              CRYPTO_PROVIDER);
+          CRYPTO_PROVIDER);
       digest.update(input);
       return digest.digest();
     } catch (NoSuchAlgorithmException e) {

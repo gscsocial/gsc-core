@@ -56,7 +56,7 @@ public abstract class GSCDatabase<T> implements IGSCChainBase<T> {
   public abstract void delete(byte[] key);
 
   public abstract T get(byte[] key)
-          throws InvalidProtocolBufferException, ItemNotFoundException, BadItemException;
+      throws InvalidProtocolBufferException, ItemNotFoundException, BadItemException;
 
   public T getUnchecked(byte[] key) {
     return null;
