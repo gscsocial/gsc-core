@@ -87,7 +87,7 @@ public class BroadTest {
     node.broadcast(transactionMessage);
     ConcurrentHashMap<Sha256Hash, InventoryType> advObjToSpread = ReflectUtils
         .getFieldValue(node, "advObjToSpread");
-    Assert.assertEquals(advObjToSpread.get(transactionMessage.getMessageId()), InventoryType.TRX);
+    Assert.assertEquals(advObjToSpread.get(transactionMessage.getMessageId()), InventoryType.GSC);
     return transactionMessage.getMessageId();
   }
 
@@ -134,7 +134,7 @@ public class BroadTest {
     logger.info("advObjToFetch:{}", advObjToFetch);
     logger.info("advObjToFetchSize:{}", advObjToFetch.size());
     //Assert.assertEquals(advObjToFetch.get(condition.getBlockId()), InventoryType.BLOCK);
-    //Assert.assertEquals(advObjToFetch.get(condition.getTransactionId()), InventoryType.TRX);
+    //Assert.assertEquals(advObjToFetch.get(condition.getTransactionId()), InventoryType.GSC);
     //To avoid writing the database, manually stop the sending of messages.
     Collection<PeerConnection> activePeers = ReflectUtils.invokeMethod(node, "getActivePeer");
     for (PeerConnection peerConnection : activePeers) {
@@ -148,7 +148,7 @@ public class BroadTest {
     int count = 0;
     for (PeerConnection peerConnection : activePeers) {
       if (peerConnection.getAdvObjWeRequested()
-          .containsKey(new Item(condition.getTransactionId(), InventoryType.TRX))) {
+          .containsKey(new Item(condition.getTransactionId(), InventoryType.GSC))) {
         ++count;
       }
       if (peerConnection.getAdvObjWeRequested()
@@ -161,7 +161,7 @@ public class BroadTest {
         if (message.getType() == MessageTypes.BLOCK) {
           Assert.assertEquals(message.getMessageId(), condition.getBlockId());
         }
-        if (message.getType() == MessageTypes.TRX) {
+        if (message.getType() == MessageTypes.GSC) {
           Assert.assertEquals(message.getMessageId(), condition.getTransactionId());
         }
       }

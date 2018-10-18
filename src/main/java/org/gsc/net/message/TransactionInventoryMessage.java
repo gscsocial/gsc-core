@@ -16,6 +16,6 @@ public class TransactionInventoryMessage extends InventoryMessage {
   }
 
   public TransactionInventoryMessage(List<Sha256Hash> hashList) {
-    super(hashList, InventoryType.TRX);
+    super(hashList, InventoryType.GSC);
   }
 }

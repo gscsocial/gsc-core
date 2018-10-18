@@ -99,6 +99,32 @@ public class FullNodeHttpApiService implements Service {
   private TriggerSmartContractServlet triggerSmartContractServlet;
   @Autowired
   private GetContractServlet getContractServlet;
+  @Autowired
+  private ProposalCreateServlet proposalCreateServlet;
+  @Autowired
+  private ProposalApproveServlet proposalApproveServlet;
+  @Autowired
+  private ProposalDeleteServlet proposalDeleteServlet;
+  @Autowired
+  private ListProposalsServlet listProposalsServlet;
+  @Autowired
+  private GetProposalByIdServlet getProposalByIdServlet;
+  @Autowired
+  private ExchangeCreateServlet exchangeCreateServlet;
+  @Autowired
+  private ExchangeInjectServlet exchangeInjectServlet;
+  @Autowired
+  private ExchangeTransactionServlet exchangeTransactionServlet;
+  @Autowired
+  private ExchangeWithdrawServlet exchangeWithdrawServlet;
+  @Autowired
+  private GetExchangeByIdServlet getExchangeByIdServlet;
+  @Autowired
+  private ListExchangesServlet listExchangesServlet;
+  @Autowired
+  private GetChainParametersServlet getChainParametersServlet;
+  @Autowired
+  private GetAccountResourceServlet getAccountResourceServlet;
 
   @Override
   public void init() {
@@ -118,7 +144,7 @@ public class FullNodeHttpApiService implements Service {
       context.setContextPath("/wallet/");
       server.setHandler(context);
       context.addServlet(new ServletHolder(accountServlet), "/getaccount");
-      context.addServlet(new ServletHolder(transferServlet), "/createtransfertransaction");
+      context.addServlet(new ServletHolder(transferServlet), "/createtransaction");
       context.addServlet(new ServletHolder(broadcastServlet), "/broadcasttransaction");
       context.addServlet(new ServletHolder(transactionSignServlet), "/gettransactionsign");
       context.addServlet(new ServletHolder(updateAccountServlet), "/updateaccount");
@@ -138,7 +164,7 @@ public class FullNodeHttpApiService implements Service {
       context
               .addServlet(new ServletHolder(getAssetIssueByAccountServlet), "/getassetissuebyaccount");
       context.addServlet(new ServletHolder(getAccountNetServlet), "/getaccountnet");
-      context.addServlet(new ServletHolder(getAssetIssueByNameServlet), "/getassetissuebyname"); //
+      context.addServlet(new ServletHolder(getAssetIssueByNameServlet), "/getassetissuebyname");
       context.addServlet(new ServletHolder(getNowBlockServlet), "/getnowblock");
       context.addServlet(new ServletHolder(getBlockByNumServlet), "/getblockbynum");
       context.addServlet(new ServletHolder(getBlockByIdServlet), "/getblockbyid");
@@ -158,9 +184,21 @@ public class FullNodeHttpApiService implements Service {
       context.addServlet(new ServletHolder(generateAddressServlet), "/generateaddress");
       context.addServlet(new ServletHolder(validateAddressServlet), "/validateaddress");
       context.addServlet(new ServletHolder(deployContractServlet), "/deploycontract");
-      context.addServlet(new ServletHolder(deployContractServlet2), "/deploycontract2");
       context.addServlet(new ServletHolder(triggerSmartContractServlet), "/triggersmartcontract");
       context.addServlet(new ServletHolder(getContractServlet), "/getcontract");
+      context.addServlet(new ServletHolder(proposalCreateServlet), "/proposalcreate");
+      context.addServlet(new ServletHolder(proposalApproveServlet), "/proposalapprove");
+      context.addServlet(new ServletHolder(proposalDeleteServlet), "/proposaldelete");
+      context.addServlet(new ServletHolder(listProposalsServlet), "/listproposals");
+      context.addServlet(new ServletHolder(getProposalByIdServlet), "/getproposalbyid");
+      context.addServlet(new ServletHolder(exchangeCreateServlet), "/exchangecreate");
+      context.addServlet(new ServletHolder(exchangeInjectServlet), "/exchangeinject");
+      context.addServlet(new ServletHolder(exchangeTransactionServlet), "/exchangetransaction");
+      context.addServlet(new ServletHolder(exchangeWithdrawServlet), "/exchangewithdraw");
+      context.addServlet(new ServletHolder(getExchangeByIdServlet), "/getexchangebyid");
+      context.addServlet(new ServletHolder(listExchangesServlet), "/listexchanges");
+      context.addServlet(new ServletHolder(getChainParametersServlet), "/getchainparameters");
+      context.addServlet(new ServletHolder(getAccountResourceServlet), "/getaccountresource");
       server.start();
     } catch (Exception e) {
       logger.debug("IOException: {}", e.getMessage());

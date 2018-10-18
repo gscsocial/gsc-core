@@ -116,7 +116,7 @@ public class Channel {
     pipeline.addLast("readTimeoutHandler", new ReadTimeoutHandler(60, TimeUnit.SECONDS));
     pipeline.addLast(stats.tcp);
     pipeline.addLast("protoPender", new ProtobufVarint32LengthFieldPrepender());
-    pipeline.addLast("lengthDecode", new TrxProtobufVarint32FrameDecoder(this));
+    pipeline.addLast("lengthDecode", new GSCProtobufVarint32FrameDecoder(this));
 
     //handshake first
     pipeline.addLast("handshakeHandler", handshakeHandler);

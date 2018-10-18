@@ -166,15 +166,15 @@ public class NodeImplTest {
     ConcurrentHashMap<BlockId, Long> syncBlockRequested2 = new ConcurrentHashMap<>();
     ConcurrentHashMap<BlockId, Long> syncBlockRequested3 = new ConcurrentHashMap<>();
 
-    advObjWeRequested1.put(new Item(new Sha256Hash(1, Sha256Hash.ZERO_HASH), InventoryType.TRX),
+    advObjWeRequested1.put(new Item(new Sha256Hash(1, Sha256Hash.ZERO_HASH), InventoryType.GSC),
         System.currentTimeMillis() - NetConstants.ADV_TIME_OUT);
     syncBlockRequested1.put(new BlockId(),
         System.currentTimeMillis());
-    advObjWeRequested2.put(new Item(new Sha256Hash(1, Sha256Hash.ZERO_HASH), InventoryType.TRX),
+    advObjWeRequested2.put(new Item(new Sha256Hash(1, Sha256Hash.ZERO_HASH), InventoryType.GSC),
         System.currentTimeMillis());
     syncBlockRequested2.put(new BlockId(),
         System.currentTimeMillis() - NetConstants.SYNC_TIME_OUT);
-    advObjWeRequested3.put(new Item(new Sha256Hash(1, Sha256Hash.ZERO_HASH), InventoryType.TRX),
+    advObjWeRequested3.put(new Item(new Sha256Hash(1, Sha256Hash.ZERO_HASH), InventoryType.GSC),
         System.currentTimeMillis());
     syncBlockRequested3.put(new BlockId(),
         System.currentTimeMillis());
