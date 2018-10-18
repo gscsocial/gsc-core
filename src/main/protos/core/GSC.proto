@@ -8,6 +8,7 @@ package protocol;
 
 option java_package = "org.gsc.protos"; //Specify the name of the package that generated the Java file
 option java_outer_classname = "Protocol"; //Specify the class name of the generated Java file
+//option go_package = "github.com/gscprotocol/grpc-gateway/core";
 
 enum AccountType {
   Normal = 0;
@@ -366,7 +367,7 @@ message BlockInventory {
 
 message Inventory {
   enum InventoryType {
-    GSC = 0;
+    TRX = 0;
     BLOCK = 1;
   }
   InventoryType type = 1;
@@ -376,7 +377,7 @@ message Inventory {
 message Items {
   enum ItemType {
     ERR = 0;
-    GSC = 1;
+    TRX = 1;
     BLOCK = 2;
     BLOCKHEADER = 3;
   }
