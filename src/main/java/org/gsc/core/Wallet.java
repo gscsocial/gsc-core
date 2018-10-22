@@ -369,10 +369,6 @@ public class Wallet {
 
     try {
       TransactionWrapper trx = new TransactionWrapper(signaturedTransaction);
-      logger.info("broadcast refblockhash ={}",Hex.toHexString(trx.getInstance()
-              .getRawData().getRefBlockHash().toByteArray()));
-      logger.info("broadcast refblockbytes={}",ByteArray.toLong(trx.getInstance()
-              .getRawData().getRefBlockBytes().toByteArray()));
       Message message = new TransactionMessage(signaturedTransaction);
 
       if (dbManager.isTooManyPending()) {

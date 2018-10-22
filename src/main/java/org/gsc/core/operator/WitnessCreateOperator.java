@@ -114,7 +114,6 @@ public class WitnessCreateOperator extends AbstractOperator {
         witnessCreateContract.getOwnerAddress(),
         0,
         witnessCreateContract.getUrl().toStringUtf8());
-
     logger.debug("createWitness,address[{}]", witnessCapsule.createReadableString());
     this.dbManager.getWitnessStore().put(witnessCapsule.createDbKey(), witnessCapsule);
     AccountWrapper accountWrapper = this.dbManager.getAccountStore()
