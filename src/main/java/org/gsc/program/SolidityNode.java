@@ -99,6 +99,8 @@ public class SolidityNode {
 //      } catch (Exception e) {
 //
 //      }
+      // sync solidity block, lastSolidityBlockNum:4515, remoteLastSolidityBlockNum:4515
+      // Sync with trust node completed!!!
       long lastSolidityBlockNum = dbManager.getDynamicPropertiesStore()
           .getLatestSolidifiedBlockNum();
       logger.info("sync solidity block, lastSolidityBlockNum:{}, remoteLastSolidityBlockNum:{}",

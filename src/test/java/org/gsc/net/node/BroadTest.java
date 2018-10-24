@@ -87,7 +87,7 @@ public class BroadTest {
     node.broadcast(transactionMessage);
     ConcurrentHashMap<Sha256Hash, InventoryType> advObjToSpread = ReflectUtils
         .getFieldValue(node, "advObjToSpread");
-    Assert.assertEquals(advObjToSpread.get(transactionMessage.getMessageId()), InventoryType.GSC);
+    Assert.assertEquals(advObjToSpread.get(transactionMessage.getMessageId()), InventoryType.TRX);
     return transactionMessage.getMessageId();
   }
 

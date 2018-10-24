@@ -133,32 +133,32 @@ public class VoteWitnessOperator extends AbstractOperator {
   private void countVoteAccount(VoteWitnessContract voteContract) {
     byte[] ownerAddress = voteContract.getOwnerAddress().toByteArray();
 
-    VotesWrapper votesCapsule;
+    VotesWrapper votesWrapper;
     VotesStore votesStore = dbManager.getVotesStore();
     AccountStore accountStore = dbManager.getAccountStore();
 
     AccountWrapper accountWrapper = accountStore.get(ownerAddress);
 
     if (!votesStore.has(ownerAddress)) {
-      votesCapsule = new VotesWrapper(voteContract.getOwnerAddress(),
+      votesWrapper = new VotesWrapper(voteContract.getOwnerAddress(),
           accountWrapper.getVotesList());
     } else {
-      votesCapsule = votesStore.get(ownerAddress);
+      votesWrapper = votesStore.get(ownerAddress);
     }
 
     accountWrapper.clearVotes();
-    votesCapsule.clearNewVotes();
+    votesWrapper.clearNewVotes();
 
     voteContract.getVotesList().forEach(vote -> {
       logger.debug("countVoteAccount,address[{}]",
           ByteArray.toHexString(vote.getVoteAddress().toByteArray()));
 
-      votesCapsule.addNewVotes(vote.getVoteAddress(), vote.getVoteCount());
+      votesWrapper.addNewVotes(vote.getVoteAddress(), vote.getVoteCount());
       accountWrapper.addVotes(vote.getVoteAddress(), vote.getVoteCount());
     });
 
     accountStore.put(accountWrapper.createDbKey(), accountWrapper);
-    votesStore.put(ownerAddress, votesCapsule);
+    votesStore.put(ownerAddress, votesWrapper);
   }
 
   @Override

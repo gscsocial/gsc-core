@@ -408,10 +408,13 @@ public class Manager {
         logger.info("save block: " + this.genesisBlock);
         // init DynamicPropertiesStore
         this.dynamicPropertiesStore.saveLatestBlockHeaderNumber(0);
+
         this.dynamicPropertiesStore.saveLatestBlockHeaderHash(
             this.genesisBlock.getBlockId().getByteString());
+
         this.dynamicPropertiesStore.saveLatestBlockHeaderTimestamp(
             this.genesisBlock.getTimeStamp());
+
         this.initAccount();
         this.initWitness();
         this.witnessController.initWits();
@@ -879,7 +882,8 @@ public class Manager {
           throw throwable;
         }
       }
-      logger.info("save block: " + newBlock);
+      // save block: BlockWrapper
+      logger.info("-------save block:------- \n" + newBlock + "\n-------");
     }
   }
 
@@ -906,6 +910,7 @@ public class Manager {
       logger.warn("missedBlocks [" + slot + "] is illegal");
     }
 
+    // update head, num = 4
     logger.info("update head, num = {}", block.getNum());
     this.dynamicPropertiesStore.saveLatestBlockHeaderHash(block.getBlockId().getByteString());
 
@@ -1271,27 +1276,32 @@ public class Manager {
       processTransaction(transactionCapsule, block);
     }
 
+    // update witness dynamicPropertiesStore.getNextMaintenanceTime() <= blockTime;
     boolean needMaint = needMaintenance(block.getTimeStamp());
     if (needMaint) {
       if (block.getNum() == 1) {
+
         this.dynamicPropertiesStore.updateNextMaintenanceTime(block.getTimeStamp());
       } else {
         this.processMaintenance(block);
       }
     }
+
     this.updateDynamicProperties(block);
-    this.updateSignedWitness(block);
+
+    this.updateSignedWitness(block); // allowance changed 出块奖励
     this.updateLatestSolidifiedBlock();
     this.updateTransHashCache(block);
     updateMaintenanceState(needMaint);
     //witnessController.updateWitnessSchedule();
+
     updateRecentBlock(block);
 
   }
 
   private void updateTransHashCache(BlockWrapper block) {
-    for (TransactionWrapper transactionCapsule : block.getTransactions()) {
-      this.transactionIdCache.put(transactionCapsule.getTransactionId(), true);
+    for (TransactionWrapper transactionWrapper : block.getTransactions()) {
+      this.transactionIdCache.put(transactionWrapper.getTransactionId(), true);
     }
   }
 
@@ -1322,6 +1332,7 @@ public class Manager {
           size);
       return;
     }
+
     long latestSolidifiedBlockNum = numbers.get(solidifiedPosition);
     //if current value is less than the previous value，keep the previous value.
     if (latestSolidifiedBlockNum < getDynamicPropertiesStore().getLatestSolidifiedBlockNum()) {
@@ -1329,6 +1340,7 @@ public class Manager {
       return;
     }
     getDynamicPropertiesStore().saveLatestSolidifiedBlockNum(latestSolidifiedBlockNum);
+    // update solid block, num = 279
     logger.info("update solid block, num = {}", latestSolidifiedBlockNum);
   }
 
@@ -1387,25 +1399,25 @@ public class Manager {
    */
   public void updateSignedWitness(BlockWrapper block) {
     // TODO: add verification
-    WitnessWrapper witnessCapsule =
+    WitnessWrapper witnessWrapper =
         witnessStore.getUnchecked(
             block.getInstance().getBlockHeader().getRawData().getWitnessAddress().toByteArray());
-    witnessCapsule.setTotalProduced(witnessCapsule.getTotalProduced() + 1);
-    witnessCapsule.setLatestBlockNum(block.getNum());
-    witnessCapsule.setLatestSlotNum(witnessController.getAbSlotAtTime(block.getTimeStamp()));
+    witnessWrapper.setTotalProduced(witnessWrapper.getTotalProduced() + 1);
+    witnessWrapper.setLatestBlockNum(block.getNum());
+    witnessWrapper.setLatestSlotNum(witnessController.getAbSlotAtTime(block.getTimeStamp()));
 
     // Update memory witness status
     WitnessWrapper wit = witnessController.getWitnesseByAddress(block.getWitnessAddress());
     if (wit != null) {
-      wit.setTotalProduced(witnessCapsule.getTotalProduced() + 1);
+      wit.setTotalProduced(witnessWrapper.getTotalProduced() + 1);
       wit.setLatestBlockNum(block.getNum());
       wit.setLatestSlotNum(witnessController.getAbSlotAtTime(block.getTimeStamp()));
     }
 
-    this.getWitnessStore().put(witnessCapsule.getAddress().toByteArray(), witnessCapsule);
+    this.getWitnessStore().put(witnessWrapper.getAddress().toByteArray(), witnessWrapper);
 
     try {
-      adjustAllowance(witnessCapsule.getAddress().toByteArray(),
+      adjustAllowance(witnessWrapper.getAddress().toByteArray(),
           getDynamicPropertiesStore().getWitnessPayPerBlock());
     } catch (BalanceInsufficientException e) {
       logger.warn(e.getMessage(), e);
@@ -1413,9 +1425,9 @@ public class Manager {
 
     logger.debug(
         "updateSignedWitness. witness address:{}, blockNum:{}, totalProduced:{}",
-        witnessCapsule.createReadableString(),
+            witnessWrapper.createReadableString(),
         block.getNum(),
-        witnessCapsule.getTotalProduced());
+            witnessWrapper.getTotalProduced());
   }
 
   public void updateMaintenanceState(boolean needMaint) {

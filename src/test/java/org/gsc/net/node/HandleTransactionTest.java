@@ -73,7 +73,7 @@ public class HandleTransactionTest {
         //Assert.assertEquals(peer.getSyncFlag(), false);
 
         //向peer广播请求过交易信息
-        peer.getAdvObjWeRequested().put(new Item(transactionMessage.getMessageId(), InventoryType.GSC), System.currentTimeMillis());
+        peer.getAdvObjWeRequested().put(new Item(transactionMessage.getMessageId(), InventoryType.TRX), System.currentTimeMillis());
         peer.setSyncFlag(true);
         node.onMessage(peer, transactionMessage);
         //Assert.assertEquals(peer.getAdvObjWeRequested().isEmpty(), true);

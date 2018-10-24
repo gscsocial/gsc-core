@@ -19,6 +19,7 @@
 package org.gsc.core;
 
 import com.google.common.primitives.Longs;
+import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 
 import java.io.UnsupportedEncodingException;
@@ -30,6 +31,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -39,6 +41,7 @@ import org.gsc.core.operator.Operator;
 import org.gsc.core.operator.OperatorFactory;
 import org.gsc.core.wrapper.*;
 import org.gsc.db.*;
+import org.gsc.protos.Contract;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -325,6 +328,21 @@ public class Wallet {
   public TransactionWrapper createTransactionCapsule(com.google.protobuf.Message message,
                                                      ContractType contractType) throws ContractValidateException {
     TransactionWrapper trx = new TransactionWrapper(message, contractType);
+
+    // do
+    if(contractType == ContractType.WitnessCreateContract){
+      Any any = trx.getInstance().getRawData().getContract(0).getParameter();
+      try {
+        Contract.WitnessCreateContract witnessCreateContract = any.unpack(Contract.WitnessCreateContract.class);
+        ByteString ownerAddress = witnessCreateContract.getOwnerAddress();
+        //this.
+
+      } catch (InvalidProtocolBufferException e) {
+        e.printStackTrace();
+        logger.error("Generate WitnessCreateContract error!");
+      }
+    }
+
     if (contractType != ContractType.CreateSmartContract
         && contractType != ContractType.TriggerSmartContract) {
       List<Operator> actList = OperatorFactory.createActuator(trx, dbManager);
@@ -821,6 +839,8 @@ public class Wallet {
     Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
     for (NodeHandler handler : handlerList) {
       String key = handler.getNode().getHexId() + handler.getNode().getHost();
+      System.out.println("key: " + key);
+      System.out.println("handler: " + handler);
       nodeHandlerMap.put(key, handler);
     }
 
