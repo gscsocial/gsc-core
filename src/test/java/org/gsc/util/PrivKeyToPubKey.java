@@ -15,7 +15,7 @@ public class PrivKeyToPubKey {
 
     @Test
     public void privKeyToPubKey() {
-        String privStr = "ad146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0";
+        String privStr = "fd146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d6";
         BigInteger privKey = new BigInteger(privStr, 16);
 
         String str = "6f74686572206572726f72203a20546865206b657920617267756d656e742063616e6e6f74206265206e756c6c";

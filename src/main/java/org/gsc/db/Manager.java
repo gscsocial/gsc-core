@@ -1325,6 +1325,10 @@ public class Manager {
 
     long size = witnessController.getActiveWitnesses().size();
     int solidifiedPosition = (int) (size * (1 - SOLIDIFIED_THRESHOLD * 1.0 / 100));
+
+
+    // #TODO
+    while (numbers.get(solidifiedPosition) == 0) solidifiedPosition++;
     if (solidifiedPosition < 0) {
       logger.warn(
           "updateLatestSolidifiedBlock error, solidifiedPosition:{},wits.size:{}",
