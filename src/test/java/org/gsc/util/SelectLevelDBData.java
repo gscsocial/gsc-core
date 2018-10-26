@@ -35,7 +35,7 @@ public class SelectLevelDBData {
 
     public static void main(String[] args) {
         // data("properties");
-        data("block");
+         data("block");
         // data("account");
         // data("witness");
         // data("witness_schedule");
@@ -51,6 +51,9 @@ public class SelectLevelDBData {
         String valueStr = Util.printBlock(blockWrapper.getInstance());
 
         System.out.println("key:" + keyStr + ", value:" + valueStr);
+        blockWrapper.getInstance().getTransactionsList().forEach(transaction -> {
+            System.out.println(Util.printTransaction(transaction));
+        });
     }
 
     public static void properties(byte[] key, byte[] value) {
@@ -122,9 +125,9 @@ public class SelectLevelDBData {
         try {
             // account  contract  block gsc-solidity full properties vote votes witness proposal peers
             //db = factory.open(new File("/home/kay/workspace/mico/gsc-core/output-directory/database/peers"), options);
-            BlockStore blockStore;
-            GSCApplicationContext context;
-            db = factory.open(new File("/home/kay/Desktop/gsc-full/output-directory/database/" + dataName), options);
+            //BlockStore blockStore;
+            //GSCApplicationContext context;
+            db = factory.open(new File("/home/kay/Desktop/gsc-solidity/output-directory/database/" + dataName), options);
 
             logger.info("---------------------------------------------");
             System.out.println();
@@ -144,7 +147,7 @@ public class SelectLevelDBData {
                 // data("witness");
                 // data("witness_schedule");
                 // data("votes");
-                data("trans");
+                //data("trans");
                 // data("transactionHistoryStore");
 
                 switch (dataName) {
@@ -178,7 +181,7 @@ public class SelectLevelDBData {
                 iterator.next();
             }
             iterator.close();
-            System.out.println("Num: " + count);
+            System.out.println(dataName + " Num: " + count);
             System.out.println();
             logger.info("---------------------------------------------");
 
