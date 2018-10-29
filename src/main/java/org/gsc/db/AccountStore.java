@@ -16,7 +16,7 @@ import org.gsc.core.Wallet;
 @Component
 public class AccountStore extends GSCStoreWithRevoking<AccountWrapper> {
 
-  private static Map<String, byte[]> assertsAddress = new HashMap<>(); // key = name , value = address
+  private static Map<String, byte[]> assetsAddress = new HashMap<>(); // key = name , value = address
 
   @Autowired
   private AccountStore(@Value("account") String dbName) {
@@ -33,7 +33,7 @@ public class AccountStore extends GSCStoreWithRevoking<AccountWrapper> {
    * Min GSC account.
    */
   public AccountWrapper getBlackhole() {
-    return getUnchecked(assertsAddress.get("Blackhole"));
+    return getUnchecked(assetsAddress.get("Blackhole"));
   }
 
 
@@ -49,7 +49,7 @@ public class AccountStore extends GSCStoreWithRevoking<AccountWrapper> {
       ConfigObject obj = list.get(i);
       String accountName = obj.get("accountName").unwrapped().toString();
       byte[] address = Wallet.decodeFromBase58Check(obj.get("address").unwrapped().toString());
-      assertsAddress.put(accountName, address);
+      assetsAddress.put(accountName, address);
     }
   }
 
