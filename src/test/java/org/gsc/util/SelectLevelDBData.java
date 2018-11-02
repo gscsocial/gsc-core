@@ -34,8 +34,8 @@ import java.io.IOException;
 public class SelectLevelDBData {
 
     public static void main(String[] args) {
-        // data("properties");
-         data("block");
+        data("properties");
+        // data("block");
         // data("account");
         // data("witness");
         // data("witness_schedule");
@@ -124,10 +124,10 @@ public class SelectLevelDBData {
         DB db = null;
         try {
             // account  contract  block gsc-solidity full properties vote votes witness proposal peers
-            //db = factory.open(new File("/home/kay/workspace/mico/gsc-core/output-directory/database/peers"), options);
+            db = factory.open(new File("/home/kay/workspace/mico/gsc-core/output-directory/database/" + dataName), options);
             //BlockStore blockStore;
             //GSCApplicationContext context;
-            db = factory.open(new File("/home/kay/Desktop/gsc-solidity/output-directory/database/" + dataName), options);
+            // db = factory.open(new File("/home/kay/Desktop/gsc-full1/output-directory/database/" + dataName), options);
 
             logger.info("---------------------------------------------");
             System.out.println();

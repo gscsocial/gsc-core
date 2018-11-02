@@ -36,9 +36,11 @@ public class BandwidthProcessor extends ResourceProcessor {
     long oldNetUsage = accountWrapper.getNetUsage();
     long latestConsumeTime = accountWrapper.getLatestConsumeTime();
     accountWrapper.setNetUsage(increase(oldNetUsage, 0, latestConsumeTime, now));
+
     long oldFreeNetUsage = accountWrapper.getFreeNetUsage();
     long latestConsumeFreeTime = accountWrapper.getLatestConsumeFreeTime();
     accountWrapper.setFreeNetUsage(increase(oldFreeNetUsage, 0, latestConsumeFreeTime, now));
+
     Map<String, Long> assetMap = accountWrapper.getAssetMap();
     assetMap.forEach((assetName, balance) -> {
       long oldFreeAssetNetUsage = accountWrapper.getFreeAssetNetUsage(assetName);

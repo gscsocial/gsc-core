@@ -39,7 +39,7 @@ import org.gsc.net.peer.PeerConnection;
 @Scope("prototype")
 public class GSCChannelInitializer extends ChannelInitializer<NioSocketChannel> {
 
-    private static final Logger logger = LoggerFactory.getLogger("gscChannelInitializer");
+    private static final Logger logger = LoggerFactory.getLogger("GSCChannelInitializer");
 
     @Autowired
     private ApplicationContext ctx;
@@ -63,7 +63,7 @@ public class GSCChannelInitializer extends ChannelInitializer<NioSocketChannel> 
             final Channel channel = ctx.getBean(PeerConnection.class);
 
             channel.init(ch.pipeline(), remoteId, peerDiscoveryMode, channelManager, p2pNode);
-            
+
             // limit the size of receiving buffer to 1024
             ch.config().setRecvByteBufAllocator(new FixedRecvByteBufAllocator(256 * 1024));
             ch.config().setOption(ChannelOption.SO_RCVBUF, 256 * 1024);
