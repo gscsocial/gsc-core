@@ -179,13 +179,13 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
     try {
       this.getMaxFrozenTime();
     } catch (IllegalArgumentException e) {
-      this.saveMaxFrozenTime(3);
+      this.saveMaxFrozenTime(5); //adjust 3 to 5
     }
 
     try {
       this.getMinFrozenTime();
     } catch (IllegalArgumentException e) {
-      this.saveMinFrozenTime(3);
+      this.saveMinFrozenTime(5);//adjust 3 to 5
     }
 
     try {
