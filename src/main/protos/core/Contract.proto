@@ -112,6 +112,7 @@ message AssetIssueContract {
   int64 public_latest_free_net_time = 25;
 }
 
+
 message ParticipateAssetIssueContract {
   bytes owner_address = 1;
   bytes to_address = 2;
