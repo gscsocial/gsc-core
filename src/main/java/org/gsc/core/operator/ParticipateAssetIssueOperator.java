@@ -164,7 +164,7 @@ public class ParticipateAssetIssueOperator extends AbstractOperator {
       }
 
       int trxNum = assetIssueWrapper.getGscNum();
-      int num = assetIssueWrapper.getNum();
+      long num = assetIssueWrapper.getNum();
       long exchangeAmount = Math.multiplyExact(amount, num);
       exchangeAmount = Math.floorDiv(exchangeAmount, trxNum);
       if (exchangeAmount <= 0) {
