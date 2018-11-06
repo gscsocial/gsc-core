@@ -85,7 +85,7 @@ public class AssetIssueWrapper implements ProtoWrapper<AssetIssueContract> {
     return name + "_" + order;
   }
 
-  public Long getNum() {
+  public int getNum() {
     return this.assetIssueContract.getNum();
   }
 

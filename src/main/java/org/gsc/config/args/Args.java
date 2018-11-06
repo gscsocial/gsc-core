@@ -448,10 +448,6 @@ public class Args {
       INSTANCE.maxTimeRatio = config.getDouble("vm.maxTimeRatio");
     }
 
-    if (config.hasPath("node.type")) {
-      INSTANCE.solidityNode = config.getBoolean("node.type");
-    }
-
     INSTANCE.storage = new Storage();
     INSTANCE.storage.setDbVersion(Optional.ofNullable(INSTANCE.storageDbVersion)
         .filter(StringUtils::isNotEmpty)
@@ -479,6 +475,13 @@ public class Args {
     } else {
       Wallet.setAddressPreFixByte(Constant.ADD_PRE_FIX_BYTE_TESTNET);
       Wallet.setAddressPreFixString(Constant.ADD_PRE_FIX_STRING_TESTNET);
+    }
+
+    if (config.hasPath("node.type")) {
+      if(config.getInt("node.type") == 1){
+        INSTANCE.solidityNode = true;
+      }
+      INSTANCE.solidityNode = false;
     }
 
     if (config.hasPath("genesis.block")) {
