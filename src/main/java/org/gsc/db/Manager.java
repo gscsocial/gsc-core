@@ -1329,6 +1329,7 @@ public class Manager {
 
     // #TODO
     while (numbers.get(solidifiedPosition) == 0) solidifiedPosition++;
+
     if (solidifiedPosition < 0) {
       logger.warn(
           "updateLatestSolidifiedBlock error, solidifiedPosition:{},wits.size:{}",

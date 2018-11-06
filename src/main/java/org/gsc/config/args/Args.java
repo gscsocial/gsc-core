@@ -448,6 +448,10 @@ public class Args {
       INSTANCE.maxTimeRatio = config.getDouble("vm.maxTimeRatio");
     }
 
+    if (config.hasPath("node.type")) {
+      INSTANCE.solidityNode = config.getBoolean("node.type");
+    }
+
     INSTANCE.storage = new Storage();
     INSTANCE.storage.setDbVersion(Optional.ofNullable(INSTANCE.storageDbVersion)
         .filter(StringUtils::isNotEmpty)
