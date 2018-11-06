@@ -33,9 +33,17 @@ import java.io.IOException;
 @Slf4j
 public class SelectLevelDBData {
 
+    //public static String path = "/home/kay/workspace/ethereum/source/ethereumj/database/";
+    public static String path = "/home/kay/workspace/mico/source/gsc-core/output-directory/database/";
+
+    // account  contract  block gsc-solidity full properties vote votes witness proposal peers
+    // "/home/kay/workspace/mico/gsc-core/output-directory/database/";
+    // "/home/kay/Desktop/gsc-full1/output-directory/database/";
+
     public static void main(String[] args) {
-        data("properties");
+        //data("properties");
         // data("block");
+        data("block");
         // data("account");
         // data("witness");
         // data("witness_schedule");
@@ -123,11 +131,7 @@ public class SelectLevelDBData {
         options.createIfMissing(true);
         DB db = null;
         try {
-            // account  contract  block gsc-solidity full properties vote votes witness proposal peers
-            db = factory.open(new File("/home/kay/workspace/mico/gsc-core/output-directory/database/" + dataName), options);
-            //BlockStore blockStore;
-            //GSCApplicationContext context;
-            // db = factory.open(new File("/home/kay/Desktop/gsc-full1/output-directory/database/" + dataName), options);
+            db = factory.open(new File(path + dataName), options);
 
             logger.info("---------------------------------------------");
             System.out.println();
@@ -136,20 +140,6 @@ public class SelectLevelDBData {
             int count = 0;
             while (iterator.hasNext()) {
                 count++;
-                //String key = ByteString.copyFrom(iterator.peekNext().getKey()).toStringUtf8();
-                //long value = ByteArray.toLong(iterator.peekNext().getValue());
-                //String value = ByteString.copyFrom(iterator.peekNext().getValue()).toStringUtf8();
-                //System.out.println("key:" + key+ ", value:" + value);
-
-                // data("properties");
-                // data("block");
-                // data("account");
-                // data("witness");
-                // data("witness_schedule");
-                // data("votes");
-                //data("trans");
-                // data("transactionHistoryStore");
-
                 switch (dataName) {
                     case "properties":
                         properties(iterator.peekNext().getKey(), iterator.peekNext().getValue());
