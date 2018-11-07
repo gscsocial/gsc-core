@@ -33,23 +33,82 @@ import java.io.IOException;
 @Slf4j
 public class SelectLevelDBData {
 
-    //public static String path = "/home/kay/workspace/ethereum/source/ethereumj/database/";
+    // public static String path = "/home/kay/workspace/ethereum/source/ethereumj/database/";
     public static String path = "/home/kay/workspace/mico/source/gsc-core/output-directory/database/";
+    // public static String path = "/home/kay/Desktop/gsc-full1/output-directory/database/";
 
     // account  contract  block gsc-solidity full properties vote votes witness proposal peers
     // "/home/kay/workspace/mico/gsc-core/output-directory/database/";
     // "/home/kay/Desktop/gsc-full1/output-directory/database/";
 
     public static void main(String[] args) {
-        //data("properties");
-        // data("block");
-        data("block");
-        // data("account");
+        data("properties");
+        //data("block");
+        //data("block");
+        //data("account");
         // data("witness");
         // data("witness_schedule");
         // data("votes");
         // data("trans");
         // data("transactionHistoryStore");
+    }
+
+    public static void data(String dataName) {
+        Options options = new Options();
+        options.createIfMissing(true);
+        DB db = null;
+        try {
+            System.out.println("Path: " + path + dataName);
+            db = factory.open(new File(path + dataName), options);
+
+            logger.info("---------------------------------------------");
+            System.out.println();
+            DBIterator iterator = db.iterator();
+            iterator.seekToFirst();
+            int count = 0;
+            while (iterator.hasNext()) {
+                count++;
+                switch (dataName) {
+                    case "properties":
+                        properties(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "block":
+                        block(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "account":
+                        account(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "witness":
+                        witness(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "witness_schedule":
+                        witness_schedule(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "votes":
+                        votes(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "trans":
+                        trans(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "transactionHistoryStore":
+                        transactionHistoryStore(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    default:
+                        break;
+                }
+                iterator.next();
+            }
+            iterator.close();
+            System.out.println(dataName + " Num: " + count);
+            System.out.println();
+            logger.info("---------------------------------------------");
+
+            db.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (BadItemException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void block(byte[] key, byte[] value) throws BadItemException {
@@ -124,62 +183,5 @@ public class SelectLevelDBData {
         String valueStr = JsonFormat.printToString(transactionWrapper.getInstance());
 
         System.out.println("key:" + keyStr + ", value:" + value.toString());
-    }
-
-    public static void data(String dataName) {
-        Options options = new Options();
-        options.createIfMissing(true);
-        DB db = null;
-        try {
-            db = factory.open(new File(path + dataName), options);
-
-            logger.info("---------------------------------------------");
-            System.out.println();
-            DBIterator iterator = db.iterator();
-            iterator.seekToFirst();
-            int count = 0;
-            while (iterator.hasNext()) {
-                count++;
-                switch (dataName) {
-                    case "properties":
-                        properties(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "block":
-                        block(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "account":
-                        account(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "witness":
-                        witness(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "witness_schedule":
-                        witness_schedule(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "votes":
-                        votes(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "trans":
-                        trans(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "transactionHistoryStore":
-                        transactionHistoryStore(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    default:
-                        break;
-                }
-                iterator.next();
-            }
-            iterator.close();
-            System.out.println(dataName + " Num: " + count);
-            System.out.println();
-            logger.info("---------------------------------------------");
-
-            db.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (BadItemException e) {
-            e.printStackTrace();
-        }
     }
 }

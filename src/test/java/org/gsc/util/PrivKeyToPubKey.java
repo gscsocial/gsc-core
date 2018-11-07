@@ -101,7 +101,7 @@ public class PrivKeyToPubKey {
 
     @Test
     public void ByteToString(){
-        String str = "6f74686572206572726f72203a20546865206b657920617267756d656e742063616e6e6f74206265206e756c6c";
+        String str = "56616c6964617465205472616e73666572436f6e7472616374206572726f722c2062616c616e6365206973206e6f742073756666696369656e742e";
         logger.info("---------------------------------------------");
         System.out.println();
         System.out.println("Hex String: " + hexStr2Str(str));

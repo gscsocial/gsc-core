@@ -28,6 +28,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.gsc.protos.Protocol.Block;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 public class Start {
@@ -36,13 +37,9 @@ public class Start {
 
     private ScheduledExecutorService syncExecutor = Executors.newSingleThreadScheduledExecutor();
 
-    public void setDbManager(Manager dbManager) {
-        this.dbManager = dbManager;
-    }
-
     public static void main(String[] args) {
-        logger.info("GSC node running.");
-        Args.setParam(args, Constant.TESTNET_CONF);
+        Args.setParam(args, Constant.KAY_CONF);
+        //Args.setParam(args, Constant.TESTNET_CONF);
         Args cfgArgs = Args.getInstance();
 
         if (cfgArgs.isHelp()) {
@@ -57,10 +54,17 @@ public class Start {
         }
 
         if(cfgArgs.isSolidityNode()){
+            logger.info("GSC Backup node running...");
+            System.out.println("GSC Backup node running...");
+            if (StringUtils.isEmpty(cfgArgs.getTrustNodeAddr())) {
+                logger.error("Trust node not set.");
+                return;
+            }
+
             ApplicationContext context = new GSCApplicationContext(DefaultConfig.class);
 
             Application appT = ApplicationFactory.create(context);
-            shutdown(appT);
+            FullNode.shutdown(appT);
 
             //appT.init(cfgArgs);
             RpcApiService rpcApiService = context.getBean(RpcApiService.class);
@@ -71,7 +75,7 @@ public class Start {
 
             appT.initServices(cfgArgs);
             appT.startServices();
-            //    appT.startup();
+//    appT.startup();
 
             //Disable peer discovery for solidity node
             DiscoverServer discoverServer = context.getBean(DiscoverServer.class);
@@ -87,6 +91,8 @@ public class Start {
 
             rpcApiService.blockUntilShutdown();
         }else {
+            logger.info("GSC node running...");
+            System.out.println("GSC node running...");
             DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
             beanFactory.setAllowCircularReferences(false);
             GSCApplicationContext context =
@@ -94,7 +100,6 @@ public class Start {
             context.register(DefaultConfig.class);
 
             context.refresh();
-
             Application appT = ApplicationFactory.create(context);
             shutdown(appT);
 
@@ -128,6 +133,10 @@ public class Start {
             }
         }, 5000, 5000, TimeUnit.MILLISECONDS);
         //new Thread(() -> syncLoop(cfgArgs), logger.getName()).start();
+    }
+
+    public void setDbManager(Manager dbManager) {
+        this.dbManager = dbManager;
     }
 
     private void initGrpcClient(String addr) {
