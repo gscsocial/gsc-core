@@ -42,10 +42,7 @@ public class Start {
 
     public static void main(String[] args) {
         logger.info("GSC node running.");
-        //LOCAL_TESTNET_CONF
-        //Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
-        Args.setParam(args, Constant.KAY_CONF);
-        //Args.setParam(args, Constant.TESTNET_CONF);
+        Args.setParam(args, Constant.TESTNET_CONF);
         Args cfgArgs = Args.getInstance();
 
         if (cfgArgs.isHelp()) {
