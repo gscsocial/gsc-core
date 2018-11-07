@@ -40,6 +40,98 @@ public class Start {
         this.dbManager = dbManager;
     }
 
+    public static void main(String[] args) {
+        logger.info("GSC node running.");
+        //LOCAL_TESTNET_CONF
+        //Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
+        Args.setParam(args, Constant.KAY_CONF);
+        //Args.setParam(args, Constant.TESTNET_CONF);
+        Args cfgArgs = Args.getInstance();
+
+        if (cfgArgs.isHelp()) {
+            logger.info("Here is the help message.");
+            return;
+        }
+
+        if (Args.getInstance().isDebug()) {
+            logger.info("in debug mode, it won't check energy time");
+        } else {
+            logger.info("not in debug mode, it will check energy time");
+        }
+
+        if(cfgArgs.isSolidityNode()){
+            ApplicationContext context = new GSCApplicationContext(DefaultConfig.class);
+
+            Application appT = ApplicationFactory.create(context);
+            shutdown(appT);
+
+            //appT.init(cfgArgs);
+            RpcApiService rpcApiService = context.getBean(RpcApiService.class);
+            appT.addService(rpcApiService);
+            //http
+            SolidityNodeHttpApiService httpApiService = context.getBean(SolidityNodeHttpApiService.class);
+            appT.addService(httpApiService);
+
+            appT.initServices(cfgArgs);
+            appT.startServices();
+            //    appT.startup();
+
+            //Disable peer discovery for solidity node
+            DiscoverServer discoverServer = context.getBean(DiscoverServer.class);
+            discoverServer.close();
+            ChannelManager channelManager = context.getBean(ChannelManager.class);
+            channelManager.close();
+            NodeManager nodeManager = context.getBean(NodeManager.class);
+            nodeManager.close();
+
+            Start node = new Start();
+            node.setDbManager(appT.getDbManager());
+            node.start(cfgArgs);
+
+            rpcApiService.blockUntilShutdown();
+        }else {
+            DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+            beanFactory.setAllowCircularReferences(false);
+            GSCApplicationContext context =
+                    new GSCApplicationContext(beanFactory);
+            context.register(DefaultConfig.class);
+
+            context.refresh();
+
+            Application appT = ApplicationFactory.create(context);
+            shutdown(appT);
+
+            // grpc api server
+            RpcApiService rpcApiService = context.getBean(RpcApiService.class);
+            appT.addService(rpcApiService);
+            if (cfgArgs.isWitness()) {
+                appT.addService(new WitnessService(appT, context));
+            }
+
+            // http api server
+            FullNodeHttpApiService httpApiService = context.getBean(FullNodeHttpApiService.class);
+            appT.addService(httpApiService);
+
+            appT.initServices(cfgArgs);
+            appT.startServices();
+            appT.startup();
+
+            rpcApiService.blockUntilShutdown();
+        }
+    }
+
+    public void start(Args cfgArgs) {
+        syncExecutor.scheduleWithFixedDelay(() -> {
+            try {
+                initGrpcClient(cfgArgs.getTrustNodeAddr());
+                syncSolidityBlock();
+                shutdownGrpcClient();
+            } catch (Throwable t) {
+                logger.error("Error in sync solidity block" + t.getMessage(), t);
+            }
+        }, 5000, 5000, TimeUnit.MILLISECONDS);
+        //new Thread(() -> syncLoop(cfgArgs), logger.getName()).start();
+    }
 
     private void initGrpcClient(String addr) {
         try {
@@ -47,12 +139,6 @@ public class Start {
         } catch (Exception e) {
             logger.error("Failed to create database grpc client {}", addr);
             System.exit(0);
-        }
-    }
-
-    private void shutdownGrpcClient() {
-        if (databaseGrpcClient != null) {
-            databaseGrpcClient.shutdown();
         }
     }
 
@@ -124,97 +210,9 @@ public class Start {
         logger.info("Sync with trust node completed!!!");
     }
 
-    public void start(Args cfgArgs) {
-        syncExecutor.scheduleWithFixedDelay(() -> {
-            try {
-                initGrpcClient(cfgArgs.getTrustNodeAddr());
-                syncSolidityBlock();
-                shutdownGrpcClient();
-            } catch (Throwable t) {
-                logger.error("Error in sync solidity block" + t.getMessage(), t);
-            }
-        }, 5000, 5000, TimeUnit.MILLISECONDS);
-        //new Thread(() -> syncLoop(cfgArgs), logger.getName()).start();
-    }
-
-    public static void main(String[] args) {
-        logger.info("GSC node running.");
-        //LOCAL_TESTNET_CONF
-        //Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
-        Args.setParam(args, Constant.KAY_CONF);
-        //Args.setParam(args, Constant.TESTNET_CONF);
-        Args cfgArgs = Args.getInstance();
-
-        if (cfgArgs.isHelp()) {
-            logger.info("Here is the help message.");
-            return;
-        }
-
-        if (Args.getInstance().isDebug()) {
-            logger.info("in debug mode, it won't check energy time");
-        } else {
-            logger.info("not in debug mode, it will check energy time");
-        }
-
-        System.out.println(cfgArgs.isSolidityNode());
-        if(cfgArgs.isSolidityNode()){
-            ApplicationContext context = new GSCApplicationContext(DefaultConfig.class);
-
-            Application appT = ApplicationFactory.create(context);
-            shutdown(appT);
-
-            //appT.init(cfgArgs);
-            RpcApiService rpcApiService = context.getBean(RpcApiService.class);
-            appT.addService(rpcApiService);
-            //http
-            SolidityNodeHttpApiService httpApiService = context.getBean(SolidityNodeHttpApiService.class);
-            appT.addService(httpApiService);
-
-            appT.initServices(cfgArgs);
-            appT.startServices();
-            //    appT.startup();
-
-            //Disable peer discovery for solidity node
-            DiscoverServer discoverServer = context.getBean(DiscoverServer.class);
-            discoverServer.close();
-            ChannelManager channelManager = context.getBean(ChannelManager.class);
-            channelManager.close();
-            NodeManager nodeManager = context.getBean(NodeManager.class);
-            nodeManager.close();
-
-            Start node = new Start();
-            node.setDbManager(appT.getDbManager());
-            node.start(cfgArgs);
-
-            rpcApiService.blockUntilShutdown();
-        }else {
-            DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-            beanFactory.setAllowCircularReferences(false);
-            GSCApplicationContext context =
-                    new GSCApplicationContext(beanFactory);
-            context.register(DefaultConfig.class);
-
-            context.refresh();
-
-            Application appT = ApplicationFactory.create(context);
-            shutdown(appT);
-
-            // grpc api server
-            RpcApiService rpcApiService = context.getBean(RpcApiService.class);
-            appT.addService(rpcApiService);
-            if (cfgArgs.isWitness()) {
-                appT.addService(new WitnessService(appT, context));
-            }
-
-            // http api server
-            FullNodeHttpApiService httpApiService = context.getBean(FullNodeHttpApiService.class);
-            appT.addService(httpApiService);
-
-            appT.initServices(cfgArgs);
-            appT.startServices();
-            appT.startup();
-
-            rpcApiService.blockUntilShutdown();
+    private void shutdownGrpcClient() {
+        if (databaseGrpcClient != null) {
+            databaseGrpcClient.shutdown();
         }
     }
 
