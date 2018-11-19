@@ -3,8 +3,14 @@ package org.gsc.util;
 import com.alibaba.fastjson.JSONObject;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.api.GrpcAPI;
+import org.gsc.api.WalletGrpc;
 import org.gsc.common.overlay.Parameter;
+import org.gsc.common.overlay.discover.table.NodeEntry;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Utils;
@@ -15,11 +21,12 @@ import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.crypto.ECKey;
 import org.gsc.db.Manager;
-import org.gsc.db.api.pojo.Transaction;
 import org.gsc.protos.Contract;
 import org.gsc.protos.Protocol;
+import org.gsc.services.http.CreateAccountServlet;
 import org.gsc.services.http.Util;
 import org.junit.Test;
+import org.spongycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -41,7 +48,6 @@ public class PrivKeyToPubKey {
         BigInteger privKey = new BigInteger(privStr, 16);
 
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
-
         final ECKey ecKey = ECKey.fromPrivate(privKey);
         byte[] address = ecKey.getAddress();
 
@@ -69,13 +75,98 @@ public class PrivKeyToPubKey {
     }
 
     @Test
+    public void aAddress(){
+        logger.info("GSC Address: " + Hex.toHexString("0x000000000000000000000".getBytes()));
+    }
+
+    @Test
     public void generateAddress(){
         ECKey ecKey = new ECKey(Utils.getRandom());
         byte[] priKey = ecKey.getPrivKeyBytes();
+        byte[] pubKey = ecKey.getPubKey();
         byte[] address = ecKey.getAddress();
         logger.info("Private Key: " + Hex.toHexString(priKey));
-        logger.info("Hex Address: " + ByteArray.toHexString(address));
+        logger.info("Public Key: " + Hex.toHexString(pubKey));
         logger.info("GSC Address: " + Wallet.encode58Check(address));
+    }
+
+    @Test
+    public void createAccount(){
+        String ownerPriKey = "ad146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0";
+        byte[] ownerAddress = Hex.decode("266145c6b6ebb0a7a87a8ce1ef9ae8f21a7d5b24e7");
+
+        byte[] newAccountAddress = Hex.decode("26582f10257c25bd4066f3cbec769643cbf12456d0");
+
+        BigInteger privKey = new BigInteger(ownerPriKey, 16);
+
+        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+        final ECKey ecKey = ECKey.fromPrivate(privKey);
+
+        ManagedChannel channel = null;
+        WalletGrpc.WalletBlockingStub blockingStub = null;
+
+        String startNode = "127.0.0.1:50051";
+        channel = ManagedChannelBuilder.forTarget(startNode).usePlaintext(true).build();
+        blockingStub = WalletGrpc.newBlockingStub(channel);
+
+        Contract.AccountCreateContract.Builder accountCreateContract = Contract.AccountCreateContract.newBuilder();
+        accountCreateContract.setOwnerAddress(ByteString.copyFrom(ownerAddress));
+        accountCreateContract.setAccountAddress(ByteString.copyFrom(newAccountAddress));
+
+        Protocol.Transaction transaction = blockingStub.createAccount(accountCreateContract.build());
+
+        Protocol.Transaction.Builder txSigned = transaction.toBuilder();
+        byte[] rawData = transaction.getRawData().toByteArray();
+        byte[] hash = sha256(rawData);
+        List<Protocol.Transaction.Contract> contractList = transaction.getRawData().getContractList();
+        for (int i = 0; i < contractList.size(); i++) {
+            ECKey.ECDSASignature signature = ecKey.sign(hash);
+            ByteString byteString = ByteString.copyFrom(signature.toByteArray());
+            txSigned.addSignature(byteString);
+        }
+
+        Message message = blockingStub.broadcastTransaction(txSigned.build());
+        logger.info(message.toString());
+    }
+
+    @Test
+    public void trasfer(){
+        String ownerPriKey = "ad146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0";
+        byte[] ownerAddress = Hex.decode("266145c6b6ebb0a7a87a8ce1ef9ae8f21a7d5b24e7");
+
+        byte[] toAddress = Hex.decode("26582f10257c25bd4066f3cbec769643cbf12456d0");
+
+        BigInteger privKey = new BigInteger(ownerPriKey, 16);
+
+        Wallet.setAddressPreFixByte(Byte.decode("0x26"));
+        final ECKey ecKey = ECKey.fromPrivate(privKey);
+
+        ManagedChannel channel = null;
+        WalletGrpc.WalletBlockingStub blockingStub = null;
+
+        String startNode = "127.0.0.1:50051";
+        channel = ManagedChannelBuilder.forTarget(startNode).usePlaintext(true).build();
+        blockingStub = WalletGrpc.newBlockingStub(channel);
+
+        Contract.TransferContract.Builder transferContract = Contract.TransferContract.newBuilder();
+        transferContract.setOwnerAddress(ByteString.copyFrom(ownerAddress));
+        transferContract.setToAddress(ByteString.copyFrom(toAddress));
+        transferContract.setAmount(1000000000000000L);
+
+        Protocol.Transaction transaction = blockingStub.createTransaction(transferContract.build());
+
+        Protocol.Transaction.Builder txSigned = transaction.toBuilder();
+        byte[] rawData = transaction.getRawData().toByteArray();
+        byte[] hash = sha256(rawData);
+        List<Protocol.Transaction.Contract> contractList = transaction.getRawData().getContractList();
+        for (int i = 0; i < contractList.size(); i++) {
+            ECKey.ECDSASignature signature = ecKey.sign(hash);
+            ByteString byteString = ByteString.copyFrom(signature.toByteArray());
+            txSigned.addSignature(byteString);
+        }
+
+        Message message = blockingStub.broadcastTransaction(txSigned.build());
+        logger.info(message.toString());
     }
 
     @Test
@@ -95,6 +186,25 @@ public class PrivKeyToPubKey {
         logger.info("---------------------------------------------");
         System.out.println();
         System.out.println("Hex String: " + Hex.toHexString(str.getBytes()));
+        System.out.println();
+        logger.info("---------------------------------------------");
+    }
+
+    @Test
+    public void distanceOfTwoNode(){
+        String node1 = "fa1b803793aba64c3ca784e21a604f9a4f94a0d002ba3bb7dfc8d2243bbaff32c34f6ea5b434cb5ceab66d6bce08f93733463ab0e722e6d693814bf070733196";
+        String node2 = "3d07f0563743eecba23793b35d987b4f9079f7e4b658465b842a59ee0b9b35f11205f94ddbd7d66d26e9baea3b01ab139b1469ef0e30206222caaea22aeed3f7";
+        String node3 = "ca39c31146a20f445a2bff58a8d42e5f24b2860105a8205e279cdcc256656021b4fdf0a366adc10e0c187560c5022456e8543982e912468cb6ad055edec29497";
+
+
+        int distance12 = NodeEntry.distance(Hex.decode(node1), Hex.decode(node2));
+        int distance23 = NodeEntry.distance(Hex.decode(node2), Hex.decode(node3));
+        int distance13 = NodeEntry.distance(Hex.decode(node1), Hex.decode(node3));
+        logger.info("---------------------------------------------");
+        System.out.println();
+        System.out.println("Node distance distance12: " + distance12);
+        System.out.println("Node distance distance23: " + distance23);
+        System.out.println("Node distance distance13: " + distance13);
         System.out.println();
         logger.info("---------------------------------------------");
     }

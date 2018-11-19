@@ -5,6 +5,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.api.GrpcAPI;
 import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.common.overlay.discover.dht.Peer;
 import org.gsc.common.overlay.server.Channel;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Time;
@@ -43,9 +44,10 @@ public class SelectLevelDBData {
 
     public static void main(String[] args) {
         data("properties");
-        //data("block");
-        //data("block");
-        //data("account");
+        // data("peers");
+        // data("block");
+        // data("block");
+        // data("account");
         // data("witness");
         // data("witness_schedule");
         // data("votes");
@@ -93,6 +95,9 @@ public class SelectLevelDBData {
                     case "transactionHistoryStore":
                         transactionHistoryStore(iterator.peekNext().getKey(), iterator.peekNext().getValue());
                         break;
+                    case "peers":
+                        peers(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
                     default:
                         break;
                 }
@@ -109,6 +114,14 @@ public class SelectLevelDBData {
         } catch (BadItemException e) {
             e.printStackTrace();
         }
+    }
+
+    public  static void peers(byte[] key, byte[] value) {
+
+        String keyStr = ByteArray.toHexString(key);
+        String valueStr = ByteArray.toHexString(value);
+
+        System.out.println("key:" + keyStr + ", value:" + valueStr);
     }
 
     public static void block(byte[] key, byte[] value) throws BadItemException {
@@ -173,7 +186,7 @@ public class SelectLevelDBData {
         TransactionWrapper transactionWrapper = new TransactionWrapper(value);
         String valueStr = JsonFormat.printToString(transactionWrapper.getInstance());
 
-        System.out.println("key:" + keyStr + ", value:" + value.toString());
+        System.out.println("key:" + keyStr + ", value:" + valueStr);
     }
 
     public static void transactionHistoryStore(byte[] key, byte[] value) throws BadItemException {
@@ -182,6 +195,6 @@ public class SelectLevelDBData {
         TransactionWrapper transactionWrapper = new TransactionWrapper(value);
         String valueStr = JsonFormat.printToString(transactionWrapper.getInstance());
 
-        System.out.println("key:" + keyStr + ", value:" + value.toString());
+        System.out.println("key:" + keyStr + ", value:" + valueStr);
     }
 }
