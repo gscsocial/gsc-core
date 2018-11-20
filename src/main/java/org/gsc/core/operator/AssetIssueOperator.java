@@ -106,7 +106,6 @@ public class AssetIssueOperator extends AbstractOperator {
       ret.setStatus(fee, code.FAILED);
       throw new ContractExeException(e.getMessage());
     }
-
     return true;
   }
 
