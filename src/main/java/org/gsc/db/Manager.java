@@ -1327,8 +1327,7 @@ public class Manager {
     int solidifiedPosition = (int) (size * (1 - SOLIDIFIED_THRESHOLD * 1.0 / 100));
 
 
-    // #TODO
-    while (numbers.get(solidifiedPosition) == 0) solidifiedPosition++;
+    while (numbers.get(solidifiedPosition) == 0) solidifiedPosition++; //fix fake witness problem
     if (solidifiedPosition < 0) {
       logger.warn(
           "updateLatestSolidifiedBlock error, solidifiedPosition:{},wits.size:{}",
