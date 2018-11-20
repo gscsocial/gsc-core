@@ -181,7 +181,8 @@ public class SolidityNode {
    * Start the SolidityNode.
    */
   public static void main(String[] args) throws InterruptedException {
-    logger.info("Solidity node running.");
+    logger.info("GSC Backup node running...");
+    System.out.println("GSC Backup node running...");
     Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
     Args cfgArgs = Args.getInstance();
 

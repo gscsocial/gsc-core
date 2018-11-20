@@ -18,12 +18,10 @@ public class FullNode {
   /**
    * Start the FullNode.
    */
-  public static void main(String[] args) throws InterruptedException {
-    logger.info("Full node running.");
-    //LOCAL_TESTNET_CONF
-    //Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
-    Args.setParam(args, Constant.KAY_CONF);
-    //Args.setParam(args, Constant.TESTNET_CONF);
+  public static void main(String[] args) {
+    logger.info("GSC node running...");
+    System.out.println("GSC node running...");
+    Args.setParam(args, Constant.TESTNET_CONF);
     Args cfgArgs = Args.getInstance();
 
     if (cfgArgs.isHelp()) {
@@ -37,9 +35,6 @@ public class FullNode {
       logger.info("not in debug mode, it will check energy time");
     }
 
-    /**
-     *
-     */
     DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
     beanFactory.setAllowCircularReferences(false);
     GSCApplicationContext context =

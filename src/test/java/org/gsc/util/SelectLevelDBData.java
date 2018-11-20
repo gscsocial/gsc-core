@@ -5,6 +5,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.api.GrpcAPI;
 import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.common.overlay.discover.dht.Peer;
 import org.gsc.common.overlay.server.Channel;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Time;
@@ -33,15 +34,94 @@ import java.io.IOException;
 @Slf4j
 public class SelectLevelDBData {
 
+    // public static String path = "/home/kay/workspace/ethereum/source/ethereumj/database/";
+    public static String path = "/home/kay/workspace/mico/source/gsc-core/output-directory/database/";
+    // public static String path = "/home/kay/Desktop/gsc-full1/output-directory/database/";
+
+    // account  contract  block gsc-solidity full properties vote votes witness proposal peers
+    // "/home/kay/workspace/mico/gsc-core/output-directory/database/";
+    // "/home/kay/Desktop/gsc-full1/output-directory/database/";
+
     public static void main(String[] args) {
-        // data("properties");
-         data("block");
+        data("properties");
+        // data("peers");
+        // data("block");
+        // data("block");
         // data("account");
         // data("witness");
         // data("witness_schedule");
         // data("votes");
         // data("trans");
         // data("transactionHistoryStore");
+    }
+
+    public static void data(String dataName) {
+        Options options = new Options();
+        options.createIfMissing(true);
+        DB db = null;
+        try {
+            System.out.println("Path: " + path + dataName);
+            db = factory.open(new File(path + dataName), options);
+
+            logger.info("---------------------------------------------");
+            System.out.println();
+            DBIterator iterator = db.iterator();
+            iterator.seekToFirst();
+            int count = 0;
+            while (iterator.hasNext()) {
+                count++;
+                switch (dataName) {
+                    case "properties":
+                        properties(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "block":
+                        block(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "account":
+                        account(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "witness":
+                        witness(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "witness_schedule":
+                        witness_schedule(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "votes":
+                        votes(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "trans":
+                        trans(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "transactionHistoryStore":
+                        transactionHistoryStore(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    case "peers":
+                        peers(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
+                    default:
+                        break;
+                }
+                iterator.next();
+            }
+            iterator.close();
+            System.out.println(dataName + " Num: " + count);
+            System.out.println();
+            logger.info("---------------------------------------------");
+
+            db.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (BadItemException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public  static void peers(byte[] key, byte[] value) {
+
+        String keyStr = ByteArray.toHexString(key);
+        String valueStr = ByteArray.toHexString(value);
+
+        System.out.println("key:" + keyStr + ", value:" + valueStr);
     }
 
     public static void block(byte[] key, byte[] value) throws BadItemException {
@@ -106,7 +186,7 @@ public class SelectLevelDBData {
         TransactionWrapper transactionWrapper = new TransactionWrapper(value);
         String valueStr = JsonFormat.printToString(transactionWrapper.getInstance());
 
-        System.out.println("key:" + keyStr + ", value:" + value.toString());
+        System.out.println("key:" + keyStr + ", value:" + valueStr);
     }
 
     public static void transactionHistoryStore(byte[] key, byte[] value) throws BadItemException {
@@ -115,81 +195,6 @@ public class SelectLevelDBData {
         TransactionWrapper transactionWrapper = new TransactionWrapper(value);
         String valueStr = JsonFormat.printToString(transactionWrapper.getInstance());
 
-        System.out.println("key:" + keyStr + ", value:" + value.toString());
-    }
-
-    public static void data(String dataName) {
-        Options options = new Options();
-        options.createIfMissing(true);
-        DB db = null;
-        try {
-            // account  contract  block gsc-solidity full properties vote votes witness proposal peers
-            //db = factory.open(new File("/home/kay/workspace/mico/gsc-core/output-directory/database/peers"), options);
-            //BlockStore blockStore;
-            //GSCApplicationContext context;
-            db = factory.open(new File("/home/kay/Desktop/gsc-solidity/output-directory/database/" + dataName), options);
-
-            logger.info("---------------------------------------------");
-            System.out.println();
-            DBIterator iterator = db.iterator();
-            iterator.seekToFirst();
-            int count = 0;
-            while (iterator.hasNext()) {
-                count++;
-                //String key = ByteString.copyFrom(iterator.peekNext().getKey()).toStringUtf8();
-                //long value = ByteArray.toLong(iterator.peekNext().getValue());
-                //String value = ByteString.copyFrom(iterator.peekNext().getValue()).toStringUtf8();
-                //System.out.println("key:" + key+ ", value:" + value);
-
-                // data("properties");
-                // data("block");
-                // data("account");
-                // data("witness");
-                // data("witness_schedule");
-                // data("votes");
-                //data("trans");
-                // data("transactionHistoryStore");
-
-                switch (dataName) {
-                    case "properties":
-                        properties(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "block":
-                        block(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "account":
-                        account(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "witness":
-                        witness(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "witness_schedule":
-                        witness_schedule(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "votes":
-                        votes(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "trans":
-                        trans(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    case "transactionHistoryStore":
-                        transactionHistoryStore(iterator.peekNext().getKey(), iterator.peekNext().getValue());
-                        break;
-                    default:
-                        break;
-                }
-                iterator.next();
-            }
-            iterator.close();
-            System.out.println(dataName + " Num: " + count);
-            System.out.println();
-            logger.info("---------------------------------------------");
-
-            db.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (BadItemException e) {
-            e.printStackTrace();
-        }
+        System.out.println("key:" + keyStr + ", value:" + valueStr);
     }
 }

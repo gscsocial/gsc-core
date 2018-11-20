@@ -25,7 +25,7 @@ apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-mainClassName = 'org.gsc.program.FullNode'
+mainClassName = 'org.gsc.Start'
 
 publishing {
     publications {
@@ -314,7 +314,8 @@ def binaryRelease(taskName, jarName, mainClass) {
 }
 
 artifacts {
-    archives(binaryRelease('buildSolidityNodeJar', 'SolidityNode', 'org.gsc.program.SolidityNode'),
+    archives(binaryRelease('buildStartJar', 'Start', 'org.gsc.program.Start'),
+            binaryRelease('buildSolidityNodeJar', 'SolidityNode', 'org.gsc.program.SolidityNode'),
             binaryRelease('buildFullNodeJar', 'FullNode', 'org.gsc.program.FullNode'),
             binaryRelease('buildKeystoreFactoryJar', 'KeystoreFactory', 'org.gsc.program.KeystoreFactory'))
 }

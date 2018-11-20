@@ -279,7 +279,7 @@ public class WitnessController {
         System.out.println(countWitness.get(voteAddress));
       });
       votes.getNewVotes().forEach(vote -> {
-        //TODO validate witness //active_witness
+        // todo validate witness //active_witness
         ByteString voteAddress = vote.getVoteAddress();
         long voteCount = vote.getVoteCount();
         if (countWitness.containsKey(voteAddress)) {
