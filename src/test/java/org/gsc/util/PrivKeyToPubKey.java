@@ -63,8 +63,10 @@ public class PrivKeyToPubKey {
         System.out.println();
         logger.info("---------------------------------------------");
 
-        String b="26cd2a3d9f938e13cd947ec05abc7fe734df8dd826";
-        String g="26" + "cd2a3d9f938e13cd947ec05abc7fe734df8dd826";
+        // String b="26cd2a3d9f938e13cd947ec05abc7fe734df8dd826";
+        // String b="307830303030303030303030303030303030303030
+        // String b="3078303030303030303030303030303030303030303030";
+        String g="3078666666666666666666666666666666666666666666";
        // String Base58Address = "GNPhKboo7ez2MDH88qnwLGM5Vwr5vYSwb6";
         //byte[] Baddress = Wallet.decodeFromBase58Check(Base58Address);
         String Gaddress = Wallet.encode58Check(Hex.decode(g));
@@ -76,7 +78,14 @@ public class PrivKeyToPubKey {
 
     @Test
     public void aAddress(){
-        logger.info("GSC Address: " + Hex.toHexString("0x000000000000000000000".getBytes()));
+        String w="3078666666666666666666666666666666666666666666";
+        logger.info(ByteString.copyFrom( "0xfffffffffffffffffffff".getBytes()).toStringUtf8());
+        logger.info(Wallet.encode58Check("0x000000000000000000000".getBytes()));
+        logger.info(Wallet.encode58Check(Hex.decode(w)));
+        String t="0xfffffffffffffffffffff";
+
+        String c="7YxAaK71utTpYJ8u4Zna7muWxd1pQwimpGxy8";
+        String g="7YxAaK71utTpYJ8u4Zna7muWxd1pQwimpGxy8";
     }
 
     @Test
@@ -155,6 +164,10 @@ public class PrivKeyToPubKey {
 
         Protocol.Transaction transaction = blockingStub.createTransaction(transferContract.build());
 
+        TransactionWrapper transactionWrapper = new TransactionWrapper(transaction);
+        System.out.println(transactionWrapper.getTransactionId());
+
+        System.out.println( transaction.toString());
         Protocol.Transaction.Builder txSigned = transaction.toBuilder();
         byte[] rawData = transaction.getRawData().toByteArray();
         byte[] hash = sha256(rawData);
@@ -166,6 +179,7 @@ public class PrivKeyToPubKey {
         }
 
         Message message = blockingStub.broadcastTransaction(txSigned.build());
+
         logger.info(message.toString());
     }
 
