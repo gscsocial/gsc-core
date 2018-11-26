@@ -21,8 +21,7 @@ public class FullNode {
   public static void main(String[] args) {
     logger.info("GSC node running...");
     System.out.println("GSC node running...");
-    Args.setParam(args, Constant.KAY_CONF);
-    //Args.setParam(args, Constant.TESTNET_CONF);
+    Args.setParam(args, Constant.TESTNET_CONF);
     Args cfgArgs = Args.getInstance();
 
     if (cfgArgs.isHelp()) {

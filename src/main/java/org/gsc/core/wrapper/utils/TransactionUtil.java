@@ -35,7 +35,7 @@ public class TransactionUtil {
     }
     TransferContract transferContract = TransferContract.newBuilder()
         .setAmount(value)
-         .setOwnerAddress(ByteString.copyFrom("0xfffffffffffffffffffff".getBytes()))
+        .setOwnerAddress(ByteString.copyFrom("0xfffffffffffffffffffff".getBytes()))
         .setToAddress(ByteString.copyFrom(key))
         .build();
 
