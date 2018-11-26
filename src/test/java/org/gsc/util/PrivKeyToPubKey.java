@@ -1,7 +1,5 @@
 package org.gsc.util;
 
-import com.alibaba.fastjson.JSONObject;
-import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
@@ -10,30 +8,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.gsc.api.GrpcAPI;
 import org.gsc.api.WalletGrpc;
 import org.gsc.common.overlay.Parameter;
+import org.gsc.common.overlay.client.WalletGrpcClient;
 import org.gsc.common.overlay.discover.table.NodeEntry;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Utils;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
-import org.gsc.core.exception.HeaderNotFound;
 import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.crypto.ECKey;
 import org.gsc.db.Manager;
 import org.gsc.protos.Contract;
 import org.gsc.protos.Protocol;
-import org.gsc.services.http.CreateAccountServlet;
 import org.gsc.services.http.Util;
 import org.junit.Test;
-import org.spongycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi;
 import org.spongycastle.util.encoders.Hex;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.List;
+import java.util.Optional;
 
 import static org.apache.commons.codec.digest.DigestUtils.sha256;
 
@@ -44,15 +37,16 @@ public class PrivKeyToPubKey {
 
     @Test
     public void privKeyToPubKey() {
-        String privStr = "c85ef7d79691fe79573b1a7064c19c1a9819ebdbd1faaab1a8ec92344438aaf4";
+        String privStr = "da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d2";
         BigInteger privKey = new BigInteger(privStr, 16);
 
-        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+        Wallet.setAddressPreFixByte((byte) 0x26);
         final ECKey ecKey = ECKey.fromPrivate(privKey);
         byte[] address = ecKey.getAddress();
 
         String pubkey = Wallet.encode58Check(address);
         byte[] decodeAddr = Wallet.decodeFromBase58Check(pubkey);
+
 
         logger.info("---------------------------------------------");
         System.out.println();
@@ -83,9 +77,16 @@ public class PrivKeyToPubKey {
         logger.info(Wallet.encode58Check("0x000000000000000000000".getBytes()));
         logger.info(Wallet.encode58Check(Hex.decode(w)));
         String t="0xfffffffffffffffffffff";
-
         String c="7YxAaK71utTpYJ8u4Zna7muWxd1pQwimpGxy8";
         String g="7YxAaK71utTpYJ8u4Zna7muWxd1pQwimpGxy8";
+
+
+        String pubkey="41206e65772073797374656d206d75737420616c6c6f77206578697374696e672073797374656d7320746f206265206c696e6b656420746f67657468657220776974686f757420726571756972696e6720616e792063656e7472616c20636f6e74726f6c206f7220636f6f7264696e6174696f6e";
+
+        ECKey eck = ECKey.fromPublicOnly(pubkey.getBytes());
+        System.out.println(Wallet.encode58Check(eck.getAddress()));
+
+
     }
 
     @Test
@@ -181,6 +182,38 @@ public class PrivKeyToPubKey {
         Message message = blockingStub.broadcastTransaction(txSigned.build());
 
         logger.info(message.toString());
+    }
+
+    @Test
+    public void getVotes2(){
+        ManagedChannel channel = null;
+        WalletGrpc.WalletBlockingStub blockingStub = null;
+
+        String startNode = "127.0.0.1:50051";
+        channel = ManagedChannelBuilder.forTarget(startNode).usePlaintext(true).build();
+        blockingStub = WalletGrpc.newBlockingStub(channel);
+
+        GrpcAPI.VoteStatistics voteStatistics = blockingStub.getWitnessVoteStatistics(GrpcAPI.EmptyMessage.newBuilder().build());
+        voteStatistics.getVotesList().forEach(vote -> {
+            ByteString address = vote.getVoteAddress();
+            long count = vote.getVoteCount();
+            System.out.println("Witness: " + Hex.toHexString(address.toByteArray()) + " vote count: " + count);
+        });
+    }
+
+    @Test
+    public void getVotes(){
+        String host = "127.0.0.1";
+        int port = 50051;
+        WalletGrpcClient walletGrpcClient = new WalletGrpcClient(host, port);
+
+        Optional<GrpcAPI.VoteStatistics> statistics = walletGrpcClient.getWitnessVoteStatistics();
+
+        statistics.get().getVotesList().forEach(vote -> {
+            ByteString address = vote.getVoteAddress();
+            long count = vote.getVoteCount();
+            System.out.println("Witness: " + address + " vote count: " + count);
+        });
     }
 
     @Test

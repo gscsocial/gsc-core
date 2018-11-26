@@ -43,7 +43,7 @@ public class SelectLevelDBData {
     // "/home/kay/Desktop/gsc-full1/output-directory/database/";
 
     public static void main(String[] args) {
-        data("properties");
+        data("votes");
         // data("peers");
         // data("block");
         // data("block");

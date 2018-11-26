@@ -6,6 +6,7 @@ import io.grpc.ManagedChannelBuilder;
 import java.math.BigInteger;
 
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.api.WalletGrpc;
 import org.gsc.crypto.ECKey;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -15,7 +16,6 @@ import org.testng.annotations.Test;
 import org.gsc.api.GrpcAPI;
 import org.gsc.api.GrpcAPI.AssetIssueList;
 import org.gsc.api.WalletExtensionGrpc;
-import org.gsc.api.WalletGrpc;
 import org.gsc.api.WalletSolidityGrpc;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Utils;

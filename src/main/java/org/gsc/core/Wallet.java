@@ -18,16 +18,13 @@
 
 package org.gsc.core;
 
+import com.google.common.collect.Maps;
 import com.google.common.primitives.Longs;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -480,6 +477,38 @@ public class Wallet {
     return ecKey.getAddress();
   }
 
+  public GrpcAPI.VoteStatistics getWitnessVoteStatistics(){
+    VotesStore votesStore = dbManager.getVotesStore();
+
+    final Map<ByteString, Long> countWitnessMap = Maps.newHashMap();
+    Iterator<Map.Entry<byte[], VotesWrapper>> dbIterator = votesStore.iterator();
+
+    while (dbIterator.hasNext()){
+      Map.Entry<byte[], VotesWrapper> next = dbIterator.next();
+      VotesWrapper votes = next.getValue();
+
+      votes.getNewVotes().forEach(vote -> {
+        ByteString voteAddress = vote.getVoteAddress();
+        long voteCount = vote.getVoteCount();
+        if (countWitnessMap.containsKey(voteAddress)) {
+          countWitnessMap.put(voteAddress, countWitnessMap.get(voteAddress) + voteCount);
+        } else {
+          countWitnessMap.put(voteAddress, voteCount);
+        }
+        System.out.println("witness: " + countWitnessMap.get(voteAddress) + " votes: " + voteCount);
+      });
+    }
+
+    final GrpcAPI.VoteStatistics.Builder countWitness = GrpcAPI.VoteStatistics.newBuilder();
+    countWitnessMap.forEach((key, value) ->{
+      Protocol.Vote.Builder vote = Protocol.Vote.newBuilder();
+      vote.setVoteAddress(key).setVoteCount(value);
+      countWitness.addVotes(vote.build());
+      System.out.println("--------------------witness: " + key + " votes: " + value);
+    });
+    return countWitness.build();
+  }
+
   public Block getNowBlock() {
     List<BlockWrapper> blockList = dbManager.getBlockStore().getBlockByLatestNum(1);
     if (CollectionUtils.isEmpty(blockList)) {
@@ -661,12 +690,31 @@ public class Wallet {
     long freeNetLimit = dbManager.getDynamicPropertiesStore().getFreeNetLimit();
     long totalNetLimit = dbManager.getDynamicPropertiesStore().getTotalNetLimit();
     long totalNetWeight = dbManager.getDynamicPropertiesStore().getTotalNetWeight();
+    long PUBLIC_NET_LIMIT = dbManager.getDynamicPropertiesStore().getPublicNetLimit();
+    long PUBLIC_NET_TIME = dbManager.getDynamicPropertiesStore().getPublicNetTime();
+    long PUBLIC_NET_USAGE = dbManager.getDynamicPropertiesStore().getPublicNetUsage();
+    long ONE_DAY_NET_LIMIT = dbManager.getDynamicPropertiesStore().getOneDayNetLimit();
 
     Map<String, Long> assetNetLimitMap = new HashMap<>();
     accountWrapper.getAllFreeAssetNetUsage().keySet().forEach(asset -> {
       byte[] key = ByteArray.fromString(asset);
       assetNetLimitMap.put(asset, dbManager.getAssetIssueStore().get(key).getFreeAssetNetLimit());
     });
+
+    System.out.println("-----------------------------------------------------------------");
+    System.out.println("netLimit: " + netLimit);
+    System.out.println("freeNetLimit: " + freeNetLimit);
+    System.out.println("totalNetLimit: " + totalNetLimit);
+    System.out.println("totalNetWeight: " + totalNetWeight);
+    System.out.println("PUBLIC_NET_LIMIT: " + PUBLIC_NET_LIMIT);
+    System.out.println("PUBLIC_NET_TIME: " + PUBLIC_NET_TIME);
+    System.out.println("PUBLIC_NET_USAGE: " + PUBLIC_NET_USAGE);
+    System.out.println("ONE_DAY_NET_LIMIT: " + ONE_DAY_NET_LIMIT);
+    System.out.println("accountWrapper.getFreeNetUsage(): " + accountWrapper.getFreeNetUsage());
+    System.out.println("accountWrapper.getNetUsage(): " + accountWrapper.getNetUsage());
+    System.out.println("accountWrapper.getAllFreeAssetNetUsage(): " + accountWrapper.getAllFreeAssetNetUsage());
+    System.out.println("assetNetLimitMap: " + assetNetLimitMap);
+    System.out.println("-----------------------------------------------------------------");
 
     builder.setFreeNetUsed(accountWrapper.getFreeNetUsage())
         .setFreeNetLimit(freeNetLimit)
@@ -849,6 +897,8 @@ public class Wallet {
               Address.newBuilder()
                   .setHost(ByteString.copyFrom(ByteArray.fromString(node.getHost())))
                   .setPort(node.getPort())));
+          System.out.println("Host: " + node.getHost());
+          System.out.println("Port: " + node.getPort());
         });
     return nodeListBuilder.build();
   }
