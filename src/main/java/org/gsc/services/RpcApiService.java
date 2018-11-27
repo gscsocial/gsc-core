@@ -17,10 +17,9 @@ import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
-import org.gsc.common.storage.DepositImpl;
+import org.gsc.api.WalletGrpc;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
-import org.gsc.db.TransactionTrace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.gsc.api.DatabaseGrpc.DatabaseImplBase;
@@ -54,7 +53,6 @@ import org.gsc.api.GrpcAPI.TransactionList;
 import org.gsc.api.GrpcAPI.TransactionListExtention;
 import org.gsc.api.GrpcAPI.WitnessList;
 import org.gsc.api.WalletExtensionGrpc;
-import org.gsc.api.WalletGrpc.WalletImplBase;
 import org.gsc.api.WalletSolidityGrpc.WalletSolidityImplBase;
 import org.gsc.common.application.Service;
 import org.gsc.crypto.ECKey;
@@ -501,7 +499,7 @@ public class RpcApiService implements Service {
     /**
      * WalletApi.
      */
-    class WalletApi extends WalletImplBase {
+    class WalletApi extends WalletGrpc.WalletImplBase {
 
         private BlockListExtention blocklist2Extention(BlockList blockList) {
             if (blockList == null) {
@@ -1152,6 +1150,13 @@ public class RpcApiService implements Service {
             } else {
                 responseObserver.onNext(null);
             }
+            responseObserver.onCompleted();
+        }
+
+        @Override
+        public void getWitnessVoteStatistics(EmptyMessage request,
+                                             StreamObserver<GrpcAPI.VoteStatistics> responseObserver){
+            responseObserver.onNext(wallet.getWitnessVoteStatistics());
             responseObserver.onCompleted();
         }
 

@@ -5,6 +5,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import org.gsc.api.GrpcAPI;
 import org.gsc.api.GrpcAPI.AssetIssueList;
 import org.gsc.api.GrpcAPI.BytesMessage;
 import org.gsc.api.GrpcAPI.EmptyMessage;
@@ -91,6 +93,15 @@ public class WalletGrpcClient {
         .listNodes(EmptyMessage.newBuilder().build());
     if (nodeList != null) {
       return Optional.of(nodeList);
+    }
+    return Optional.empty();
+  }
+
+  public Optional<GrpcAPI.VoteStatistics> getWitnessVoteStatistics(){
+    GrpcAPI.VoteStatistics voteStatistics = walletBlockingStub.getWitnessVoteStatistics(EmptyMessage.newBuilder().build());
+
+    if (voteStatistics != null){
+      return Optional.of(voteStatistics);
     }
     return Optional.empty();
   }
