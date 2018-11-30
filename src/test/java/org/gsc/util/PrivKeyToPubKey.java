@@ -19,6 +19,7 @@ import org.gsc.crypto.ECKey;
 import org.gsc.db.Manager;
 import org.gsc.protos.Contract;
 import org.gsc.protos.Protocol;
+import org.gsc.services.http.JsonFormat;
 import org.gsc.services.http.Util;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
@@ -37,7 +38,7 @@ public class PrivKeyToPubKey {
 
     @Test
     public void privKeyToPubKey() {
-        String privStr = "da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d2";
+        String privStr = "F603197654386A796418913AB29BAC9198DE871AE04FE47D185F716D2145F9CC";
         BigInteger privKey = new BigInteger(privStr, 16);
 
         Wallet.setAddressPreFixByte((byte) 0x26);
@@ -202,18 +203,67 @@ public class PrivKeyToPubKey {
     }
 
     @Test
+    public void getfreeznI(){
+        String ownerPriKey = "fd146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d1";
+        byte[] ownerAddress = Hex.decode("268398f1c16a0cdb2dd3fd2feab1ae6fe149c86b59");
+
+        BigInteger privKey = new BigInteger(ownerPriKey, 16);
+
+        Wallet.setAddressPreFixByte(Byte.decode("0x26"));
+        final ECKey ecKey = ECKey.fromPrivate(privKey);
+
+        ManagedChannel channel = null;
+        WalletGrpc.WalletBlockingStub blockingStub = null;
+
+        String startNode = "127.0.0.1:50051";
+        channel = ManagedChannelBuilder.forTarget(startNode).usePlaintext(true).build();
+        blockingStub = WalletGrpc.newBlockingStub(channel);
+
+        Protocol.Transaction transaction = blockingStub.unfreezeAsset(Contract.UnfreezeAssetContract.newBuilder().setOwnerAddress(ByteString.copyFrom(ownerAddress)).build());
+        System.out.println( transaction.toString());
+        Protocol.Transaction.Builder txSigned = transaction.toBuilder();
+        byte[] rawData = transaction.getRawData().toByteArray();
+        byte[] hash = sha256(rawData);
+        List<Protocol.Transaction.Contract> contractList = transaction.getRawData().getContractList();
+        for (int i = 0; i < contractList.size(); i++) {
+            ECKey.ECDSASignature signature = ecKey.sign(hash);
+            ByteString byteString = ByteString.copyFrom(signature.toByteArray());
+            txSigned.addSignature(byteString);
+        }
+
+        Message message = blockingStub.broadcastTransaction(txSigned.build());
+        logger.info(message.toString());
+    }
+
+
+    @Test
+    public void getAccount(){
+        //byte[] ownerAddress = Hex.decode("268398f1c16a0cdb2dd3fd2feab1ae6fe149c86b59");
+        //String node = "127.0.0.1:50051";
+
+        byte[] ownerAddress = Hex.decode("262daebb11f20b68a2035519a8553b597bb7dbbfa4");
+        String node = "47.254.71.98:50051";
+        ManagedChannel channel = null;
+        WalletGrpc.WalletBlockingStub blockingStub = null;
+        channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();
+        blockingStub = WalletGrpc.newBlockingStub(channel);
+
+        GrpcAPI.AccountNetMessage accountNet = blockingStub.getAccountNet(Protocol.Account.newBuilder().setAddress(ByteString.copyFrom(ownerAddress)).build());
+        System.out.println("Account: \n" + accountNet.toString());
+
+    }
+
+    @Test
     public void getVotes(){
         String host = "127.0.0.1";
         int port = 50051;
         WalletGrpcClient walletGrpcClient = new WalletGrpcClient(host, port);
 
         Optional<GrpcAPI.VoteStatistics> statistics = walletGrpcClient.getWitnessVoteStatistics();
+        System.out.println(JsonFormat.printToString(statistics.get()));
 
-        statistics.get().getVotesList().forEach(vote -> {
-            ByteString address = vote.getVoteAddress();
-            long count = vote.getVoteCount();
-            System.out.println("Witness: " + address + " vote count: " + count);
-        });
+        Optional<GrpcAPI.NodeList> nodelist = walletGrpcClient.listNodes();
+        System.out.println(JsonFormat.printToString(nodelist.get()));
     }
 
     @Test

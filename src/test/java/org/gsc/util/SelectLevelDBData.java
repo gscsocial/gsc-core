@@ -1,35 +1,20 @@
 package org.gsc.util;
 
 import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.api.GrpcAPI;
-import org.gsc.common.application.GSCApplicationContext;
-import org.gsc.common.overlay.discover.dht.Peer;
-import org.gsc.common.overlay.server.Channel;
 import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.Time;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
-import org.gsc.core.Constant;
 import org.gsc.core.exception.BadItemException;
 import org.gsc.core.wrapper.*;
-import org.gsc.db.BlockStore;
-import org.gsc.db.Manager;
 import org.gsc.services.http.JsonFormat;
 import org.gsc.services.http.Util;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.DBIterator;
 import org.iq80.leveldb.Options;
-import org.joda.time.DateTime;
-import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
-
-import static com.google.protobuf.BytesValue.parseFrom;
-import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 
 import java.io.File;
 import java.io.IOException;
+
+import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 
 @Slf4j
 public class SelectLevelDBData {
@@ -43,7 +28,7 @@ public class SelectLevelDBData {
     // "/home/kay/Desktop/gsc-full1/output-directory/database/";
 
     public static void main(String[] args) {
-        data("votes");
+        data("properties");
         // data("peers");
         // data("block");
         // data("block");
