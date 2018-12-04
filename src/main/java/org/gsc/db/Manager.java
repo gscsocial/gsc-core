@@ -1335,7 +1335,6 @@ public class Manager {
           size);
       return;
     }
-
     long latestSolidifiedBlockNum = numbers.get(solidifiedPosition);
     //if current value is less than the previous value，keep the previous value.
     if (latestSolidifiedBlockNum < getDynamicPropertiesStore().getLatestSolidifiedBlockNum()) {

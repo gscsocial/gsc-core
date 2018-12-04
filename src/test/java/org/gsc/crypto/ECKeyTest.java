@@ -30,7 +30,7 @@ import static org.iq80.leveldb.impl.Iq80DBFactory.*;
 @Slf4j
 public class ECKeyTest {
 
-  private String privString = "367fb555e8b57a016c3c3453ee67ff053decbd793c38eb55ff91b18b6d8b50c3";
+  private String privString = "09A2A74AFB6C035914EACB9EF9A450CB3152CEBD6A068B5E0D65409ED11F090E";
   private BigInteger privateKey = new BigInteger(privString, 16);
 
   private String pubString = "040947751e3022ecf3016be03ec77ab0ce3c2662b4843898cb068d74f698ccc8ad75aa17564ae80a20bb044ee7a6d903e8e8df624b089c95d66a0570f051e5a05b";

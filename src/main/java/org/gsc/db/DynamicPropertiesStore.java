@@ -121,9 +121,7 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
   private static final byte[] REMOVE_THE_POWER_OF_THE_GR = "REMOVE_THE_POWER_OF_THE_GR".getBytes();
 
   //If the parameter is larger than 0, the contract is allowed to be created.
-  private static final byte[] ALLOW_CREATION_OF_CONTRACTS = "ALLOW_CREATION_OF_CONTRACTS"
-      .getBytes();
-
+  private static final byte[] ALLOW_CREATION_OF_CONTRACTS = "ALLOW_CREATION_OF_CONTRACTS".getBytes();
 
   @Autowired
   private DynamicPropertiesStore(@Value("properties") String dbName) {
