@@ -28,7 +28,8 @@ public class SelectLevelDBData {
     // "/home/kay/Desktop/gsc-full1/output-directory/database/";
 
     public static void main(String[] args) {
-        data("properties");
+         data("asset-issue");
+        // data("properties");
         // data("peers");
         // data("block");
         // data("block");
@@ -83,6 +84,9 @@ public class SelectLevelDBData {
                     case "peers":
                         peers(iterator.peekNext().getKey(), iterator.peekNext().getValue());
                         break;
+                    case "asset-issue":
+                        assetissue(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
                     default:
                         break;
                 }
@@ -99,6 +103,15 @@ public class SelectLevelDBData {
         } catch (BadItemException e) {
             e.printStackTrace();
         }
+    }
+
+    public  static void assetissue(byte[] key, byte[] value) {
+
+        String keyStr = ByteString.copyFrom(key).toStringUtf8();
+        AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(value);
+        String valueStr = JsonFormat.printToString(assetIssueWrapper.getInstance());
+
+        System.out.println("key:" + keyStr + ", value:" + valueStr);
     }
 
     public  static void peers(byte[] key, byte[] value) {

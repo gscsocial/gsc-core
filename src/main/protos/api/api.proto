@@ -777,7 +777,9 @@ message TransactionList {
 message NodeList {
   repeated Node nodes = 1;
 }
-
+message VoteStatistics{
+  repeated Vote votes = 1;
+}
 // Gossip node
 message Node {
   Address address = 1;
@@ -818,10 +820,6 @@ message TimePaginatedMessage {
   TimeMessage timeMessage = 1;
   int64 offset = 2;
   int64 limit = 3;
-}
-
-message VoteStatistics{
-  repeated Vote votes = 1;
 }
 
 //deprecated

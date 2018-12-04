@@ -8,9 +8,11 @@ import org.gsc.api.GrpcAPI.*;
 import org.gsc.api.WalletGrpc;
 import org.gsc.protos.Contract;
 import org.gsc.protos.Contract.AssetIssueContract;
+import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.Transaction;
+import org.spongycastle.util.encoders.Hex;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -62,8 +64,12 @@ public class WalletGrpcClient{
     return walletBlockingStub.getAccountResource(request);
   }
 
-  public Transaction createTransaction(Contract.TransferContract contract) {
+  public Transaction createTransferTransaction(Contract.TransferContract contract) {
     return walletBlockingStub.createTransaction(contract);
+  }
+
+  public Transaction createFreezeBalanceTransaction(Contract.FreezeBalanceContract contract) {
+    return walletBlockingStub.freezeBalance(contract);
   }
 
   public Transaction createTransferAssetTransaction(Contract.TransferAssetContract contract) {
@@ -73,6 +79,61 @@ public class WalletGrpcClient{
   public Transaction createParticipateAssetIssueTransaction(
       Contract.ParticipateAssetIssueContract contract) {
     return walletBlockingStub.participateAssetIssue(contract);
+  }
+
+  public Transaction createWitnessUpdateTransaction(ByteString ownerAddress, ByteString url){
+    Contract.WitnessUpdateContract request = Contract.WitnessUpdateContract.newBuilder()
+            .setOwnerAddress(ownerAddress).setUpdateUrl(url).build();
+    Transaction response = walletBlockingStub.updateWitness(request);
+    if (request != null){
+      return response;
+    }
+    return null;
+  }
+
+  /**
+   *   bytes origin_address = 1;
+   *   bytes contract_address = 2;
+   *   ABI abi = 3;
+   *   bytes bytecode = 4;
+   *   int64 call_value = 5;
+   *   int64 consume_user_resource_percent = 6;
+   *   string name = 7;
+   * @return
+   */
+  public Transaction deployContract(String contractName,
+                            String originAddress,
+                            String abiStr, String byteCode, long callValue, long consumeUserResourcePercent){
+    Protocol.SmartContract.ABI abi = RPCUtils.jsonStr2ABI(abiStr);
+
+    Protocol.SmartContract.Builder smartContract = Protocol.SmartContract.newBuilder();
+    smartContract.setOriginAddress(ByteString.copyFrom(Hex.decode(originAddress)));
+    // smartContract.setContractAddress();
+    smartContract.setName(contractName);
+    smartContract.setAbi(abi);
+    smartContract.setCallValue(callValue);
+    smartContract.setBytecode(ByteString.copyFrom(Hex.decode(byteCode)));
+    smartContract.setConsumeUserResourcePercent(consumeUserResourcePercent);
+    Contract.CreateSmartContract request = Contract.CreateSmartContract.newBuilder()
+            .setNewContract(smartContract).setOwnerAddress(ByteString.copyFrom(Hex.decode(originAddress))).build();
+    TransactionExtention response = walletBlockingStub.deployContract(request);
+    if (response.getResult().getResult()){
+      return response.getTransaction();
+    }
+    return null;
+  }
+
+
+
+  public Return easyTransfer(long amount, ByteString toAddress, ByteString passPhrase){
+    EasyTransferMessage request = EasyTransferMessage.newBuilder().setAmount(amount)
+            .setToAddress(toAddress)
+            .setPassPhrase(passPhrase).build();
+    EasyTransferResponse response = walletBlockingStub.easyTransfer(request);
+    if (response != null){
+      return response.getResult();
+    }
+    return null;
   }
 
   public Transaction createAssetIssue(AssetIssueContract contract) {

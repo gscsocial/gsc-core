@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gsc.api.GrpcAPI;
 import org.gsc.api.WalletGrpc;
 import org.gsc.common.overlay.Parameter;
+import org.gsc.common.overlay.client.RPCUtils;
 import org.gsc.common.overlay.client.WalletGrpcClient;
 import org.gsc.common.overlay.discover.table.NodeEntry;
 import org.gsc.common.utils.Utils;
@@ -379,4 +380,51 @@ public class PrivKeyToPubKey {
         logger.info("\n Transcation: " + Util.printTransaction(txSigned.build()));
     }
 
+    @Test
+    public void deployContract(){
+        String originAddress = "262daebb11f20b68a2035519a8553b597bb7dbbfa4";
+        String node = "47.254.71.98:50051";
+        ManagedChannel channel = null;
+        WalletGrpc.WalletBlockingStub walletBlockingStub = null;
+        channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();
+        walletBlockingStub = WalletGrpc.newBlockingStub(channel);
+
+        String contractName = "barContract";
+        String abiStr = "[{\"constant\":false,\"inputs\":[],\"name\":\"getName\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],"
+                + "\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],"
+                + "\"name\":\"getId\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\","
+                + "\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"id\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],"
+                + "\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"getNumber\","
+                + "\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
+        String byteCode = "6080604052600a60005534801561001557600080fd5b506101f9806100256000396000f300608060405260043610610062576000357c01"
+                + "00000000000000000000000000000000000000000000000000000000900463ffffffff16806317d7de7c146100675780635d1ca631146100f757806"
+                + "3af640d0f14610122578063f2c9ecd81461014d575b600080fd5b34801561007357600080fd5b5061007c610178565b6040518080602001828103825"
+                + "283818151815260200191508051906020019080838360005b838110156100bc5780820151818401526020810190506100a1565b505050509050908101"
+                + "90601f1680156100e95780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34801561010357600080fd"
+                + "5b5061010c6101b5565b6040518082815260200191505060405180910390f35b34801561012e57600080fd5b506101376101be565b60405180828152602"
+                + "00191505060405180910390f35b34801561015957600080fd5b506101626101c4565b6040518082815260200191505060405180910390f35b6060604080"
+                + "5190810160405280600381526020017f6261720000000000000000000000000000000000000000000000000000000000815250905090565b60008054905"
+                + "090565b60005481565b600060649050905600a165627a7a72305820dfe79cf7f4a8a342b754cad8895b13f85de7daa11803925cf392263397653e7f0029";
+        long callValue = 0;
+        long fee = 100000000;
+        long consumeUserResourcePercent = 0;
+
+        Protocol.SmartContract.ABI abi = RPCUtils.jsonStr2ABI(abiStr);
+
+        Protocol.SmartContract.Builder smartContract = Protocol.SmartContract.newBuilder();
+        smartContract.setOriginAddress(ByteString.copyFrom(Hex.decode(originAddress)));
+        // smartContract.setContractAddress();
+        smartContract.setName(contractName);
+        smartContract.setAbi(abi);
+        smartContract.setCallValue(callValue);
+        smartContract.setBytecode(ByteString.copyFrom(Hex.decode(byteCode)));
+        smartContract.setConsumeUserResourcePercent(consumeUserResourcePercent);
+        Contract.CreateSmartContract request = Contract.CreateSmartContract.newBuilder()
+                .setNewContract(smartContract).setOwnerAddress(ByteString.copyFrom(Hex.decode(originAddress))).build();
+        GrpcAPI.TransactionExtention response = walletBlockingStub.deployContract(request);
+        if (response.getTransaction() != null){
+            System.out.println(Util.printTransaction(response.getTransaction()));
+            System.out.println(response.getResult().getResult());
+        }
+    }
 }
