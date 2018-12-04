@@ -22,77 +22,55 @@ import com.google.common.collect.Maps;
 import com.google.common.primitives.Longs;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
-
-import java.io.UnsupportedEncodingException;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.core.exception.*;
-import org.gsc.core.operator.Operator;
-import org.gsc.core.operator.OperatorFactory;
-import org.gsc.core.wrapper.*;
-import org.gsc.db.*;
-import org.gsc.protos.Contract;
-import org.spongycastle.util.encoders.Hex;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.gsc.api.GrpcAPI;
-import org.gsc.api.GrpcAPI.AccountNetMessage;
-import org.gsc.api.GrpcAPI.AccountResourceMessage;
-import org.gsc.api.GrpcAPI.Address;
-import org.gsc.api.GrpcAPI.AssetIssueList;
-import org.gsc.api.GrpcAPI.BlockList;
-import org.gsc.api.GrpcAPI.ExchangeList;
-import org.gsc.api.GrpcAPI.Node;
-import org.gsc.api.GrpcAPI.NodeList;
-import org.gsc.api.GrpcAPI.NumberMessage;
-import org.gsc.api.GrpcAPI.ProposalList;
-import org.gsc.api.GrpcAPI.Return;
+import org.gsc.api.GrpcAPI.*;
 import org.gsc.api.GrpcAPI.Return.response_code;
 import org.gsc.api.GrpcAPI.TransactionExtention.Builder;
-import org.gsc.api.GrpcAPI.WitnessList;
-import org.gsc.crypto.ECKey;
-import org.gsc.crypto.Hash;
 import org.gsc.common.overlay.discover.node.NodeHandler;
 import org.gsc.common.overlay.discover.node.NodeManager;
 import org.gsc.common.overlay.message.Message;
-import org.gsc.runtime.Runtime;
-import org.gsc.runtime.vm.program.ProgramResult;
-import org.gsc.runtime.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.gsc.common.storage.DepositImpl;
 import org.gsc.common.utils.Base58;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Utils;
-import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.Parameter.ChainParameters;
 import org.gsc.config.args.Args;
+import org.gsc.core.exception.*;
+import org.gsc.core.operator.Operator;
+import org.gsc.core.operator.OperatorFactory;
+import org.gsc.core.wrapper.*;
+import org.gsc.crypto.ECKey;
+import org.gsc.crypto.Hash;
+import org.gsc.db.*;
 import org.gsc.net.message.TransactionMessage;
 import org.gsc.net.node.NodeImpl;
+import org.gsc.protos.Contract;
 import org.gsc.protos.Contract.AssetIssueContract;
 import org.gsc.protos.Contract.CreateSmartContract;
 import org.gsc.protos.Contract.TransferContract;
 import org.gsc.protos.Contract.TriggerSmartContract;
 import org.gsc.protos.Protocol;
-import org.gsc.protos.Protocol.Account;
-import org.gsc.protos.Protocol.Block;
-import org.gsc.protos.Protocol.Exchange;
-import org.gsc.protos.Protocol.Proposal;
-import org.gsc.protos.Protocol.SmartContract;
+import org.gsc.protos.Protocol.*;
 import org.gsc.protos.Protocol.SmartContract.ABI;
 import org.gsc.protos.Protocol.SmartContract.ABI.Entry.StateMutabilityType;
-import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
 import org.gsc.protos.Protocol.Transaction.Result.code;
-import org.gsc.protos.Protocol.TransactionSign;
+import org.gsc.runtime.Runtime;
+import org.gsc.runtime.vm.program.ProgramResult;
+import org.gsc.runtime.vm.program.invoke.ProgramInvokeFactoryImpl;
+import org.gsc.services.http.JsonFormat;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.util.*;
 
 @Slf4j
 @Component
@@ -263,6 +241,9 @@ public class Wallet {
   public Account getAccount(Account account) {
     AccountStore accountStore = dbManager.getAccountStore();
     AccountWrapper accountWrapper = accountStore.get(account.getAddress().toByteArray());
+    System.out.println("----------------------------getAccount-----------------------------------");
+    System.out.println(JsonFormat.printToString(accountWrapper.getInstance()));
+    System.out.println("----------------------------getAccount-----------------------------------");
     if (accountWrapper == null) {
       return null;
     }
@@ -679,6 +660,9 @@ public class Wallet {
     }
     AccountNetMessage.Builder builder = AccountNetMessage.newBuilder();
     AccountWrapper accountWrapper = dbManager.getAccountStore().get(accountAddress.toByteArray());
+    System.out.println("----------------------------getAccountNet-----------------------------------");
+    System.out.println(JsonFormat.printToString(accountWrapper.getInstance()));
+    System.out.println("----------------------------getAccountNet-----------------------------------");
     if (accountWrapper == null) {
       return null;
     }

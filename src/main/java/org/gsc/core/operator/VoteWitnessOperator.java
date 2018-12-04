@@ -4,24 +4,25 @@ import com.google.common.math.LongMath;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.util.Iterator;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.StringUtil;
+import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.core.Wallet;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.VotesWrapper;
-import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.db.AccountStore;
 import org.gsc.db.Manager;
 import org.gsc.db.VotesStore;
 import org.gsc.db.WitnessStore;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract.VoteWitnessContract;
 import org.gsc.protos.Contract.VoteWitnessContract.Vote;
 import org.gsc.protos.Protocol.Transaction.Result.code;
+
+import java.util.Iterator;
 
 @Slf4j
 public class VoteWitnessOperator extends AbstractOperator {
@@ -130,6 +131,17 @@ public class VoteWitnessOperator extends AbstractOperator {
     return true;
   }
 
+  /**
+   * message VoteWitnessContract {
+   *   message Vote {
+   *     bytes vote_address = 1;
+   *     int64 vote_count = 2;
+   *   }
+   *   bytes owner_address = 1;
+   *   repeated Vote votes = 2;
+   *   bool support = 3;
+   * }
+   */
   private void countVoteAccount(VoteWitnessContract voteContract) {
     byte[] ownerAddress = voteContract.getOwnerAddress().toByteArray();
 

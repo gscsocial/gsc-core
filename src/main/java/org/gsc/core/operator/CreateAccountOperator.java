@@ -108,6 +108,6 @@ public class CreateAccountOperator extends AbstractOperator {
 
   @Override
   public long calcFee() {
-    return dbManager.getDynamicPropertiesStore().getCreateNewAccountFeeInSystemContract();
+    return dbManager.getDynamicPropertiesStore().getCreateNewAccountFeeInSystemContract(); // 0
   }
 }

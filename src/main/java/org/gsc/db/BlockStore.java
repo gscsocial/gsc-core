@@ -15,17 +15,18 @@
 
 package org.gsc.db;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.utils.Sha256Hash;
+import org.gsc.core.exception.BadItemException;
 import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.gsc.common.utils.Sha256Hash;
-import org.gsc.core.wrapper.BlockWrapper.BlockId;
-import org.gsc.core.exception.BadItemException;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -52,7 +53,6 @@ public class BlockStore extends GSCStoreWithRevoking<BlockWrapper> {
   }
 
   public List<BlockWrapper> getBlockByLatestNum(long getNum) {
-
     return revokingDB.getlatestValues(getNum).stream()
         .map(bytes -> {
           try {

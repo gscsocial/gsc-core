@@ -1,23 +1,25 @@
 package org.gsc.db;
 
 
-import static org.gsc.protos.Protocol.Transaction.Contract.ContractType.TransferAssetContract;
-
 import com.google.protobuf.ByteString;
-import java.util.List;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.core.Constant;
-import org.gsc.core.wrapper.*;
-import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.core.exception.AccountResourceInsufficientException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.exception.TooBigTransactionResultException;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.AssetIssueWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.protos.Contract.TransferAssetContract;
 import org.gsc.protos.Contract.TransferContract;
 import org.gsc.protos.Protocol.Transaction.Contract;
+
+import java.util.List;
+import java.util.Map;
+
+import static org.gsc.protos.Protocol.Transaction.Contract.ContractType.TransferAssetContract;
 
 @Slf4j
 public class BandwidthProcessor extends ResourceProcessor {
@@ -33,12 +35,15 @@ public class BandwidthProcessor extends ResourceProcessor {
   }
 
   private void updateUsage(AccountWrapper accountWrapper, long now) {
+    System.out.println("---------------updateUsage----------------");
     long oldNetUsage = accountWrapper.getNetUsage();
     long latestConsumeTime = accountWrapper.getLatestConsumeTime();
+    System.out.println("---------------latestConsumeTime: " + latestConsumeTime);
     accountWrapper.setNetUsage(increase(oldNetUsage, 0, latestConsumeTime, now));
 
     long oldFreeNetUsage = accountWrapper.getFreeNetUsage();
     long latestConsumeFreeTime = accountWrapper.getLatestConsumeFreeTime();
+    System.out.println("---------------latestConsumeFreeTime: " + latestConsumeFreeTime);
     accountWrapper.setFreeNetUsage(increase(oldFreeNetUsage, 0, latestConsumeFreeTime, now));
 
     Map<String, Long> assetMap = accountWrapper.getAssetMap();
@@ -97,6 +102,7 @@ public class BandwidthProcessor extends ResourceProcessor {
         continue;
       }
 
+      // 10 * bytes
       if (useTransactionFee(accountWrapper, bytes, ret)) {
         trace.setNetBill(0, ret.getFee());
         continue;

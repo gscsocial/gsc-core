@@ -1,26 +1,24 @@
 package org.gsc.common.discover;
 
-import static org.gsc.common.discover.DiscoverManager.BackupStatusEnum.INIT;
-import static org.gsc.common.discover.DiscoverManager.BackupStatusEnum.MASTER;
-import static org.gsc.common.discover.DiscoverManager.BackupStatusEnum.SLAVER;
-
 import io.netty.util.internal.ConcurrentSet;
-import java.net.InetSocketAddress;
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 import org.gsc.common.net.udp.handler.EventHandler;
 import org.gsc.common.net.udp.handler.MessageHandler;
 import org.gsc.common.net.udp.handler.UdpEvent;
 import org.gsc.common.net.udp.message.Message;
 import org.gsc.common.net.udp.message.UdpMessageTypeEnum;
 import org.gsc.common.net.udp.message.backup.KeepAliveMessage;
+import org.gsc.config.args.Args;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.gsc.config.args.Args;
+
+import java.net.InetSocketAddress;
+import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import static org.gsc.common.discover.DiscoverManager.BackupStatusEnum.*;
 
 @Component
 public class DiscoverManager implements EventHandler {
@@ -86,8 +84,11 @@ public class DiscoverManager implements EventHandler {
     executorService.scheduleWithFixedDelay(() -> {
       try {
         if (!status.equals(MASTER) && System.currentTimeMillis() - lastKeepAliveTime > keepAliveTimeout){
+
           if (status.equals(SLAVER)){
             setStatus(INIT);
+            System.out.println("INIT");
+
             lastKeepAliveTime = System.currentTimeMillis();
           }else {
             setStatus(MASTER);
@@ -106,6 +107,7 @@ public class DiscoverManager implements EventHandler {
 
   @Override
   public void handleEvent(UdpEvent udpEvent) {
+    System.out.println("Discover Manager: handleEvent");
     InetSocketAddress sender = udpEvent.getAddress();
     Message msg = udpEvent.getMessage();
     if (!msg.getType().equals(UdpMessageTypeEnum.BACKUP_KEEP_ALIVE)){

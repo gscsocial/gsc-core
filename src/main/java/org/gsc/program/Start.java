@@ -16,19 +16,19 @@ import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.core.wrapper.TransactionInfoWrapper;
 import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.db.Manager;
+import org.gsc.protos.Protocol.Block;
+import org.gsc.protos.Protocol.DynamicProperties;
 import org.gsc.services.RpcApiService;
 import org.gsc.services.WitnessService;
 import org.gsc.services.http.FullNodeHttpApiService;
 import org.gsc.services.http.solidity.SolidityNodeHttpApiService;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.gsc.protos.Protocol.DynamicProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.util.StringUtils;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.gsc.protos.Protocol.Block;
-import org.springframework.context.ApplicationContext;
-import org.springframework.util.StringUtils;
 
 @Slf4j
 public class Start {
@@ -54,8 +54,10 @@ public class Start {
         }
 
         if(cfgArgs.isSolidityNode()){
+            System.out.println("******************************************************************************");
+            System.out.println("***************************Starting GSC Backup Node***************************");
+            System.out.println("******************************************************************************");
             logger.info("GSC Backup node running...");
-            System.out.println("GSC Backup node running...");
             if (StringUtils.isEmpty(cfgArgs.getTrustNodeAddr())) {
                 logger.error("Trust node not set.");
                 return;
@@ -91,8 +93,10 @@ public class Start {
 
             rpcApiService.blockUntilShutdown();
         }else {
+            System.out.println("***********************************************************************");
+            System.out.println("***************************Starting GSC Node***************************");
+            System.out.println("***********************************************************************");
             logger.info("GSC node running...");
-            System.out.println("GSC node running...");
             DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
             beanFactory.setAllowCircularReferences(false);
             GSCApplicationContext context =

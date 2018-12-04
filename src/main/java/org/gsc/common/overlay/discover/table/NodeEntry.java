@@ -95,7 +95,7 @@ public class NodeEntry {
       hash[i] = (byte) (((int) h1[i]) ^ ((int) h2[i]));
     }
 
-    int d = KademliaOptions.BINS;
+    int d = KademliaOptions.BINS; // BINS:256
 
     for (byte b : hash) {
       if (b == 0) {

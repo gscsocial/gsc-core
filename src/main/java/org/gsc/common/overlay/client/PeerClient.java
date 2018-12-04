@@ -1,27 +1,24 @@
 package org.gsc.common.overlay.client;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.DefaultMessageSizeEstimator;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.stereotype.Component;
 import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.overlay.discover.node.NodeHandler;
 import org.gsc.common.overlay.server.GSCChannelInitializer;
 import org.gsc.config.args.Args;
 import org.gsc.net.node.NodeImpl;
 import org.gsc.protos.Protocol.ReasonCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class PeerClient {
@@ -63,6 +60,7 @@ public class PeerClient {
                 if (!future.isSuccess()) {
                     logger.error("connect to {}:{} fail,cause:{}", node.getHost(), node.getPort(),
                         future.cause().getMessage());
+                    System.out.println("connectAsync----------------------------------------" + node.getPort());
                     nodeHandler.getNodeStatistics().nodeDisconnectedLocal(ReasonCode.CONNECT_FAIL);
                     nodeHandler.getNodeStatistics().notifyDisconnect();
                     future.channel().close();
