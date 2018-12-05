@@ -28,12 +28,12 @@ public class SelectLevelDBData {
     // "/home/kay/Desktop/gsc-full1/output-directory/database/";
 
     public static void main(String[] args) {
-         data("asset-issue");
+        // data("asset-issue");
         // data("properties");
         // data("peers");
         // data("block");
         // data("block");
-        // data("account");
+         data("account");
         // data("witness");
         // data("witness_schedule");
         // data("votes");

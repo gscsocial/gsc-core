@@ -67,7 +67,7 @@ public class PrivKeyToPubKey {
         //byte[] Baddress = Wallet.decodeFromBase58Check(Base58Address);
         String Gaddress = Wallet.encode58Check(Hex.decode(g));
 
-        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GcYjYPW92ezr3JUVh9exppDXaK4hzzuqnG")));
+        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GQbfRAVNsFC3wVwrUWoRi8WZDubkd6XyhH")));
         logger.info("Baddress Key: " + Hex.toHexString(address));
         logger.info("Gaddress Key: " + Gaddress);
     }
@@ -204,7 +204,23 @@ public class PrivKeyToPubKey {
     }
 
     @Test
-    public void getfreeznI(){
+    public void getToken(){
+        ManagedChannel channel = null;
+        WalletGrpc.WalletBlockingStub blockingStub = null;
+
+        String startNode = "47.254.71.98:50051";
+        channel = ManagedChannelBuilder.forTarget(startNode).usePlaintext(true).build();
+        blockingStub = WalletGrpc.newBlockingStub(channel);
+
+        GrpcAPI.AssetIssueList voteStatistics = blockingStub.getAssetIssueList(GrpcAPI.EmptyMessage.newBuilder().build());
+        voteStatistics.getAssetIssueList().forEach(assetIssueContract -> {
+            System.out.println(assetIssueContract.getDescription().toStringUtf8());
+        });
+        System.out.println(voteStatistics.getAssetIssueList().toString());
+    }
+
+    @Test
+    public void unfreezeAsset(){
         String ownerPriKey = "fd146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d1";
         byte[] ownerAddress = Hex.decode("268398f1c16a0cdb2dd3fd2feab1ae6fe149c86b59");
 
@@ -255,12 +271,45 @@ public class PrivKeyToPubKey {
     }
 
     @Test
+    public void wiki(){
+        byte[] ownerAddress = Hex.decode("266145c6b6ebb0a7a87a8ce1ef9ae8f21a7d5b24e7");
+        byte[] accountName = Hex.decode("kay");
+        String node = "47.254.71.98:50051";
+
+        ManagedChannel channel = null;
+        WalletGrpc.WalletBlockingStub blockingStub = null;
+        channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();
+        blockingStub = WalletGrpc.newBlockingStub(channel);
+
+        Contract.AccountUpdateContract.Builder builder = Contract.AccountUpdateContract.newBuilder();
+        builder.setOwnerAddress(ByteString.copyFrom(ownerAddress));
+        builder.setAccountName(ByteString.copyFrom(accountName));
+
+        Protocol.Transaction transaction = blockingStub.updateAccount(builder.build());
+        System.out.println("Account: \n" + transaction.toString());
+    }
+
+    @Test
+    public void getWitness(){
+        byte[] ownerAddress = Hex.decode("262daebb11f20b68a2035519a8553b597bb7dbbfa4");
+        String node = "47.254.71.98:50051";
+        ManagedChannel channel = null;
+        WalletGrpc.WalletBlockingStub blockingStub = null;
+        channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();
+        blockingStub = WalletGrpc.newBlockingStub(channel);
+
+        GrpcAPI.WitnessList witnessList = blockingStub.listWitnesses(GrpcAPI.EmptyMessage.newBuilder().build());
+        System.out.println("WitnessList: \n" + witnessList.toString());
+
+    }
+
+    @Test
     public void getVotes(){
-        String host = "127.0.0.1";
+        String host = "47.254.71.98";
         int port = 50051;
         WalletGrpcClient walletGrpcClient = new WalletGrpcClient(host, port);
 
-        Optional<GrpcAPI.VoteStatistics> statistics = walletGrpcClient.getWitnessVoteStatistics();
+        Optional<GrpcAPI.AssetIssueList> statistics = walletGrpcClient.getAssetIssueByAccount(Hex.decode("264a168943a7e07924e402b76db9a3d0cd51359b55".getBytes()));
         System.out.println(JsonFormat.printToString(statistics.get()));
 
         Optional<GrpcAPI.NodeList> nodelist = walletGrpcClient.listNodes();
@@ -309,7 +358,7 @@ public class PrivKeyToPubKey {
 
     @Test
     public void ByteToString(){
-        String str = "56616c6964617465205472616e73666572436f6e7472616374206572726f722c2062616c616e6365206973206e6f742073756666696369656e742e";
+        String str = "475162";
         logger.info("---------------------------------------------");
         System.out.println();
         System.out.println("Hex String: " + hexStr2Str(str));

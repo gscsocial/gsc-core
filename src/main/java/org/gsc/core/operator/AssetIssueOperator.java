@@ -150,6 +150,9 @@ public class AssetIssueOperator extends AbstractOperator {
       throw new ContractValidateException("Invalid ownerAddress");
     }
     // todo add to AssetName repeat
+    // when create assetIssue, this code will be called.
+    // If in the 3 second block period, should have the same name of assetIssue in different transaction.
+    // when transactions be packaged in the block, this code will be also called.
     byte[] name = new String(assetIssueContract.getName().toByteArray(),
             Charset.forName("UTF-8")).getBytes();;
     if (this.dbManager.getAssetIssueStore().get(name) != null) {
