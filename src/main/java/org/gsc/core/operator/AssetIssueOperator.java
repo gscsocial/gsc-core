@@ -52,6 +52,7 @@ public class AssetIssueOperator extends AbstractOperator {
     try {
       AssetIssueContract assetIssueContract = contract.unpack(AssetIssueContract.class);
       byte[] ownerAddress = assetIssueContract.getOwnerAddress().toByteArray();
+      System.out.println(assetIssueContract.getDescription());
       AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
       /** start remove: Avoid TOKEN's duplicate name*/
       /*
@@ -67,16 +68,6 @@ public class AssetIssueOperator extends AbstractOperator {
       }
       assetIssueWrapper.setOrder(order);
       */
-      /** end */
-
-      /** Within 3 seconds,Possible produce duplicate IssuedName token. */
-      String name = new String(assetIssueWrapper.getName().toByteArray(),
-              Charset.forName("UTF-8")); // getName().toStringUtf8()
-      byte[] key = name.getBytes();
-      if (this.dbManager.getAssetIssueStore().get(key) != null) {
-        ret.setStatus(fee, code.FAILED);
-        throw new ContractExeException("AssetName repeat!");
-      }
       /** end */
 
       dbManager.getAssetIssueStore()
