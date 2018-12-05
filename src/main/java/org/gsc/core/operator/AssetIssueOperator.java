@@ -54,7 +54,7 @@ public class AssetIssueOperator extends AbstractOperator {
       byte[] ownerAddress = assetIssueContract.getOwnerAddress().toByteArray();
       System.out.println(assetIssueContract.getDescription());
       AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
-      /** start remove: Avoid TOKEN's duplicate name*/
+      /** start remove: Avoid duplicate name of token. */
       /*
       String name = new String(assetIssueWrapper.getName().toByteArray(),
           Charset.forName("UTF-8")); // getName().toStringUtf8()
