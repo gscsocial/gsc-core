@@ -997,7 +997,7 @@ public class Manager {
   }
 
   /**
-   * Process transaction.
+   * Process the transaction.
    */
   public boolean processTransaction(final TransactionWrapper trxCap, BlockWrapper blockCap)
       throws ValidateSignatureException, ContractValidateException, ContractExeException, ReceiptException,
@@ -1024,33 +1024,15 @@ public class Manager {
 
     TransactionTrace trace = new TransactionTrace(trxCap, this);
 
-// TODO vm switch
-//    if (!this.dynamicPropertiesStore.supportVM() && trace.needVM()) {
-//      throw new UnsupportVMException("this node doesn't support vm, trx id: " + trxCap.getTransactionId().toString());
-//    }
-
     DepositImpl deposit = DepositImpl.createRoot(this);
     Runtime runtime = new Runtime(trace, blockCap, deposit, new ProgramInvokeFactoryImpl());
     if (runtime.isCallConstant()) {
-      // Fixme Wrong exception
       throw new UnsupportVMException("cannot call constant method ");
     }
-    // if (getDynamicPropertiesStore().supportVM()) {
-    //   if(trxCap.getInstance().getRetCount()<=0){
-    //     trxCap.setResult(new TransactionResultWrapper(contractResult.UNKNOWN));
-    //   }
-    // }
 
     consumeBandwidth(trxCap, runtime.getResult().getRet(), trace);
 
     trace.init();
-
-    // if (blockCap != null && blockCap.generatedByMyself &&
-    //     !blockCap.getInstance().getBlockHeader().getWitnessSignature().isEmpty() &&
-    //     trxCap.getInstance().getRet(0).getContractRet() != contractResult.SUCCESS) {
-    // setBill(energyUsage);
-    // } else {
-    // }
 
     trace.exec(runtime);
 
@@ -1286,7 +1268,7 @@ public class Manager {
     updateMaintenanceState(needMaint);
     //witnessController.updateWitnessSchedule();
     updateRecentBlock(block);
-
+    this.dynamicPropertiesStore.saveWitnessPayPerBlockByBlockNum(block.getNum()); //update award per block
   }
 
   private void updateTransHashCache(BlockWrapper block) {

@@ -37,8 +37,8 @@ public class FreezeBalanceOperator extends AbstractOperator {
     AccountWrapper accountWrapper = dbManager.getAccountStore()
         .get(freezeBalanceContract.getOwnerAddress().toByteArray());
 
-    long now = dbManager.getHeadBlockTimeStamp();
-    long duration = freezeBalanceContract.getFrozenDuration() * 86_400_000;
+    //long now = dbManager.getHeadBlockTimeStamp();
+    //long duration = freezeBalanceContract.getFrozenDuration() * 86_400_000;
 
     long newBalance = accountWrapper.getBalance() - freezeBalanceContract.getFrozenBalance();
 
@@ -49,7 +49,8 @@ public class FreezeBalanceOperator extends AbstractOperator {
 
         Frozen newFrozen = Frozen.newBuilder()
             .setFrozenBalance(newFrozenBalance)
-            .setExpireTime(now + duration)
+            //.setExpireTime(now + duration)
+            .setExpireTime(0) // set expireTime to 0 as inactive frozen balance
             .build();
 
         long frozenCount = accountWrapper.getFrozenCount();
@@ -77,7 +78,8 @@ public class FreezeBalanceOperator extends AbstractOperator {
 
         Frozen newFrozenForEnergy = Frozen.newBuilder()
             .setFrozenBalance(newFrozenBalanceForEnergy)
-            .setExpireTime(now + duration)
+            //.setExpireTime(now + duration)
+            .setExpireTime(0) // set to 0 as mark of inactive frozen balance
             .build();
 
         AccountResource newAccountResource = accountWrapper.getAccountResource().toBuilder()

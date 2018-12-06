@@ -124,6 +124,10 @@ enum ResourceCode {
   BANDWIDTH = 0x00;
   ENERGY = 0x01;
 }
+enum UnfreezeCode {
+  ACTIVATE = 0X00; // active the fronzen balance, after frozen balance
+  RECOVER = 0x01; // be able to withdraw the active balance after 3 days
+}
 
 message FreezeBalanceContract {
   bytes owner_address = 1;
@@ -135,8 +139,8 @@ message FreezeBalanceContract {
 
 message UnfreezeBalanceContract {
   bytes owner_address = 1;
-
-  ResourceCode resource = 10;
+  ResourceCode resource = 2;
+  UnfreezeCode type = 3;
 }
 
 message UnfreezeAssetContract {

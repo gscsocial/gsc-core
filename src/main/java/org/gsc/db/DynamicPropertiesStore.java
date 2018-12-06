@@ -213,7 +213,8 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
     try {
       this.getWitnessPayPerBlock();
     } catch (IllegalArgumentException e) {
-      this.saveWitnessPayPerBlock(32000000L);
+      //this.saveWitnessPayPerBlockByBlockNum(32000000L);
+      this.saveWitnessPayPerBlockByBlockNum(0L);
     }
 
     try {
@@ -556,10 +557,21 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
             () -> new IllegalArgumentException("not found ACCOUNT_UPGRADE_COST"));
   }
 
-  public void saveWitnessPayPerBlock(long pay) {
-    logger.debug("WITNESS_PAY_PER_BLOCK:" + pay);
-    this.put(WITNESS_PAY_PER_BLOCK,
-        new BytesWrapper(ByteArray.fromLong(pay)));
+  public void saveWitnessPayPerBlockByBlockNum(long blockNum) {
+    logger.debug("WITNESS_PAY_PER_BLOCK BLOCK_NUM:" + blockNum);
+    long pay = 0L;
+    if(blockNum >= 21024000){//witness pay 6% of total during 1st year,4.5% 2nd year,3% 3rd year
+        pay = 3805175;
+    }else if(blockNum >= 10512000){
+        pay = 2853881;
+    }else{
+        pay = 1902587;
+    }
+    if(blockNum == 0 || pay != getWitnessPayPerBlock()){
+      this.put(WITNESS_PAY_PER_BLOCK,
+              new BytesWrapper(ByteArray.fromLong(pay)));
+      logger.info("WITNESS_PAY_PER_BLOCK changed to={}",pay);
+    }
   }
 
   public long getWitnessPayPerBlock() {
