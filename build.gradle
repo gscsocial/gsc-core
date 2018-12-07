@@ -1,5 +1,6 @@
 buildscript {
     repositories {
+        maven { url 'http://mvnrepository.com' }
         mavenCentral()
         jcenter()
     }
@@ -16,7 +17,7 @@ group 'org.gsc'
 version '1.0.0'
 
 apply plugin: 'java'
-apply plugin: 'com.google.protobuf'
+//apply plugin: 'com.google.protobuf'
 apply plugin: 'application'
 apply plugin: 'checkstyle'
 apply plugin: 'com.github.johnrengelman.shadow'
@@ -25,7 +26,7 @@ apply plugin: 'maven-publish'
 
 sourceCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
-mainClassName = 'org.gsc.Start'
+mainClassName = 'org.gsc.program.FullNode'
 
 publishing {
     publications {
@@ -45,12 +46,13 @@ task sourceJar(type: Jar, dependsOn: classes) {
 }
 
 repositories {
+    maven { url 'http://mvnrepository.com' }
     mavenLocal()
     mavenCentral()
     maven { url 'http://repo.spring.io/plugins-release' }
 }
 def versions = [
-        checkstyle: '8.7',
+        checkstyle: '8.7'
 ]
 
 jacoco {
@@ -108,7 +110,7 @@ dependencies {
 
     compile group: 'com.google.guava', name: 'guava', version: '24.1-jre'
 
-    compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.4.0'
+    //compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.4.0'
 
     compile "org.iq80.leveldb:leveldb:0.7"
 
@@ -185,7 +187,7 @@ task lint(type: Checkstyle) {
     delete fileTree(dir: "${project.rootDir}/app/build/reports")
     source 'src'
     include '**/*.java'
-    exclude 'main/gen/**'
+    //exclude 'main/gen/**'
     exclude 'test/**'
     // empty classpath
     classpath = files()
@@ -203,9 +205,9 @@ if (project.hasProperty("mainClass")) {
 
 sourceSets {
     main {
-        proto {
-            srcDir 'src/main/protos'
-        }
+//        proto {
+//            srcDir 'src/main/'
+//        }
         java {
             srcDir 'src/main/gen'
             srcDir 'src/main/java'
@@ -214,30 +216,6 @@ sourceSets {
 
 }
 
-protobuf {
-    generatedFilesBaseDir = "$projectDir/src/"
-    protoc {
-        artifact = "com.google.protobuf:protoc:3.5.1-1"
-    }
-
-    plugins {
-        grpc {
-            artifact = 'io.grpc:protoc-gen-grpc-java:1.9.0'
-        }
-    }
-    generateProtoTasks {
-        all().each { task ->
-            task.builtins {
-                java { outputSubDir = "gen" }
-            }
-        }
-        all()*.plugins {
-            grpc {
-                outputSubDir = "gen"
-            }
-        }
-    }
-}
 
 run {
     if (project.hasProperty('witness')) {
@@ -247,7 +225,7 @@ run {
 }
 
 shadowJar {
-    baseName = 'gsc-core'
+    baseName = 'java-gsc'
     classifier = null
     version = null
 }
@@ -267,9 +245,6 @@ task stest(type: Test) {
 
     useTestNG {
         suites(file('src/test/resources/testng.xml'))
-        parallel 'tests'
-        threadCount 4
-
     }
 
     testLogging {
@@ -286,7 +261,7 @@ task stest(type: Test) {
 
 jacocoTestReport {
     reports {
-        xml.enabled true
+        xml.enabled false
         csv.enabled false
         html.destination file("${buildDir}/jacocoHtml")
     }
@@ -314,8 +289,7 @@ def binaryRelease(taskName, jarName, mainClass) {
 }
 
 artifacts {
-    archives(binaryRelease('buildStartJar', 'Start', 'org.gsc.program.Start'),
-            binaryRelease('buildSolidityNodeJar', 'SolidityNode', 'org.gsc.program.SolidityNode'),
+    archives(binaryRelease('buildSolidityNodeJar', 'SolidityNode', 'org.gsc.program.SolidityNode'),
             binaryRelease('buildFullNodeJar', 'FullNode', 'org.gsc.program.FullNode'),
             binaryRelease('buildKeystoreFactoryJar', 'KeystoreFactory', 'org.gsc.program.KeystoreFactory'))
 }
