@@ -570,7 +570,7 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
     if(blockNum == 0 || pay != getWitnessPayPerBlock()){
       this.put(WITNESS_PAY_PER_BLOCK,
               new BytesWrapper(ByteArray.fromLong(pay)));
-      logger.info("WITNESS_PAY_PER_BLOCK changed to={}",pay);
+      logger.info("WITNESS_PAY_PER_BLOCK changed to={} from blockNum={}",pay,blockNum);
     }
   }
 
