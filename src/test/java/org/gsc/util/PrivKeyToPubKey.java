@@ -67,7 +67,7 @@ public class PrivKeyToPubKey {
         //byte[] Baddress = Wallet.decodeFromBase58Check(Base58Address);
         String Gaddress = Wallet.encode58Check(Hex.decode(g));
 
-        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GQbfRAVNsFC3wVwrUWoRi8WZDubkd6XyhH")));
+        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GSJ6Ci1KiAuUrfYbrAF2KADs5Ry3DPocL4")));
         logger.info("Baddress Key: " + Hex.toHexString(address));
         logger.info("Gaddress Key: " + Gaddress);
     }
@@ -201,6 +201,7 @@ public class PrivKeyToPubKey {
             long count = vote.getVoteCount();
             System.out.println("Witness: " + Hex.toHexString(address.toByteArray()) + " vote count: " + count);
         });
+
     }
 
     @Test
@@ -214,9 +215,16 @@ public class PrivKeyToPubKey {
 
         GrpcAPI.AssetIssueList voteStatistics = blockingStub.getAssetIssueList(GrpcAPI.EmptyMessage.newBuilder().build());
         voteStatistics.getAssetIssueList().forEach(assetIssueContract -> {
-            System.out.println(assetIssueContract.getDescription().toStringUtf8());
+           // System.out.println(assetIssueContract.getDescription().toStringUtf8());
         });
-        System.out.println(voteStatistics.getAssetIssueList().toString());
+        //System.out.println(voteStatistics.getAssetIssueList().toString());
+
+        Protocol.Account account = blockingStub.getAccount(Protocol.Account.newBuilder().setAddress(ByteString.copyFrom("GRwZdfiZDBQZFuuYvjTW7KgcDkfyt9otDL".getBytes())).build());
+        System.out.println(account.toString());
+        voteStatistics.getAssetIssueList().forEach(assetIssueContract -> {
+            //System.out.println(assetIssueContract.getDescription().toStringUtf8());
+        });
+        //System.out.println(voteStatistics.getAssetIssueList().toString());
     }
 
     @Test
@@ -265,7 +273,7 @@ public class PrivKeyToPubKey {
         channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();
         blockingStub = WalletGrpc.newBlockingStub(channel);
 
-        GrpcAPI.AccountNetMessage accountNet = blockingStub.getAccountNet(Protocol.Account.newBuilder().setAddress(ByteString.copyFrom(ownerAddress)).build());
+        GrpcAPI.AccountNetMessage accountNet = blockingStub.getAccountNet(Protocol.Account.newBuilder().setAddress(ByteString.copyFrom("GRwZdfiZDBQZFuuYvjTW7KgcDkfyt9otDL".getBytes())).build());
         System.out.println("Account: \n" + accountNet.toString());
 
     }
@@ -299,13 +307,16 @@ public class PrivKeyToPubKey {
         blockingStub = WalletGrpc.newBlockingStub(channel);
 
         GrpcAPI.WitnessList witnessList = blockingStub.listWitnesses(GrpcAPI.EmptyMessage.newBuilder().build());
-        System.out.println("WitnessList: \n" + witnessList.toString());
+        //System.out.println("WitnessList: \n" + witnessList.toString());
+
+        Protocol.Block block = blockingStub.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
+        System.out.println("WitnessList: \n" + block.toString());
 
     }
 
     @Test
     public void getVotes(){
-        String host = "47.254.71.98";
+        String host = "39.105.18.104";
         int port = 50051;
         WalletGrpcClient walletGrpcClient = new WalletGrpcClient(host, port);
 
@@ -314,6 +325,9 @@ public class PrivKeyToPubKey {
 
         Optional<GrpcAPI.NodeList> nodelist = walletGrpcClient.listNodes();
         System.out.println(JsonFormat.printToString(nodelist.get()));
+
+        Optional<GrpcAPI.VoteStatistics> voteStatistics = walletGrpcClient.getWitnessVoteStatistics();
+        System.out.println(voteStatistics.toString());
     }
 
     @Test
