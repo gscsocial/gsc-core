@@ -45,7 +45,6 @@ public class MessageHandler extends SimpleChannelInboundHandler<UdpEvent>
 
   @Override
   public void channelActive(ChannelHandlerContext ctx) throws Exception {
-    System.out.println("-----------------------------channelActive: " );
     eventHandler.channelActivated();
   }
 
@@ -55,7 +54,6 @@ public class MessageHandler extends SimpleChannelInboundHandler<UdpEvent>
         udpEvent.getMessage().getType(),
         udpEvent.getMessage().getSendData().length,
         udpEvent.getAddress());
-    System.out.println("-----------------------------MessageHandler: " + udpEvent.getAddress().getPort());
     eventHandler.handleEvent(udpEvent);
   }
 

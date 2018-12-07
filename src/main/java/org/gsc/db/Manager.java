@@ -347,6 +347,7 @@ public class Manager {
    */
   public void initGenesis() {
     this.genesisBlock = BlockUtil.newGenesisBlockCapsule();
+    System.out.println("------------id: " + ByteString.copyFrom(this.genesisBlock.getBlockId().getBytes()).toStringUtf8());
     if (this.containBlock(this.genesisBlock.getBlockId())) {
       Args.getInstance().setChainId(this.genesisBlock.getBlockId().toString());
     } else {

@@ -76,8 +76,9 @@ public class VoteWitnessOperator extends AbstractOperator {
     WitnessStore witnessStore = dbManager.getWitnessStore();
 
     if (contract.getVotesCount() == 0) {
-      throw new ContractValidateException(
-          "VoteNumber must more than 0");
+      return true;
+      /*throw new ContractValidateException(
+          "VoteNumber must more than 0");*/
     }
     int maxVoteNumber = ChainConstant.MAX_VOTE_NUMBER;
     if (contract.getVotesCount() > maxVoteNumber) {
