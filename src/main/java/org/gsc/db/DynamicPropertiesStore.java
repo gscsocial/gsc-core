@@ -585,8 +585,6 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
 
   public void saveWitnessStandbyAllowance(long blockNum) {
 //    logger.debug("WITNESS_STANDBY_ALLOWANCE blocknum:" + allowance);
-//    this.put(WITNESS_STANDBY_ALLOWANCE,
-//        new BytesWrapper(ByteArray.fromLong(allowance)));
     long pay = 0L;
     if(blockNum >= 21024000){//witness pay 6% of total during 1st year,4.5% 2nd year,3% 3rd year
       pay = 6849315068L;
