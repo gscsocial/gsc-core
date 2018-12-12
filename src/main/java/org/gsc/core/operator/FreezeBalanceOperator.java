@@ -41,10 +41,8 @@ public class FreezeBalanceOperator extends AbstractOperator {
 
     switch (freezeBalanceContract.getResource()) {
       case BANDWIDTH:
-        long currentFrozenBalance = accountWrapper.getFrozenBalance();
-
         Frozen newFrozen = Frozen.newBuilder()
-            .setFrozenBalance(currentFrozenBalance)
+            .setFrozenBalance(freezeBalanceContract.getFrozenBalance())
             .setExpireTime(0) // set expireTime to 0 as inactive frozen balance
             .build();
         accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()

@@ -18,15 +18,12 @@
 
 package org.gsc.core;
 
+import com.google.common.collect.Maps;
 import com.google.common.primitives.Longs;
 import com.google.protobuf.ByteString;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -460,6 +457,38 @@ public class Wallet {
     byte[] privateKey = pass2Key(passPhrase);
     ECKey ecKey = ECKey.fromPrivate(privateKey);
     return ecKey.getAddress();
+  }
+
+  public GrpcAPI.VoteStatistics getWitnessVoteStatistics(){
+    VotesStore votesStore = dbManager.getVotesStore();
+
+    final Map<ByteString, Long> countWitnessMap = Maps.newHashMap();
+    Iterator<Map.Entry<byte[], VotesWrapper>> dbIterator = votesStore.iterator();
+
+    while (dbIterator.hasNext()){
+      Map.Entry<byte[], VotesWrapper> next = dbIterator.next();
+      VotesWrapper votes = next.getValue();
+
+      votes.getNewVotes().forEach(vote -> {
+        ByteString voteAddress = vote.getVoteAddress();
+        long voteCount = vote.getVoteCount();
+        if (countWitnessMap.containsKey(voteAddress)) {
+          countWitnessMap.put(voteAddress, countWitnessMap.get(voteAddress) + voteCount);
+        } else {
+          countWitnessMap.put(voteAddress, voteCount);
+        }
+        System.out.println("witness: " + countWitnessMap.get(voteAddress) + " votes: " + voteCount);
+      });
+    }
+
+    final GrpcAPI.VoteStatistics.Builder countWitness = GrpcAPI.VoteStatistics.newBuilder();
+    countWitnessMap.forEach((key, value) ->{
+      Protocol.Vote.Builder vote = Protocol.Vote.newBuilder();
+      vote.setVoteAddress(key).setVoteCount(value);
+      countWitness.addVotes(vote.build());
+      System.out.println("--------------------witness: " + key + " votes: " + value);
+    });
+    return countWitness.build();
   }
 
   public Block getNowBlock() {
