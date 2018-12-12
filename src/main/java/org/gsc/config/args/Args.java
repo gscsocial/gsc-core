@@ -477,6 +477,10 @@ public class Args {
       Wallet.setAddressPreFixString(Constant.ADD_PRE_FIX_STRING_TESTNET);
     }
 
+    if (config.hasPath("node.type")) {
+      if(config.getInt("node.type") == 1) INSTANCE.solidityNode = true;
+    }
+
     if (config.hasPath("genesis.block")) {
       INSTANCE.genesisBlock = new GenesisBlock();
 
@@ -652,10 +656,6 @@ public class Args {
     final Account account = new Account();
     account.setAccountName(asset.get("accountName").unwrapped().toString());
     account.setAccountType(asset.get("accountType").unwrapped().toString());
-    System.out.println("--------------------------");
-    System.out.println("-------------------------------" + asset.get("address").toString());
-    System.out.println("-------------------------------" + asset.get("address").unwrapped().toString());
-    System.out.println("-------------------------------" + Wallet.decodeFromBase58Check(asset.get("address").unwrapped().toString()));
     account.setAddress(Wallet.decodeFromBase58Check(asset.get("address").unwrapped().toString()));
     account.setBalance(asset.get("balance").unwrapped().toString());
     return account;

@@ -29,7 +29,7 @@ public interface DiscoverListener {
 
   /**
    * Invoked whenever a new node appeared which meets criteria specified in the {@link
-   * NodeManager#addDiscoverListener} method
+   * NodeManager# addDiscoverListener} method
    */
   void nodeAppeared(NodeHandler handler);
 
@@ -41,6 +41,7 @@ public interface DiscoverListener {
   class Adapter implements DiscoverListener {
 
     public void nodeAppeared(NodeHandler handler) {
+
     }
 
     public void nodeDisappeared(NodeHandler handler) {

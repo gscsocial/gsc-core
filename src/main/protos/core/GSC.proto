@@ -8,7 +8,6 @@ package protocol;
 
 option java_package = "org.gsc.protos"; //Specify the name of the package that generated the Java file
 option java_outer_classname = "Protocol"; //Specify the class name of the generated Java file
-//option go_package = "github.com/gscprotocol/grpc-gateway/core";
 
 enum AccountType {
   Normal = 0;
@@ -68,11 +67,7 @@ message ChainParameters {
 
 /* Account */
 message Account {
-  /* frozen balance */
-  message Frozen {
-    int64 frozen_balance = 1; // the frozen gsc balance
-    int64 expire_time = 2; // the expire time
-  }
+
   bytes account_name = 1;
   AccountType type = 2;
   // the create address
@@ -114,6 +109,12 @@ message Account {
   int64 latest_consume_free_time = 22;
 
   bytes account_id = 23;
+
+/* frozen balance */
+  message Frozen {
+    int64 frozen_balance = 1; // the frozen gsc balance
+    int64 expire_time = 2; // the expire time
+  }
 
   message AccountResource {
     // energy resource, get from frozen

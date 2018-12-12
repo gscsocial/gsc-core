@@ -1,19 +1,19 @@
 package org.gsc.services.http;
 
 import com.alibaba.fastjson.JSONObject;
-import java.io.IOException;
-import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.Wallet;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.db.Manager;
+import org.gsc.protos.Protocol.Account;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.wrapper.AccountWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.gsc.core.Wallet;
-import org.gsc.db.BandwidthProcessor;
-import org.gsc.db.Manager;
-import org.gsc.protos.Protocol.Account;
+import java.io.IOException;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -36,8 +36,8 @@ public class GetAccountServlet extends HttpServlet {
       Account reply = wallet.getAccount(build.build());
       if (reply != null) {
         AccountWrapper accountWrapper = new AccountWrapper(reply);
-        BandwidthProcessor processor = new BandwidthProcessor(dbManager);
-        processor.updateUsage(accountWrapper);
+        /*BandwidthProcessor processor = new BandwidthProcessor(dbManager);
+        processor.updateUsage(accountWrapper);*/
         response.getWriter().println(JsonFormat.printToString(accountWrapper.getInstance()));
       } else {
         response.getWriter().println("{}");
@@ -61,8 +61,8 @@ public class GetAccountServlet extends HttpServlet {
       Account reply = wallet.getAccount(build.build());
       if (reply != null) {
         AccountWrapper accountWrapper = new AccountWrapper(reply);
-        BandwidthProcessor processor = new BandwidthProcessor(dbManager);
-        processor.updateUsage(accountWrapper);
+        /*BandwidthProcessor processor = new BandwidthProcessor(dbManager);
+        processor.updateUsage(accountWrapper);*/
         response.getWriter().println(JsonFormat.printToString(accountWrapper.getInstance()));
       } else {
         response.getWriter().println("{}");

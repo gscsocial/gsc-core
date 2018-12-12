@@ -84,8 +84,9 @@ public class BackupManager implements EventHandler{
     lastKeepAliveTime = System.currentTimeMillis();
 
     executorService.scheduleWithFixedDelay(() -> {
+
       try {
-        if (!status.equals(MASTER) && System.currentTimeMillis() - lastKeepAliveTime > keepAliveTimeout){
+        if ( !status.equals(MASTER) && System.currentTimeMillis() - lastKeepAliveTime > keepAliveTimeout){
           if (status.equals(SLAVER)){
             setStatus(INIT);
             lastKeepAliveTime = System.currentTimeMillis();
@@ -99,7 +100,7 @@ public class BackupManager implements EventHandler{
         members.forEach(member -> messageHandler.accept(new UdpEvent(new KeepAliveMessage(status.equals(MASTER), priority),
             new InetSocketAddress(member, port))));
       } catch (Throwable t) {
-        logger.error("Exception in send keep alive message.", t.getMessage());
+        logger.error("Exception  in send keep alive message.", t.getMessage());
       }
     }, 1, 1, TimeUnit.SECONDS);
   }

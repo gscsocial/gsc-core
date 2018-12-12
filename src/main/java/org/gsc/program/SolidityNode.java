@@ -1,13 +1,6 @@
 package org.gsc.program;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.wrapper.BlockWrapper;
-import org.gsc.core.wrapper.TransactionWrapper;
-import org.springframework.context.ApplicationContext;
-import org.springframework.util.StringUtils;
 import org.gsc.common.application.Application;
 import org.gsc.common.application.ApplicationFactory;
 import org.gsc.common.application.GSCApplicationContext;
@@ -15,34 +8,24 @@ import org.gsc.common.overlay.client.DatabaseGrpcClient;
 import org.gsc.common.overlay.discover.DiscoverServer;
 import org.gsc.common.overlay.discover.node.NodeManager;
 import org.gsc.common.overlay.server.ChannelManager;
-import org.gsc.core.Constant;
-import org.gsc.core.wrapper.TransactionInfoWrapper;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
+import org.gsc.core.Constant;
+import org.gsc.core.exception.*;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.TransactionInfoWrapper;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.db.Manager;
-import org.gsc.core.exception.AccountResourceInsufficientException;
-import org.gsc.core.exception.BadBlockException;
-import org.gsc.core.exception.BadItemException;
-import org.gsc.core.exception.BadNumberBlockException;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
-import org.gsc.core.exception.DupTransactionException;
-import org.gsc.core.exception.NonCommonBlockException;
-import org.gsc.core.exception.ReceiptCheckErrException;
-import org.gsc.core.exception.ReceiptException;
-import org.gsc.core.exception.TaposException;
-import org.gsc.core.exception.TooBigTransactionException;
-import org.gsc.core.exception.TooBigTransactionResultException;
-import org.gsc.core.exception.TransactionExpirationException;
-import org.gsc.core.exception.TransactionTraceException;
-import org.gsc.core.exception.UnLinkedBlockException;
-import org.gsc.core.exception.UnsupportVMException;
-import org.gsc.core.exception.ValidateScheduleException;
-import org.gsc.core.exception.ValidateSignatureException;
-import org.gsc.services.RpcApiService;
-import org.gsc.services.http.solidity.SolidityNodeHttpApiService;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.DynamicProperties;
+import org.gsc.services.RpcApiService;
+import org.gsc.services.http.solidity.SolidityNodeHttpApiService;
+import org.springframework.context.ApplicationContext;
+import org.springframework.util.StringUtils;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class SolidityNode {
@@ -99,6 +82,8 @@ public class SolidityNode {
 //      } catch (Exception e) {
 //
 //      }
+      // sync solidity block, lastSolidityBlockNum:4515, remoteLastSolidityBlockNum:4515
+      // Sync with trust node completed!!!
       long lastSolidityBlockNum = dbManager.getDynamicPropertiesStore()
           .getLatestSolidifiedBlockNum();
       logger.info("sync solidity block, lastSolidityBlockNum:{}, remoteLastSolidityBlockNum:{}",
@@ -178,9 +163,12 @@ public class SolidityNode {
   /**
    * Start the SolidityNode.
    */
-  public static void main(String[] args) throws InterruptedException {
-    logger.info("Solidity node running.");
-    Args.setParam(args, Constant.TESTNET_CONF);
+  public static void main(String[] args) {
+    System.out.println("******************************************************************************");
+    System.out.println("***************************Starting GSC Backup Node***************************");
+    System.out.println("******************************************************************************");
+    logger.info("GSC Backup node running...");
+    Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
     Args cfgArgs = Args.getInstance();
 
     if (StringUtils.isEmpty(cfgArgs.getTrustNodeAddr())) {

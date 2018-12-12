@@ -2,23 +2,19 @@ package org.gsc.core.db2.core;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Streams;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.common.utils.ByteUtil;
 import org.gsc.config.args.Args;
-import org.gsc.db.common.WrappedByteArray;
 import org.gsc.core.db2.common.IRevokingDB;
 import org.gsc.core.db2.common.LevelDB;
 import org.gsc.core.db2.common.Value;
 import org.gsc.core.exception.ItemNotFoundException;
+import org.gsc.db.common.WrappedByteArray;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class RevokingDBWithCachingNewValue implements IRevokingDB {
   @Setter
@@ -134,7 +130,5 @@ public class RevokingDBWithCachingNewValue implements IRevokingDB {
         .map(Map.Entry::getValue)
         .map(WrappedByteArray::getBytes)
         .collect(Collectors.toSet());
-
   }
-
 }

@@ -28,7 +28,8 @@ abstract class ResourceProcessor {
       throws ContractValidateException, AccountResourceInsufficientException, TooBigTransactionResultException;
 
   protected long increase(long lastUsage, long usage, long lastTime, long now) {
-    long averageLastUsage = divideCeil(lastUsage * precision, windowSize);
+
+    long averageLastUsage = divideCeil(lastUsage * precision, windowSize); // divideCeil: (numerator / denominator) + ((numerator % denominator) > 0 ? 1 : 0)
     long averageUsage = divideCeil(usage * precision, windowSize);
 
     if (lastTime != now) {
@@ -37,14 +38,23 @@ abstract class ResourceProcessor {
         long delta = now - lastTime;
         double decay = (windowSize - delta) / (double) windowSize;
         averageLastUsage = Math.round(averageLastUsage * decay);
+
       } else {
         averageLastUsage = 0;
       }
     }
+
     averageLastUsage += averageUsage;
-    return getUsage(averageLastUsage);
+    long getUsage = getUsage(averageLastUsage); // usage * windowSize / precision;
+    return getUsage;
   }
 
+  /**
+   * numerator    带宽换乘GSC的总数
+   * denominator  每天出块总数
+   *
+   * 0,28800
+   */
   private long divideCeil(long numerator, long denominator) {
     return (numerator / denominator) + ((numerator % denominator) > 0 ? 1 : 0);
   }

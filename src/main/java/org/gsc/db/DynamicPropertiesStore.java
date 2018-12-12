@@ -1,20 +1,21 @@
 package org.gsc.db;
 
 import com.google.protobuf.ByteString;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.wrapper.BytesWrapper;
-import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.config.Parameter;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.args.Args;
+import org.gsc.core.wrapper.BytesWrapper;
+import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Component
@@ -293,7 +294,7 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
     try {
       this.getEnergyFee();
     } catch (IllegalArgumentException e) {
-      this.saveEnergyFee(100L);// 100 sun per energy
+      this.saveEnergyFee(100L);// 100 dot per energy
     }
 
     try {
@@ -1079,6 +1080,7 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
    * save timestamp of creating global latest block.
    */
   public void saveLatestBlockHeaderTimestamp(long t) {
+    // update latest block header timestamp = 1540189404000
     logger.info("update latest block header timestamp = {}", t);
     this.put(LATEST_BLOCK_HEADER_TIMESTAMP, new BytesWrapper(ByteArray.fromLong(t)));
   }
@@ -1087,6 +1089,7 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
    * save number of global latest block.
    */
   public void saveLatestBlockHeaderNumber(long n) {
+    // update latest block header number = 279
     logger.info("update latest block header number = {}", n);
     this.put(LATEST_BLOCK_HEADER_NUMBER, new BytesWrapper(ByteArray.fromLong(n)));
   }
@@ -1095,6 +1098,7 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
    * save id of global latest block.
    */
   public void saveLatestBlockHeaderHash(ByteString h) {
+    // 2.update latest block header id = 000000000000011732b59a4c89d1a30edd0f52626b68324c118b745bc544c46e
     logger.info("update latest block header id = {}", ByteArray.toHexString(h.toByteArray()));
     this.put(LATEST_BLOCK_HEADER_HASH, new BytesWrapper(h.toByteArray()));
     if (revokingDB.getUnchecked(LATEST_BLOCK_HEADER_HASH).length == 32) {
@@ -1133,6 +1137,20 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
     long nextMaintenanceTime = currentMaintenanceTime + (round + 1) * maintenanceTimeInterval;
     saveNextMaintenanceTime(nextMaintenanceTime);
 
+    /**
+     *
+     * blockTime: 1540210389000 1540252800000
+     * maintenanceTimeInterval: 43200000
+     * round: 35653
+     * currentMaintenanceTime: 0
+     * nextMaintenanceTime: 1540252800000
+     *
+     */
+    logger.info("blockTime: " + blockTime);
+    logger.info("maintenanceTimeInterval: " + maintenanceTimeInterval);
+    logger.info("round: " + round);
+    logger.info("currentMaintenanceTime: " + currentMaintenanceTime);
+    logger.info("nextMaintenanceTime: " + nextMaintenanceTime);
     logger.info(
         "do update nextMaintenanceTime,currentMaintenanceTime:{}, blockTime:{},nextMaintenanceTime:{}",
         new DateTime(currentMaintenanceTime), new DateTime(blockTime),

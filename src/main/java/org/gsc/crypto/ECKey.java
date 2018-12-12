@@ -69,7 +69,6 @@ import org.spongycastle.math.ec.ECPoint;
 import org.spongycastle.util.BigIntegers;
 import org.spongycastle.util.encoders.Base64;
 import org.spongycastle.util.encoders.Hex;
-import org.gsc.crypto.Hash;
 import org.gsc.crypto.jce.ECKeyAgreement;
 import org.gsc.crypto.jce.ECKeyFactory;
 import org.gsc.crypto.jce.ECKeyPairGenerator;

@@ -22,10 +22,10 @@ public class WitnessUpdateOperator extends AbstractOperator {
   }
 
   private void updateWitness(final WitnessUpdateContract contract) {
-    WitnessWrapper witnessCapsule = this.dbManager.getWitnessStore()
+    WitnessWrapper witnessWrapper = this.dbManager.getWitnessStore()
         .get(contract.getOwnerAddress().toByteArray());
-    witnessCapsule.setUrl(contract.getUpdateUrl().toStringUtf8());
-    this.dbManager.getWitnessStore().put(witnessCapsule.createDbKey(), witnessCapsule);
+    witnessWrapper.setUrl(contract.getUpdateUrl().toStringUtf8());
+    this.dbManager.getWitnessStore().put(witnessWrapper.createDbKey(), witnessWrapper);
   }
 
   @Override

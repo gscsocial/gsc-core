@@ -20,13 +20,13 @@ package org.gsc.common.overlay.server;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
-import io.netty.handler.timeout.ReadTimeoutException;
-import io.netty.handler.timeout.ReadTimeoutHandler;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
+import io.netty.handler.timeout.ReadTimeoutException;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.gsc.net.peer.GSCHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +116,7 @@ public class Channel {
     pipeline.addLast("readTimeoutHandler", new ReadTimeoutHandler(60, TimeUnit.SECONDS));
     pipeline.addLast(stats.tcp);
     pipeline.addLast("protoPender", new ProtobufVarint32LengthFieldPrepender());
-    pipeline.addLast("lengthDecode", new TrxProtobufVarint32FrameDecoder(this));
+    pipeline.addLast("lengthDecode", new GSCProtobufVarint32FrameDecoder(this));
 
     //handshake first
     pipeline.addLast("handshakeHandler", handshakeHandler);

@@ -118,12 +118,12 @@ public class WitnessCreateOperator extends AbstractOperator {
     this.dbManager.getWitnessStore().put(witnessCapsule.createDbKey(), witnessCapsule);
     AccountWrapper accountWrapper = this.dbManager.getAccountStore()
         .get(witnessCapsule.createDbKey());
-    accountWrapper.setIsWitness(true);
+    accountWrapper.setIsWitness(true); //
     this.dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     long cost = dbManager.getDynamicPropertiesStore().getAccountUpgradeCost();
-    dbManager.adjustBalance(witnessCreateContract.getOwnerAddress().toByteArray(), -cost);
+    dbManager.adjustBalance(witnessCreateContract.getOwnerAddress().toByteArray(), - cost);
 
-    dbManager.adjustBalance(this.dbManager.getAccountStore().getBlackhole().createDbKey(), +cost);
+    dbManager.adjustBalance(this.dbManager.getAccountStore().getBlackhole().createDbKey(), + cost);
 
     dbManager.getDynamicPropertiesStore().addTotalCreateWitnessCost(cost);
   }
