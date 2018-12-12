@@ -17,6 +17,12 @@
  */
 package org.gsc.common.overlay.discover.node;
 
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.spongycastle.util.encoders.Hex;
 import org.gsc.common.net.udp.handler.UdpEvent;
 import org.gsc.common.net.udp.message.Message;
 import org.gsc.common.net.udp.message.discover.FindNodeMessage;
@@ -25,13 +31,6 @@ import org.gsc.common.net.udp.message.discover.PingMessage;
 import org.gsc.common.net.udp.message.discover.PongMessage;
 import org.gsc.common.overlay.discover.node.statistics.NodeStatistics;
 import org.gsc.config.args.Args;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongycastle.util.encoders.Hex;
-
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The instance of this class responsible for discovery messages exchange with the specified Node It
@@ -288,7 +287,6 @@ public class NodeHandler {
   }
 
   private void sendMessage(Message msg) {
-    System.out.println("33333333333333333333333333333333333333 udp msf type: " + msg.getType());
     nodeManager.sendOutbound(new UdpEvent(msg, getInetSocketAddress()));
     nodeStatistics.messageStatistics.addUdpOutMessage(msg.getType());
   }

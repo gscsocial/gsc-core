@@ -39,7 +39,7 @@ public class PrivKeyToPubKey {
 
     @Test
     public void privKeyToPubKey() {
-        String privStr = "F603197654386A796418913AB29BAC9198DE871AE04FE47D185F716D2145F9CC";
+        String privStr = "7C2FD037E7E2290EE3151BF5860A5E395E5FBB4D201AC091B999BB1CAA7D6168";
         BigInteger privKey = new BigInteger(privStr, 16);
 
         Wallet.setAddressPreFixByte((byte) 0x26);
@@ -67,7 +67,7 @@ public class PrivKeyToPubKey {
         //byte[] Baddress = Wallet.decodeFromBase58Check(Base58Address);
         String Gaddress = Wallet.encode58Check(Hex.decode(g));
 
-        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GSJ6Ci1KiAuUrfYbrAF2KADs5Ry3DPocL4")));
+        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GfhvkTCVkNPzpq5zZP8cjF4f3HJ1NdEVum")));
         logger.info("Baddress Key: " + Hex.toHexString(address));
         logger.info("Gaddress Key: " + Gaddress);
     }
@@ -201,7 +201,11 @@ public class PrivKeyToPubKey {
             long count = vote.getVoteCount();
             System.out.println("Witness: " + Hex.toHexString(address.toByteArray()) + " vote count: " + count);
         });
+    }
 
+    @Test
+    public void getAllAccount(){
+        String gson = "";
     }
 
     @Test
@@ -215,11 +219,13 @@ public class PrivKeyToPubKey {
 
         GrpcAPI.AssetIssueList voteStatistics = blockingStub.getAssetIssueList(GrpcAPI.EmptyMessage.newBuilder().build());
         voteStatistics.getAssetIssueList().forEach(assetIssueContract -> {
-           // System.out.println(assetIssueContract.getDescription().toStringUtf8());
+           //System.out.println(assetIssueContract.getDescription().toStringUtf8());
         });
         //System.out.println(voteStatistics.getAssetIssueList().toString());
 
-        Protocol.Account account = blockingStub.getAccount(Protocol.Account.newBuilder().setAddress(ByteString.copyFrom("GRwZdfiZDBQZFuuYvjTW7KgcDkfyt9otDL".getBytes())).build());
+        String k = "2667ec8e3af5ea0bbb7cf92826af329cf54b9d7f6b";
+        byte[] address = Wallet.decodeFromBase58Check("GTKRQ4CgeUYHYYAu8Hh1ex9bEBaCvSqf4w");
+        Protocol.Account account = blockingStub.getAccount(Protocol.Account.newBuilder().setAddress(ByteString.copyFrom(address)).build());
         System.out.println(account.toString());
         voteStatistics.getAssetIssueList().forEach(assetIssueContract -> {
             //System.out.println(assetIssueContract.getDescription().toStringUtf8());
@@ -273,7 +279,7 @@ public class PrivKeyToPubKey {
         channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();
         blockingStub = WalletGrpc.newBlockingStub(channel);
 
-        GrpcAPI.AccountNetMessage accountNet = blockingStub.getAccountNet(Protocol.Account.newBuilder().setAddress(ByteString.copyFrom("GRwZdfiZDBQZFuuYvjTW7KgcDkfyt9otDL".getBytes())).build());
+        GrpcAPI.AccountNetMessage accountNet = blockingStub.getAccountNet(Protocol.Account.newBuilder().setAddress(ByteString.copyFrom(ownerAddress)).build());
         System.out.println("Account: \n" + accountNet.toString());
 
     }
@@ -300,7 +306,7 @@ public class PrivKeyToPubKey {
     @Test
     public void getWitness(){
         byte[] ownerAddress = Hex.decode("262daebb11f20b68a2035519a8553b597bb7dbbfa4");
-        String node = "47.254.71.98:50051";
+        String node = "39.105.18.104:50051";
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub blockingStub = null;
         channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();
@@ -310,7 +316,10 @@ public class PrivKeyToPubKey {
         //System.out.println("WitnessList: \n" + witnessList.toString());
 
         Protocol.Block block = blockingStub.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
-        System.out.println("WitnessList: \n" + block.toString());
+        //System.out.println("WitnessList: \n" + block.toString());
+
+        GrpcAPI.VoteStatistics voteStatistics = blockingStub.getWitnessVoteStatistics(GrpcAPI.EmptyMessage.newBuilder().build());
+        System.out.println("WitnessList: \n" + voteStatistics.toString());
 
     }
 
@@ -372,7 +381,8 @@ public class PrivKeyToPubKey {
 
     @Test
     public void ByteToString(){
-        String str = "475162";
+        String str = "76616c6964617465207369676e6174757265206572726f72";
+        System.out.println(ByteString.copyFrom("76616c6964617465207369676e6174757265206572726f72".getBytes()).toStringUtf8());
         logger.info("---------------------------------------------");
         System.out.println();
         System.out.println("Hex String: " + hexStr2Str(str));
@@ -445,29 +455,23 @@ public class PrivKeyToPubKey {
 
     @Test
     public void deployContract(){
-        String originAddress = "262daebb11f20b68a2035519a8553b597bb7dbbfa4";
-        String node = "47.254.71.98:50051";
+        String ownerPriKey = "AF304626A855D730945C1DEAE264DE915BF5556EC555C05F22C021F0D8505297";
+        BigInteger privKey = new BigInteger(ownerPriKey, 16);
+
+        Wallet.setAddressPreFixByte(Byte.decode("0x41"));
+        final ECKey ecKey = ECKey.fromPrivate(privKey);
+        byte[] originAddress = ecKey.getAddress();
+        System.out.println(ByteString.copyFrom(originAddress));
+
+        String node = "https://Grpc.shasta.trongrid.io:50051";
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub walletBlockingStub = null;
         channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();
         walletBlockingStub = WalletGrpc.newBlockingStub(channel);
 
         String contractName = "barContract";
-        String abiStr = "[{\"constant\":false,\"inputs\":[],\"name\":\"getName\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],"
-                + "\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],"
-                + "\"name\":\"getId\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\","
-                + "\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"id\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],"
-                + "\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"getNumber\","
-                + "\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
-        String byteCode = "6080604052600a60005534801561001557600080fd5b506101f9806100256000396000f300608060405260043610610062576000357c01"
-                + "00000000000000000000000000000000000000000000000000000000900463ffffffff16806317d7de7c146100675780635d1ca631146100f757806"
-                + "3af640d0f14610122578063f2c9ecd81461014d575b600080fd5b34801561007357600080fd5b5061007c610178565b6040518080602001828103825"
-                + "283818151815260200191508051906020019080838360005b838110156100bc5780820151818401526020810190506100a1565b505050509050908101"
-                + "90601f1680156100e95780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b34801561010357600080fd"
-                + "5b5061010c6101b5565b6040518082815260200191505060405180910390f35b34801561012e57600080fd5b506101376101be565b60405180828152602"
-                + "00191505060405180910390f35b34801561015957600080fd5b506101626101c4565b6040518082815260200191505060405180910390f35b6060604080"
-                + "5190810160405280600381526020017f6261720000000000000000000000000000000000000000000000000000000000815250905090565b60008054905"
-                + "090565b60005481565b600060649050905600a165627a7a72305820dfe79cf7f4a8a342b754cad8895b13f85de7daa11803925cf392263397653e7f0029";
+        String abiStr = "[{\"constant\":false,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
+        String byteCode = "608060405234801561001057600080fd5b5061013f806100206000396000f300608060405260043610610041576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806306fdde0314610046575b600080fd5b34801561005257600080fd5b5061005b6100d6565b6040518080602001828103825283818151815260200191508051906020019080838360005b8381101561009b578082015181840152602081019050610080565b50505050905090810190601f1680156100c85780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b60606040805190810160405280600481526020017f636f6e74000000000000000000000000000000000000000000000000000000008152509050905600a165627a7a72305820bf7b4863abe17d67507c4fc2f3b723d323a0f048871d56df82b5752715b0c58f0029";
         long callValue = 0;
         long fee = 100000000;
         long consumeUserResourcePercent = 0;
@@ -475,7 +479,7 @@ public class PrivKeyToPubKey {
         Protocol.SmartContract.ABI abi = RPCUtils.jsonStr2ABI(abiStr);
 
         Protocol.SmartContract.Builder smartContract = Protocol.SmartContract.newBuilder();
-        smartContract.setOriginAddress(ByteString.copyFrom(Hex.decode(originAddress)));
+        smartContract.setOriginAddress(ByteString.copyFrom(originAddress));
         // smartContract.setContractAddress();
         smartContract.setName(contractName);
         smartContract.setAbi(abi);
@@ -483,8 +487,45 @@ public class PrivKeyToPubKey {
         smartContract.setBytecode(ByteString.copyFrom(Hex.decode(byteCode)));
         smartContract.setConsumeUserResourcePercent(consumeUserResourcePercent);
         Contract.CreateSmartContract request = Contract.CreateSmartContract.newBuilder()
-                .setNewContract(smartContract).setOwnerAddress(ByteString.copyFrom(Hex.decode(originAddress))).build();
+                .setNewContract(smartContract).setOwnerAddress(ByteString.copyFrom(originAddress)).build();
         GrpcAPI.TransactionExtention response = walletBlockingStub.deployContract(request);
+
+        if (response.getTransaction() != null){
+            System.out.println(Util.printTransaction(response.getTransaction()));
+            System.out.println(response.getResult().getResult());
+        }
+
+        Protocol.Transaction transaction = response.getTransaction();
+
+        Protocol.Transaction.Builder txSigned = transaction.toBuilder();
+        byte[] rawData = transaction.getRawData().toByteArray();
+        byte[] hash = sha256(rawData);
+        List<Protocol.Transaction.Contract> contractList = transaction.getRawData().getContractList();
+        for (int i = 0; i < contractList.size(); i++) {
+            ECKey.ECDSASignature signature = ecKey.sign(hash);
+            ByteString byteString = ByteString.copyFrom(signature.toByteArray());
+            txSigned.addSignature(byteString);
+        }
+
+        Message message = walletBlockingStub.broadcastTransaction(txSigned.build());
+        logger.info(message.toString());
+    }
+
+    @Test
+    public void triggerContract(){
+        String contractAddress = "26fcddc9ac1a86b99411478f23da71976bbdf5d7ac";
+        String ownerAddress = "262daebb11f20b68a2035519a8553b597bb7dbbfa4";
+        String node = "127.0.0.1:50051";
+        ManagedChannel channel = null;
+        WalletGrpc.WalletBlockingStub walletBlockingStub = null;
+        channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();
+        walletBlockingStub = WalletGrpc.newBlockingStub(channel);
+
+        Contract.TriggerSmartContract.Builder triggerSmartContract = Contract.TriggerSmartContract.newBuilder();
+        triggerSmartContract.setContractAddress(ByteString.copyFrom(Hex.decode(contractAddress)));
+        triggerSmartContract.setOwnerAddress(ByteString.copyFrom(Hex.decode(ownerAddress)));
+        triggerSmartContract.setCallValue(1);
+        GrpcAPI.TransactionExtention response = walletBlockingStub.triggerContract(triggerSmartContract.build());
         if (response.getTransaction() != null){
             System.out.println(Util.printTransaction(response.getTransaction()));
             System.out.println(response.getResult().getResult());

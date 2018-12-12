@@ -481,5 +481,4 @@ message SmartContract {
   int64 call_value = 5;
   int64 consume_user_resource_percent = 6;
   string name = 7;
-
 }

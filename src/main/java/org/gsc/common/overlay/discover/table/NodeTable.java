@@ -147,7 +147,6 @@ public class NodeTable {
     if (closestEntries.size() > KademliaOptions.BUCKET_SIZE) {
       closestEntries = closestEntries.subList(0, KademliaOptions.BUCKET_SIZE);
     }
-
     for (NodeEntry e : closestEntries) {
       if (!e.getNode().isDiscoveryNode()) {
         closestNodes.add(e.getNode());

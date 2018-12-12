@@ -17,12 +17,11 @@
  */
 package org.gsc.common.overlay.discover;
 
-import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.overlay.discover.table.KademliaOptions;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.gsc.common.overlay.discover.node.NodeManager;
+import org.gsc.common.overlay.discover.table.KademliaOptions;
 
 public class DiscoveryExecutor {
 
@@ -38,11 +37,11 @@ public class DiscoveryExecutor {
   public void start() {
     discoverer.scheduleWithFixedDelay(
         new DiscoverTask(nodeManager),
-        1, KademliaOptions.DISCOVER_CYCLE, TimeUnit.SECONDS); // DISCOVER_CYCLE 30s
+        1, KademliaOptions.DISCOVER_CYCLE, TimeUnit.SECONDS);
 
     refresher.scheduleWithFixedDelay(
         new RefreshTask(nodeManager),
-        1, KademliaOptions.BUCKET_REFRESH, TimeUnit.MILLISECONDS); // BUCKET_REFRESH 7.2s
+        1, KademliaOptions.BUCKET_REFRESH, TimeUnit.MILLISECONDS);
   }
 
   public void close() {

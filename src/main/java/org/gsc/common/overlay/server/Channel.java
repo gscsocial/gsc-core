@@ -20,19 +20,8 @@ package org.gsc.common.overlay.server;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.util.concurrent.TimeUnit;
-
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import org.gsc.net.peer.GSCHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.overlay.discover.node.NodeManager;
 import org.gsc.common.overlay.discover.node.statistics.NodeStatistics;
@@ -40,10 +29,21 @@ import org.gsc.common.overlay.message.DisconnectMessage;
 import org.gsc.common.overlay.message.HelloMessage;
 import org.gsc.common.overlay.message.MessageCodec;
 import org.gsc.common.overlay.message.StaticMessages;
-import org.gsc.db.ByteArrayWrapper;
 import org.gsc.core.exception.P2pException;
+import org.gsc.db.ByteArrayWrapper;
+import org.gsc.net.peer.GSCHandler;
 import org.gsc.net.peer.PeerConnectionDelegate;
 import org.gsc.protos.Protocol.ReasonCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Scope("prototype")

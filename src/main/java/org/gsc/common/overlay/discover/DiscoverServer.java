@@ -86,7 +86,8 @@ public class DiscoverServer {
             .channel(NioDatagramChannel.class)
             .handler(new ChannelInitializer<NioDatagramChannel>() {
               @Override
-              public void initChannel(NioDatagramChannel ch) {
+              public void initChannel(NioDatagramChannel ch)
+                  throws Exception {
                 ch.pipeline().addLast(stats.udp);
                 ch.pipeline().addLast(new ProtobufVarint32LengthFieldPrepender());
                 ch.pipeline().addLast(new ProtobufVarint32FrameDecoder());
