@@ -1269,6 +1269,7 @@ public class Manager {
     //witnessController.updateWitnessSchedule();
     updateRecentBlock(block);
     this.dynamicPropertiesStore.saveWitnessPayPerBlockByBlockNum(block.getNum()); //update award per block
+    this.dynamicPropertiesStore.saveWitnessStandbyAllowance(block.getNum());
   }
 
   private void updateTransHashCache(BlockWrapper block) {

@@ -1,5 +1,5 @@
 /*
- * java-gsc is free software: you can redistribute it and/or modify
+ * gsc-core is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -132,6 +132,15 @@ public class AssetIssueOperator extends AbstractOperator {
     byte[] ownerAddress = assetIssueContract.getOwnerAddress().toByteArray();
     if (!Wallet.addressValid(ownerAddress)) {
       throw new ContractValidateException("Invalid ownerAddress");
+    }
+    // todo add to AssetName repeat
+    // when create assetIssue, this code will be called.
+    // If in the 3 second block period, should have the same name of assetIssue in different transaction.
+    // when transactions be packaged in the block, this code will be also called.
+    byte[] name = new String(assetIssueContract.getName().toByteArray(),
+            Charset.forName("UTF-8")).toLowerCase().getBytes();
+    if (this.dbManager.getAssetIssueStore().get(name) != null) {
+      throw new ContractValidateException("AssetName repeat!");
     }
     if (!TransactionUtil.validAssetName(assetIssueContract.getName().toByteArray())) {
       throw new ContractValidateException("Invalid assetName");

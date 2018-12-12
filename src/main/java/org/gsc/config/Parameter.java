@@ -5,7 +5,7 @@ public interface Parameter {
   interface ChainConstant {
 
     long TRANSFER_FEE = 0; // free
-    int WITNESS_STANDBY_LENGTH = 127;
+    int WITNESS_STANDBY_LENGTH = 123;
     int SOLIDIFIED_THRESHOLD = 70; // 70%
     int PRIVATE_KEY_LENGTH = 64;
     int MAX_ACTIVE_WITNESS_NUM = 23;

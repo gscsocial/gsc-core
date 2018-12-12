@@ -220,7 +220,8 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
     try {
       this.getWitnessStandbyAllowance();
     } catch (IllegalArgumentException e) {
-      this.saveWitnessStandbyAllowance(115_200_000_000L);
+      //this.saveWitnessStandbyAllowance(115_200_000_000L);
+      this.saveWitnessStandbyAllowance(0L);
     }
 
     try {
@@ -582,10 +583,23 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
             () -> new IllegalArgumentException("not found WITNESS_PAY_PER_BLOCK"));
   }
 
-  public void saveWitnessStandbyAllowance(long allowance) {
-    logger.debug("WITNESS_STANDBY_ALLOWANCE:" + allowance);
-    this.put(WITNESS_STANDBY_ALLOWANCE,
-        new BytesWrapper(ByteArray.fromLong(allowance)));
+  public void saveWitnessStandbyAllowance(long blockNum) {
+//    logger.debug("WITNESS_STANDBY_ALLOWANCE blocknum:" + allowance);
+//    this.put(WITNESS_STANDBY_ALLOWANCE,
+//        new BytesWrapper(ByteArray.fromLong(allowance)));
+    long pay = 0L;
+    if(blockNum >= 21024000){//witness pay 6% of total during 1st year,4.5% 2nd year,3% 3rd year
+      pay = 6849315068L;
+    }else if(blockNum >= 10512000){
+      pay = 10273972602L;
+    }else{
+      pay = 13698630136L;
+    }
+    if(blockNum == 0 || pay != getWitnessStandbyAllowance()){
+      this.put(WITNESS_STANDBY_ALLOWANCE,
+              new BytesWrapper(ByteArray.fromLong(pay)));
+      logger.info("WITNESS_STANDBY_ALLOWANCE changed to={} from blockNum={}",pay,blockNum);
+    }
   }
 
   public long getWitnessStandbyAllowance() {

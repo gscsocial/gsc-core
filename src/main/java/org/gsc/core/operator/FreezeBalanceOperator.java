@@ -37,35 +37,21 @@ public class FreezeBalanceOperator extends AbstractOperator {
     AccountWrapper accountWrapper = dbManager.getAccountStore()
         .get(freezeBalanceContract.getOwnerAddress().toByteArray());
 
-    //long now = dbManager.getHeadBlockTimeStamp();
-    //long duration = freezeBalanceContract.getFrozenDuration() * 86_400_000;
-
     long newBalance = accountWrapper.getBalance() - freezeBalanceContract.getFrozenBalance();
 
     switch (freezeBalanceContract.getResource()) {
       case BANDWIDTH:
         long currentFrozenBalance = accountWrapper.getFrozenBalance();
-        long newFrozenBalance = freezeBalanceContract.getFrozenBalance() + currentFrozenBalance;
 
         Frozen newFrozen = Frozen.newBuilder()
-            .setFrozenBalance(newFrozenBalance)
-            //.setExpireTime(now + duration)
+            .setFrozenBalance(currentFrozenBalance)
             .setExpireTime(0) // set expireTime to 0 as inactive frozen balance
             .build();
+        accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
+                .addFrozen(newFrozen)
+                .setBalance(newBalance)
+                .build());
 
-        long frozenCount = accountWrapper.getFrozenCount();
-        if (frozenCount == 0) {
-          accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-              .addFrozen(newFrozen)
-              .setBalance(newBalance)
-              .build());
-        } else {
-          accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
-              .setFrozen(0, newFrozen)
-              .setBalance(newBalance)
-              .build()
-          );
-        }
         dbManager.getDynamicPropertiesStore()
             .addTotalNetWeight(freezeBalanceContract.getFrozenBalance() / 1000_000L);
         break;
