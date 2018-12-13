@@ -3,20 +3,17 @@ package org.gsc.common.overlay.client;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import org.gsc.api.GrpcAPI.AssetIssueList;
-import org.gsc.api.GrpcAPI.BytesMessage;
-import org.gsc.api.GrpcAPI.EmptyMessage;
-import org.gsc.api.GrpcAPI.NodeList;
-import org.gsc.api.GrpcAPI.NumberMessage;
-import org.gsc.api.GrpcAPI.Return;
+import org.gsc.api.GrpcAPI;
+import org.gsc.api.GrpcAPI.*;
 import org.gsc.api.WalletGrpc;
 import org.gsc.protos.Contract;
 import org.gsc.protos.Contract.AssetIssueContract;
 import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.Transaction;
+
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public class WalletGrpcClient {
 
@@ -25,15 +22,15 @@ public class WalletGrpcClient {
 
   public WalletGrpcClient(String host, int port) {
     channel = ManagedChannelBuilder.forAddress(host, port)
-        .usePlaintext(true)
-        .build();
+            .usePlaintext(true)
+            .build();
     walletBlockingStub = WalletGrpc.newBlockingStub(channel);
   }
 
   public WalletGrpcClient(String host) {
     channel = ManagedChannelBuilder.forTarget(host)
-        .usePlaintext(true)
-        .build();
+            .usePlaintext(true)
+            .build();
     walletBlockingStub = WalletGrpc.newBlockingStub(channel);
   }
 
@@ -56,7 +53,7 @@ public class WalletGrpcClient {
   }
 
   public Transaction createParticipateAssetIssueTransaction(
-      Contract.ParticipateAssetIssueContract contract) {
+          Contract.ParticipateAssetIssueContract contract) {
     return walletBlockingStub.participateAssetIssue(contract);
   }
 
@@ -88,9 +85,18 @@ public class WalletGrpcClient {
 
   public Optional<NodeList> listNodes() {
     NodeList nodeList = walletBlockingStub
-        .listNodes(EmptyMessage.newBuilder().build());
+            .listNodes(EmptyMessage.newBuilder().build());
     if (nodeList != null) {
       return Optional.of(nodeList);
+    }
+    return Optional.empty();
+  }
+
+  public Optional<GrpcAPI.VoteStatistics> getWitnessVoteStatistics(){
+    GrpcAPI.VoteStatistics voteStatistics = walletBlockingStub.getWitnessVoteStatistics(EmptyMessage.newBuilder().build());
+
+    if (voteStatistics != null){
+      return Optional.of(voteStatistics);
     }
     return Optional.empty();
   }
@@ -99,7 +105,7 @@ public class WalletGrpcClient {
     ByteString addressBS = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBS).build();
     AssetIssueList assetIssueList = walletBlockingStub
-        .getAssetIssueByAccount(request);
+            .getAssetIssueByAccount(request);
     if (assetIssueList != null) {
       return Optional.of(assetIssueList);
     }
