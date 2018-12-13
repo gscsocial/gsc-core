@@ -39,7 +39,7 @@ public class PrivKeyToPubKey {
 
     @Test
     public void privKeyToPubKey() {
-        String privStr = "7C2FD037E7E2290EE3151BF5860A5E395E5FBB4D201AC091B999BB1CAA7D6168";
+        String privStr = "da146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d1";
         BigInteger privKey = new BigInteger(privStr, 16);
 
         Wallet.setAddressPreFixByte((byte) 0x26);
@@ -325,7 +325,7 @@ public class PrivKeyToPubKey {
 
     @Test
     public void getVotes(){
-        String host = "39.105.18.104";
+        String host = "54.236.37.243";
         int port = 50051;
         WalletGrpcClient walletGrpcClient = new WalletGrpcClient(host, port);
 
@@ -335,8 +335,8 @@ public class PrivKeyToPubKey {
         Optional<GrpcAPI.NodeList> nodelist = walletGrpcClient.listNodes();
         System.out.println(JsonFormat.printToString(nodelist.get()));
 
-        Optional<GrpcAPI.VoteStatistics> voteStatistics = walletGrpcClient.getWitnessVoteStatistics();
-        System.out.println(voteStatistics.toString());
+        //Optional<GrpcAPI.VoteStatistics> voteStatistics = walletGrpcClient.getWitnessVoteStatistics();
+        //System.out.println(voteStatistics.toString());
     }
 
     @Test
@@ -381,7 +381,7 @@ public class PrivKeyToPubKey {
 
     @Test
     public void ByteToString(){
-        String str = "76616c6964617465207369676e6174757265206572726f72";
+        String str = "3137332e31342e38342e313133";
         System.out.println(ByteString.copyFrom("76616c6964617465207369676e6174757265206572726f72".getBytes()).toStringUtf8());
         logger.info("---------------------------------------------");
         System.out.println();
