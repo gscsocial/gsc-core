@@ -1,0 +1,3 @@
+[submodule "src/main/protocol"]
+	path = src/main/protocol
+	url = https://github.com/gscsocial/protocol.git

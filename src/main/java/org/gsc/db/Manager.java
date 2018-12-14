@@ -1,91 +1,48 @@
 package org.gsc.db;
 
-import static org.gsc.config.Parameter.ChainConstant.SOLIDIFIED_THRESHOLD;
-import static org.gsc.config.Parameter.NodeConstant.MAX_TRANSACTION_PENDING;
-import static org.gsc.protos.Protocol.Transaction.Contract.ContractType.TransferAssetContract;
-import static org.gsc.protos.Protocol.Transaction.Contract.ContractType.TransferContract;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.protobuf.ByteString;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import javafx.util.Pair;
-import javax.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.gsc.common.overlay.discover.node.Node;
+import org.gsc.common.storage.DepositImpl;
+import org.gsc.common.utils.*;
+import org.gsc.config.Parameter.ChainConstant;
+import org.gsc.config.args.Args;
+import org.gsc.config.args.GenesisBlock;
+import org.gsc.core.Constant;
+import org.gsc.core.db2.core.IGSCChainBase;
+import org.gsc.core.db2.core.ISession;
+import org.gsc.core.exception.*;
+import org.gsc.core.witness.ProposalController;
+import org.gsc.core.witness.WitnessController;
 import org.gsc.core.wrapper.*;
+import org.gsc.core.wrapper.BlockWrapper.BlockId;
+import org.gsc.core.wrapper.utils.BlockUtil;
+import org.gsc.db.KhaosDatabase.KhaosBlock;
+import org.gsc.protos.Protocol.AccountType;
+import org.gsc.protos.Protocol.Transaction;
+import org.gsc.runtime.Runtime;
+import org.gsc.runtime.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.joda.time.DateTime;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.runtime.Runtime;
-import org.gsc.runtime.vm.program.invoke.ProgramInvokeFactoryImpl;
-import org.gsc.common.storage.DepositImpl;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.ForkController;
-import org.gsc.common.utils.SessionOptional;
-import org.gsc.common.utils.Sha256Hash;
-import org.gsc.common.utils.StringUtil;
-import org.gsc.common.utils.Time;
-import org.gsc.core.Constant;
-import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.core.wrapper.BlockWrapper.BlockId;
-import org.gsc.core.wrapper.utils.BlockUtil;
-import org.gsc.config.Parameter.ChainConstant;
-import org.gsc.config.args.Args;
-import org.gsc.config.args.GenesisBlock;
-import org.gsc.db.KhaosDatabase.KhaosBlock;
-import org.gsc.core.db2.core.ISession;
-import org.gsc.core.db2.core.IGSCChainBase;
-import org.gsc.core.exception.AccountResourceInsufficientException;
-import org.gsc.core.exception.BadBlockException;
-import org.gsc.core.exception.BadItemException;
-import org.gsc.core.exception.BadNumberBlockException;
-import org.gsc.core.exception.BalanceInsufficientException;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractSizeNotEqualToOneException;
-import org.gsc.core.exception.ContractValidateException;
-import org.gsc.core.exception.DupTransactionException;
-import org.gsc.core.exception.HeaderNotFound;
-import org.gsc.core.exception.HighFreqException;
-import org.gsc.core.exception.ItemNotFoundException;
-import org.gsc.core.exception.NonCommonBlockException;
-import org.gsc.core.exception.ReceiptCheckErrException;
-import org.gsc.core.exception.ReceiptException;
-import org.gsc.core.exception.TaposException;
-import org.gsc.core.exception.TooBigTransactionException;
-import org.gsc.core.exception.TooBigTransactionResultException;
-import org.gsc.core.exception.TransactionExpirationException;
-import org.gsc.core.exception.TransactionTraceException;
-import org.gsc.core.exception.UnLinkedBlockException;
-import org.gsc.core.exception.UnsupportVMException;
-import org.gsc.core.exception.ValidateScheduleException;
-import org.gsc.core.exception.ValidateSignatureException;
-import org.gsc.core.witness.ProposalController;
-import org.gsc.core.witness.WitnessController;
-import org.gsc.protos.Protocol.AccountType;
-import org.gsc.protos.Protocol.Transaction;
+
+import javax.annotation.PostConstruct;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
+
+import static org.gsc.config.Parameter.ChainConstant.SOLIDIFIED_THRESHOLD;
+import static org.gsc.config.Parameter.NodeConstant.MAX_TRANSACTION_PENDING;
+import static org.gsc.protos.Protocol.Transaction.Contract.ContractType.TransferAssetContract;
+import static org.gsc.protos.Protocol.Transaction.Contract.ContractType.TransferContract;
 
 
 @Slf4j
@@ -390,6 +347,7 @@ public class Manager {
    */
   public void initGenesis() {
     this.genesisBlock = BlockUtil.newGenesisBlockCapsule();
+    System.out.println("------------id: " + ByteString.copyFrom(this.genesisBlock.getBlockId().getBytes()).toStringUtf8());
     if (this.containBlock(this.genesisBlock.getBlockId())) {
       Args.getInstance().setChainId(this.genesisBlock.getBlockId().toString());
     } else {
@@ -408,10 +366,13 @@ public class Manager {
         logger.info("save block: " + this.genesisBlock);
         // init DynamicPropertiesStore
         this.dynamicPropertiesStore.saveLatestBlockHeaderNumber(0);
+
         this.dynamicPropertiesStore.saveLatestBlockHeaderHash(
             this.genesisBlock.getBlockId().getByteString());
+
         this.dynamicPropertiesStore.saveLatestBlockHeaderTimestamp(
             this.genesisBlock.getTimeStamp());
+
         this.initAccount();
         this.initWitness();
         this.witnessController.initWits();
@@ -879,7 +840,8 @@ public class Manager {
           throw throwable;
         }
       }
-      logger.info("save block: " + newBlock);
+      // save block: BlockWrapper
+      logger.info("-------save block:------- \n" + newBlock + "\n-------");
     }
   }
 
@@ -906,6 +868,7 @@ public class Manager {
       logger.warn("missedBlocks [" + slot + "] is illegal");
     }
 
+    // update head, num = 4
     logger.info("update head, num = {}", block.getNum());
     this.dynamicPropertiesStore.saveLatestBlockHeaderHash(block.getBlockId().getByteString());
 
@@ -997,7 +960,7 @@ public class Manager {
   }
 
   /**
-   * Process transaction.
+   * Process the transaction.
    */
   public boolean processTransaction(final TransactionWrapper trxCap, BlockWrapper blockCap)
       throws ValidateSignatureException, ContractValidateException, ContractExeException, ReceiptException,
@@ -1024,33 +987,15 @@ public class Manager {
 
     TransactionTrace trace = new TransactionTrace(trxCap, this);
 
-// TODO vm switch
-//    if (!this.dynamicPropertiesStore.supportVM() && trace.needVM()) {
-//      throw new UnsupportVMException("this node doesn't support vm, trx id: " + trxCap.getTransactionId().toString());
-//    }
-
     DepositImpl deposit = DepositImpl.createRoot(this);
     Runtime runtime = new Runtime(trace, blockCap, deposit, new ProgramInvokeFactoryImpl());
     if (runtime.isCallConstant()) {
-      // Fixme Wrong exception
       throw new UnsupportVMException("cannot call constant method ");
     }
-    // if (getDynamicPropertiesStore().supportVM()) {
-    //   if(trxCap.getInstance().getRetCount()<=0){
-    //     trxCap.setResult(new TransactionResultWrapper(contractResult.UNKNOWN));
-    //   }
-    // }
 
     consumeBandwidth(trxCap, runtime.getResult().getRet(), trace);
 
     trace.init();
-
-    // if (blockCap != null && blockCap.generatedByMyself &&
-    //     !blockCap.getInstance().getBlockHeader().getWitnessSignature().isEmpty() &&
-    //     trxCap.getInstance().getRet(0).getContractRet() != contractResult.SUCCESS) {
-    // setBill(energyUsage);
-    // } else {
-    // }
 
     trace.exec(runtime);
 
@@ -1271,27 +1216,33 @@ public class Manager {
       processTransaction(transactionCapsule, block);
     }
 
+    // update witness dynamicPropertiesStore.getNextMaintenanceTime() <= blockTime;
     boolean needMaint = needMaintenance(block.getTimeStamp());
     if (needMaint) {
       if (block.getNum() == 1) {
+
         this.dynamicPropertiesStore.updateNextMaintenanceTime(block.getTimeStamp());
       } else {
         this.processMaintenance(block);
       }
     }
+
     this.updateDynamicProperties(block);
-    this.updateSignedWitness(block);
+
+    this.updateSignedWitness(block); // allowance changed 出块奖励
     this.updateLatestSolidifiedBlock();
     this.updateTransHashCache(block);
     updateMaintenanceState(needMaint);
     //witnessController.updateWitnessSchedule();
-    updateRecentBlock(block);
 
+    updateRecentBlock(block);
+    this.dynamicPropertiesStore.saveWitnessPayPerBlockByBlockNum(block.getNum()); //update award per block
+    this.dynamicPropertiesStore.saveWitnessStandbyAllowance(block.getNum());
   }
 
   private void updateTransHashCache(BlockWrapper block) {
-    for (TransactionWrapper transactionCapsule : block.getTransactions()) {
-      this.transactionIdCache.put(transactionCapsule.getTransactionId(), true);
+    for (TransactionWrapper transactionWrapper : block.getTransactions()) {
+      this.transactionIdCache.put(transactionWrapper.getTransactionId(), true);
     }
   }
 
@@ -1315,6 +1266,9 @@ public class Manager {
 
     long size = witnessController.getActiveWitnesses().size();
     int solidifiedPosition = (int) (size * (1 - SOLIDIFIED_THRESHOLD * 1.0 / 100));
+
+
+    while (numbers.get(solidifiedPosition) == 0) solidifiedPosition++; //fix fake witness problem
     if (solidifiedPosition < 0) {
       logger.warn(
           "updateLatestSolidifiedBlock error, solidifiedPosition:{},wits.size:{}",
@@ -1322,7 +1276,6 @@ public class Manager {
           size);
       return;
     }
-    while (numbers.get(solidifiedPosition) == 0) solidifiedPosition++;
     long latestSolidifiedBlockNum = numbers.get(solidifiedPosition);
     //if current value is less than the previous value，keep the previous value.
     if (latestSolidifiedBlockNum < getDynamicPropertiesStore().getLatestSolidifiedBlockNum()) {
@@ -1330,6 +1283,7 @@ public class Manager {
       return;
     }
     getDynamicPropertiesStore().saveLatestSolidifiedBlockNum(latestSolidifiedBlockNum);
+    // update solid block, num = 279
     logger.info("update solid block, num = {}", latestSolidifiedBlockNum);
   }
 
@@ -1388,25 +1342,25 @@ public class Manager {
    */
   public void updateSignedWitness(BlockWrapper block) {
     // TODO: add verification
-    WitnessWrapper witnessCapsule =
+    WitnessWrapper witnessWrapper =
         witnessStore.getUnchecked(
             block.getInstance().getBlockHeader().getRawData().getWitnessAddress().toByteArray());
-    witnessCapsule.setTotalProduced(witnessCapsule.getTotalProduced() + 1);
-    witnessCapsule.setLatestBlockNum(block.getNum());
-    witnessCapsule.setLatestSlotNum(witnessController.getAbSlotAtTime(block.getTimeStamp()));
+    witnessWrapper.setTotalProduced(witnessWrapper.getTotalProduced() + 1);
+    witnessWrapper.setLatestBlockNum(block.getNum());
+    witnessWrapper.setLatestSlotNum(witnessController.getAbSlotAtTime(block.getTimeStamp()));
 
     // Update memory witness status
     WitnessWrapper wit = witnessController.getWitnesseByAddress(block.getWitnessAddress());
     if (wit != null) {
-      wit.setTotalProduced(witnessCapsule.getTotalProduced() + 1);
+      wit.setTotalProduced(witnessWrapper.getTotalProduced() + 1);
       wit.setLatestBlockNum(block.getNum());
       wit.setLatestSlotNum(witnessController.getAbSlotAtTime(block.getTimeStamp()));
     }
 
-    this.getWitnessStore().put(witnessCapsule.getAddress().toByteArray(), witnessCapsule);
+    this.getWitnessStore().put(witnessWrapper.getAddress().toByteArray(), witnessWrapper);
 
     try {
-      adjustAllowance(witnessCapsule.getAddress().toByteArray(),
+      adjustAllowance(witnessWrapper.getAddress().toByteArray(),
           getDynamicPropertiesStore().getWitnessPayPerBlock());
     } catch (BalanceInsufficientException e) {
       logger.warn(e.getMessage(), e);
@@ -1414,9 +1368,9 @@ public class Manager {
 
     logger.debug(
         "updateSignedWitness. witness address:{}, blockNum:{}, totalProduced:{}",
-        witnessCapsule.createReadableString(),
+            witnessWrapper.createReadableString(),
         block.getNum(),
-        witnessCapsule.getTotalProduced());
+            witnessWrapper.getTotalProduced());
   }
 
   public void updateMaintenanceState(boolean needMaint) {

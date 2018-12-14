@@ -23,10 +23,10 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import org.slf4j.LoggerFactory;
+
 import java.net.InetSocketAddress;
 import java.util.function.Consumer;
-import org.slf4j.LoggerFactory;
-import org.gsc.common.overlay.discover.node.NodeManager;
 
 
 public class MessageHandler extends SimpleChannelInboundHandler<UdpEvent>
@@ -63,6 +63,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<UdpEvent>
         udpEvent.getMessage().getType(),
         udpEvent.getMessage().getSendData().length,
         udpEvent.getAddress());
+    System.out.println("accept");
     InetSocketAddress address = udpEvent.getAddress();
     sendPacket(udpEvent.getMessage().getSendData(), address);
   }

@@ -1,28 +1,26 @@
 package org.gsc.common.overlay.server;
 
-import static org.gsc.protos.Protocol.ReasonCode.DUPLICATE_PEER;
-import static org.gsc.protos.Protocol.ReasonCode.TOO_MANY_PEERS;
-import static org.gsc.protos.Protocol.ReasonCode.TOO_MANY_PEERS_WITH_SAME_IP;
-import static org.gsc.protos.Protocol.ReasonCode.UNKNOWN;
-
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import lombok.Getter;
+import org.gsc.common.overlay.client.PeerClient;
+import org.gsc.common.overlay.discover.node.Node;
+import org.gsc.config.args.Args;
+import org.gsc.db.ByteArrayWrapper;
+import org.gsc.protos.Protocol.ReasonCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import lombok.Getter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.gsc.common.overlay.client.PeerClient;
-import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.config.args.Args;
-import org.gsc.db.ByteArrayWrapper;
-import org.gsc.protos.Protocol.ReasonCode;
+
+import static org.gsc.protos.Protocol.ReasonCode.*;
 
 
 @Component
@@ -89,6 +87,7 @@ public class ChannelManager {
 
   public void notifyDisconnect(Channel channel) {
     syncPool.onDisconnect(channel);
+    activePeers.values().forEach(peer -> System.out.println("Disconnect: " + peer.getNode().getPort()));
     activePeers.values().remove(channel);
     if (channel != null) {
       if (channel.getNodeStatistics() != null) {

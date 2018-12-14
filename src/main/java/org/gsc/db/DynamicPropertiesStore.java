@@ -1,20 +1,21 @@
 package org.gsc.db;
 
 import com.google.protobuf.ByteString;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.IntStream;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.wrapper.BytesWrapper;
-import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.config.Parameter;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.args.Args;
+import org.gsc.core.wrapper.BytesWrapper;
+import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Component
@@ -213,13 +214,15 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
     try {
       this.getWitnessPayPerBlock();
     } catch (IllegalArgumentException e) {
-      this.saveWitnessPayPerBlock(32000000L);
+      //this.saveWitnessPayPerBlockByBlockNum(32000000L);
+      this.saveWitnessPayPerBlockByBlockNum(0L);
     }
 
     try {
       this.getWitnessStandbyAllowance();
     } catch (IllegalArgumentException e) {
-      this.saveWitnessStandbyAllowance(115_200_000_000L);
+      //this.saveWitnessStandbyAllowance(115_200_000_000L);
+      this.saveWitnessStandbyAllowance(0L);
     }
 
     try {
@@ -291,7 +294,7 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
     try {
       this.getEnergyFee();
     } catch (IllegalArgumentException e) {
-      this.saveEnergyFee(100L);// 100 sun per energy
+      this.saveEnergyFee(100L);// 100 dot per energy
     }
 
     try {
@@ -556,10 +559,21 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
             () -> new IllegalArgumentException("not found ACCOUNT_UPGRADE_COST"));
   }
 
-  public void saveWitnessPayPerBlock(long pay) {
-    logger.debug("WITNESS_PAY_PER_BLOCK:" + pay);
-    this.put(WITNESS_PAY_PER_BLOCK,
-        new BytesWrapper(ByteArray.fromLong(pay)));
+  public void saveWitnessPayPerBlockByBlockNum(long blockNum) {
+    logger.debug("WITNESS_PAY_PER_BLOCK BLOCK_NUM:" + blockNum);
+    long pay = 0L;
+    if(blockNum >= 21024000){//witness pay 6% of total during 1st year,4.5% 2nd year,3% 3rd year
+        pay = 3805175;
+    }else if(blockNum >= 10512000){
+        pay = 2853881;
+    }else{
+        pay = 1902587;
+    }
+    if(blockNum == 0 || pay != getWitnessPayPerBlock()){
+      this.put(WITNESS_PAY_PER_BLOCK,
+              new BytesWrapper(ByteArray.fromLong(pay)));
+      logger.info("WITNESS_PAY_PER_BLOCK changed to={} from blockNum={}",pay,blockNum);
+    }
   }
 
   public long getWitnessPayPerBlock() {
@@ -570,10 +584,21 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
             () -> new IllegalArgumentException("not found WITNESS_PAY_PER_BLOCK"));
   }
 
-  public void saveWitnessStandbyAllowance(long allowance) {
-    logger.debug("WITNESS_STANDBY_ALLOWANCE:" + allowance);
-    this.put(WITNESS_STANDBY_ALLOWANCE,
-        new BytesWrapper(ByteArray.fromLong(allowance)));
+  public void saveWitnessStandbyAllowance(long blockNum) {
+//    logger.debug("WITNESS_STANDBY_ALLOWANCE blocknum:" + allowance);
+    long pay = 0L;
+    if(blockNum >= 21024000){//witness pay 6% of total during 1st year,4.5% 2nd year,3% 3rd year
+      pay = 6849315068L;
+    }else if(blockNum >= 10512000){
+      pay = 10273972602L;
+    }else{
+      pay = 13698630136L;
+    }
+    if(blockNum == 0 || pay != getWitnessStandbyAllowance()){
+      this.put(WITNESS_STANDBY_ALLOWANCE,
+              new BytesWrapper(ByteArray.fromLong(pay)));
+      logger.info("WITNESS_STANDBY_ALLOWANCE changed to={} from blockNum={}",pay,blockNum);
+    }
   }
 
   public long getWitnessStandbyAllowance() {
@@ -1055,6 +1080,7 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
    * save timestamp of creating global latest block.
    */
   public void saveLatestBlockHeaderTimestamp(long t) {
+    // update latest block header timestamp = 1540189404000
     logger.info("update latest block header timestamp = {}", t);
     this.put(LATEST_BLOCK_HEADER_TIMESTAMP, new BytesWrapper(ByteArray.fromLong(t)));
   }
@@ -1063,6 +1089,7 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
    * save number of global latest block.
    */
   public void saveLatestBlockHeaderNumber(long n) {
+    // update latest block header number = 279
     logger.info("update latest block header number = {}", n);
     this.put(LATEST_BLOCK_HEADER_NUMBER, new BytesWrapper(ByteArray.fromLong(n)));
   }
@@ -1071,6 +1098,7 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
    * save id of global latest block.
    */
   public void saveLatestBlockHeaderHash(ByteString h) {
+    // 2.update latest block header id = 000000000000011732b59a4c89d1a30edd0f52626b68324c118b745bc544c46e
     logger.info("update latest block header id = {}", ByteArray.toHexString(h.toByteArray()));
     this.put(LATEST_BLOCK_HEADER_HASH, new BytesWrapper(h.toByteArray()));
     if (revokingDB.getUnchecked(LATEST_BLOCK_HEADER_HASH).length == 32) {
@@ -1109,6 +1137,20 @@ public class DynamicPropertiesStore extends GSCStoreWithRevoking<BytesWrapper> {
     long nextMaintenanceTime = currentMaintenanceTime + (round + 1) * maintenanceTimeInterval;
     saveNextMaintenanceTime(nextMaintenanceTime);
 
+    /**
+     *
+     * blockTime: 1540210389000 1540252800000
+     * maintenanceTimeInterval: 43200000
+     * round: 35653
+     * currentMaintenanceTime: 0
+     * nextMaintenanceTime: 1540252800000
+     *
+     */
+    logger.info("blockTime: " + blockTime);
+    logger.info("maintenanceTimeInterval: " + maintenanceTimeInterval);
+    logger.info("round: " + round);
+    logger.info("currentMaintenanceTime: " + currentMaintenanceTime);
+    logger.info("nextMaintenanceTime: " + nextMaintenanceTime);
     logger.info(
         "do update nextMaintenanceTime,currentMaintenanceTime:{}, blockTime:{},nextMaintenanceTime:{}",
         new DateTime(currentMaintenanceTime), new DateTime(blockTime),

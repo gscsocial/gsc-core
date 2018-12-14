@@ -18,81 +18,59 @@
 
 package org.gsc.core;
 
+import com.google.common.collect.Maps;
 import com.google.common.primitives.Longs;
+import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
-
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.core.exception.*;
-import org.gsc.core.operator.Operator;
-import org.gsc.core.operator.OperatorFactory;
-import org.gsc.core.wrapper.*;
-import org.gsc.db.*;
-import org.spongycastle.util.encoders.Hex;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.gsc.api.GrpcAPI;
-import org.gsc.api.GrpcAPI.AccountNetMessage;
-import org.gsc.api.GrpcAPI.AccountResourceMessage;
-import org.gsc.api.GrpcAPI.Address;
-import org.gsc.api.GrpcAPI.AssetIssueList;
-import org.gsc.api.GrpcAPI.BlockList;
-import org.gsc.api.GrpcAPI.ExchangeList;
-import org.gsc.api.GrpcAPI.Node;
-import org.gsc.api.GrpcAPI.NodeList;
-import org.gsc.api.GrpcAPI.NumberMessage;
-import org.gsc.api.GrpcAPI.ProposalList;
-import org.gsc.api.GrpcAPI.Return;
+import org.gsc.api.GrpcAPI.*;
 import org.gsc.api.GrpcAPI.Return.response_code;
 import org.gsc.api.GrpcAPI.TransactionExtention.Builder;
-import org.gsc.api.GrpcAPI.WitnessList;
-import org.gsc.crypto.ECKey;
-import org.gsc.crypto.Hash;
 import org.gsc.common.overlay.discover.node.NodeHandler;
 import org.gsc.common.overlay.discover.node.NodeManager;
 import org.gsc.common.overlay.message.Message;
-import org.gsc.runtime.Runtime;
-import org.gsc.runtime.vm.program.ProgramResult;
-import org.gsc.runtime.vm.program.invoke.ProgramInvokeFactoryImpl;
 import org.gsc.common.storage.DepositImpl;
 import org.gsc.common.utils.Base58;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Utils;
-import org.gsc.core.wrapper.BlockWrapper;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.Parameter.ChainParameters;
 import org.gsc.config.args.Args;
+import org.gsc.core.exception.*;
+import org.gsc.core.operator.Operator;
+import org.gsc.core.operator.OperatorFactory;
+import org.gsc.core.wrapper.*;
+import org.gsc.crypto.ECKey;
+import org.gsc.crypto.Hash;
+import org.gsc.db.*;
 import org.gsc.net.message.TransactionMessage;
 import org.gsc.net.node.NodeImpl;
+import org.gsc.protos.Contract;
 import org.gsc.protos.Contract.AssetIssueContract;
 import org.gsc.protos.Contract.CreateSmartContract;
 import org.gsc.protos.Contract.TransferContract;
 import org.gsc.protos.Contract.TriggerSmartContract;
 import org.gsc.protos.Protocol;
-import org.gsc.protos.Protocol.Account;
-import org.gsc.protos.Protocol.Block;
-import org.gsc.protos.Protocol.Exchange;
-import org.gsc.protos.Protocol.Proposal;
-import org.gsc.protos.Protocol.SmartContract;
+import org.gsc.protos.Protocol.*;
 import org.gsc.protos.Protocol.SmartContract.ABI;
 import org.gsc.protos.Protocol.SmartContract.ABI.Entry.StateMutabilityType;
-import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
 import org.gsc.protos.Protocol.Transaction.Result.code;
-import org.gsc.protos.Protocol.TransactionSign;
+import org.gsc.runtime.Runtime;
+import org.gsc.runtime.vm.program.ProgramResult;
+import org.gsc.runtime.vm.program.invoke.ProgramInvokeFactoryImpl;
+import org.gsc.services.http.JsonFormat;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.util.*;
 
 @Slf4j
 @Component
@@ -263,6 +241,9 @@ public class Wallet {
   public Account getAccount(Account account) {
     AccountStore accountStore = dbManager.getAccountStore();
     AccountWrapper accountWrapper = accountStore.get(account.getAddress().toByteArray());
+    System.out.println("----------------------------getAccount-----------------------------------");
+    System.out.println(JsonFormat.printToString(accountWrapper.getInstance()));
+    System.out.println("----------------------------getAccount-----------------------------------");
     if (accountWrapper == null) {
       return null;
     }
@@ -325,6 +306,21 @@ public class Wallet {
   public TransactionWrapper createTransactionCapsule(com.google.protobuf.Message message,
                                                      ContractType contractType) throws ContractValidateException {
     TransactionWrapper trx = new TransactionWrapper(message, contractType);
+
+    // do
+    if(contractType == ContractType.WitnessCreateContract){
+      Any any = trx.getInstance().getRawData().getContract(0).getParameter();
+      try {
+        Contract.WitnessCreateContract witnessCreateContract = any.unpack(Contract.WitnessCreateContract.class);
+        ByteString ownerAddress = witnessCreateContract.getOwnerAddress();
+        //this.
+
+      } catch (InvalidProtocolBufferException e) {
+        e.printStackTrace();
+        logger.error("Generate WitnessCreateContract error!");
+      }
+    }
+
     if (contractType != ContractType.CreateSmartContract
         && contractType != ContractType.TriggerSmartContract) {
       List<Operator> actList = OperatorFactory.createActuator(trx, dbManager);
@@ -460,6 +456,38 @@ public class Wallet {
     byte[] privateKey = pass2Key(passPhrase);
     ECKey ecKey = ECKey.fromPrivate(privateKey);
     return ecKey.getAddress();
+  }
+
+  public GrpcAPI.VoteStatistics getWitnessVoteStatistics(){
+    VotesStore votesStore = dbManager.getVotesStore();
+
+    final Map<ByteString, Long> countWitnessMap = Maps.newHashMap();
+    Iterator<Map.Entry<byte[], VotesWrapper>> dbIterator = votesStore.iterator();
+
+    while (dbIterator.hasNext()){
+      Map.Entry<byte[], VotesWrapper> next = dbIterator.next();
+      VotesWrapper votes = next.getValue();
+
+      votes.getNewVotes().forEach(vote -> {
+        ByteString voteAddress = vote.getVoteAddress();
+        long voteCount = vote.getVoteCount();
+        if (countWitnessMap.containsKey(voteAddress)) {
+          countWitnessMap.put(voteAddress, countWitnessMap.get(voteAddress) + voteCount);
+        } else {
+          countWitnessMap.put(voteAddress, voteCount);
+        }
+        System.out.println("witness: " + countWitnessMap.get(voteAddress) + " votes: " + voteCount);
+      });
+    }
+
+    final GrpcAPI.VoteStatistics.Builder countWitness = GrpcAPI.VoteStatistics.newBuilder();
+    countWitnessMap.forEach((key, value) ->{
+      Protocol.Vote.Builder vote = Protocol.Vote.newBuilder();
+      vote.setVoteAddress(key).setVoteCount(value);
+      countWitness.addVotes(vote.build());
+      System.out.println("--------------------witness: " + key + " votes: " + value);
+    });
+    return countWitness.build();
   }
 
   public Block getNowBlock() {
@@ -632,6 +660,9 @@ public class Wallet {
     }
     AccountNetMessage.Builder builder = AccountNetMessage.newBuilder();
     AccountWrapper accountWrapper = dbManager.getAccountStore().get(accountAddress.toByteArray());
+    System.out.println("----------------------------getAccountNet-----------------------------------");
+    System.out.println(JsonFormat.printToString(accountWrapper.getInstance()));
+    System.out.println("----------------------------getAccountNet-----------------------------------");
     if (accountWrapper == null) {
       return null;
     }
@@ -643,12 +674,31 @@ public class Wallet {
     long freeNetLimit = dbManager.getDynamicPropertiesStore().getFreeNetLimit();
     long totalNetLimit = dbManager.getDynamicPropertiesStore().getTotalNetLimit();
     long totalNetWeight = dbManager.getDynamicPropertiesStore().getTotalNetWeight();
+    long PUBLIC_NET_LIMIT = dbManager.getDynamicPropertiesStore().getPublicNetLimit();
+    long PUBLIC_NET_TIME = dbManager.getDynamicPropertiesStore().getPublicNetTime();
+    long PUBLIC_NET_USAGE = dbManager.getDynamicPropertiesStore().getPublicNetUsage();
+    long ONE_DAY_NET_LIMIT = dbManager.getDynamicPropertiesStore().getOneDayNetLimit();
 
     Map<String, Long> assetNetLimitMap = new HashMap<>();
     accountWrapper.getAllFreeAssetNetUsage().keySet().forEach(asset -> {
       byte[] key = ByteArray.fromString(asset);
       assetNetLimitMap.put(asset, dbManager.getAssetIssueStore().get(key).getFreeAssetNetLimit());
     });
+
+    System.out.println("-----------------------------------------------------------------");
+    System.out.println("netLimit: " + netLimit);
+    System.out.println("freeNetLimit: " + freeNetLimit);
+    System.out.println("totalNetLimit: " + totalNetLimit);
+    System.out.println("totalNetWeight: " + totalNetWeight);
+    System.out.println("PUBLIC_NET_LIMIT: " + PUBLIC_NET_LIMIT);
+    System.out.println("PUBLIC_NET_TIME: " + PUBLIC_NET_TIME);
+    System.out.println("PUBLIC_NET_USAGE: " + PUBLIC_NET_USAGE);
+    System.out.println("ONE_DAY_NET_LIMIT: " + ONE_DAY_NET_LIMIT);
+    System.out.println("accountWrapper.getFreeNetUsage(): " + accountWrapper.getFreeNetUsage());
+    System.out.println("accountWrapper.getNetUsage(): " + accountWrapper.getNetUsage());
+    System.out.println("accountWrapper.getAllFreeAssetNetUsage(): " + accountWrapper.getAllFreeAssetNetUsage());
+    System.out.println("assetNetLimitMap: " + assetNetLimitMap);
+    System.out.println("-----------------------------------------------------------------");
 
     builder.setFreeNetUsed(accountWrapper.getFreeNetUsage())
         .setFreeNetLimit(freeNetLimit)
@@ -817,6 +867,8 @@ public class Wallet {
     Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
     for (NodeHandler handler : handlerList) {
       String key = handler.getNode().getHexId() + handler.getNode().getHost();
+      System.out.println("key: " + key);
+      System.out.println("handler: " + handler);
       nodeHandlerMap.put(key, handler);
     }
 
@@ -829,6 +881,8 @@ public class Wallet {
               Address.newBuilder()
                   .setHost(ByteString.copyFrom(ByteArray.fromString(node.getHost())))
                   .setPort(node.getPort())));
+          System.out.println("Host: " + node.getHost());
+          System.out.println("Port: " + node.getPort());
         });
     return nodeListBuilder.build();
   }

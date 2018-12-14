@@ -115,11 +115,11 @@ public class ProposalController {
           break;
         }
         case (5): {
-          manager.getDynamicPropertiesStore().saveWitnessPayPerBlock(entry.getValue());
+          //manager.getDynamicPropertiesStore().saveWitnessPayPerBlock(entry.getValue());
           break;
         }
         case (6): {
-          manager.getDynamicPropertiesStore().saveWitnessStandbyAllowance(entry.getValue());
+          //manager.getDynamicPropertiesStore().saveWitnessStandbyAllowance(entry.getValue());
           break;
         }
         case (7): {

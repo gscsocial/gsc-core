@@ -17,25 +17,6 @@
  */
 package org.gsc.common.overlay.discover.node;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.gsc.common.net.udp.handler.EventHandler;
 import org.gsc.common.net.udp.handler.UdpEvent;
 import org.gsc.common.net.udp.message.Message;
@@ -44,12 +25,23 @@ import org.gsc.common.net.udp.message.discover.NeighborsMessage;
 import org.gsc.common.net.udp.message.discover.PingMessage;
 import org.gsc.common.net.udp.message.discover.PongMessage;
 import org.gsc.common.overlay.discover.DiscoverListener;
-import org.gsc.common.overlay.discover.node.NodeHandler.State;
 import org.gsc.common.overlay.discover.node.statistics.NodeStatistics;
 import org.gsc.common.overlay.discover.table.NodeTable;
 import org.gsc.common.utils.CollectionUtils;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @Component
 public class NodeManager implements EventHandler {
@@ -142,12 +134,6 @@ public class NodeManager implements EventHandler {
     }
   }
 
-  public boolean isNodeAlive(NodeHandler nodeHandler) {
-    return nodeHandler.getState().equals(State.Alive) ||
-        nodeHandler.getState().equals(State.Active) ||
-        nodeHandler.getState().equals(State.EvictCandidate);
-  }
-
   private void dbRead() {
     Set<Node> Nodes = this.dbManager.readNeighbours();
     logger.info("Reading Node statistics from PeersStore: " + Nodes.size() + " nodes.");
@@ -224,6 +210,7 @@ public class NodeManager implements EventHandler {
   @Override
   public void handleEvent(UdpEvent udpEvent) {
     Message m = udpEvent.getMessage();
+    //System.out.println("------------handleEvent------------ " + m.getType());
     InetSocketAddress sender = udpEvent.getAddress();
 
     Node n = new Node(m.getFrom().getId(), sender.getHostString(), sender.getPort());
@@ -253,6 +240,7 @@ public class NodeManager implements EventHandler {
 
   public void sendOutbound(UdpEvent udpEvent) {
     if (discoveryEnabled && messageSender != null) {
+      System.out.println("sendOutbound accept");
       messageSender.accept(udpEvent);
     }
   }
@@ -271,7 +259,9 @@ public class NodeManager implements EventHandler {
     ArrayList<NodeHandler> filtered = new ArrayList<>();
     synchronized (this) {
       for (NodeHandler handler : nodeHandlerMap.values()) {
+        System.out.println("...................getNodes: " + handler.getNode().getPort());
         if (predicate.test(handler)) {
+          System.out.println("...................getNodes: " + handler.getNode().getPort());
           filtered.add(handler);
         }
       }
@@ -289,19 +279,31 @@ public class NodeManager implements EventHandler {
 
   public List<NodeHandler> dumpActiveNodes() {
     List<NodeHandler> handlers = new ArrayList<>();
+
     for (NodeHandler handler :
         this.nodeHandlerMap.values()) {
-      if (isNodeAlive(handler)) {
+      if (!isNodeAlive(handler)) {
+       // System.out.println("**************************************************: "+ handler.getNode().getPort());
         handlers.add(handler);
       }
     }
-
     return handlers;
   }
 
+  public boolean isNodeAlive(NodeHandler nodeHandler) {
+    return nodeHandler.getNodeStatistics().wasDisconnected();
+    /*return nodeHandler.getState().equals(State.Alive) ||     //
+            nodeHandler.getState().equals(State.Active) ||       // Active
+            nodeHandler.getState().equals(State.EvictCandidate); // Evict Candidate 逐出候选人*/
+  }
+
   private synchronized void processListeners() {
+
+    nodeHandlerMap.values().forEach(nodeHandler -> System.out.println("NodeHandlerMap: " + nodeHandler.toString()));
+    //System.out.println("processListeners: " + listeners.values());
     for (ListenerHandler handler : listeners.values()) {
       try {
+        //System.out.println("...processListeners...");
         handler.checkAll();
       } catch (Exception e) {
         logger.error("Exception processing listener: " + handler, e);
@@ -309,9 +311,13 @@ public class NodeManager implements EventHandler {
     }
   }
 
-  public synchronized void addDiscoverListener(DiscoverListener listener,
-      Predicate<NodeStatistics> filter) {
+  public synchronized void addDiscoverListener(DiscoverListener listener, Predicate<NodeStatistics> filter) {
+    //System.out.println("Add node.....................................................");
     listeners.put(listener, new ListenerHandler(listener, filter));
+  }
+
+  public synchronized void removeDiscoverListener(DiscoverListener listener) {
+    listeners.remove(listener);
   }
 
   public synchronized String dumpAllStatistics() {
@@ -359,12 +365,14 @@ public class NodeManager implements EventHandler {
 
     void checkAll() {
       for (NodeHandler handler : nodeHandlerMap.values()) {
+        //System.out.println("NodeHandlerMap: " + nodeHandlerMap.values());
         boolean has = discoveredNodes.containsKey(handler);
         boolean test = filter.test(handler.getNodeStatistics());
+        //System.out.println("??????????????????????filter.test checkAll: ");
         if (!has && test) {
           listener.nodeAppeared(handler);
           discoveredNodes.put(handler, null);
-        } else if (has && !test) {
+        } else if (!has && !test) {
           listener.nodeDisappeared(handler);
           discoveredNodes.remove(handler);
         }

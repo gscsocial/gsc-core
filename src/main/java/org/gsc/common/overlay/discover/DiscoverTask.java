@@ -17,14 +17,15 @@
  */
 package org.gsc.common.overlay.discover;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.common.overlay.discover.node.NodeManager;
 import org.gsc.common.overlay.discover.table.KademliaOptions;
 import org.gsc.common.overlay.discover.table.NodeEntry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DiscoverTask implements Runnable {
 
@@ -36,7 +37,7 @@ public class DiscoverTask implements Runnable {
 
   public DiscoverTask(NodeManager nodeManager) {
     this.nodeManager = nodeManager;
-    nodeId = nodeManager.getPublicHomeNode().getId();
+    nodeId = nodeManager.getPublicHomeNode().getId(); // local node Id
   }
 
   @Override
@@ -46,31 +47,39 @@ public class DiscoverTask implements Runnable {
 
   public synchronized void discover(byte[] nodeId, int round, List<Node> prevTried) {
 
+   // System.out.println("<<<<<<<<<<<<<<<<<<<<< round: " + round + " >>>>>>>>>>>>>>>>>>>>>");
     try {
-      if (round == KademliaOptions.MAX_STEPS) {
+      if (round == KademliaOptions.MAX_STEPS) { // MAX_STEPS = 8
         logger.debug("Node table contains [{}] peers", nodeManager.getTable().getNodesCount());
         logger.debug("{}", String
             .format("(KademliaOptions.MAX_STEPS) Terminating discover after %d rounds.", round));
         logger.trace("{}\n{}",
             String.format("Nodes discovered %d ", nodeManager.getTable().getNodesCount()),
             dumpNodes());
+        logger.info("-----------------{}\n{}",
+                String.format("Nodes discovered %d ", nodeManager.getTable().getNodesCount()),dumpNodes());
         return;
       }
 
-      List<Node> closest = nodeManager.getTable().getClosestNodes(nodeId);
+      List<Node> closest = nodeManager.getTable().getClosestNodes(nodeId); // Closest Nodes
+
       List<Node> tried = new ArrayList<>();
       for (Node n : closest) {
         if (!tried.contains(n) && !prevTried.contains(n)) {
           try {
+
             nodeManager.getNodeHandler(n).sendFindNode(nodeId);
+
             tried.add(n);
-            wait(50);
+            wait(50); // 50 milliseconds
           } catch (InterruptedException e) {
+            logger.error("Interrupted Exception " + e, e);
           } catch (Exception ex) {
             logger.error("Unexpected Exception " + ex, ex);
           }
         }
-        if (tried.size() == KademliaOptions.ALPHA) {
+
+        if (tried.size() == KademliaOptions.ALPHA) { // ALPHA=3 ,
           break;
         }
       }
@@ -81,6 +90,9 @@ public class DiscoverTask implements Runnable {
         logger.trace("{}\n{}",
             String.format("Nodes discovered %d ", nodeManager.getTable().getNodesCount()),
             dumpNodes());
+
+        logger.info("-----------------{}\n{}",
+                String.format("Nodes discovered %d ", nodeManager.getTable().getNodesCount()),dumpNodes());
         return;
       }
 

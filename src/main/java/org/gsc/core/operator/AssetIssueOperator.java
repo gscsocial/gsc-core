@@ -1,5 +1,5 @@
 /*
- * java-gsc is free software: you can redistribute it and/or modify
+ * gsc-core is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
@@ -18,24 +18,25 @@ package org.gsc.core.operator;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.core.Wallet;
+import org.gsc.core.exception.BalanceInsufficientException;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.AssetIssueWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.utils.TransactionUtil;
 import org.gsc.db.Manager;
-import org.gsc.core.exception.BalanceInsufficientException;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract.AssetIssueContract;
 import org.gsc.protos.Contract.AssetIssueContract.FrozenSupply;
 import org.gsc.protos.Protocol.Account.Frozen;
 import org.gsc.protos.Protocol.Transaction.Result.code;
+
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 @Slf4j
 public class AssetIssueOperator extends AbstractOperator {
@@ -44,40 +45,55 @@ public class AssetIssueOperator extends AbstractOperator {
     super(contract, dbManager);
   }
 
+  // AssetIssueContract
   @Override
   public boolean execute(TransactionResultWrapper ret) throws ContractExeException {
     long fee = calcFee();
     try {
       AssetIssueContract assetIssueContract = contract.unpack(AssetIssueContract.class);
       byte[] ownerAddress = assetIssueContract.getOwnerAddress().toByteArray();
+      System.out.println(assetIssueContract.getDescription());
       AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
+      /** start remove: Avoid duplicate name of token. */
+      /*
       String name = new String(assetIssueWrapper.getName().toByteArray(),
           Charset.forName("UTF-8")); // getName().toStringUtf8()
       long order = 0;
       byte[] key = name.getBytes();
+      // name + "_" + order;
       while (this.dbManager.getAssetIssueStore().get(key) != null) {
         order++;
         String nameKey = AssetIssueWrapper.createDbKeyString(name, order);
         key = nameKey.getBytes();
       }
       assetIssueWrapper.setOrder(order);
+      */
+      /** end */
+
       dbManager.getAssetIssueStore()
           .put(assetIssueWrapper.createDbKey(), assetIssueWrapper);
 
+      // 1000 000000/1000000
       dbManager.adjustBalance(ownerAddress, -fee);
       dbManager.adjustBalance(dbManager.getAccountStore().getBlackhole().getAddress().toByteArray(),
           fee);//send to blackhole
 
       AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
-      List<FrozenSupply> frozenSupplyList = assetIssueContract.getFrozenSupplyList();
+      List<FrozenSupply> frozenSupplyList = assetIssueContract.getFrozenSupplyList(); // 冻结Token的数量和冻结时间列表。
       Iterator<FrozenSupply> iterator = frozenSupplyList.iterator();
-      long remainSupply = assetIssueContract.getTotalSupply();
+      long remainSupply = assetIssueContract.getTotalSupply(); // 发行总的token数量
       List<Frozen> frozenList = new ArrayList<>();
       long startTime = assetIssueContract.getStartTime();
 
+      /**
+       * message FrozenSupply {
+       *     int64 frozen_amount = 1;
+       *     int64 frozen_days = 2;
+       *   }
+       */
       while (iterator.hasNext()) {
         FrozenSupply next = iterator.next();
-        long expireTime = startTime + next.getFrozenDays() * 86_400_000;
+        long expireTime = startTime + next.getFrozenDays() * 86_400_000; // 24h
         Frozen newFrozen = Frozen.newBuilder()
             .setFrozenBalance(next.getFrozenAmount())
             .setExpireTime(expireTime)
@@ -132,6 +148,15 @@ public class AssetIssueOperator extends AbstractOperator {
     byte[] ownerAddress = assetIssueContract.getOwnerAddress().toByteArray();
     if (!Wallet.addressValid(ownerAddress)) {
       throw new ContractValidateException("Invalid ownerAddress");
+    }
+    // todo add to AssetName repeat
+    // when create assetIssue, this code will be called.
+    // If in the 3 second block period, should have the same name of assetIssue in different transaction.
+    // when transactions be packaged in the block, this code will be also called.
+    byte[] name = new String(assetIssueContract.getName().toByteArray(),
+            Charset.forName("UTF-8")).toLowerCase().getBytes();
+    if (this.dbManager.getAssetIssueStore().get(name) != null) {
+      throw new ContractValidateException("AssetName repeat!");
     }
     if (!TransactionUtil.validAssetName(assetIssueContract.getName().toByteArray())) {
       throw new ContractValidateException("Invalid assetName");
