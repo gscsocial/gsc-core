@@ -56,9 +56,9 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
             long now = dbManager.getHeadBlockTimeStamp();
             while (iterator.hasNext()) {
               Frozen next = iterator.next();
-              if (next.getExpireTime() == 0) {
+              if (next.getExpireTime() == 0L) {
                 unfreezeBalance += next.getFrozenBalance();
-                next.toBuilder().setExpireTime(now + DURATION).build();
+                next = next.toBuilder().setExpireTime(now + DURATION).build();
               }
               frozenList.add(next);
             }

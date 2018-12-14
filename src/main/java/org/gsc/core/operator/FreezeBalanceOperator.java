@@ -5,6 +5,7 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
+import org.gsc.config.Parameter;
 import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
@@ -41,11 +42,9 @@ public class FreezeBalanceOperator extends AbstractOperator {
 
     switch (freezeBalanceContract.getResource()) {
       case BANDWIDTH:
-        long currentFrozenBalance = accountWrapper.getFrozenBalance();
-
         Frozen newFrozen = Frozen.newBuilder()
-            .setFrozenBalance(currentFrozenBalance)
-            .setExpireTime(0) // set expireTime to 0 as inactive frozen balance
+            .setFrozenBalance(freezeBalanceContract.getFrozenBalance())
+            .setExpireTime(0L) // set expireTime to 0 as inactive frozen balance
             .build();
         accountWrapper.setInstance(accountWrapper.getInstance().toBuilder()
                 .addFrozen(newFrozen)

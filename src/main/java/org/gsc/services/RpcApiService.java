@@ -1152,6 +1152,12 @@ public class RpcApiService implements Service {
             }
             responseObserver.onCompleted();
         }
+        @Override
+        public void getWitnessVoteStatistics(EmptyMessage request,
+                                             StreamObserver<GrpcAPI.VoteStatistics> responseObserver){
+            responseObserver.onNext(wallet.getWitnessVoteStatistics());
+            responseObserver.onCompleted();
+        }
 
         @Override
         public void getWitnessVoteStatistics(EmptyMessage request,
