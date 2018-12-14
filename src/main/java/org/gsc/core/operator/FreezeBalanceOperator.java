@@ -5,13 +5,12 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
-import org.gsc.config.Parameter;
 import org.gsc.core.Wallet;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.db.Manager;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract.FreezeBalanceContract;
 import org.gsc.protos.Protocol.Account.AccountResource;
 import org.gsc.protos.Protocol.Account.Frozen;
@@ -129,9 +128,9 @@ public class FreezeBalanceOperator extends AbstractOperator {
     }
 
     int frozenCount = accountWrapper.getFrozenCount();
-    if (!(frozenCount == 0 || frozenCount == 1)) {
+    /*if (!(frozenCount == 0 || frozenCount == 1)) {
       throw new ContractValidateException("frozenCount must be 0 or 1");
-    }
+    }*/
     if (frozenBalance > accountWrapper.getBalance()) {
       throw new ContractValidateException("frozenBalance must be less than accountBalance");
     }

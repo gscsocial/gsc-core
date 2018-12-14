@@ -6,6 +6,41 @@ import com.google.protobuf.Message;
 import io.grpc.Server;
 import io.grpc.netty.NettyServerBuilder;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Hex;
+import org.gsc.api.DatabaseGrpc.DatabaseImplBase;
+import org.gsc.api.GrpcAPI;
+import org.gsc.api.GrpcAPI.*;
+import org.gsc.api.GrpcAPI.Return.response_code;
+import org.gsc.api.WalletExtensionGrpc;
+import org.gsc.api.WalletGrpc;
+import org.gsc.api.WalletSolidityGrpc.WalletSolidityImplBase;
+import org.gsc.common.application.Service;
+import org.gsc.common.overlay.discover.node.NodeHandler;
+import org.gsc.common.overlay.discover.node.NodeManager;
+import org.gsc.common.utils.ByteArray;
+import org.gsc.common.utils.Sha256Hash;
+import org.gsc.common.utils.StringUtil;
+import org.gsc.common.utils.Utils;
+import org.gsc.config.args.Args;
+import org.gsc.core.Wallet;
+import org.gsc.core.WalletSolidity;
+import org.gsc.core.exception.ContractValidateException;
+import org.gsc.core.exception.StoreException;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.TransactionWrapper;
+import org.gsc.core.wrapper.WitnessWrapper;
+import org.gsc.crypto.ECKey;
+import org.gsc.db.BandwidthProcessor;
+import org.gsc.db.Manager;
+import org.gsc.protos.Contract;
+import org.gsc.protos.Contract.*;
+import org.gsc.protos.Protocol;
+import org.gsc.protos.Protocol.*;
+import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,83 +49,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Hex;
-import org.gsc.api.WalletGrpc;
-import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.core.wrapper.TransactionWrapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.gsc.api.DatabaseGrpc.DatabaseImplBase;
-import org.gsc.api.GrpcAPI;
-import org.gsc.api.GrpcAPI.AccountNetMessage;
-import org.gsc.api.GrpcAPI.AccountPaginated;
-import org.gsc.api.GrpcAPI.AccountResourceMessage;
-import org.gsc.api.GrpcAPI.Address;
-import org.gsc.api.GrpcAPI.AddressPrKeyPairMessage;
-import org.gsc.api.GrpcAPI.AssetIssueList;
-import org.gsc.api.GrpcAPI.BlockExtention;
-import org.gsc.api.GrpcAPI.BlockLimit;
-import org.gsc.api.GrpcAPI.BlockList;
-import org.gsc.api.GrpcAPI.BlockListExtention;
-import org.gsc.api.GrpcAPI.BlockReference;
-import org.gsc.api.GrpcAPI.BytesMessage;
-import org.gsc.api.GrpcAPI.EasyTransferByPrivateMessage;
-import org.gsc.api.GrpcAPI.EasyTransferMessage;
-import org.gsc.api.GrpcAPI.EasyTransferResponse;
-import org.gsc.api.GrpcAPI.EmptyMessage;
-import org.gsc.api.GrpcAPI.ExchangeList;
-import org.gsc.api.GrpcAPI.Node;
-import org.gsc.api.GrpcAPI.NodeList;
-import org.gsc.api.GrpcAPI.NumberMessage;
-import org.gsc.api.GrpcAPI.PaginatedMessage;
-import org.gsc.api.GrpcAPI.ProposalList;
-import org.gsc.api.GrpcAPI.Return;
-import org.gsc.api.GrpcAPI.Return.response_code;
-import org.gsc.api.GrpcAPI.TransactionExtention;
-import org.gsc.api.GrpcAPI.TransactionList;
-import org.gsc.api.GrpcAPI.TransactionListExtention;
-import org.gsc.api.GrpcAPI.WitnessList;
-import org.gsc.api.WalletExtensionGrpc;
-import org.gsc.api.WalletSolidityGrpc.WalletSolidityImplBase;
-import org.gsc.common.application.Service;
-import org.gsc.crypto.ECKey;
-import org.gsc.common.overlay.discover.node.NodeHandler;
-import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.Sha256Hash;
-import org.gsc.common.utils.StringUtil;
-import org.gsc.common.utils.Utils;
-import org.gsc.core.Wallet;
-import org.gsc.core.WalletSolidity;
-import org.gsc.core.wrapper.BlockWrapper;
-import org.gsc.core.wrapper.WitnessWrapper;
-import org.gsc.config.args.Args;
-import org.gsc.db.BandwidthProcessor;
-import org.gsc.db.Manager;
-import org.gsc.core.exception.ContractValidateException;
-import org.gsc.core.exception.StoreException;
-import org.gsc.protos.Contract;
-import org.gsc.protos.Contract.AccountCreateContract;
-import org.gsc.protos.Contract.AssetIssueContract;
-import org.gsc.protos.Contract.ParticipateAssetIssueContract;
-import org.gsc.protos.Contract.TransferAssetContract;
-import org.gsc.protos.Contract.TransferContract;
-import org.gsc.protos.Contract.UnfreezeAssetContract;
-import org.gsc.protos.Contract.UpdateSettingContract;
-import org.gsc.protos.Contract.VoteWitnessContract;
-import org.gsc.protos.Contract.WitnessCreateContract;
-import org.gsc.protos.Protocol;
-import org.gsc.protos.Protocol.Account;
-import org.gsc.protos.Protocol.Block;
-import org.gsc.protos.Protocol.DynamicProperties;
-import org.gsc.protos.Protocol.Exchange;
-import org.gsc.protos.Protocol.Proposal;
-import org.gsc.protos.Protocol.Transaction;
-import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
-import org.gsc.protos.Protocol.TransactionInfo;
-import org.gsc.protos.Protocol.TransactionSign;
 
 @Component
 @Slf4j
@@ -1152,13 +1110,6 @@ public class RpcApiService implements Service {
             }
             responseObserver.onCompleted();
         }
-        @Override
-        public void getWitnessVoteStatistics(EmptyMessage request,
-                                             StreamObserver<GrpcAPI.VoteStatistics> responseObserver){
-            responseObserver.onNext(wallet.getWitnessVoteStatistics());
-            responseObserver.onCompleted();
-        }
-
         @Override
         public void getWitnessVoteStatistics(EmptyMessage request,
                                              StreamObserver<GrpcAPI.VoteStatistics> responseObserver){

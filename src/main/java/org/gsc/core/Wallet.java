@@ -242,6 +242,7 @@ public class Wallet {
     AccountStore accountStore = dbManager.getAccountStore();
     AccountWrapper accountWrapper = accountStore.get(account.getAddress().toByteArray());
     System.out.println("----------------------------getAccount-----------------------------------");
+      System.out.println(accountWrapper.getInstance().toString());
     System.out.println(JsonFormat.printToString(accountWrapper.getInstance()));
     System.out.println("----------------------------getAccount-----------------------------------");
     if (accountWrapper == null) {
