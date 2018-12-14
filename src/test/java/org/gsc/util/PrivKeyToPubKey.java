@@ -213,24 +213,20 @@ public class PrivKeyToPubKey {
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub blockingStub = null;
 
-        String startNode = "47.254.71.98:50051";
+        String startNode = "127.0.0.1:5005";
         channel = ManagedChannelBuilder.forTarget(startNode).usePlaintext(true).build();
         blockingStub = WalletGrpc.newBlockingStub(channel);
 
-        GrpcAPI.AssetIssueList voteStatistics = blockingStub.getAssetIssueList(GrpcAPI.EmptyMessage.newBuilder().build());
+        /*GrpcAPI.AssetIssueList voteStatistics = blockingStub.getAssetIssueList(GrpcAPI.EmptyMessage.newBuilder().build());
         voteStatistics.getAssetIssueList().forEach(assetIssueContract -> {
-           //System.out.println(assetIssueContract.getDescription().toStringUtf8());
+           System.out.println(assetIssueContract.getDescription().toStringUtf8());
         });
-        //System.out.println(voteStatistics.getAssetIssueList().toString());
+        System.out.println(voteStatistics.getAssetIssueList().toString());*/
 
         String k = "2667ec8e3af5ea0bbb7cf92826af329cf54b9d7f6b";
         byte[] address = Wallet.decodeFromBase58Check("GTKRQ4CgeUYHYYAu8Hh1ex9bEBaCvSqf4w");
-        Protocol.Account account = blockingStub.getAccount(Protocol.Account.newBuilder().setAddress(ByteString.copyFrom(address)).build());
+        Protocol.Account account = blockingStub.getAccount(Protocol.Account.newBuilder().setAddress(ByteString.copyFrom(Hex.decode("2667ec8e3af5ea0bbb7cf92826af329cf54b9d7f6b"))).build());
         System.out.println(account.toString());
-        voteStatistics.getAssetIssueList().forEach(assetIssueContract -> {
-            //System.out.println(assetIssueContract.getDescription().toStringUtf8());
-        });
-        //System.out.println(voteStatistics.getAssetIssueList().toString());
     }
 
     @Test
@@ -381,7 +377,7 @@ public class PrivKeyToPubKey {
 
     @Test
     public void ByteToString(){
-        String str = "3137332e31342e38342e313133";
+        String str = "636f6e74726163742065786563757465206572726f72203a206e6f7420796574206861726420666f726b6564";
         System.out.println(ByteString.copyFrom("76616c6964617465207369676e6174757265206572726f72".getBytes()).toStringUtf8());
         logger.info("---------------------------------------------");
         System.out.println();
@@ -391,7 +387,7 @@ public class PrivKeyToPubKey {
     }
 
     public static String hexStr2Str(String hexStr) {
-        String str = "0123456789ABCDEF";
+        String str = "0123456789abcdef";
         char[] hexs = hexStr.toCharArray();
         byte[] bytes = new byte[hexStr.length() / 2];
         int n;
@@ -455,22 +451,22 @@ public class PrivKeyToPubKey {
 
     @Test
     public void deployContract(){
-        String ownerPriKey = "AF304626A855D730945C1DEAE264DE915BF5556EC555C05F22C021F0D8505297";
+        String ownerPriKey = "fd146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d1";
         BigInteger privKey = new BigInteger(ownerPriKey, 16);
 
-        Wallet.setAddressPreFixByte(Byte.decode("0x41"));
+        Wallet.setAddressPreFixByte(Byte.decode("0x26"));
         final ECKey ecKey = ECKey.fromPrivate(privKey);
         byte[] originAddress = ecKey.getAddress();
         System.out.println(ByteString.copyFrom(originAddress));
 
-        String node = "https://Grpc.shasta.trongrid.io:50051";
+        String node = "127.0.0.1:5005";
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub walletBlockingStub = null;
         channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();
         walletBlockingStub = WalletGrpc.newBlockingStub(channel);
 
         String contractName = "barContract";
-        String abiStr = "[{\"constant\":false,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
+        String abiStr = "[{\"constant\":false,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"kay\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
         String byteCode = "608060405234801561001057600080fd5b5061013f806100206000396000f300608060405260043610610041576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff16806306fdde0314610046575b600080fd5b34801561005257600080fd5b5061005b6100d6565b6040518080602001828103825283818151815260200191508051906020019080838360005b8381101561009b578082015181840152602081019050610080565b50505050905090810190601f1680156100c85780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b60606040805190810160405280600481526020017f636f6e74000000000000000000000000000000000000000000000000000000008152509050905600a165627a7a72305820bf7b4863abe17d67507c4fc2f3b723d323a0f048871d56df82b5752715b0c58f0029";
         long callValue = 0;
         long fee = 100000000;
