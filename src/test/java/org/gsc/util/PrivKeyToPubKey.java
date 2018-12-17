@@ -302,12 +302,14 @@ public class PrivKeyToPubKey {
     @Test
     public void getWitness(){
         byte[] ownerAddress = Hex.decode("262daebb11f20b68a2035519a8553b597bb7dbbfa4");
-        String node = "39.105.18.104:50051";
+        String node = "127.0.0.1:5005";
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub blockingStub = null;
         channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();
         blockingStub = WalletGrpc.newBlockingStub(channel);
 
+        Protocol.Transaction transaction = blockingStub.getTransactionById(GrpcAPI.BytesMessage.newBuilder().setValue(ByteString.copyFrom(Hex.decode("8e1394a3486b811d399bcc6024b29d554d4be1b8cad82a9725d78420512add9f"))).build());
+        System.out.println(transaction.toString());
         GrpcAPI.WitnessList witnessList = blockingStub.listWitnesses(GrpcAPI.EmptyMessage.newBuilder().build());
         //System.out.println("WitnessList: \n" + witnessList.toString());
 
@@ -315,7 +317,7 @@ public class PrivKeyToPubKey {
         //System.out.println("WitnessList: \n" + block.toString());
 
         GrpcAPI.VoteStatistics voteStatistics = blockingStub.getWitnessVoteStatistics(GrpcAPI.EmptyMessage.newBuilder().build());
-        System.out.println("WitnessList: \n" + voteStatistics.toString());
+        //System.out.println("WitnessList: \n" + voteStatistics.toString());
 
     }
 
@@ -377,11 +379,11 @@ public class PrivKeyToPubKey {
 
     @Test
     public void ByteToString(){
-        String str = "636f6e74726163742065786563757465206572726f72203a206e6f7420796574206861726420666f726b6564";
+        String str = "746869732069732074686520317374207472616e73616374696f6e";
         System.out.println(ByteString.copyFrom("76616c6964617465207369676e6174757265206572726f72".getBytes()).toStringUtf8());
         logger.info("---------------------------------------------");
         System.out.println();
-        System.out.println("Hex String: " + hexStr2Str(str));
+        System.out.println(hexStr2Str(str));
         System.out.println();
         logger.info("---------------------------------------------");
     }

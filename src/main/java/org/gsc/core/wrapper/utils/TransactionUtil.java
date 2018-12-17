@@ -39,8 +39,12 @@ public class TransactionUtil {
         .setToAddress(ByteString.copyFrom(key))
         .build();
 
-    return new TransactionWrapper(transferContract,
-        Contract.ContractType.TransferContract).getInstance();
+    Transaction transaction = new TransactionWrapper(transferContract,
+            Contract.ContractType.TransferContract).getInstance();
+    Transaction.raw raw = transaction
+            .getRawData().toBuilder().setData(ByteString.copyFromUtf8("this is the 1st transaction")).build();
+    transaction = transaction.toBuilder().setRawData(raw).build();
+    return transaction;
   }
 
   /**
