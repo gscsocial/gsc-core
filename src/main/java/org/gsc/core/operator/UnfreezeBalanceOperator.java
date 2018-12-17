@@ -4,21 +4,22 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
-import java.util.Iterator;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.core.Wallet;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.gsc.core.wrapper.VotesWrapper;
 import org.gsc.db.Manager;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Contract.UnfreezeBalanceContract;
 import org.gsc.protos.Protocol.Account.AccountResource;
 import org.gsc.protos.Protocol.Account.Frozen;
 import org.gsc.protos.Protocol.Transaction.Result.code;
+
+import java.util.Iterator;
+import java.util.List;
 
 @Slf4j
 public class UnfreezeBalanceOperator extends AbstractOperator {
@@ -91,7 +92,6 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
     dbManager.getAccountStore().put(ownerAddress, accountWrapper);
     dbManager.getVotesStore().put(ownerAddress, votesCapsule);
 
-
     ret.setUnfreezeAmount(unfreezeBalance);
     ret.setStatus(fee, code.SUCESS);
 
@@ -129,7 +129,6 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
       throw new ContractValidateException(
           "Account[" + readableOwnerAddress + "] not exists");
     }
-
     long now = dbManager.getHeadBlockTimeStamp();
 
     switch (unfreezeBalanceContract.getResource()) {
@@ -153,13 +152,11 @@ public class UnfreezeBalanceOperator extends AbstractOperator {
         if (frozenBalanceForEnergy.getExpireTime() > now) {
           throw new ContractValidateException("It's not time to unfreeze.");
         }
-
         break;
       default:
         throw new ContractValidateException(
             "ResourceCode error.valid ResourceCode[BANDWIDTH、ENERGY]");
     }
-
     return true;
   }
 
