@@ -225,7 +225,6 @@ public class WitnessService implements Service {
         }
 
         try {
-
             controller.setGeneratingBlock(true);
             BlockWrapper block = generateBlock(scheduledTime, scheduledWitness);
 
@@ -304,7 +303,6 @@ public class WitnessService implements Service {
     public void start() {
         isRunning = true;
         generateThread.start();
-
     }
 
     @Override
