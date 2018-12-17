@@ -232,6 +232,17 @@ public class RpcApiService implements Service {
         }
 
         @Override
+        public void getDynamicProperties(EmptyMessage request,
+                                         StreamObserver<DynamicProperties> responseObserver) {
+            DynamicProperties.Builder builder = DynamicProperties.newBuilder();
+            builder.setLastSolidityBlockNum(
+                    dbManager.getDynamicPropertiesStore().getLatestSolidifiedBlockNum());
+            DynamicProperties dynamicProperties = builder.build();
+            responseObserver.onNext(dynamicProperties);
+            responseObserver.onCompleted();
+        }
+        
+        @Override
         public void getBlockByNum(NumberMessage request, StreamObserver<Block> responseObserver) {
             Block block = null;
             try {
@@ -240,17 +251,6 @@ public class RpcApiService implements Service {
                 logger.error(e.getMessage());
             }
             responseObserver.onNext(block);
-            responseObserver.onCompleted();
-        }
-
-        @Override
-        public void getDynamicProperties(EmptyMessage request,
-                                         StreamObserver<DynamicProperties> responseObserver) {
-            DynamicProperties.Builder builder = DynamicProperties.newBuilder();
-            builder.setLastSolidityBlockNum(
-                    dbManager.getDynamicPropertiesStore().getLatestSolidifiedBlockNum());
-            DynamicProperties dynamicProperties = builder.build();
-            responseObserver.onNext(dynamicProperties);
             responseObserver.onCompleted();
         }
     }
@@ -319,15 +319,15 @@ public class RpcApiService implements Service {
         }
 
         @Override
-        public void getNowBlock(EmptyMessage request, StreamObserver<Block> responseObserver) {
-            responseObserver.onNext(wallet.getNowBlock());
-            responseObserver.onCompleted();
-        }
-
-        @Override
         public void getNowBlock2(EmptyMessage request,
                                  StreamObserver<BlockExtention> responseObserver) {
             responseObserver.onNext(block2Extention(wallet.getNowBlock()));
+            responseObserver.onCompleted();
+        }
+        
+        @Override
+        public void getNowBlock(EmptyMessage request, StreamObserver<Block> responseObserver) {
+            responseObserver.onNext(wallet.getNowBlock());
             responseObserver.onCompleted();
         }
 
@@ -372,20 +372,6 @@ public class RpcApiService implements Service {
         }
 
         @Override
-        public void getTransactionById(BytesMessage request,
-                                       StreamObserver<Transaction> responseObserver) {
-            ByteString id = request.getValue();
-            if (null != id) {
-                Transaction reply = walletSolidity.getTransactionById(id);
-
-                responseObserver.onNext(reply);
-            } else {
-                responseObserver.onNext(null);
-            }
-            responseObserver.onCompleted();
-        }
-
-        @Override
         public void getTransactionInfoById(BytesMessage request,
                                            StreamObserver<TransactionInfo> responseObserver) {
             ByteString id = request.getValue();
@@ -413,6 +399,22 @@ public class RpcApiService implements Service {
             responseObserver.onNext(builder.build());
             responseObserver.onCompleted();
         }
+        
+        
+        @Override
+        public void getTransactionById(BytesMessage request,
+                                       StreamObserver<Transaction> responseObserver) {
+            ByteString id = request.getValue();
+            if (null != id) {
+                Transaction reply = walletSolidity.getTransactionById(id);
+
+                responseObserver.onNext(reply);
+            } else {
+                responseObserver.onNext(null);
+            }
+            responseObserver.onCompleted();
+        }
+
     }
 
     /**
