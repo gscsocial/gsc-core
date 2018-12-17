@@ -762,6 +762,11 @@ public class Wallet {
     return builder.build();
   }
 
+  public NumberMessage totalTransaction() {
+    NumberMessage.Builder builder = NumberMessage.newBuilder()
+        .setNum(dbManager.getTransactionStore().getTotalTransactions());
+    return builder.build();
+  }
   public AssetIssueContract getAssetIssueByName(ByteString assetName) {
     if (assetName == null || assetName.isEmpty()) {
       return null;
@@ -770,13 +775,6 @@ public class Wallet {
         .get(assetName.toByteArray());
     return assetIssueWrapper != null ? assetIssueWrapper.getInstance() : null;
   }
-
-  public NumberMessage totalTransaction() {
-    NumberMessage.Builder builder = NumberMessage.newBuilder()
-        .setNum(dbManager.getTransactionStore().getTotalTransactions());
-    return builder.build();
-  }
-
   public NumberMessage getNextMaintenanceTime() {
     NumberMessage.Builder builder = NumberMessage.newBuilder()
         .setNum(dbManager.getDynamicPropertiesStore().getNextMaintenanceTime());
@@ -795,15 +793,7 @@ public class Wallet {
     return block;
   }
 
-  public BlockList getBlocksByLimitNext(long number, long limit) {
-    if (limit <= 0) {
-      return null;
-    }
-    BlockList.Builder blockListBuilder = BlockList.newBuilder();
-    dbManager.getBlockStore().getLimitNumber(number, limit).forEach(
-        blockCapsule -> blockListBuilder.addBlock(blockCapsule.getInstance()));
-    return blockListBuilder.build();
-  }
+
 
   public BlockList getBlockByLatestNum(long getNum) {
     BlockList.Builder blockListBuilder = BlockList.newBuilder();
@@ -843,7 +833,15 @@ public class Wallet {
     }
     return null;
   }
-
+  public BlockList getBlocksByLimitNext(long number, long limit) {
+    if (limit <= 0) {
+      return null;
+    }
+    BlockList.Builder blockListBuilder = BlockList.newBuilder();
+    dbManager.getBlockStore().getLimitNumber(number, limit).forEach(
+        blockCapsule -> blockListBuilder.addBlock(blockCapsule.getInstance()));
+    return blockListBuilder.build();
+  }
   public Exchange getExchangeById(ByteString exchangeId) {
     if (Objects.isNull(exchangeId)) {
       return null;
