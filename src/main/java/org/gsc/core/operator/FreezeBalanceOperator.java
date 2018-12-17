@@ -99,7 +99,6 @@ public class FreezeBalanceOperator extends AbstractOperator {
     return true;
   }
 
-
   @Override
   public boolean validate() throws ContractValidateException {
     if (this.contract == null) {

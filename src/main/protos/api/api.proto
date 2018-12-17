@@ -31,7 +31,6 @@ service Wallet {
     };
   };
 
-  //Please use CreateTransaction2 instead of this function.
   rpc CreateTransaction (TransferContract) returns (Transaction) {
     option (google.api.http) = {
       post: "/wallet/createtransaction"
@@ -41,7 +40,6 @@ service Wallet {
       }
     };
   };
-  //Use this function instead of CreateTransaction.
   rpc CreateTransaction2 (TransferContract) returns (TransactionExtention) {
   };
 
@@ -54,7 +52,6 @@ service Wallet {
       }
     };
   };
-  //Please use UpdateAccount2 instead of this function.
   rpc UpdateAccount (AccountUpdateContract) returns (Transaction) {
     option (google.api.http) = {
       post: "/wallet/updateaccount"
@@ -64,7 +61,6 @@ service Wallet {
       }
     };
   };
-
 
   rpc SetAccountId (SetAccountIdContract) returns (Transaction) {
     option (google.api.http) = {
@@ -76,11 +72,9 @@ service Wallet {
     };
   };
 
-  //Use this function instead of UpdateAccount.
   rpc UpdateAccount2 (AccountUpdateContract) returns (TransactionExtention) {
   };
 
-  //Please use VoteWitnessAccount2 instead of this function.
   rpc VoteWitnessAccount (VoteWitnessContract) returns (Transaction) {
     option (google.api.http) = {
       post: "/wallet/votewitnessaccount"
@@ -91,14 +85,12 @@ service Wallet {
     };
   };
 
-  //modify the consume_user_resource_percent
   rpc UpdateSetting (UpdateSettingContract) returns (TransactionExtention) {
   };
 
-  //Use this function instead of VoteWitnessAccount.
   rpc VoteWitnessAccount2 (VoteWitnessContract) returns (TransactionExtention) {
   };
-  //Please use CreateAssetIssue2 instead of this function.
+
   rpc CreateAssetIssue (AssetIssueContract) returns (Transaction) {
     option (google.api.http) = {
       post: "/wallet/createassetissue"
@@ -108,10 +100,10 @@ service Wallet {
       }
     };
   };
-  //Use this function instead of CreateAssetIssue.
+
   rpc CreateAssetIssue2 (AssetIssueContract) returns (TransactionExtention) {
   };
-  //Please use UpdateWitness2 instead of this function.
+
   rpc UpdateWitness (WitnessUpdateContract) returns (Transaction) {
     option (google.api.http) = {
       post: "/wallet/updatewitness"
@@ -121,7 +113,7 @@ service Wallet {
       }
     };
   };
-  //Use this function instead of UpdateWitness.
+
   rpc UpdateWitness2 (WitnessUpdateContract) returns (TransactionExtention) {
   };
   //Please use CreateAccount2 instead of this function.
