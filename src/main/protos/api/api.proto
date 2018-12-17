@@ -31,7 +31,6 @@ service Wallet {
     };
   };
 
-  //Please use CreateTransaction2 instead of this function.
   rpc CreateTransaction (TransferContract) returns (Transaction) {
     option (google.api.http) = {
       post: "/wallet/createtransaction"
@@ -41,7 +40,6 @@ service Wallet {
       }
     };
   };
-  //Use this function instead of CreateTransaction.
   rpc CreateTransaction2 (TransferContract) returns (TransactionExtention) {
   };
 
@@ -54,7 +52,6 @@ service Wallet {
       }
     };
   };
-  //Please use UpdateAccount2 instead of this function.
   rpc UpdateAccount (AccountUpdateContract) returns (Transaction) {
     option (google.api.http) = {
       post: "/wallet/updateaccount"
