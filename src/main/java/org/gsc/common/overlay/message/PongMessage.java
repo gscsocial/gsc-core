@@ -17,13 +17,13 @@ public class PongMessage extends P2pMessage {
   }
 
   @Override
-  public byte[] getData() {
-    return FIXED_PAYLOAD;
-  }
-
-  @Override
   public String toString() {
     return super.toString();
+  }
+  
+  @Override
+  public byte[] getData() {
+    return FIXED_PAYLOAD;
   }
 
   @Override
