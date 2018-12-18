@@ -68,12 +68,12 @@ public class WitnessController {
     return this.manager.getWitnessStore().get(address.toByteArray());
   }
 
-  public void setActiveWitnesses(List<ByteString> addresses) {
-    this.manager.getWitnessScheduleStore().saveActiveWitnesses(addresses);
-  }
-
   public List<ByteString> getActiveWitnesses() {
     return this.manager.getWitnessScheduleStore().getActiveWitnesses();
+  }
+
+  public void setActiveWitnesses(List<ByteString> addresses) {
+    this.manager.getWitnessScheduleStore().saveActiveWitnesses(addresses);
   }
 
   public void addWitness(ByteString address) {
