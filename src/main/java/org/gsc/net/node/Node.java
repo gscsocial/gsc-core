@@ -8,9 +8,9 @@ public interface Node extends Quitable {
 
   void setNodeDelegate(NodeDelegate nodeDel);
 
-  void broadcast(Message msg);
-
   void listen();
+  
+  void broadcast(Message msg);
 
   void syncFrom(Sha256Hash myHeadBlockHash);
 
