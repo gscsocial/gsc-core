@@ -35,12 +35,12 @@ public class GSCHandler extends SimpleChannelInboundHandler<GSCMessage> {
     peer.processException(cause);
   }
 
-  public void setMsgQueue(MessageQueue msgQueue) {
-    this.msgQueue = msgQueue;
-  }
-
   public void setChannel(Channel channel) {
     this.peer = (PeerConnection) channel;
+  }
+  
+  public void setMsgQueue(MessageQueue msgQueue) {
+    this.msgQueue = msgQueue;
   }
 
 }
