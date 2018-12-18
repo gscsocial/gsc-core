@@ -171,19 +171,6 @@ public class RpcApiService implements Service {
         }));
     }
 
-    private TransactionExtention transaction2Extention(Transaction transaction) {
-        if (transaction == null) {
-            return null;
-        }
-        TransactionExtention.Builder trxExtBuilder = TransactionExtention.newBuilder();
-        Return.Builder retBuilder = Return.newBuilder();
-        trxExtBuilder.setTransaction(transaction);
-        trxExtBuilder.setTxid(Sha256Hash.of(transaction.getRawData().toByteArray()).getByteString());
-        retBuilder.setResult(true).setCode(response_code.SUCCESS);
-        trxExtBuilder.setResult(retBuilder);
-        return trxExtBuilder.build();
-    }
-
     private BlockExtention block2Extention(Block block) {
         if (block == null) {
             return null;
@@ -199,6 +186,19 @@ public class RpcApiService implements Service {
         return builder.build();
     }
 
+    private TransactionExtention transaction2Extention(Transaction transaction) {
+        if (transaction == null) {
+            return null;
+        }
+        TransactionExtention.Builder trxExtBuilder = TransactionExtention.newBuilder();
+        Return.Builder retBuilder = Return.newBuilder();
+        trxExtBuilder.setTransaction(transaction);
+        trxExtBuilder.setTxid(Sha256Hash.of(transaction.getRawData().toByteArray()).getByteString());
+        retBuilder.setResult(true).setCode(response_code.SUCCESS);
+        trxExtBuilder.setResult(retBuilder);
+        return trxExtBuilder.build();
+    }
+    
     /**
      * DatabaseApi.
      */
@@ -232,17 +232,6 @@ public class RpcApiService implements Service {
         }
 
         @Override
-        public void getDynamicProperties(EmptyMessage request,
-                                         StreamObserver<DynamicProperties> responseObserver) {
-            DynamicProperties.Builder builder = DynamicProperties.newBuilder();
-            builder.setLastSolidityBlockNum(
-                    dbManager.getDynamicPropertiesStore().getLatestSolidifiedBlockNum());
-            DynamicProperties dynamicProperties = builder.build();
-            responseObserver.onNext(dynamicProperties);
-            responseObserver.onCompleted();
-        }
-        
-        @Override
         public void getBlockByNum(NumberMessage request, StreamObserver<Block> responseObserver) {
             Block block = null;
             try {
@@ -251,6 +240,17 @@ public class RpcApiService implements Service {
                 logger.error(e.getMessage());
             }
             responseObserver.onNext(block);
+            responseObserver.onCompleted();
+        }
+        
+        @Override
+        public void getDynamicProperties(EmptyMessage request,
+                                         StreamObserver<DynamicProperties> responseObserver) {
+            DynamicProperties.Builder builder = DynamicProperties.newBuilder();
+            builder.setLastSolidityBlockNum(
+                    dbManager.getDynamicPropertiesStore().getLatestSolidifiedBlockNum());
+            DynamicProperties dynamicProperties = builder.build();
+            responseObserver.onNext(dynamicProperties);
             responseObserver.onCompleted();
         }
     }
