@@ -546,11 +546,12 @@ public class Runtime {
 
   }
 
-  public ProgramResult getResult() {
-    return result;
-  }
-
   public String getRuntimeError() {
     return runtimeError;
   }
+  
+  public ProgramResult getResult() {
+    return result;
+  }
+  
 }
