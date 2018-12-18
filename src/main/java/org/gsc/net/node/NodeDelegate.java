@@ -23,16 +23,16 @@ public interface NodeDelegate {
 
   boolean handleTransaction(TransactionWrapper trx) throws BadTransactionException;
 
-  LinkedList<BlockId> getLostBlockIds(List<BlockId> blockChainSummary) throws StoreException;
-
   Deque<BlockId> getBlockChainSummary(BlockId beginBLockId, Deque<BlockId> blockIds)
       throws GSCException;
 
+  LinkedList<BlockId> getLostBlockIds(List<BlockId> blockChainSummary) throws StoreException;
+  
   Message getData(Sha256Hash msgId, MessageTypes type);
 
-  void syncToCli(long unSyncNum);
-
   long getBlockTime(BlockId id);
+  
+  void syncToCli(long unSyncNum);
 
   BlockId getHeadBlockId();
 
