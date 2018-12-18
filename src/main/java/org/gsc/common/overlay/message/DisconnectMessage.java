@@ -22,12 +22,12 @@ public class DisconnectMessage extends P2pMessage {
     this.data = this.disconnectMessage.toByteArray();
   }
 
-  public int getReason() {
-    return this.disconnectMessage.getReason().getNumber();
-  }
-
   public ReasonCode getReasonCode() {
     return disconnectMessage.getReason();
+  }
+  
+  public int getReason() {
+    return this.disconnectMessage.getReason().getNumber();
   }
 
   @Override
