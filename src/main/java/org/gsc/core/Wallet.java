@@ -448,16 +448,16 @@ public class Wallet {
     return trx;
   }
 
-  public byte[] pass2Key(byte[] passPhrase) {
-    return Sha256Hash.hash(passPhrase);
-  }
-
   public byte[] createAdresss(byte[] passPhrase) {
     byte[] privateKey = pass2Key(passPhrase);
     ECKey ecKey = ECKey.fromPrivate(privateKey);
     return ecKey.getAddress();
   }
 
+  public byte[] pass2Key(byte[] passPhrase) {
+    return Sha256Hash.hash(passPhrase);
+  }
+  
   public GrpcAPI.VoteStatistics getWitnessVoteStatistics(){
     VotesStore votesStore = dbManager.getVotesStore();
 
