@@ -115,6 +115,9 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     public InventoryType getType() {
       return item.getType();
     }
+    public void refreshTime() {
+      this.time = Time.getCurrentMillis();
+    }
 
     public PriorItem(Item item, long count) {
       this.item = item;
@@ -122,10 +125,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
       this.time = Time.getCurrentMillis();
     }
 
-    public void refreshTime() {
-      this.time = Time.getCurrentMillis();
-    }
-
+    
     @Override
     public int compareTo(final PriorItem o) {
       if (!this.item.getType().equals(o.getItem().getType())) {
@@ -873,13 +873,6 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     }
   }
 
-  private void onHandleTransactionsMessage(PeerConnection peer, TransactionsMessage msg) {
-    for (Transaction trans : msg.getTransactions().getTransactionsList()) {
-      trxsHandlePool
-          .submit(() -> onHandleTransactionMessage(peer, new TransactionMessage(trans)));
-    }
-  }
-
   private boolean checkSyncBlockChainMessage(PeerConnection peer, SyncBlockChainMessage syncMsg) {
     long lastBlockNum = syncMsg.getBlockIds().get(syncMsg.getBlockIds().size() - 1).getNum();
     BlockId lastSyncBlockId = peer.getLastSyncBlockId();
@@ -890,7 +883,14 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
     }
     return true;
   }
-
+  
+  private void onHandleTransactionsMessage(PeerConnection peer, TransactionsMessage msg) {
+    for (Transaction trans : msg.getTransactions().getTransactionsList()) {
+      trxsHandlePool
+          .submit(() -> onHandleTransactionMessage(peer, new TransactionMessage(trans)));
+    }
+  }
+  
   private void onHandleSyncBlockChainMessage(PeerConnection peer, SyncBlockChainMessage syncMsg) {
     peer.setGscState(GSCState.SYNCING);
     BlockId headBlockId = del.getHeadBlockId();
