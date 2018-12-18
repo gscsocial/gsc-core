@@ -194,16 +194,16 @@ public class RuntimeSummary {
     }
     */
 
-    public Transaction getTransaction() {
-        //if (!parsed) rlpParse();
-        return tx;
-    }
-
-    /*
+     /*
     public byte[] getTransactionHash() {
         return getTransaction().getRawDataOrBuilder().;
     }
     */
+    
+    public Transaction getTransaction() {
+        //if (!parsed) rlpParse();
+        return tx;
+    }
 
     public BigInteger getValue() {
         //if (!parsed) rlpParse();
