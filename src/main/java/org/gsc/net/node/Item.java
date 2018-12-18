@@ -15,7 +15,12 @@ public class Item {
     this.hash = hash;
     this.type = type;
   }
-
+  
+  @Override
+  public int hashCode() {
+    return hash.hashCode();
+  }
+  
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -29,8 +34,4 @@ public class Item {
         type.equals(item.getType());
   }
 
-  @Override
-  public int hashCode() {
-    return hash.hashCode();
-  }
 }
