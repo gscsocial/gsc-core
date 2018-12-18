@@ -98,13 +98,13 @@ public class PeerConnection extends Channel {
     return syncBlockIdCache;
   }
 
+  public Map<BlockId, Long> getSyncBlockRequested() {
+    return syncBlockRequested;
+  }
+  
   public void setSyncChainRequested(
       Pair<Deque<BlockId>, Long> syncChainRequested) {
     this.syncChainRequested = syncChainRequested;
-  }
-
-  public Map<BlockId, Long> getSyncBlockRequested() {
-    return syncBlockRequested;
   }
 
   public void setSyncBlockRequested(ConcurrentHashMap<BlockId, Long> syncBlockRequested) {
@@ -282,13 +282,14 @@ public class PeerConnection extends Channel {
     return !idle();
   }
 
+  public void sendMessage(Message message) {
+    msgQueue.sendMessage(message);
+  }
+  
   public boolean idle() {
     return advObjWeRequested.isEmpty()
         && syncBlockRequested.isEmpty()
         && syncChainRequested == null;
   }
-
-  public void sendMessage(Message message) {
-    msgQueue.sendMessage(message);
-  }
+  
 }
