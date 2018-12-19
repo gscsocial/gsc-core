@@ -88,7 +88,6 @@ public class SyncPool {
     peerClient = ctx.getBean(PeerClient.class);
 
     for (Node node : args.getActiveNodes()) {
-      System.out.println("init active nodes: " + node.getPort());
       nodeManager.getNodeHandler(node).getNodeStatistics().setPredefined(true);
     }
 
@@ -166,7 +165,6 @@ public class SyncPool {
     List<PeerConnection> peers = Lists.newArrayList();
     activePeers.forEach(peer -> {
       if (!peer.isDisconnect()) {
-        System.out.println("Active Peer: " + peer.getNode().getPort());
         peers.add(peer);
       }
     });
@@ -174,14 +172,12 @@ public class SyncPool {
   }
 
   public synchronized void onConnect(Channel peer) {
-     System.out.println("Peer onConnect...");
     if (!activePeers.contains(peer)) {
       if (!peer.isActive()) {
         passivePeersCount.incrementAndGet();
       } else {
         activePeersCount.incrementAndGet();
       }
-      System.out.println("Peer onConnect...  Add Peer: " + peer.getNode().getPort());
       activePeers.add((PeerConnection) peer);
       activePeers.sort(Comparator.comparingDouble(c -> c.getPeerStats().getAvgLatency()));
       peerDel.onConnectPeer((PeerConnection) peer);
@@ -189,14 +185,12 @@ public class SyncPool {
   }
 
   public synchronized void onDisconnect(Channel peer) {
-    System.out.println("Peer onDisconnect...");
     if (activePeers.contains(peer)) {
       if (!peer.isActive()) {
         passivePeersCount.decrementAndGet();
       } else {
         activePeersCount.decrementAndGet();
       }
-      System.out.println("Peer onDisconnect...  Remove Peer: " + peer.getNode().getPort());
       activePeers.remove(peer);
       peerDel.onDisconnectPeer((PeerConnection) peer);
     }
@@ -231,46 +225,37 @@ public class SyncPool {
 
       if (handler.getNode().getHost().equals(nodeManager.getPublicHomeNode().getHost()) &&
           handler.getNode().getPort() == nodeManager.getPublicHomeNode().getPort()) {
-        System.out.println("1---------------" + handler.getNode().getHost() + ":" + handler.getNode().getPort());
         return false;
       }
 
       if (nodesInUse != null && nodesInUse.contains(handler.getNode().getHexId())) {
-        System.out.println("2---------------nodesInUse");
         return false;
       }
 
       if (handler.getNodeStatistics().getReputation() >= NodeStatistics.REPUTATION_PREDEFINED){ //100000
-        System.out.println("3---------------handler.getNodeStatistics().getReputation(): " + handler.getNodeStatistics().getReputation());
         return true;
       }
 
 
       InetAddress inetAddress = handler.getInetSocketAddress().getAddress();
       if (channelManager.getRecentlyDisconnected().getIfPresent(inetAddress) != null) {
-        System.out.println("4---------------getRecentlyDisconnected");
         return false;
       }
       if (channelManager.getBadPeers().getIfPresent(inetAddress) != null) {
-        System.out.println("5---------------getBadPeers");
         return false;
       }
       if (channelManager.getConnectionNum(inetAddress) >= getMaxActivePeersWithSameIp){
-        System.out.println("6---------------getConnectionNum");
         return false;
       }
 
       if (nodeHandlerCache.getIfPresent(handler) != null) {
-        System.out.println("7---------------getIfPresent");
         return false;
       }
 
       if (handler.getNodeStatistics().getReputation() < 100) {
-        System.out.println("8---------------handler.getNodeStatistics().getReputation() < 100");
         return false;
       }
 
-      System.out.println("9---------------return true.");
       return true;
     }
   }
