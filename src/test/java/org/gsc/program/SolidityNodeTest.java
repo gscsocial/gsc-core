@@ -24,7 +24,7 @@ public class SolidityNodeTest {
 
   private static RpcApiService rpcApiService;
   private static Application appT;
-  private static String dbPath = "output_witness_test";
+  private static String dbPath = "output_witness_solidity_test";
 
   static {
     Args.setParam(new String[]{"-d", dbPath}, Constant.TEST_CONF);
@@ -34,17 +34,11 @@ public class SolidityNodeTest {
     rpcApiService = context.getBean(RpcApiService.class);
   }
 
-  /**
-   * init db.
-   */
   @BeforeClass
   public static void init() {
     rpcApiService.start();
   }
 
-  /**
-   * remo db when after test.
-   */
   @AfterClass
   public static void removeDb() {
     Args.clearParam();
