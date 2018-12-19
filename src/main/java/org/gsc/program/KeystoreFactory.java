@@ -24,7 +24,7 @@ public class KeystoreFactory {
 
   private boolean priKeyValid(String priKey) {
     if (StringUtils.isEmpty(priKey)) {
-      logger.warn("Warning: PrivateKey is empty !!");
+      logger.warn("Warning:  PrivateKey is empty !!");
       return false;
     }
     if (priKey.length() != 64) {
