@@ -68,18 +68,18 @@ public class Start {
             Application appT = ApplicationFactory.create(context);
             FullNode.shutdown(appT);
 
-            //appT.init(cfgArgs);
+            // appT.init(cfgArgs);
             RpcApiService rpcApiService = context.getBean(RpcApiService.class);
             appT.addService(rpcApiService);
-            //http
+            // http
             SolidityNodeHttpApiService httpApiService = context.getBean(SolidityNodeHttpApiService.class);
             appT.addService(httpApiService);
 
             appT.initServices(cfgArgs);
             appT.startServices();
-//    appT.startup();
+            // appT.startup();
 
-            //Disable peer discovery for solidity node
+            // Disable peer discovery for solidity node
             DiscoverServer discoverServer = context.getBean(DiscoverServer.class);
             discoverServer.close();
             ChannelManager channelManager = context.getBean(ChannelManager.class);
@@ -136,7 +136,7 @@ public class Start {
                 logger.error("Error in sync solidity block" + t.getMessage(), t);
             }
         }, 5000, 5000, TimeUnit.MILLISECONDS);
-        //new Thread(() -> syncLoop(cfgArgs), logger.getName()).start();
+        // new Thread(() -> syncLoop(cfgArgs), logger.getName()).start();
     }
 
     public void setDbManager(Manager dbManager) {
@@ -227,7 +227,7 @@ public class Start {
     }
 
     public static void shutdown(final Application app) {
-        logger.info("********register application shutdown hook********");
+        logger.info("******** register application shutdown hook ********");
         Runtime.getRuntime().addShutdownHook(new Thread(app::shutdown));
     }
 }
