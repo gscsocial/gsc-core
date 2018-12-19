@@ -36,7 +36,6 @@ src/test/java/org/gsc/wallet/onlineStress
 src/test/java/org/gsc/wallet/wallettestp
 src/main/java/META-INF/
 src/main/resources/META-INF/
-src/main/resources/kay.conf
 /bin/
 
 # Eclipse IDE specific files and folders
