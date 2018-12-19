@@ -187,10 +187,6 @@ public class Args {
   @Setter
   private long nodeP2pPingInterval;
 
-//  @Getter
-//  @Setter
-//  private long syncNodeCount;
-
   @Getter
   @Setter
   private int nodeP2pVersion;
@@ -440,12 +436,12 @@ public class Args {
       INSTANCE.supportConstant = config.getBoolean("vm.supportConstant");
     }
 
-    if (config.hasPath("vm.minTimeRatio")) {
-      INSTANCE.minTimeRatio = config.getDouble("vm.minTimeRatio");
-    }
-
     if (config.hasPath("vm.maxTimeRatio")) {
       INSTANCE.maxTimeRatio = config.getDouble("vm.maxTimeRatio");
+    }
+    
+    if (config.hasPath("vm.minTimeRatio")) {
+      INSTANCE.minTimeRatio = config.getDouble("vm.minTimeRatio");
     }
 
     INSTANCE.storage = new Storage();
@@ -665,12 +661,6 @@ public class Args {
     return INSTANCE;
   }
 
-  /**
-   * Get storage path by name of database
-   *
-   * @param dbName name of database
-   * @return path of that database
-   */
   public String getOutputDirectoryByDbName(String dbName) {
     String path = storage.getPathByDbName(dbName);
     if (!StringUtils.isBlank(path)) {
@@ -679,9 +669,6 @@ public class Args {
     return getOutputDirectory();
   }
 
-  /**
-   * get output directory.
-   */
   public String getOutputDirectory() {
     if (!this.outputDirectory.equals("") && !this.outputDirectory.endsWith(File.separator)) {
       return this.outputDirectory + File.separator;

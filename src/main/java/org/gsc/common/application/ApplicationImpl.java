@@ -29,7 +29,6 @@ public class ApplicationImpl implements Application {
 
   private void resetP2PNode() {
     p2pNode.listen();
-    //p2pNode.connectToP2PNetWork();
     p2pNode.syncFrom(null);
   }
 
@@ -59,9 +58,6 @@ public class ApplicationImpl implements Application {
     services.init(args);
   }
 
-  /**
-   * start up the app.
-   */
   public void startup() {
     p2pNode.setNodeDelegate(nodeDelegate);
     resetP2PNode();

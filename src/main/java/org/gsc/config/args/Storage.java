@@ -30,14 +30,6 @@ import org.gsc.common.utils.FileUtil;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Custom storage configurations
- *
- * @author haoyouqiang
- * @version 1.0
- * @since 2018/5/25
- */
-
 public class Storage {
 
   /**
@@ -68,7 +60,6 @@ public class Storage {
 
   /**
    * Default values of db options:
-   * <p>
    * DEFAULT_COMPRESSION_TYPE: compressed with snappy
    * DEFAULT_BLOCK_SIZE:         4 KB =         4 * 1024 B
    * DEFAULT_WRITE_BUFFER_SIZE: 10 MB = 10 * 1024 * 1024 B
