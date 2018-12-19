@@ -45,6 +45,11 @@ public class CliApplication implements Application {
   public void shutdown() {
 
   }
+  
+  @Override
+  public void addService(Service service) {
+
+  }
 
   @Override
   public void startServices() {
@@ -57,18 +62,13 @@ public class CliApplication implements Application {
   }
 
   @Override
-  public Node getP2pNode() {
-    return null;
-  }
-
-  @Override
   public BlockStore getBlockStoreS() {
     return null;
   }
-
+  
   @Override
-  public void addService(Service service) {
-
+  public Node getP2pNode() {
+    return null;
   }
 
   @Override
