@@ -45,7 +45,7 @@ public class DefaultConfig {
     } else if (dbVersion == 2) {
       return new SnapshotManager();
     } else {
-      throw new RuntimeException("db version is error.");
+      throw new RuntimeException("DB version is error.");
     }
   }
 
