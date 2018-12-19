@@ -52,7 +52,6 @@ public class AssetIssueOperator extends AbstractOperator {
     try {
       AssetIssueContract assetIssueContract = contract.unpack(AssetIssueContract.class);
       byte[] ownerAddress = assetIssueContract.getOwnerAddress().toByteArray();
-      System.out.println(assetIssueContract.getDescription());
       AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
       /** start remove: Avoid duplicate name of token. */
       /*

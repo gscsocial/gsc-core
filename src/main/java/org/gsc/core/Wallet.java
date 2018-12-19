@@ -65,7 +65,6 @@ import org.gsc.protos.Protocol.Transaction.Result.code;
 import org.gsc.runtime.Runtime;
 import org.gsc.runtime.vm.program.ProgramResult;
 import org.gsc.runtime.vm.program.invoke.ProgramInvokeFactoryImpl;
-import org.gsc.services.http.JsonFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -241,9 +240,6 @@ public class Wallet {
   public Account getAccount(Account account) {
     AccountStore accountStore = dbManager.getAccountStore();
     AccountWrapper accountWrapper = accountStore.get(account.getAddress().toByteArray());
-    System.out.println("----------------------------getAccount-----------------------------------");
-    System.out.println(JsonFormat.printToString(accountWrapper.getInstance()));
-    System.out.println("----------------------------getAccount-----------------------------------");
     if (accountWrapper == null) {
       return null;
     }
@@ -476,7 +472,6 @@ public class Wallet {
         } else {
           countWitnessMap.put(voteAddress, voteCount);
         }
-        System.out.println("witness: " + countWitnessMap.get(voteAddress) + " votes: " + voteCount);
       });
     }
 
@@ -485,7 +480,6 @@ public class Wallet {
       Protocol.Vote.Builder vote = Protocol.Vote.newBuilder();
       vote.setVoteAddress(key).setVoteCount(value);
       countWitness.addVotes(vote.build());
-      System.out.println("--------------------witness: " + key + " votes: " + value);
     });
     return countWitness.build();
   }
@@ -660,9 +654,6 @@ public class Wallet {
     }
     AccountNetMessage.Builder builder = AccountNetMessage.newBuilder();
     AccountWrapper accountWrapper = dbManager.getAccountStore().get(accountAddress.toByteArray());
-    System.out.println("----------------------------getAccountNet-----------------------------------");
-    System.out.println(JsonFormat.printToString(accountWrapper.getInstance()));
-    System.out.println("----------------------------getAccountNet-----------------------------------");
     if (accountWrapper == null) {
       return null;
     }
@@ -684,21 +675,6 @@ public class Wallet {
       byte[] key = ByteArray.fromString(asset);
       assetNetLimitMap.put(asset, dbManager.getAssetIssueStore().get(key).getFreeAssetNetLimit());
     });
-
-    System.out.println("-----------------------------------------------------------------");
-    System.out.println("netLimit: " + netLimit);
-    System.out.println("freeNetLimit: " + freeNetLimit);
-    System.out.println("totalNetLimit: " + totalNetLimit);
-    System.out.println("totalNetWeight: " + totalNetWeight);
-    System.out.println("PUBLIC_NET_LIMIT: " + PUBLIC_NET_LIMIT);
-    System.out.println("PUBLIC_NET_TIME: " + PUBLIC_NET_TIME);
-    System.out.println("PUBLIC_NET_USAGE: " + PUBLIC_NET_USAGE);
-    System.out.println("ONE_DAY_NET_LIMIT: " + ONE_DAY_NET_LIMIT);
-    System.out.println("accountWrapper.getFreeNetUsage(): " + accountWrapper.getFreeNetUsage());
-    System.out.println("accountWrapper.getNetUsage(): " + accountWrapper.getNetUsage());
-    System.out.println("accountWrapper.getAllFreeAssetNetUsage(): " + accountWrapper.getAllFreeAssetNetUsage());
-    System.out.println("assetNetLimitMap: " + assetNetLimitMap);
-    System.out.println("-----------------------------------------------------------------");
 
     builder.setFreeNetUsed(accountWrapper.getFreeNetUsage())
         .setFreeNetLimit(freeNetLimit)
@@ -865,8 +841,6 @@ public class Wallet {
     Map<String, NodeHandler> nodeHandlerMap = new HashMap<>();
     for (NodeHandler handler : handlerList) {
       String key = handler.getNode().getHexId() + handler.getNode().getHost();
-      System.out.println("key: " + key);
-      System.out.println("handler: " + handler);
       nodeHandlerMap.put(key, handler);
     }
 
@@ -879,8 +853,6 @@ public class Wallet {
               Address.newBuilder()
                   .setHost(ByteString.copyFrom(ByteArray.fromString(node.getHost())))
                   .setPort(node.getPort())));
-          System.out.println("Host: " + node.getHost());
-          System.out.println("Port: " + node.getPort());
         });
     return nodeListBuilder.build();
   }

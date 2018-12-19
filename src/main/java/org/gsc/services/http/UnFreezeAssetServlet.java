@@ -28,7 +28,6 @@ public class UnFreezeAssetServlet extends HttpServlet {
 
   protected void doPost(HttpServletRequest request, HttpServletResponse response) {
     try {
-      System.out.println("================================================");
       String contract = request.getReader().lines()
           .collect(Collectors.joining(System.lineSeparator()));
       Contract.UnfreezeAssetContract.Builder build = Contract.UnfreezeAssetContract.newBuilder();
