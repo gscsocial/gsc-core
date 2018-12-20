@@ -37,5 +37,4 @@ public class TransactionsMessage extends GSCMessage {
   public Class<?> getAnswerMessage() {
     return null;
   }
-
 }
