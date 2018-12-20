@@ -35,15 +35,12 @@ public class TransactionUtil {
     }
     TransferContract transferContract = TransferContract.newBuilder()
         .setAmount(value)
-        .setOwnerAddress(ByteString.copyFrom("0xfffffffffffffffffffff".getBytes()))
+        .setOwnerAddress(ByteString.copyFrom("0x000000000000000000000".getBytes()))
         .setToAddress(ByteString.copyFrom(key))
         .build();
 
     Transaction transaction = new TransactionWrapper(transferContract,
             Contract.ContractType.TransferContract).getInstance();
-    Transaction.raw raw = transaction
-            .getRawData().toBuilder().setData(ByteString.copyFromUtf8("this is the 1st transaction")).build();
-    transaction = transaction.toBuilder().setRawData(raw).build();
     return transaction;
   }
 
