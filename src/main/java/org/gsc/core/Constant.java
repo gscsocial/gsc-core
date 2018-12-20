@@ -31,8 +31,7 @@ public class Constant {
   public static final String TESTNET_CONF = "config.conf";
 
   public static final String LOCAL_TESTNET_CONF = "config-localtest.conf";
-  public static final String TEST_NET_CONF = "config-test-net.conf";
-  
+
   //config for junit test
   public static final String TEST_CONF = "config-test.conf";
 

@@ -23,7 +23,7 @@ public class FullNode {
     System.out.println("***************************Starting GSC Node***************************");
     System.out.println("***********************************************************************");
     logger.info("GSC node running...");
-    Args.setParam(args, Constant.KAY_CONF);
+    Args.setParam(args, Constant.TESTNET_CONF);
     Args cfgArgs = Args.getInstance();
 
     Args.getInstance().setDebug(true);
