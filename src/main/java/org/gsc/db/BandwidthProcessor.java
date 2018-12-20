@@ -294,7 +294,6 @@ public class BandwidthProcessor extends ResourceProcessor {
     dbManager.getAssetIssueStore().put(assetIssueWrapper.createDbKey(), assetIssueWrapper);
 
     return true;
-
   }
 
   public long calculateGlobalNetLimit(long frozeBalance) {
@@ -368,7 +367,6 @@ public class BandwidthProcessor extends ResourceProcessor {
     dbManager.getDynamicPropertiesStore().savePublicNetTime(publicNetTime);
     dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     return true;
-
   }
 
 }
