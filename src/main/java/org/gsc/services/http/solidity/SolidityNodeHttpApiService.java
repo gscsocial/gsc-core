@@ -77,7 +77,7 @@ public class SolidityNodeHttpApiService implements Service {
       context.addServlet(new ServletHolder(getNowBlockServlet), "/walletsolidity/getnowblock");
       context.addServlet(new ServletHolder(getBlockByNumServlet), "/walletsolidity/getblockbynum");
 
-      // only for SolidityNode
+      // only for
       context.addServlet(new ServletHolder(getTransactionByIdServlet),
           "/walletsolidity/gettransactionbyid");
       context

@@ -67,7 +67,7 @@ public class Start {
             ApplicationContext context = new GSCApplicationContext(DefaultConfig.class);
 
             Application appT = ApplicationFactory.create(context);
-            FullNode.shutdown(appT);
+            shutdown(appT);
 
             // appT.init(cfgArgs);
             RpcApiService rpcApiService = context.getBean(RpcApiService.class);
