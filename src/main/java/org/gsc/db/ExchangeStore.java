@@ -25,9 +25,6 @@ public class ExchangeStore extends GSCStoreWithRevoking<ExchangeWrapper> {
     return new ExchangeWrapper(value);
   }
 
-  /**
-   * get all exchanges.
-   */
   public List<ExchangeWrapper> getAllExchanges() {
     return Streams.stream(iterator())
         .map(Map.Entry::getValue)
