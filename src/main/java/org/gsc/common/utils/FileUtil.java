@@ -69,9 +69,7 @@ public class FileUtil {
   public static boolean recursiveDelete(String fileName) {
     File file = new File(fileName);
     if (file.exists()) {
-      // check if the file is a directory
       if (file.isDirectory()) {
-        // call deletion of file individually
         Arrays.stream(Objects.requireNonNull(file.list()))
             .map(s -> fileName + System.getProperty("file.separator") + s)
             .forEachOrdered(FileUtil::recursiveDelete);
