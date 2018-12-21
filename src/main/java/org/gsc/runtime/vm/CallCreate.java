@@ -17,10 +17,6 @@
  */
 package org.gsc.runtime.vm;
 
-/**
- * @author Roman Mandeleil
- * @since 03.07.2014
- */
 public class CallCreate {
 
   private final byte[] data;
