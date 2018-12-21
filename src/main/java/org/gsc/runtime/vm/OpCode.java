@@ -586,20 +586,20 @@ public enum OpCode {
     RETURN(0xf3, 2, 0, OpCode.Tier.ZeroTier),
 
     /**
-     * (0xf4)  similar in idea to CALLCODE, except that it propagates the sender and value
-     *  from the parent scope to the child scope, ie. the call created has the same sender
-     *  and value as the original call.
-     *  also the Value parameter is omitted for this opCode
-     */
-    DELEGATECALL(0xf4, 6, 1, OpCode.Tier.SpecialTier, CallFlags.Call, CallFlags.Stateless, CallFlags.Delegate),
-
-    /**
      *  opcode that can be used to call another contract (or itself) while disallowing any
      *  modifications to the state during the call (and its subcalls, if present).
      *  Any opcode that attempts to perform such a modification (see below for details)
      *  will result in an exception instead of performing the modification.
      */
     STATICCALL(0xfa, 6, 1, OpCode.Tier.SpecialTier, CallFlags.Call, CallFlags.Static),
+
+    /**
+     * (0xf4)  similar in idea to CALLCODE, except that it propagates the sender and value
+     *  from the parent scope to the child scope, ie. the call created has the same sender
+     *  and value as the original call.
+     *  also the Value parameter is omitted for this opCode
+     */
+    DELEGATECALL(0xf4, 6, 1, OpCode.Tier.SpecialTier, CallFlags.Call, CallFlags.Stateless, CallFlags.Delegate),
 
     /**
      * (0xfd) The `REVERT` instruction will stop execution, roll back all state changes done so far
