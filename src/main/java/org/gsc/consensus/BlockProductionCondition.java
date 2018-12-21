@@ -8,8 +8,8 @@ public enum  BlockProductionCondition {
   NOT_TIME_YET,       // Not yet arrived
   NO_PRIVATE_KEY,
   LOW_PARTICIPATION,
-  LAG,
   CONSECUTIVE,
+  LAG,
   TIME_OUT,
   BACKUP_STATUS_IS_NOT_MASTER,
   EXCEPTION_PRODUCING_BLOCK
