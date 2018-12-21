@@ -241,9 +241,6 @@ public class Wallet {
   public Account getAccount(Account account) {
     AccountStore accountStore = dbManager.getAccountStore();
     AccountWrapper accountWrapper = accountStore.get(account.getAddress().toByteArray());
-    System.out.println("----------------------------getAccount-----------------------------------");
-    System.out.println(JsonFormat.printToString(accountWrapper.getInstance()));
-    System.out.println("----------------------------getAccount-----------------------------------");
     if (accountWrapper == null) {
       return null;
     }
@@ -421,7 +418,7 @@ public class Wallet {
     } catch (TaposException e) {
       logger.info("tapos error" + e.getMessage());
       return builder.setResult(false).setCode(response_code.TAPOS_ERROR)
-          .setMessage(ByteString.copyFromUtf8("Tapos check error"))
+          .setMessage(ByteString.copyFromUtf8("Tapos check error check error"))
           .build();
     } catch (TooBigTransactionException e) {
       logger.info("transaction error" + e.getMessage());

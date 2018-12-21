@@ -128,10 +128,10 @@ public class FreezeBalanceOperator extends AbstractOperator {
       throw new ContractValidateException("frozenBalance must be more than 1GSC");
     }
 
-    int frozenCount = accountWrapper.getFrozenCount();
-    if (!(frozenCount == 0 || frozenCount == 1)) {
-      throw new ContractValidateException("frozenCount must be 0 or 1");
-    }
+//    int frozenCount = accountWrapper.getFrozenCount();
+//    if (!(frozenCount == 0 || frozenCount == 1)) {
+//      throw new ContractValidateException("frozenCount must be 0 or 1");
+//    }
     if (frozenBalance > accountWrapper.getBalance()) {
       throw new ContractValidateException("frozenBalance must be less than accountBalance");
     }

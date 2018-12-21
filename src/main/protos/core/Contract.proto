@@ -125,7 +125,7 @@ enum ResourceCode {
   ENERGY = 0x01;
 }
 enum UnfreezeCode {
-  ACTIVATE = 0X00; // active the fronzen balance, after frozen balance
+  ACTIVATE = 0x00; // active the fronzen balance, after frozen balance
   RECOVER = 0x01; // be able to withdraw the active balance after 3 days
 }
 

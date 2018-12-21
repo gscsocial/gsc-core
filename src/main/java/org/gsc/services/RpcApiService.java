@@ -1160,13 +1160,6 @@ public class RpcApiService implements Service {
         }
 
         @Override
-        public void getWitnessVoteStatistics(EmptyMessage request,
-                                             StreamObserver<GrpcAPI.VoteStatistics> responseObserver){
-            responseObserver.onNext(wallet.getWitnessVoteStatistics());
-            responseObserver.onCompleted();
-        }
-
-        @Override
         public void getAccountResource(Account request,
                                        StreamObserver<AccountResourceMessage> responseObserver) {
             ByteString fromBs = request.getAddress();
