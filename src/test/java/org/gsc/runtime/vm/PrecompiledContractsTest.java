@@ -46,10 +46,10 @@ public class PrecompiledContractsTest {
   // common
   private static final DataWord voteContractAddr = new DataWord(
       "0000000000000000000000000000000000000000000000000000000000010001");
-//  private static final DataWord freezeBalanceAddr = new DataWord(
-//      "0000000000000000000000000000000000000000000000000000000000010002");
-//  private static final DataWord unFreezeBalanceAddr = new DataWord(
-//      "0000000000000000000000000000000000000000000000000000000000010003");
+  private static final DataWord freezeBalanceAddr = new DataWord(
+      "0000000000000000000000000000000000000000000000000000000000010002");
+  private static final DataWord unFreezeBalanceAddr = new DataWord(
+      "0000000000000000000000000000000000000000000000000000000000010003");
   private static final DataWord withdrawBalanceAddr = new DataWord(
       "0000000000000000000000000000000000000000000000000000000000010004");
   private static final DataWord proposalApproveAddr = new DataWord(
