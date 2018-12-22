@@ -17,14 +17,14 @@ public class TransactionsMessage extends GSCMessage {
     this.data = this.transactions.toByteArray();
   }
 
+  public Protocol.Transactions getTransactions() {
+    return transactions;
+  }
+  
   public TransactionsMessage(byte[] data) throws Exception {
     this.type = MessageTypes.TRXS.asByte();
     this.data = data;
     this.transactions = Protocol.Transactions.parseFrom(data);
-  }
-
-  public Protocol.Transactions getTransactions() {
-    return transactions;
   }
 
   @Override
