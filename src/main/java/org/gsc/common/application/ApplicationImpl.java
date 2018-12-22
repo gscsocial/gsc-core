@@ -86,13 +86,13 @@ public class ApplicationImpl implements Application {
   }
 
   @Override
-  public Node getP2pNode() {
-    return p2pNode;
+  public BlockStore getBlockStoreS() {
+    return blockStoreDb;
   }
 
   @Override
-  public BlockStore getBlockStoreS() {
-    return blockStoreDb;
+  public Node getP2pNode() {
+    return p2pNode;
   }
 
   @Override
