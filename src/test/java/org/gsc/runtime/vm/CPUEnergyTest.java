@@ -228,9 +228,6 @@ public class CPUEnergyTest {
             deposit, null);
   }
 
-  /**
-   * Release resources.
-   */
   @After
   public void destroy() {
     Args.clearParam();
