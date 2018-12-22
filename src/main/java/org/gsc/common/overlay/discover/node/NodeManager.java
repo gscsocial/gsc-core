@@ -259,9 +259,7 @@ public class NodeManager implements EventHandler {
     ArrayList<NodeHandler> filtered = new ArrayList<>();
     synchronized (this) {
       for (NodeHandler handler : nodeHandlerMap.values()) {
-        System.out.println("...................getNodes: " + handler.getNode().getPort());
         if (predicate.test(handler)) {
-          System.out.println("...................getNodes: " + handler.getNode().getPort());
           filtered.add(handler);
         }
       }
@@ -283,7 +281,6 @@ public class NodeManager implements EventHandler {
     for (NodeHandler handler :
         this.nodeHandlerMap.values()) {
       if (!isNodeAlive(handler)) {
-       // System.out.println("**************************************************: "+ handler.getNode().getPort());
         handlers.add(handler);
       }
     }
@@ -300,7 +297,6 @@ public class NodeManager implements EventHandler {
   private synchronized void processListeners() {
 
     nodeHandlerMap.values().forEach(nodeHandler -> System.out.println("NodeHandlerMap: " + nodeHandler.toString()));
-    //System.out.println("processListeners: " + listeners.values());
     for (ListenerHandler handler : listeners.values()) {
       try {
         //System.out.println("...processListeners...");
@@ -312,7 +308,6 @@ public class NodeManager implements EventHandler {
   }
 
   public synchronized void addDiscoverListener(DiscoverListener listener, Predicate<NodeStatistics> filter) {
-    //System.out.println("Add node.....................................................");
     listeners.put(listener, new ListenerHandler(listener, filter));
   }
 
@@ -365,10 +360,8 @@ public class NodeManager implements EventHandler {
 
     void checkAll() {
       for (NodeHandler handler : nodeHandlerMap.values()) {
-        //System.out.println("NodeHandlerMap: " + nodeHandlerMap.values());
         boolean has = discoveredNodes.containsKey(handler);
         boolean test = filter.test(handler.getNodeStatistics());
-        //System.out.println("??????????????????????filter.test checkAll: ");
         if (!has && test) {
           listener.nodeAppeared(handler);
           discoveredNodes.put(handler, null);

@@ -71,7 +71,6 @@ public class P2pHandler extends SimpleChannelInboundHandler<P2pMessage> {
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, P2pMessage msg) throws InterruptedException {
 
-        System.out.println("++++++++++++++++ P2pHandler: " + msg.getType() + "++++++++++++++++");
         msgQueue.receivedMessage(msg);
         MessageStatistics messageStatistics = channel.getNodeStatistics().messageStatistics;
         switch (msg.getType()) {

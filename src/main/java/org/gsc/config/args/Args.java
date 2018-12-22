@@ -404,7 +404,6 @@ public class Args {
           String fileName = System.getProperty("user.dir") + "/" + localwitness.get(0);
           String password;
           if (StringUtils.isEmpty(INSTANCE.password)) {
-            System.out.println("Please input your password.");
             password = WalletUtils.inputPassword();
           } else {
             password = INSTANCE.password;

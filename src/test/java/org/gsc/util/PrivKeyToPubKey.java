@@ -346,7 +346,6 @@ public class PrivKeyToPubKey {
         String str = "http://Mercury.org";
         logger.info("---------------------------------------------");
         System.out.println();
-        System.out.println("Hex String: " + Hex.toHexString(str.getBytes()));
         System.out.println();
         logger.info("---------------------------------------------");
     }
