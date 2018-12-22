@@ -212,7 +212,8 @@ public class PrivKeyToPubKey {
     public void getToken(){
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub blockingStub = null;
-        String startNode = "39.105.18.104:50051";
+        String startNode = "47.254.25.183:50051";
+        //String startNode = "127.0.0.1:5005";
         channel = ManagedChannelBuilder.forTarget(startNode).usePlaintext(true).build();
         blockingStub = WalletGrpc.newBlockingStub(channel);
 
@@ -224,9 +225,11 @@ public class PrivKeyToPubKey {
 
         String k = "26698e9ecabb5d78041c513bf69fdda6b87eb0a5b8 GTU4DhZeZy8ouQdP3CDtQrXaNyzyasQ8r1";
         byte[] address = Wallet.decodeFromBase58Check("GTU4DhZeZy8ouQdP3CDtQrXaNyzyasQ8r1");
-        Protocol.Account account = blockingStub.getAccount(Protocol.Account.newBuilder().setAddress(ByteString.
-                copyFrom(address)).build());
-        System.out.println(account.toString());
+        ByteString bb = ByteString.copyFrom(address);
+        //Protocol.Account account = blockingStub.getAccount(Protocol.Account.newBuilder().setAddress(bb).build());
+        //System.out.println(account.toString());
+        GrpcAPI.AccountNetMessage accountNetMessage = blockingStub.getAccountNet(Protocol.Account.newBuilder().setAddress(bb).build());
+        System.out.println(accountNetMessage.toString());
     }
 
     @Test
@@ -242,7 +245,7 @@ public class PrivKeyToPubKey {
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub blockingStub = null;
 
-        String startNode = "127.0.0.1:50051";
+        String startNode = "127.0.0.1:5005";
         channel = ManagedChannelBuilder.forTarget(startNode).usePlaintext(true).build();
         blockingStub = WalletGrpc.newBlockingStub(channel);
 
@@ -269,7 +272,7 @@ public class PrivKeyToPubKey {
         //String node = "127.0.0.1:50051";
 
         byte[] ownerAddress = Hex.decode(Wallet.decodeFromBase58Check("GbL3RrNATonfkBqJ8FYsd4dmWvFRjti8GR"));
-        String node = "47.254.71.98:50051";
+        String node = "47.254.71.98:5005";
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub blockingStub = null;
         channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();

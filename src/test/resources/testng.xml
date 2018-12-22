@@ -10,8 +10,5 @@
                     <package name="org.gsc.wallet.*">
                     </package>
                 </packages>
-<!--        <classes>
-            <class name="org.gsc.wallet.onlinestress.TestNetErc721Cat"/>
-        </classes>-->
     </test>
 </suite>
