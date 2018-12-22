@@ -41,9 +41,9 @@ public class BackupManager implements EventHandler{
 
   private volatile BackupStatusEnum status = MASTER;
 
-  private volatile long lastKeepAliveTime;
-
   private volatile long keepAliveTimeout = 3000;
+  
+  private volatile long lastKeepAliveTime;
 
   private volatile boolean isInit = false;
 

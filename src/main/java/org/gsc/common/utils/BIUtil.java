@@ -66,7 +66,6 @@ public class BIUtil {
     return valueA.compareTo(valueB) > 0;
   }
 
-
   /**
    * @param valueA - not null
    * @param valueB - not null
@@ -75,7 +74,6 @@ public class BIUtil {
   public static BigInteger sum(BigInteger valueA, BigInteger valueB){
     return valueA.add(valueB);
   }
-
 
   /**
    * @param data = not null
@@ -92,7 +90,6 @@ public class BIUtil {
   public static BigInteger toBI(long data){
     return BigInteger.valueOf(data);
   }
-
 
   public static boolean isPositive(BigInteger value){
     return value.signum() > 0;

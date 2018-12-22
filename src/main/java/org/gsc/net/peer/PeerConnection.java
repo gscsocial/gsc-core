@@ -241,14 +241,14 @@ public class PeerConnection extends Channel {
     this.invWeAdv = invWeAdv;
   }
 
-  public boolean getSyncFlag() {
-    return syncFlag;
-  }
-
   public void setSyncFlag(boolean syncFlag) {
     this.syncFlag = syncFlag;
   }
 
+  public boolean getSyncFlag() {
+    return syncFlag;
+  }
+  
   public String logSyncStats() {
     return String.format(
         "Peer %s: [ %18s, ping %6s ms]-----------\n"

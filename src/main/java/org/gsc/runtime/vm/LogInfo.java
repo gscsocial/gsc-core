@@ -66,12 +66,12 @@ public class LogInfo {
         this.data = (data != null) ? data : new byte[]{};
     }
 
-    public byte[] getAddress() {
-        return address;
-    }
-
     public List<DataWord> getTopics() {
         return topics;
+    }
+    
+    public byte[] getAddress() {
+        return address;
     }
 
     public byte[] getData() {
@@ -80,7 +80,6 @@ public class LogInfo {
 
     /*  [address, [topic, topic ...] data] */
     public byte[] getEncoded() {
-
         /*
         byte[] addressEncoded = RLP.encodeElement(this.address);
 

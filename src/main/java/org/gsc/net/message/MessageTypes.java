@@ -29,9 +29,9 @@ public enum MessageTypes {
 
   FETCH_BLOCK_HEADERS(0x11),
 
-  BLOCK_INVENTORY(0x12),
-
   TRX_INVENTORY(0x13),
+  
+  BLOCK_INVENTORY(0x12),
 
   P2P_HELLO(0x20),
 

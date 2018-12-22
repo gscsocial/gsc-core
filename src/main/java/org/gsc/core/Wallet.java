@@ -126,12 +126,12 @@ public class Wallet {
     return addressPreFixString;
   }
 
-  public static void setAddressPreFixString(String addressPreFixString) {
-    Wallet.addressPreFixString = addressPreFixString;
-  }
-
   public static byte getAddressPreFixByte() {
     return addressPreFixByte;
+  }
+  
+  public static void setAddressPreFixString(String addressPreFixString) {
+    Wallet.addressPreFixString = addressPreFixString;
   }
 
   public static void setAddressPreFixByte(byte addressPreFixByte) {

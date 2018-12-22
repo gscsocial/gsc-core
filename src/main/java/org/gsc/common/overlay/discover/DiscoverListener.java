@@ -22,8 +22,6 @@ import org.gsc.common.overlay.discover.node.NodeManager;
 
 /**
  * Allows to handle discovered nodes state changes
- *
- * Created by Anton Nashatyrev on 21.07.2015.
  */
 public interface DiscoverListener {
 

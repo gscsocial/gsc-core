@@ -122,6 +122,15 @@ public final class VMUtils {
         return compress(content.getBytes("UTF-8"));
     }
 
+    public static String zipAndEncode(String content) {
+        try {
+            return encodeBase64String(compress(content));
+        } catch (Exception e) {
+            LOGGER.error("Cannot zip or encode: ", e);
+            return content;
+        }
+    }
+    
     public static byte[] decompress(byte[] data) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(data.length);
 
@@ -131,15 +140,6 @@ public final class VMUtils {
         write(in, out, BUF_SIZE);
 
         return baos.toByteArray();
-    }
-
-    public static String zipAndEncode(String content) {
-        try {
-            return encodeBase64String(compress(content));
-        } catch (Exception e) {
-            LOGGER.error("Cannot zip or encode: ", e);
-            return content;
-        }
     }
 
     public static String unzipAndDecode(String content) {

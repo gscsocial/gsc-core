@@ -21,12 +21,12 @@ public class BlockMessage extends GSCMessage {
     this.block = block;
   }
 
-  public BlockId getBlockId() {
-    return getBlockCapsule().getBlockId();
-  }
-
   public BlockWrapper getBlockCapsule() {
     return block;
+  }
+  
+  public BlockId getBlockId() {
+    return getBlockCapsule().getBlockId();
   }
 
   @Override

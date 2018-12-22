@@ -20,10 +20,10 @@ public class DefaultConfig {
   private static Logger logger = LoggerFactory.getLogger("general");
 
   @Autowired
-  ApplicationContext appCtx;
-
-  @Autowired
   CommonConfig commonConfig;
+  
+  @Autowired
+  ApplicationContext appCtx;
 
   public DefaultConfig() {
     Thread.setDefaultUncaughtExceptionHandler((t, e) -> logger.error("Uncaught exception", e));

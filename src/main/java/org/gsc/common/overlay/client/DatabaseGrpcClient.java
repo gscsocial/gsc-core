@@ -13,20 +13,19 @@ public class DatabaseGrpcClient {
   private final ManagedChannel channel;
   private final DatabaseGrpc.DatabaseBlockingStub databaseBlockingStub;
 
-  public DatabaseGrpcClient(String host, int port) {
-    channel = ManagedChannelBuilder.forAddress(host, port)
-        .usePlaintext(true)
-        .build();
-    databaseBlockingStub = DatabaseGrpc.newBlockingStub(channel);
-  }
-
   public DatabaseGrpcClient(String host) {
     channel = ManagedChannelBuilder.forTarget(host)
         .usePlaintext(true)
         .build();
     databaseBlockingStub = DatabaseGrpc.newBlockingStub(channel);
   }
-
+  
+  public DatabaseGrpcClient(String host, int port) {
+    channel = ManagedChannelBuilder.forAddress(host, port)
+        .usePlaintext(true)
+        .build();
+    databaseBlockingStub = DatabaseGrpc.newBlockingStub(channel);
+  }
 
   public Block getBlock(long blockNum) {
     if (blockNum < 0) {

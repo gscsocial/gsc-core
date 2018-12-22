@@ -60,8 +60,8 @@ public interface Parameter {
     MAINTENANCE_TIME_INTERVAL, //ms  ,0
     ACCOUNT_UPGRADE_COST, //drop ,1
     CREATE_ACCOUNT_FEE, //drop ,2
-    TRANSACTION_FEE, //drop ,3
     ASSET_ISSUE_FEE, //drop ,4
+    TRANSACTION_FEE, //drop ,3
     WITNESS_PAY_PER_BLOCK, //drop ,5
     WITNESS_STANDBY_ALLOWANCE, //drop ,6
     CREATE_NEW_ACCOUNT_FEE_IN_SYSTEM_CONTRACT, //drop ,7

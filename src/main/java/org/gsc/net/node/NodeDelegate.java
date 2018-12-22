@@ -34,10 +34,10 @@ public interface NodeDelegate {
   
   void syncToCli(long unSyncNum);
 
-  BlockId getHeadBlockId();
-
   BlockId getSolidBlockId();
 
+  BlockId getHeadBlockId();
+  
   boolean contain(Sha256Hash hash, MessageTypes type);
 
   boolean containBlock(BlockId id);
