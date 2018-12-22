@@ -57,11 +57,6 @@ public class InheritanceTest {
    *         return "foo";
    *     }
    * }
-   *
-   * contract bar is foo {
-   *     function getName()  returns (string) { return "bar"; }
-   *     function getId() returns(uint256){return id;}
-   * }
    */
   @Test
   public void inheritanceTest()
@@ -130,13 +125,13 @@ public class InheritanceTest {
   @AfterClass
   public static void destroy() {
     Args.clearParam();
-    /*
+   
     if (FileUtil.deleteDir(new File(dbPath))) {
       logger.info("Release resources successful.");
     } else {
       logger.info("Release resources failure.");
     }
-    */
+    
     context.destroy();
   }
 }
