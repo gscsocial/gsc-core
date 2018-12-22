@@ -32,9 +32,6 @@ public class GenesisBlock implements Serializable {
     this.number = "0";
   }
 
-  /**
-   * return default genesis block.
-   */
   public static GenesisBlock getDefault() {
     final GenesisBlock genesisBlock = new GenesisBlock();
     List<Account> assets = Collections.emptyList();
@@ -47,9 +44,6 @@ public class GenesisBlock implements Serializable {
     return genesisBlock;
   }
 
-  /**
-   * Empty assets.
-   */
   public void setAssets(final List<Account> assets) {
     this.assets = assets;
 
@@ -58,9 +52,6 @@ public class GenesisBlock implements Serializable {
     }
   }
 
-  /**
-   * Timestamp >= 0.
-   */
   public void setTimestamp(final String timestamp) {
     this.timestamp = timestamp;
 
@@ -78,9 +69,6 @@ public class GenesisBlock implements Serializable {
     }
   }
 
-  /**
-   * Set parent hash.
-   */
   public void setParentHash(final String parentHash) {
     this.parentHash = parentHash;
 
@@ -93,9 +81,6 @@ public class GenesisBlock implements Serializable {
     this.number = "0";
   }
 
-  /**
-   * Empty witnesses.
-   */
   public void setWitnesses(final List<Witness> witnesses) {
     this.witnesses = witnesses;
 
