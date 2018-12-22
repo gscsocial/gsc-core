@@ -649,6 +649,7 @@ public class Wallet {
   }
 
   public AccountNetMessage getAccountNet(ByteString accountAddress) {
+    System.out.println("accountAddress");
     if (accountAddress == null || accountAddress.isEmpty()) {
       return null;
     }
