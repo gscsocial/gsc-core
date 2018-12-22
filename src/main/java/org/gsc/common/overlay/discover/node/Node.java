@@ -67,13 +67,6 @@ public class Node implements Serializable {
     return node;
   }
 
-  public String getEnodeURL() {
-    return new StringBuilder("enode://")
-        .append(ByteArray.toHexString(id)).append("@")
-        .append(host).append(":")
-        .append(port).toString();
-  }
-
   public Node(String enodeURL) {
     try {
       URI uri = new URI(enodeURL);
@@ -88,6 +81,13 @@ public class Node implements Serializable {
     }
   }
 
+  public String getEnodeURL() {
+    return new StringBuilder("enode://")
+        .append(ByteArray.toHexString(id)).append("@")
+        .append(host).append(":")
+        .append(port).toString();
+  }
+  
   public Node(byte[] id, String host, int port) {
     if (id != null) {
       this.id = id.clone();
