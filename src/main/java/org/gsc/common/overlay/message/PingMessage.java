@@ -21,7 +21,6 @@ public class PingMessage extends P2pMessage {
     return FIXED_PAYLOAD;
   }
 
-
   @Override
   public String toString() {
     return super.toString();
