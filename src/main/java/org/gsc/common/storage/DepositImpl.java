@@ -77,14 +77,13 @@ public class DepositImpl implements Deposit {
     return dbManager.getVotesStore();
   }
 
-  private AccountStore getAccountStore() {
-    return dbManager.getAccountStore();
-  }
-
   private CodeStore getCodeStore() {
     return dbManager.getCodeStore();
   }
-
+  
+  private AccountStore getAccountStore() {
+    return dbManager.getAccountStore();
+  }
   private StorageRowStore getStorageRowStore() {
     return dbManager.getStorageRowStore();
   }
