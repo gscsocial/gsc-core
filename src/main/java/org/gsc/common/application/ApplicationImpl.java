@@ -49,13 +49,13 @@ public class ApplicationImpl implements Application {
   }
 
   @Override
-  public void addService(Service service) {
-    services.add(service);
-  }
-
-  @Override
   public void initServices(Args args) {
     services.init(args);
+  }
+  
+  @Override
+  public void addService(Service service) {
+    services.add(service);
   }
 
   public void startup() {
