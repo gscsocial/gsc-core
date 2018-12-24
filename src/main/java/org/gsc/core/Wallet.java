@@ -122,14 +122,14 @@ public class Wallet {
     return ecKey.getAddress();
   }
 
-  public static String getAddressPreFixString() {
-    return addressPreFixString;
-  }
-
   public static byte getAddressPreFixByte() {
     return addressPreFixByte;
   }
   
+  public static String getAddressPreFixString() {
+    return addressPreFixString;
+  }
+
   public static void setAddressPreFixString(String addressPreFixString) {
     Wallet.addressPreFixString = addressPreFixString;
   }
@@ -232,7 +232,6 @@ public class Wallet {
     if (!addressValid(address)) {
       return null;
     }
-
     return address;
   }
 
@@ -309,8 +308,6 @@ public class Wallet {
       try {
         Contract.WitnessCreateContract witnessCreateContract = any.unpack(Contract.WitnessCreateContract.class);
         ByteString ownerAddress = witnessCreateContract.getOwnerAddress();
-        //this.
-
       } catch (InvalidProtocolBufferException e) {
         e.printStackTrace();
         logger.error("Generate WitnessCreateContract error!");
@@ -898,7 +895,7 @@ public class Wallet {
     //trace.exec(runtime);
 
     if (runtime.getResult().getException() != null) {
-//          runtime.getResult().getException().printStackTrace();
+    // runtime.getResult().getException().printStackTrace();
       throw new RuntimeException("Runtime exe failed!");
     }
 
@@ -952,7 +949,7 @@ public class Wallet {
       runtime.finalization();
       // TODO exception
       if (runtime.getResult().getException() != null) {
-//          runtime.getResult().getException().printStackTrace();
+      //  runtime.getResult().getException().printStackTrace();
         throw new RuntimeException("Runtime exe failed!");
       }
 
