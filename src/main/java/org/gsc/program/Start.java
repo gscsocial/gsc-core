@@ -134,10 +134,6 @@ public class Start {
         }, 5000, 5000, TimeUnit.MILLISECONDS);
     }
 
-    public void setDbManager(Manager dbManager) {
-        this.dbManager = dbManager;
-    }
-
     private void initGrpcClient(String addr) {
         try {
             databaseGrpcClient = new DatabaseGrpcClient(addr);
@@ -147,6 +143,10 @@ public class Start {
         }
     }
 
+    public void setDbManager(Manager dbManager) {
+        this.dbManager = dbManager;
+    }
+    
     private void syncSolidityBlock() throws BadBlockException {
         DynamicProperties remoteDynamicProperties = databaseGrpcClient.getDynamicProperties();
         long remoteLastSolidityBlockNum = remoteDynamicProperties.getLastSolidityBlockNum();
