@@ -166,7 +166,7 @@ public class Start {
                         try {
                             ret = dbManager.getTransactionHistoryStore().get(trx.getTransactionId().getBytes());
                         } catch (BadItemException ex) {
-                            logger.warn(" ", ex);
+                            logger.warn("Transaction History Store: ", ex);
                             continue;
                         }
                         ret.setBlockNumber(blockWrapper.getNum());
