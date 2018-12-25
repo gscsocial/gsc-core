@@ -63,7 +63,6 @@ public class MessageHandler extends SimpleChannelInboundHandler<UdpEvent>
         udpEvent.getMessage().getType(),
         udpEvent.getMessage().getSendData().length,
         udpEvent.getAddress());
-    System.out.println("accept");
     InetSocketAddress address = udpEvent.getAddress();
     sendPacket(udpEvent.getMessage().getSendData(), address);
   }

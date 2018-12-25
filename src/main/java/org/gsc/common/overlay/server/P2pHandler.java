@@ -17,25 +17,23 @@
  */
 package org.gsc.common.overlay.server;
 
-import static org.gsc.common.overlay.message.StaticMessages.PING_MESSAGE;
-import static org.gsc.common.overlay.message.StaticMessages.PONG_MESSAGE;
-
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.gsc.common.overlay.discover.node.statistics.MessageStatistics;
+import org.gsc.common.overlay.message.DisconnectMessage;
+import org.gsc.common.overlay.message.P2pMessage;
+import org.gsc.protos.Protocol.ReasonCode;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
-import org.gsc.common.overlay.discover.node.statistics.MessageStatistics;
-import org.gsc.common.overlay.discover.node.statistics.NodeStatistics;
-import org.gsc.common.overlay.message.DisconnectMessage;
-import org.gsc.common.overlay.message.P2pMessage;
-import org.gsc.protos.Protocol.ReasonCode;
+import static org.gsc.common.overlay.message.StaticMessages.PING_MESSAGE;
+import static org.gsc.common.overlay.message.StaticMessages.PONG_MESSAGE;
 
 @Slf4j
 @Component
@@ -71,7 +69,6 @@ public class P2pHandler extends SimpleChannelInboundHandler<P2pMessage> {
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, P2pMessage msg) throws InterruptedException {
 
-        System.out.println("++++++++++++++++ P2pHandler: " + msg.getType() + "++++++++++++++++");
         msgQueue.receivedMessage(msg);
         MessageStatistics messageStatistics = channel.getNodeStatistics().messageStatistics;
         switch (msg.getType()) {
@@ -110,7 +107,6 @@ public class P2pHandler extends SimpleChannelInboundHandler<P2pMessage> {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("-----------------------channelInactive------------------------------");
     }
 
     @Override

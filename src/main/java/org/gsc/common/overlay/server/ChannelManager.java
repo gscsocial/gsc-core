@@ -87,7 +87,6 @@ public class ChannelManager {
 
   public void notifyDisconnect(Channel channel) {
     syncPool.onDisconnect(channel);
-    activePeers.values().forEach(peer -> System.out.println("Disconnect: " + peer.getNode().getPort()));
     activePeers.values().remove(channel);
     if (channel != null) {
       if (channel.getNodeStatistics() != null) {

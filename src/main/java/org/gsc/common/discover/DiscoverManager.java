@@ -87,7 +87,6 @@ public class DiscoverManager implements EventHandler {
 
           if (status.equals(SLAVER)){
             setStatus(INIT);
-            System.out.println("INIT");
 
             lastKeepAliveTime = System.currentTimeMillis();
           }else {
@@ -107,7 +106,6 @@ public class DiscoverManager implements EventHandler {
 
   @Override
   public void handleEvent(UdpEvent udpEvent) {
-    System.out.println("Discover Manager: handleEvent");
     InetSocketAddress sender = udpEvent.getAddress();
     Message msg = udpEvent.getMessage();
     if (!msg.getType().equals(UdpMessageTypeEnum.BACKUP_KEEP_ALIVE)){

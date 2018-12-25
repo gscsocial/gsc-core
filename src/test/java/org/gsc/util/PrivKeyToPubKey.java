@@ -49,7 +49,6 @@ public class PrivKeyToPubKey {
         String pubkey = Wallet.encode58Check(address);
         byte[] decodeAddr = Wallet.decodeFromBase58Check(pubkey);
 
-
         logger.info("---------------------------------------------");
         System.out.println();
         System.out.println("Private Key: " + privStr);
@@ -67,7 +66,7 @@ public class PrivKeyToPubKey {
         //byte[] Baddress = Wallet.decodeFromBase58Check(Base58Address);
         String Gaddress = Wallet.encode58Check(Hex.decode(g));
 
-        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GSJ6Ci1KiAuUrfYbrAF2KADs5Ry3DPocL4")));
+        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GNL185SmY7Bj14af1wi7QefPJeuLn3rydg")));
         logger.info("Baddress Key: " + Hex.toHexString(address));
         logger.info("Gaddress Key: " + Gaddress);
     }
@@ -273,8 +272,8 @@ public class PrivKeyToPubKey {
         channel = ManagedChannelBuilder.forTarget(node).usePlaintext(true).build();
         blockingStub = WalletGrpc.newBlockingStub(channel);
 
-        GrpcAPI.AccountNetMessage accountNet = blockingStub.getAccountNet(Protocol.Account.newBuilder().setAddress(ByteString.copyFrom("GRwZdfiZDBQZFuuYvjTW7KgcDkfyt9otDL".getBytes())).build());
-        System.out.println("Account: \n" + accountNet.toString());
+        Protocol.Account account = blockingStub.getAccount(Protocol.Account.newBuilder().setAddress(ByteString.copyFrom(Hex.decode("263130141690d953233e1ed308b5a02f1fef7a565a"))).build());
+        System.out.println("Account: \n" + account.toString());
 
     }
 

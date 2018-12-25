@@ -35,15 +35,12 @@ public class BandwidthProcessor extends ResourceProcessor {
   }
 
   private void updateUsage(AccountWrapper accountWrapper, long now) {
-    System.out.println("---------------updateUsage----------------");
     long oldNetUsage = accountWrapper.getNetUsage();
     long latestConsumeTime = accountWrapper.getLatestConsumeTime();
-    System.out.println("---------------latestConsumeTime: " + latestConsumeTime);
     accountWrapper.setNetUsage(increase(oldNetUsage, 0, latestConsumeTime, now));
 
     long oldFreeNetUsage = accountWrapper.getFreeNetUsage();
     long latestConsumeFreeTime = accountWrapper.getLatestConsumeFreeTime();
-    System.out.println("---------------latestConsumeFreeTime: " + latestConsumeFreeTime);
     accountWrapper.setFreeNetUsage(increase(oldFreeNetUsage, 0, latestConsumeFreeTime, now));
 
     Map<String, Long> assetMap = accountWrapper.getAssetMap();

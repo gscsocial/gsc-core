@@ -60,7 +60,6 @@ public class PeerClient {
                 if (!future.isSuccess()) {
                     logger.error("connect to {}:{} fail,cause:{}", node.getHost(), node.getPort(),
                         future.cause().getMessage());
-                    System.out.println("connectAsync----------------------------------------" + node.getPort());
                     nodeHandler.getNodeStatistics().nodeDisconnectedLocal(ReasonCode.CONNECT_FAIL);
                     nodeHandler.getNodeStatistics().notifyDisconnect();
                     future.channel().close();

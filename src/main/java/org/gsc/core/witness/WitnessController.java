@@ -2,33 +2,28 @@ package org.gsc.core.witness;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.gsc.core.wrapper.BlockWrapper;
-import org.gsc.core.wrapper.WitnessWrapper;
-import org.joda.time.DateTime;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.StringUtil;
 import org.gsc.common.utils.Time;
-import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.core.wrapper.VotesWrapper;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.args.Args;
+import org.gsc.core.exception.HeaderNotFound;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.core.wrapper.VotesWrapper;
+import org.gsc.core.wrapper.WitnessWrapper;
 import org.gsc.db.AccountStore;
 import org.gsc.db.Manager;
 import org.gsc.db.VotesStore;
 import org.gsc.db.WitnessStore;
-import org.gsc.core.exception.HeaderNotFound;
+import org.joda.time.DateTime;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 @Slf4j
 public class WitnessController {
@@ -275,8 +270,6 @@ public class WitnessController {
         } else {
           countWitness.put(voteAddress, -voteCount);
         }
-        System.out.println("-------------------------Count Vote Old-------------------------");
-        System.out.println(countWitness.get(voteAddress));
       });
       votes.getNewVotes().forEach(vote -> {
         // todo validate witness //active_witness
@@ -287,8 +280,6 @@ public class WitnessController {
         } else {
           countWitness.put(voteAddress, voteCount);
         }
-        System.out.println("-------------------------Count Vote New-------------------------");
-        System.out.println(countWitness.get(voteAddress));
       });
 
 
@@ -320,17 +311,6 @@ public class WitnessController {
 
       List<ByteString> newWitnessAddressList = new ArrayList<>();
       witnessStore.getAllWitnesses().forEach(witnessWrapper -> {
-        System.out.println("---------------------------update witness---------------------------");
-        System.out.println("getAddress: " + witnessWrapper.getAddress());
-        System.out.println("getLatestBlockNum: " + witnessWrapper.getLatestBlockNum());
-        System.out.println("getVoteCount: " + witnessWrapper.getVoteCount());
-        System.out.println("getTotalProduced: " + witnessWrapper.getTotalProduced());
-        System.out.println("getUrl: " + witnessWrapper.getUrl());
-        System.out.println("getTotalMissed: " + witnessWrapper.getTotalMissed());
-        System.out.println("getIsJobs: " + witnessWrapper.getIsJobs());
-        System.out.println("getLatestSlotNum: " + witnessWrapper.getLatestSlotNum());
-        System.out.println("getData: " + witnessWrapper.getData());
-
         logger.info("getAddress: ",witnessWrapper.getAddress());
         logger.info("getLatestBlockNum: ",witnessWrapper.getLatestBlockNum());
         logger.info("getVoteCount: ",witnessWrapper.getVoteCount());
@@ -392,18 +372,6 @@ public class WitnessController {
           witnessStore.put(witnessCapsule.createDbKey(), witnessCapsule);
         });
       }
-
-      newWits.forEach(witness -> {
-        System.out.println("---------------------------update witness---------------------------");
-        System.out.println("getAddress: " + witnessStore.get(witness.toByteArray()).getInstance().getAddress());
-        System.out.println("getLatestBlockNum: " + witnessStore.get(witness.toByteArray()).getInstance().getLatestBlockNum());
-        System.out.println("getVoteCount: " + witnessStore.get(witness.toByteArray()).getInstance().getVoteCount());
-        System.out.println("getTotalProduced: " + witnessStore.get(witness.toByteArray()).getInstance().getTotalProduced());
-        System.out.println("getUrl: " + witnessStore.get(witness.toByteArray()).getInstance().getUrl());
-        System.out.println("getTotalMissed: " + witnessStore.get(witness.toByteArray()).getInstance().getTotalMissed());
-        System.out.println("getIsJobs: " + witnessStore.get(witness.toByteArray()).getInstance().getIsJobs());
-        System.out.println("getLatestSlotNum: " + witnessStore.get(witness.toByteArray()).getInstance().getLatestSlotNum());
-      });
 
       logger.info(
           "updateWitness,before:{} ", StringUtil.getAddressStringList(currentWits)

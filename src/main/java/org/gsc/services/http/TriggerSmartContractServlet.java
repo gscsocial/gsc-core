@@ -2,27 +2,28 @@ package org.gsc.services.http;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.protobuf.ByteString;
-import java.io.IOException;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.core.wrapper.TransactionWrapper;
-import org.spongycastle.util.encoders.Hex;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.gsc.api.GrpcAPI.Return;
 import org.gsc.api.GrpcAPI.Return.response_code;
 import org.gsc.api.GrpcAPI.TransactionExtention;
-import org.gsc.crypto.Hash;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.core.Wallet;
 import org.gsc.core.exception.ContractValidateException;
+import org.gsc.core.wrapper.TransactionWrapper;
+import org.gsc.crypto.Hash;
 import org.gsc.protos.Contract.TriggerSmartContract;
 import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
+import org.spongycastle.util.encoders.Hex;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -38,7 +39,6 @@ public class TriggerSmartContractServlet extends HttpServlet {
   public static String parseMethod(String methodSign, String params) {
     byte[] selector = new byte[4];
     System.arraycopy(Hash.sha3(methodSign.getBytes()), 0, selector, 0, 4);
-    System.out.println(methodSign + ":" + Hex.toHexString(selector));
     if (StringUtils.isEmpty(params)) {
       return Hex.toHexString(selector);
     }
@@ -83,15 +83,11 @@ public class TriggerSmartContractServlet extends HttpServlet {
 
       JsonFormat.merge(contract, build);
       JSONObject jsonObject = JSONObject.parseObject(contract);
-      System.out.println(jsonObject.toString());
       String selector = jsonObject.getString("function_selector");//
       String parameter = jsonObject.getString("parameter");//
       String data = parseMethod(selector, parameter);
-      System.out.println(data);
       build.setData(ByteString.copyFrom(ByteArray.fromHexString(data)));
-      System.out.println("4");
       long feeLimit = jsonObject.getLongValue("fee_limit");//
-      System.out.println("5");
       TransactionWrapper trxCap = wallet
           .createTransactionCapsule(build.build(), ContractType.TriggerSmartContract);
 

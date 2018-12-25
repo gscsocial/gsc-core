@@ -288,7 +288,6 @@ public class NodeHandler {
   }
 
   private void sendMessage(Message msg) {
-    System.out.println("33333333333333333333333333333333333333 udp msf type: " + msg.getType());
     nodeManager.sendOutbound(new UdpEvent(msg, getInetSocketAddress()));
     nodeStatistics.messageStatistics.addUdpOutMessage(msg.getType());
   }
