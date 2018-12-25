@@ -44,7 +44,7 @@ public class TransactionUtil {
     Transaction transaction = new TransactionWrapper(transferContract,
             Contract.ContractType.TransferContract).getInstance();
     Transaction.raw raw = transaction
-            .getRawData().toBuilder().setData(ByteString.copyFromUtf8("Go Go GSC")).build();
+            .getRawData().toBuilder().setData(ByteString.copyFromUtf8("In Us We Trust. 2018/12/25.")).build();
     transaction = transaction.toBuilder().setRawData(raw).build();
     return transaction;
   }
