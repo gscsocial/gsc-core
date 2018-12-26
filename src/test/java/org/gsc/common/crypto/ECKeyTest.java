@@ -1,13 +1,10 @@
 package org.gsc.common.crypto;
 
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.utils.ByteArray;
+import org.gsc.common.utils.Utils;
 import org.gsc.core.Wallet;
 import org.gsc.crypto.ECKey;
 import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
-
-import static org.junit.Assert.assertEquals;
 
 @Slf4j
 public class ECKeyTest {
