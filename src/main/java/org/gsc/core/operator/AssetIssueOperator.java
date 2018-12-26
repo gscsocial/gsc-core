@@ -153,7 +153,7 @@ public class AssetIssueOperator extends AbstractOperator {
     // If in the 3 second block period, should have the same name of assetIssue in different transaction.
     // when transactions be packaged in the block, this code will be also called.
     byte[] name = new String(assetIssueContract.getName().toByteArray(),
-            Charset.forName("UTF-8")).toLowerCase().getBytes();
+            Charset.forName("UTF-8")).getBytes();
     if (this.dbManager.getAssetIssueStore().get(name) != null) {
       throw new ContractValidateException("AssetName repeat!");
     }

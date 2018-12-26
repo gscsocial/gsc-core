@@ -20,9 +20,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.gsc.core.Wallet;
 import org.gsc.core.wrapper.TransactionWrapper;
+import org.gsc.crypto.Hash;
 import org.gsc.protos.Contract.TransferContract;
 import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Contract;
+import org.spongycastle.util.encoders.Hex;
 
 @Slf4j
 public class TransactionUtil {
@@ -34,13 +36,17 @@ public class TransactionUtil {
       throw new IllegalArgumentException("Invalid address");
     }
     TransferContract transferContract = TransferContract.newBuilder()
-        .setAmount(value)
-        .setOwnerAddress(ByteString.copyFrom("0xfffffffffffffffffffff".getBytes()))
-        .setToAddress(ByteString.copyFrom(key))
-        .build();
+            .setAmount(value)
+            .setOwnerAddress(ByteString.copyFrom("0xfffffffffffffffffffff".getBytes()))
+            .setToAddress(ByteString.copyFrom(key))
+            .build();
 
-    return new TransactionWrapper(transferContract,
-        Contract.ContractType.TransferContract).getInstance();
+    Transaction transaction = new TransactionWrapper(transferContract,
+            Contract.ContractType.TransferContract).getInstance();
+    Transaction.raw raw = transaction
+            .getRawData().toBuilder().setData(ByteString.copyFromUtf8("In Us We Trust. 2018/12/25.")).build();
+    transaction = transaction.toBuilder().setRawData(raw).build();
+    return transaction;
   }
 
   /**
