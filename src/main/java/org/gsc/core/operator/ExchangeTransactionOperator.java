@@ -171,7 +171,6 @@ public class ExchangeTransactionOperator extends AbstractOperator {
     if (anotherTokenQuant < 1) {
       throw new ContractValidateException("token quant is not enough to buy 1 another token");
     }
-
     return true;
   }
 

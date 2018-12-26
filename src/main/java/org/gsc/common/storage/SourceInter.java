@@ -29,7 +29,6 @@ public interface SourceInter<K, V> {
 
   V getData(K key);
 
-
   void deleteData(K key);
 
   void deleteData(K k, WriteOptions options);

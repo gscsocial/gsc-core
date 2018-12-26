@@ -66,13 +66,13 @@ public class TransactionResultWrapper implements ProtoWrapper<Result> {
     return transactionResult.getWithdrawAmount();
   }
 
-  public void setFee(long fee) {
-    this.transactionResult = this.transactionResult.toBuilder().setFee(fee).build();
-  }
-
   public void addFee(long fee) {
     this.transactionResult = this.transactionResult.toBuilder()
         .setFee(this.transactionResult.getFee() + fee).build();
+  }
+  
+  public void setFee(long fee) {
+    this.transactionResult = this.transactionResult.toBuilder().setFee(fee).build();
   }
 
   public void setErrorCode(Transaction.Result.code code) {

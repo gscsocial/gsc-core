@@ -166,13 +166,13 @@ public class KhaosDatabase extends GSCDatabase {
   }
 
   @Override
-  public Object get(byte[] key) {
-    return null;
-  }
-
-  @Override
   public boolean has(byte[] key) {
     return false;
+  }
+  
+  @Override
+  public Object get(byte[] key) {
+    return null;
   }
 
   void start(BlockWrapper blk) {

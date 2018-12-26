@@ -29,7 +29,6 @@ public interface Application {
   void initServices(Args args);
 
   void startup();
-
   
   void shutdown();
 

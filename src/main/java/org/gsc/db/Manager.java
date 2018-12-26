@@ -90,10 +90,8 @@ public class Manager {
   @Autowired
   private PeersStore peersStore;
 
-
   @Autowired
   private KhaosDatabase khaosDb;
-
 
   private BlockWrapper genesisBlock;
   @Getter
@@ -986,10 +984,10 @@ public class Manager {
 
     TransactionTrace trace = new TransactionTrace(trxCap, this);
 
-// TODO vm switch
-//    if (!this.dynamicPropertiesStore.supportVM() && trace.needVM()) {
-//      throw new UnsupportVMException("this node doesn't support vm, trx id: " + trxCap.getTransactionId().toString());
-//    }
+    // TODO vm switch
+    //    if (!this.dynamicPropertiesStore.supportVM() && trace.needVM()) {
+    //      throw new UnsupportVMException("this node doesn't support vm, trx id: " + trxCap.getTransactionId().toString());
+    //    }
 
     DepositImpl deposit = DepositImpl.createRoot(this);
     Runtime runtime = new Runtime(trace, blockCap, deposit, new ProgramInvokeFactoryImpl());

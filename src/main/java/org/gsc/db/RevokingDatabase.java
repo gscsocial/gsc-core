@@ -22,10 +22,10 @@ public interface RevokingDatabase {
 
   void enable();
 
-  int size();
-
   void check();
 
+  int size();
+  
   void setMaxSize(int maxSize);
 
   void disable();
