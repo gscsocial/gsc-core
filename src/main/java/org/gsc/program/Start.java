@@ -39,7 +39,7 @@ public class Start {
 
     public static void main(String[] args) {
 
-        Args.setParam(args, Constant.TESTNET_CONF);
+        Args.setParam(args, Constant.gsTESTNET_CONF);
         Args cfgArgs = Args.getInstance();
 
         if (cfgArgs.isHelp()) {

@@ -1,20 +1,21 @@
 package org.gsc.program;
 
 import com.beust.jcommander.JCommander;
-import java.io.File;
-import java.io.IOException;
-import java.util.Scanner;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.gsc.crypto.ECKey;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.Utils;
-import org.gsc.core.Constant;
 import org.gsc.config.args.Args;
+import org.gsc.core.Constant;
+import org.gsc.crypto.ECKey;
 import org.gsc.keystore.CipherException;
 import org.gsc.keystore.Credentials;
 import org.gsc.keystore.WalletUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Scanner;
 
 
 public class KeystoreFactory {
@@ -152,7 +153,7 @@ public class KeystoreFactory {
   }
 
   public static void main(String[] args) {
-    Args.setParam(args, Constant.TESTNET_CONF);
+    Args.setParam(args, Constant.gsTESTNET_CONF);
     KeystoreFactory cli = new KeystoreFactory();
 
     JCommander.newBuilder()
