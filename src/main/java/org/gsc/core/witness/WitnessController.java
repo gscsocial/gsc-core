@@ -311,7 +311,6 @@ public class WitnessController {
 
       List<ByteString> newWitnessAddressList = new ArrayList<>();
       witnessStore.getAllWitnesses().forEach(witnessWrapper -> {
-
         logger.info("getAddress: ",witnessWrapper.getAddress());
         logger.info("getLatestBlockNum: ",witnessWrapper.getLatestBlockNum());
         logger.info("getVoteCount: ",witnessWrapper.getVoteCount());
@@ -423,6 +422,7 @@ public class WitnessController {
     });
     logger.debug(builder.toString());
   }
+
 
   private void sortWitness(List<ByteString> list) {
     list.sort(Comparator.comparingLong((ByteString b) -> getWitnesseByAddress(b).getVoteCount())

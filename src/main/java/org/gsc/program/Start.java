@@ -39,8 +39,7 @@ public class Start {
 
     public static void main(String[] args) {
 
-        Args.setParam(args, Constant.TESTNET_CONF);
-        // Args.setParam(args, Constant.LOCAL_TESTNET_CONF);
+        Args.setParam(args, Constant.gsTESTNET_CONF);
         Args cfgArgs = Args.getInstance();
 
         if (cfgArgs.isHelp()) {
@@ -67,17 +66,20 @@ public class Start {
             ApplicationContext context = new GSCApplicationContext(DefaultConfig.class);
 
             Application appT = ApplicationFactory.create(context);
-            shutdown(appT);
+            FullNode.shutdown(appT);
 
+            //appT.init(cfgArgs);
             RpcApiService rpcApiService = context.getBean(RpcApiService.class);
             appT.addService(rpcApiService);
-
+            //http
             SolidityNodeHttpApiService httpApiService = context.getBean(SolidityNodeHttpApiService.class);
             appT.addService(httpApiService);
 
             appT.initServices(cfgArgs);
             appT.startServices();
+//    appT.startup();
 
+            //Disable peer discovery for solidity node
             DiscoverServer discoverServer = context.getBean(DiscoverServer.class);
             discoverServer.close();
             ChannelManager channelManager = context.getBean(ChannelManager.class);
@@ -105,12 +107,14 @@ public class Start {
             Application appT = ApplicationFactory.create(context);
             shutdown(appT);
 
+            // grpc api server
             RpcApiService rpcApiService = context.getBean(RpcApiService.class);
             appT.addService(rpcApiService);
             if (cfgArgs.isWitness()) {
                 appT.addService(new WitnessService(appT, context));
             }
 
+            // http api server
             FullNodeHttpApiService httpApiService = context.getBean(FullNodeHttpApiService.class);
             appT.addService(httpApiService);
 
@@ -132,6 +136,11 @@ public class Start {
                 logger.error("Error in sync solidity block" + t.getMessage(), t);
             }
         }, 5000, 5000, TimeUnit.MILLISECONDS);
+        //new Thread(() -> syncLoop(cfgArgs), logger.getName()).start();
+    }
+
+    public void setDbManager(Manager dbManager) {
+        this.dbManager = dbManager;
     }
 
     private void initGrpcClient(String addr) {
@@ -143,10 +152,6 @@ public class Start {
         }
     }
 
-    public void setDbManager(Manager dbManager) {
-        this.dbManager = dbManager;
-    }
-    
     private void syncSolidityBlock() throws BadBlockException {
         DynamicProperties remoteDynamicProperties = databaseGrpcClient.getDynamicProperties();
         long remoteLastSolidityBlockNum = remoteDynamicProperties.getLastSolidityBlockNum();
@@ -166,7 +171,7 @@ public class Start {
                         try {
                             ret = dbManager.getTransactionHistoryStore().get(trx.getTransactionId().getBytes());
                         } catch (BadItemException ex) {
-                            logger.warn("Transaction History Store: ", ex);
+                            logger.warn(" ", ex);
                             continue;
                         }
                         ret.setBlockNumber(blockWrapper.getNum());
@@ -222,7 +227,7 @@ public class Start {
     }
 
     public static void shutdown(final Application app) {
-        logger.info("******** register application shutdown hook ********");
+        logger.info("********register application shutdown hook********");
         Runtime.getRuntime().addShutdownHook(new Thread(app::shutdown));
     }
 }

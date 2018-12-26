@@ -87,7 +87,7 @@ message Account {
 
   // this account create time
   int64 create_time = 0x09;
-  // this last operation time, including transfer, voting and so on. //FIXME fix grammar
+  //last operation time, including transfer, voting and so on.
   int64 latest_opration_time = 10;
   // witness block producing allowance
   int64 allowance = 0x0B;
@@ -97,7 +97,7 @@ message Account {
   bytes code = 13;
   bool is_witness = 14;
   bool is_committee = 15;
-  // frozen asset(for asset issuer)
+  // frozen asset(for asset issue)
   repeated Frozen frozen_supply = 16;
   // asset_issued_name
   bytes asset_issued_name = 17;

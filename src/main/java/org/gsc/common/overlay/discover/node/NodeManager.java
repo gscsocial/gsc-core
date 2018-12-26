@@ -25,7 +25,6 @@ import org.gsc.common.net.udp.message.discover.NeighborsMessage;
 import org.gsc.common.net.udp.message.discover.PingMessage;
 import org.gsc.common.net.udp.message.discover.PongMessage;
 import org.gsc.common.overlay.discover.DiscoverListener;
-import org.gsc.common.overlay.discover.node.NodeHandler.State;
 import org.gsc.common.overlay.discover.node.statistics.NodeStatistics;
 import org.gsc.common.overlay.discover.table.NodeTable;
 import org.gsc.common.utils.CollectionUtils;
@@ -135,12 +134,6 @@ public class NodeManager implements EventHandler {
     }
   }
 
-  public boolean isNodeAlive(NodeHandler nodeHandler) {
-    return nodeHandler.getState().equals(State.Alive) ||
-        nodeHandler.getState().equals(State.Active) ||
-        nodeHandler.getState().equals(State.EvictCandidate);
-  }
-
   private void dbRead() {
     Set<Node> Nodes = this.dbManager.readNeighbours();
     logger.info("Reading Node statistics from PeersStore: " + Nodes.size() + " nodes.");
@@ -217,6 +210,7 @@ public class NodeManager implements EventHandler {
   @Override
   public void handleEvent(UdpEvent udpEvent) {
     Message m = udpEvent.getMessage();
+    //System.out.println("------------handleEvent------------ " + m.getType());
     InetSocketAddress sender = udpEvent.getAddress();
 
     Node n = new Node(m.getFrom().getId(), sender.getHostString(), sender.getPort());
@@ -282,17 +276,26 @@ public class NodeManager implements EventHandler {
 
   public List<NodeHandler> dumpActiveNodes() {
     List<NodeHandler> handlers = new ArrayList<>();
+
     for (NodeHandler handler :
         this.nodeHandlerMap.values()) {
-      if (isNodeAlive(handler)) {
+      if (!isNodeAlive(handler)) {
+       // System.out.println("**************************************************: "+ handler.getNode().getPort());
         handlers.add(handler);
       }
     }
-
     return handlers;
   }
 
+  public boolean isNodeAlive(NodeHandler nodeHandler) {
+    return nodeHandler.getNodeStatistics().wasDisconnected();
+    /*return nodeHandler.getState().equals(State.Alive) ||     //
+            nodeHandler.getState().equals(State.Active) ||       // Active
+            nodeHandler.getState().equals(State.EvictCandidate); // Evict Candidate 逐出候选人*/
+  }
+
   private synchronized void processListeners() {
+
     for (ListenerHandler handler : listeners.values()) {
       try {
         handler.checkAll();
@@ -302,9 +305,12 @@ public class NodeManager implements EventHandler {
     }
   }
 
-  public synchronized void addDiscoverListener(DiscoverListener listener,
-      Predicate<NodeStatistics> filter) {
+  public synchronized void addDiscoverListener(DiscoverListener listener, Predicate<NodeStatistics> filter) {
     listeners.put(listener, new ListenerHandler(listener, filter));
+  }
+
+  public synchronized void removeDiscoverListener(DiscoverListener listener) {
+    listeners.remove(listener);
   }
 
   public synchronized String dumpAllStatistics() {
@@ -352,12 +358,14 @@ public class NodeManager implements EventHandler {
 
     void checkAll() {
       for (NodeHandler handler : nodeHandlerMap.values()) {
+        //System.out.println("NodeHandlerMap: " + nodeHandlerMap.values());
         boolean has = discoveredNodes.containsKey(handler);
         boolean test = filter.test(handler.getNodeStatistics());
+        //System.out.println("??????????????????????filter.test checkAll: ");
         if (!has && test) {
           listener.nodeAppeared(handler);
           discoveredNodes.put(handler, null);
-        } else if (has && !test) {
+        } else if (!has && !test) {
           listener.nodeDisappeared(handler);
           discoveredNodes.remove(handler);
         }

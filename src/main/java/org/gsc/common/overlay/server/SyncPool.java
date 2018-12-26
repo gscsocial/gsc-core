@@ -161,6 +161,7 @@ public class SyncPool {
   }
 
   public synchronized List<PeerConnection> getActivePeers() {
+    // System.out.println("Peer getActivePeers...");
     List<PeerConnection> peers = Lists.newArrayList();
     activePeers.forEach(peer -> {
       if (!peer.isDisconnect()) {
@@ -231,9 +232,10 @@ public class SyncPool {
         return false;
       }
 
-      if (handler.getNodeStatistics().getReputation() >= NodeStatistics.REPUTATION_PREDEFINED){
+      if (handler.getNodeStatistics().getReputation() >= NodeStatistics.REPUTATION_PREDEFINED){ //100000
         return true;
       }
+
 
       InetAddress inetAddress = handler.getInetSocketAddress().getAddress();
       if (channelManager.getRecentlyDisconnected().getIfPresent(inetAddress) != null) {

@@ -153,7 +153,7 @@ public class KeystoreFactory {
   }
 
   public static void main(String[] args) {
-    Args.setParam(args, Constant.TESTNET_CONF);
+    Args.setParam(args, Constant.gsTESTNET_CONF);
     KeystoreFactory cli = new KeystoreFactory();
 
     JCommander.newBuilder()

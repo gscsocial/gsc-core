@@ -415,7 +415,7 @@ public class Wallet {
     } catch (TaposException e) {
       logger.info("tapos error" + e.getMessage());
       return builder.setResult(false).setCode(response_code.TAPOS_ERROR)
-          .setMessage(ByteString.copyFromUtf8("Tapos check error"))
+          .setMessage(ByteString.copyFromUtf8("Tapos check error check error"))
           .build();
     } catch (TooBigTransactionException e) {
       logger.info("transaction error" + e.getMessage());
