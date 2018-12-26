@@ -2,22 +2,25 @@ package org.gsc.runtime;
 
 import lombok.extern.slf4j.Slf4j;
 import org.gsc.common.application.GSCApplicationContext;
+import org.gsc.common.storage.DepositImpl;
+import org.gsc.common.utils.FileUtil;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
+import org.gsc.core.Constant;
+import org.gsc.core.Wallet;
+import org.gsc.core.exception.ContractExeException;
+import org.gsc.core.exception.ContractValidateException;
+import org.gsc.core.exception.ReceiptCheckErrException;
+import org.gsc.core.exception.TransactionTraceException;
+import org.gsc.db.Manager;
+import org.gsc.protos.Protocol.AccountType;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 import org.testng.Assert;
-import org.gsc.common.storage.DepositImpl;
-import org.gsc.core.Constant;
-import org.gsc.core.Wallet;
-import org.gsc.db.Manager;
-import org.gsc.core.exception.ContractExeException;
-import org.gsc.core.exception.ContractValidateException;
-import org.gsc.core.exception.ReceiptCheckErrException;
-import org.gsc.core.exception.TransactionTraceException;
-import org.gsc.protos.Protocol.AccountType;
+
+import java.io.File;
 
 @Slf4j
 public class InheritanceTest {
