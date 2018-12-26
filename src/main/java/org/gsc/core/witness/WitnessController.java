@@ -424,7 +424,6 @@ public class WitnessController {
     logger.debug(builder.toString());
   }
 
-
   private void sortWitness(List<ByteString> list) {
     list.sort(Comparator.comparingLong((ByteString b) -> getWitnesseByAddress(b).getVoteCount())
         .reversed()

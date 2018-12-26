@@ -53,8 +53,7 @@ public class AssetIssueOperator extends AbstractOperator {
       AssetIssueContract assetIssueContract = contract.unpack(AssetIssueContract.class);
       byte[] ownerAddress = assetIssueContract.getOwnerAddress().toByteArray();
       AssetIssueWrapper assetIssueWrapper = new AssetIssueWrapper(assetIssueContract);
-      /** start remove: Avoid duplicate name of token. */
-      /*
+      /** start: duplicate name of token. */
       String name = new String(assetIssueWrapper.getName().toByteArray(),
           Charset.forName("UTF-8")); // getName().toStringUtf8()
       long order = 0;
@@ -66,7 +65,6 @@ public class AssetIssueOperator extends AbstractOperator {
         key = nameKey.getBytes();
       }
       assetIssueWrapper.setOrder(order);
-      */
       /** end */
 
       dbManager.getAssetIssueStore()
@@ -153,7 +151,7 @@ public class AssetIssueOperator extends AbstractOperator {
     // If in the 3 second block period, should have the same name of assetIssue in different transaction.
     // when transactions be packaged in the block, this code will be also called.
     byte[] name = new String(assetIssueContract.getName().toByteArray(),
-            Charset.forName("UTF-8")).getBytes();
+            Charset.forName("UTF-8")).toLowerCase().getBytes();
     if (this.dbManager.getAssetIssueStore().get(name) != null) {
       throw new ContractValidateException("AssetName repeat!");
     }

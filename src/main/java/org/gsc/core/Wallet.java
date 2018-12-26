@@ -238,6 +238,7 @@ public class Wallet {
 
   public Account getAccount(Account account) {
     AccountStore accountStore = dbManager.getAccountStore();
+    String name = accountStore.getName();
     AccountWrapper accountWrapper = accountStore.get(account.getAddress().toByteArray());
     if (accountWrapper == null) {
       return null;
