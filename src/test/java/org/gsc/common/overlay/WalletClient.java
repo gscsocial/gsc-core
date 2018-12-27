@@ -5,46 +5,32 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigObject;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.crypto.ECKey;
-import org.gsc.crypto.SymmEncoder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.spongycastle.util.encoders.Hex;
-import org.gsc.api.GrpcAPI.AccountNetMessage;
-import org.gsc.api.GrpcAPI.AssetIssueList;
-import org.gsc.api.GrpcAPI.BlockList;
-import org.gsc.api.GrpcAPI.NodeList;
-import org.gsc.api.GrpcAPI.TransactionList;
-import org.gsc.api.GrpcAPI.WitnessList;
+import org.gsc.api.GrpcAPI.*;
+import org.gsc.common.overlay.Parameter.CommonConstant;
+import org.gsc.common.overlay.util.Base58;
+import org.gsc.common.overlay.util.TransactionUtils;
 import org.gsc.common.utils.ByteArray;
 import org.gsc.common.utils.FileUtil;
 import org.gsc.common.utils.Sha256Hash;
 import org.gsc.common.utils.Utils;
 import org.gsc.core.exception.CancelException;
+import org.gsc.crypto.ECKey;
+import org.gsc.crypto.SymmEncoder;
 import org.gsc.keystore.CipherException;
 import org.gsc.protos.Contract;
 import org.gsc.protos.Contract.AssetIssueContract;
 import org.gsc.protos.Contract.FreezeBalanceContract;
 import org.gsc.protos.Contract.UnfreezeBalanceContract;
 import org.gsc.protos.Contract.WithdrawBalanceContract;
-import org.gsc.protos.Protocol.Account;
-import org.gsc.protos.Protocol.AccountType;
-import org.gsc.protos.Protocol.Block;
-import org.gsc.protos.Protocol.Transaction;
-import org.gsc.protos.Protocol.Witness;
-import org.gsc.common.overlay.util.Base58;
-import org.gsc.common.overlay.util.TransactionUtils;
-import org.gsc.common.overlay.Parameter.CommonConstant;
+import org.gsc.protos.Protocol.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.spongycastle.util.encoders.Hex;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.*;
 
 class AccountComparator implements Comparator {
 
@@ -73,18 +59,6 @@ public class WalletClient {
     private static String txtPath;
 
     private static byte addressPreFixByte = CommonConstant.ADD_PRE_FIX_BYTE_MAINNET;
-
-//  static {
-//    new Timer().schedule(new TimerTask() {
-//      @Override
-//      public void run() {
-//        String fullnode = selectFullNode();
-//        if(!"".equals(fullnode)) {
-//          rpcCli = new GrpcClient(fullnode);
-//        }
-//      }
-//    }, 3 * 60 * 1000, 3 * 60 * 1000);
-//  }
 
     public static boolean init( int itype ) {
         Config config = Configuration.getByPath("testng.conf");
@@ -741,21 +715,6 @@ public class WalletClient {
         //Other rule;
         return true;
     }
-
-/*    public static Optional<AccountList> listAccounts() {
-        Optional<AccountList> result = rpcCli.listAccounts();
-        if (result.isPresent()) {
-            AccountList accountList = result.get();
-            List<Account> list = accountList.getAccountsList();
-            List<Account> newList = new ArrayList();
-            newList.addAll(list);
-            newList.sort(new AccountComparator());
-            AccountList.Builder builder = AccountList.newBuilder();
-            newList.forEach(account -> builder.addAccounts(account));
-            result = Optional.of(builder.build());
-        }
-        return result;
-    }*/
 
     public static Optional<WitnessList> listWitnesses() {
         Optional<WitnessList> result = rpcCli.listWitnesses();
