@@ -53,7 +53,7 @@ GSC (Global Social Chain) is the world's first new generation of social networki
 * [Meidum](https://medium.com/@gsc_socialchain)
 * [Reddit](https://www.reddit.com/user/GSCOfficial/)
 * [Youtube](https://www.youtube.com/channel/UCWcQhl4N6_ggZFdHwTxuuIQ)
-
+* [Wiki](https://wiki.gsc.social/)
  
 ## How to Contribute
 
