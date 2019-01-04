@@ -10,7 +10,7 @@
 
 ## About
 
-GSC (Global Social Chain) is the world's first new generation of social networking chain that owns hundreds of millions of social users. This social chain is determined to use block chain technology to subvert centralized social networks such as Facebook, WeChat, etc., which plays a dual role as "manager" and "arbiter" simultaneously for the former social networking platforms.
+GSC (Global Social Chain) is the world's first new generation of social networking chain. This social chain is determined to use block chain technology to subvert centralized social networks such as Facebook, WeChat, etc., which plays a dual role as "manager" and "arbiter" simultaneously for the former social networking platforms.
 
 
 ## Prepare dependencies
