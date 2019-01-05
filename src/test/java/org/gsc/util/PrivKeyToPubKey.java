@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 import org.springframework.util.CollectionUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Optional;
@@ -39,15 +40,21 @@ public class PrivKeyToPubKey {
 
     @Test
     public void privKeyToPubKey() {
-        String privStr = "F603197654386A796418913AB29BAC9198DE871AE04FE47D185F716D2145F9CC";
+        String privStr = "A603197654386A796418913AB29BAC9198DE871AE04FE47D185F716D2145F9CB";
         BigInteger privKey = new BigInteger(privStr, 16);
 
-        Wallet.setAddressPreFixByte((byte) 0x26);
+        Wallet.setAddressPreFixByte((byte) 0x41);
         final ECKey ecKey = ECKey.fromPrivate(privKey);
         byte[] address = ecKey.getAddress();
 
         String pubkey = Wallet.encode58Check(address);
         byte[] decodeAddr = Wallet.decodeFromBase58Check(pubkey);
+
+        System.out.println();
+        System.out.println(privStr);
+        System.out.println(Hex.toHexString(address));
+        System.out.println(pubkey);
+        System.out.println();
 
         logger.info("---------------------------------------------");
         System.out.println();
@@ -66,9 +73,11 @@ public class PrivKeyToPubKey {
         //byte[] Baddress = Wallet.decodeFromBase58Check(Base58Address);
         String Gaddress = Wallet.encode58Check(Hex.decode(g));
 
-        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GNL185SmY7Bj14af1wi7QefPJeuLn3rydg")));
         logger.info("Baddress Key: " + Hex.toHexString(address));
         logger.info("Gaddress Key: " + Gaddress);
+        logger.info("---------------------------------------------");
+        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("TVbh7D6sJi3LfDE72DQtypWDXaVaTUidHJ")));
+
     }
 
     @Test
@@ -342,7 +351,7 @@ public class PrivKeyToPubKey {
 
     @Test
     public void toHexString(){
-        String str = "http://Mercury.org";
+        String str = "kay";
         logger.info("---------------------------------------------");
         System.out.println();
         System.out.println("Hex String: " + Hex.toHexString(str.getBytes()));
@@ -370,17 +379,27 @@ public class PrivKeyToPubKey {
     }
 
     @Test
-    public void ByteToString(){
-        String str = "475162";
+    public void ByteToString() throws UnsupportedEncodingException {
+        String str = "7bff0a01\"";
         logger.info("---------------------------------------------");
+        //System.out.println(new Integer(Hex.encode(str.getBytes()).toString()));
+        System.out.println("Hex String: " + new String(Hex.decode(str), "UTF-8"));
         System.out.println();
-        System.out.println("Hex String: " + hexStr2Str(str));
+        logger.info("---------------------------------------------");
+    }
+
+    @Test
+    public void ToString(){
+        String str = "l";
+        logger.info("---------------------------------------------");
+        System.out.println(Integer.parseInt(str));
+        System.out.println(hexStr2Str(str));
         System.out.println();
         logger.info("---------------------------------------------");
     }
 
     public static String hexStr2Str(String hexStr) {
-        String str = "0123456789ABCDEF";
+        String str = "0123456789abcdef";
         char[] hexs = hexStr.toCharArray();
         byte[] bytes = new byte[hexStr.length() / 2];
         int n;
