@@ -380,7 +380,7 @@ public class PrivKeyToPubKey {
 
     @Test
     public void ByteToString() throws UnsupportedEncodingException {
-        String str = "7bff0a01\"";
+        String str = "1017df80";
         logger.info("---------------------------------------------");
         //System.out.println(new Integer(Hex.encode(str.getBytes()).toString()));
         System.out.println("Hex String: " + new String(Hex.decode(str), "UTF-8"));
