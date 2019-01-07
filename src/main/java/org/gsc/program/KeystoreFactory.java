@@ -101,6 +101,7 @@ public class KeystoreFactory {
   }
 
   private void help() {
+
     System.out.println("You can enter the following command: ");
     System.out.println("GenKeystore");
     System.out.println("ImportPrivatekey");
@@ -116,6 +117,7 @@ public class KeystoreFactory {
         String cmdLine = in.nextLine().trim();
         String[] cmdArray = cmdLine.split("\\s+");
         // split on trim() string will always return at the minimum: [""]
+
         String cmd = cmdArray[0];
         if ("".equals(cmd)) {
           continue;
@@ -150,6 +152,7 @@ public class KeystoreFactory {
         logger.error(e.getMessage());
       }
     }
+
   }
 
   public static void main(String[] args) {

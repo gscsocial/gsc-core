@@ -668,8 +668,11 @@ public class WalletClient {
         byte[] hash0 = Sha256Hash.hash(input);
         byte[] hash1 = Sha256Hash.hash(hash0);
         byte[] inputCheck = new byte[input.length + 4];
+
         System.arraycopy(input, 0, inputCheck, 0, input.length);
+
         System.arraycopy(hash1, 0, inputCheck, input.length, 4);
+        
         return Base58.encode(inputCheck);
     }
 
