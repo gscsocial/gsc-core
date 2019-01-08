@@ -18,11 +18,12 @@
 
 package org.gsc.common.overlay.discover.node.statistics;
 
-import java.util.concurrent.atomic.AtomicLong;
 import lombok.Getter;
 import org.gsc.common.overlay.discover.node.Node;
 import org.gsc.config.args.Args;
 import org.gsc.protos.Protocol.ReasonCode;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 public class NodeStatistics {
 
@@ -212,7 +213,6 @@ public class NodeStatistics {
     public String getName() {
       return name;
     }
-
   }
 
   public boolean nodeIsHaveDataTransfer() {

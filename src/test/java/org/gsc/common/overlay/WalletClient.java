@@ -672,7 +672,7 @@ public class WalletClient {
         System.arraycopy(input, 0, inputCheck, 0, input.length);
 
         System.arraycopy(hash1, 0, inputCheck, input.length, 4);
-        
+
         return Base58.encode(inputCheck);
     }
 
