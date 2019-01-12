@@ -35,6 +35,7 @@ public class ProposalDeleteServlet extends HttpServlet {
       Transaction tx = wallet
           .createTransactionCapsule(build.build(), ContractType.ProposalDeleteContract)
           .getInstance();
+
       response.getWriter().println(Util.printTransaction(tx));
     } catch (Exception e) {
       logger.debug("Exception: {}", e.getMessage());

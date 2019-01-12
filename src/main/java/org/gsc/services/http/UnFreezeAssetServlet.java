@@ -35,6 +35,7 @@ public class UnFreezeAssetServlet extends HttpServlet {
       Transaction tx = wallet
           .createTransactionCapsule(build.build(), ContractType.UnfreezeAssetContract)
           .getInstance();
+
       response.getWriter().println(Util.printTransaction(tx));
     } catch (Exception e) {
       logger.debug("Exception: {}", e.getMessage());

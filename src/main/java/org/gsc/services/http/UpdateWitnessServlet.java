@@ -1,17 +1,18 @@
 package org.gsc.services.http;
 
-import java.io.IOException;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.gsc.core.Wallet;
 import org.gsc.protos.Contract.WitnessUpdateContract;
 import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -33,6 +34,7 @@ public class UpdateWitnessServlet extends HttpServlet {
       JsonFormat.merge(contract, build);
       Transaction tx = wallet
           .createTransactionCapsule(build.build(), ContractType.WitnessUpdateContract).getInstance();
+
       response.getWriter().println(Util.printTransaction(tx));
     } catch (Exception e) {
       logger.debug("Exception: {}", e.getMessage());
