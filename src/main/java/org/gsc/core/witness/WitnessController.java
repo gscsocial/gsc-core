@@ -42,7 +42,6 @@ public class WitnessController {
     return instance;
   }
 
-
   public void initWits() {
     // getWitnesses().clear();
     List<ByteString> witnessAddresses = new ArrayList<>();
@@ -77,14 +76,13 @@ public class WitnessController {
     setActiveWitnesses(l);
   }
 
-  public List<ByteString> getCurrentShuffledWitnesses() {
-    return this.manager.getWitnessScheduleStore().getCurrentShuffledWitnesses();
-  }
-
   public void setCurrentShuffledWitnesses(List<ByteString> addresses) {
     this.manager.getWitnessScheduleStore().saveCurrentShuffledWitnesses(addresses);
   }
 
+   public List<ByteString> getCurrentShuffledWitnesses() {
+    return this.manager.getWitnessScheduleStore().getCurrentShuffledWitnesses();
+  }
   /**
    * get slot at time.
    */
