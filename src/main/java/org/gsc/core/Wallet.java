@@ -197,7 +197,6 @@ public class Wallet {
     System.arraycopy(ownerAddress, 0, combined, txRawDataHash.length, ownerAddress.length);
 
     return Hash.sha3omit12(combined);
-
   }
 
   public static byte[] generateContractAddress(byte[] ownerAddress, byte[] txRawDataHash) {
@@ -207,7 +206,6 @@ public class Wallet {
     System.arraycopy(ownerAddress, 0, combined, txRawDataHash.length, ownerAddress.length);
 
     return Hash.sha3omit12(combined);
-
   }
 
   public static byte[] generateContractAddress(byte[] transactionRootId, long nonce) {
@@ -768,8 +766,6 @@ public class Wallet {
     return block;
   }
 
-
-
   public BlockList getBlockByLatestNum(long getNum) {
     BlockList.Builder blockListBuilder = BlockList.newBuilder();
     dbManager.getBlockStore().getBlockByLatestNum(getNum).forEach(
@@ -808,6 +804,7 @@ public class Wallet {
     }
     return null;
   }
+  
   public BlockList getBlocksByLimitNext(long number, long limit) {
     if (limit <= 0) {
       return null;
@@ -817,6 +814,7 @@ public class Wallet {
         blockCapsule -> blockListBuilder.addBlock(blockCapsule.getInstance()));
     return blockListBuilder.build();
   }
+  
   public Exchange getExchangeById(ByteString exchangeId) {
     if (Objects.isNull(exchangeId)) {
       return null;
@@ -1073,5 +1071,4 @@ public class Wallet {
 
     return runtime;
   }
-
 }
