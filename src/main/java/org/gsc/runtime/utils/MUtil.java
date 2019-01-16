@@ -27,7 +27,6 @@ public class MUtil {
     deposit.addBalance(fromAddress, -amount);
   }
 
-
   public static void burn(Deposit deposit, byte[] address, long amount) {
     if (deposit.getBalance(address) < amount) {
       throw new RuntimeException("Not enough balance!");
@@ -55,7 +54,9 @@ public class MUtil {
     for(int i=0;i<parameters.length;i++){
       length+=parameters[i].length;
     }
+    
     byte[] result = new byte[length];
+    
     int pos =0;
     for (int i=0;i<parameters.length;i++){
       System.arraycopy(parameters[i],0,result,pos,parameters[i].length);
