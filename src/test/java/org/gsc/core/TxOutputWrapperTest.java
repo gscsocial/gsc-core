@@ -52,8 +52,6 @@ public class TxOutputWrapperTest {
     Assert.assertEquals("",
         ByteArray.toHexString(txOutputWrapper3.getTxOutput().getPubKeyHash().toByteArray()));
     Assert.assertTrue(txOutputWrapper3.validate());
-
   }
-
 }
 
