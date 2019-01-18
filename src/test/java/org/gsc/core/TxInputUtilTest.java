@@ -48,6 +48,5 @@ public class TxInputUtilTest {
     Assert.assertEquals(vout, txInput.getRawData().getVout());
     Assert.assertArrayEquals(signature, txInput.getSignature().toByteArray());
     Assert.assertArrayEquals(pubkey, txInput.getRawData().getPubKey().toByteArray());
-
   }
 }
