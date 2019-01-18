@@ -46,17 +46,11 @@ public class BandwidthProcessorTest {
     ASSET_ADDRESS = Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a3456";
   }
 
-  /**
-   * Init data.
-   */
   @BeforeClass
   public static void init() {
     dbManager = context.getBean(Manager.class);
   }
 
-  /**
-   * Release resources.
-   */
   @AfterClass
   public static void destroy() {
     Args.clearParam();
@@ -68,9 +62,6 @@ public class BandwidthProcessorTest {
     context.destroy();
   }
 
-  /**
-   * create temp Capsule test need.
-   */
   @Before
   public void createCapsule() {
     AccountWrapper ownerCapsule =
@@ -161,7 +152,6 @@ public class BandwidthProcessorTest {
 
   }
 
-
   @Test
   public void testFree() throws Exception {
 
@@ -209,7 +199,6 @@ public class BandwidthProcessorTest {
     Assert.assertEquals(508897012L, dbManager.getDynamicPropertiesStore().getPublicNetTime());
     Assert.assertEquals(0L, ret.getFee());
   }
-
 
   @Test
   public void testConsumeAssetAccount() throws Exception {
@@ -263,7 +252,6 @@ public class BandwidthProcessorTest {
     Assert.assertEquals(61L + 122L + (dbManager.getDynamicPropertiesStore().supportVM() ? Constant.MAX_RESULT_SIZE_IN_TX / 2 * 3 : 0),
         ownerCapsuleNew.getFreeAssetNetUsage(ASSET_NAME));
     Assert.assertEquals(0L, ret.getFee());
-
   }
 
   @Test
@@ -309,9 +297,7 @@ public class BandwidthProcessorTest {
     Assert.assertEquals(1526691038000L, ownerCapsuleNew.getLatestOperationTime());
     Assert.assertEquals(508897012L, ownerCapsuleNew.getLatestConsumeTime());
     Assert.assertEquals(0L, ret.getFee());
-
   }
-
 
   @Test
   public void testUsingFee() throws Exception {
@@ -367,6 +353,4 @@ public class BandwidthProcessorTest {
 //        10_000_000L - transactionFee - createAccountFee, ownerCapsuleNew.getBalance());
 //    Assert.assertEquals(101220L, ret.getFee());
   }
-
-
 }
