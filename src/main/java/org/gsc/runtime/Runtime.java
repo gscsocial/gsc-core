@@ -67,7 +67,6 @@ import org.gsc.protos.Protocol.Transaction.Result.contractResult;
 @Slf4j(topic = "Runtime")
 public class Runtime {
 
-
   private SystemProperties config = SystemProperties.getInstance();
 
   private Transaction trx;
@@ -81,7 +80,6 @@ public class Runtime {
   PrecompiledContracts.PrecompiledContract precompiledContract = null;
   private ProgramResult result = new ProgramResult();
 
-
   private VM vm = null;
   private Program program = null;
 
@@ -90,7 +88,6 @@ public class Runtime {
 
   //tx trace
   private TransactionTrace trace;
-
 
   /**
    * For blockCap's trx run
@@ -125,7 +122,6 @@ public class Runtime {
     }
   }
 
-
   /**
    * For constant trx with latest blockCap.
    */
@@ -151,7 +147,6 @@ public class Runtime {
     }
   }
 
-
   public void precompiled() throws ContractValidateException, ContractExeException {
     TransactionWrapper trxCap = new TransactionWrapper(trx);
     final List<Operator> operatorList = OperatorFactory
@@ -162,7 +157,6 @@ public class Runtime {
       act.execute(result.getRet());
     }
   }
-
 
   public BigInteger getBlockCPULeftInUs() {
 
@@ -177,7 +171,6 @@ public class Runtime {
             / 100)); // us
 
     return curBlockCPULimitInUs.subtract(curBlockHaveElapsedCPUInUs);
-
   }
 
   public void execute() throws ContractValidateException, ContractExeException {
