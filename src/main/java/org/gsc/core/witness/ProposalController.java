@@ -23,7 +23,6 @@ public class ProposalController {
     return instance;
   }
 
-
   public void processProposals() {
     long latestProposalNum = manager.getDynamicPropertiesStore().getLatestProposalNum();
     if (latestProposalNum == 0) {
@@ -46,7 +45,6 @@ public class ProposalController {
       if (proposalWrapper.hasProcessed()) {
         logger
             .info("Proposal has processed，id:[{}],skip it and before it", proposalWrapper.getID());
-        //proposals with number less than this one, have been processed before
         break;
       }
 
@@ -86,7 +84,6 @@ public class ProposalController {
       proposalWrapper.setState(State.DISAPPROVED);
       manager.getProposalStore().put(proposalWrapper.createDbKey(), proposalWrapper);
     }
-
   }
 
   public void setDynamicParameters(ProposalWrapper proposalWrapper) {
@@ -155,6 +152,4 @@ public class ProposalController {
       }
     }
   }
-
-
 }
