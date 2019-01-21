@@ -83,9 +83,7 @@ public class WitnessController {
    public List<ByteString> getCurrentShuffledWitnesses() {
     return this.manager.getWitnessScheduleStore().getCurrentShuffledWitnesses();
   }
-  /**
-   * get slot at time.
-   */
+
   public long getSlotAtTime(long when) {
     long firstSlotTime = getSlotTime(1);
     if (when < firstSlotTime) {
@@ -108,16 +106,10 @@ public class WitnessController {
     return manager.lastHeadBlockIsMaintenance();
   }
 
-  /**
-   * get absolute Slot At Time
-   */
   public long getAbSlotAtTime(long when) {
     return (when - getGenesisBlock().getTimeStamp()) / ChainConstant.BLOCK_PRODUCED_INTERVAL;
   }
 
-  /**
-   * get slot time.
-   */
   public long getSlotTime(long slotNum) {
     if (slotNum == 0) {
       return Time.getCurrentMillis();
@@ -139,9 +131,6 @@ public class WitnessController {
     return headSlotTime + interval * slotNum;
   }
 
-  /**
-   * validate witness schedule.
-   */
   public boolean validateWitnessSchedule(BlockWrapper block) {
 
     ByteString witnessAddress = block.getInstance().getBlockHeader().getRawData()
