@@ -3,7 +3,6 @@ package org.gsc.config;
 public interface Parameter {
 
   interface ChainConstant {
-
     long TRANSFER_FEE = 0; // free
     int WITNESS_STANDBY_LENGTH = 123;
     int SOLIDIFIED_THRESHOLD = 70; // 70%
@@ -27,7 +26,6 @@ public interface Parameter {
   }
 
   interface NodeConstant {
-
     long SYNC_RETURN_BATCH_NUM = 1000;
     long SYNC_FETCH_BATCH_NUM = 2000;
     long MAX_BLOCKS_IN_PROCESS = 400;
@@ -35,10 +33,11 @@ public interface Parameter {
     long MAX_BLOCKS_SYNC_FROM_ONE_PEER = 1000;
     long SYNC_CHAIN_LIMIT_NUM = 500;
     int MAX_TRANSACTION_PENDING = 2000;
+    
+    
   }
 
   interface NetConstants {
-
     long GRPC_IDLE_TIME_OUT = 60000L;
     long ADV_TIME_OUT = 20000L;
     long SYNC_TIME_OUT = 5000L;
@@ -48,7 +47,7 @@ public interface Parameter {
     long NET_MAX_TRX_PER_SECOND = 700L;
     long MAX_TRX_PER_PEER = 200L;
     int NET_MAX_INV_SIZE_IN_MINUTES = 2;
-    int MSG_CACHE_DURATION_IN_BLOCKS = 5;
+    int MSG_CACHE_DURATION_IN_BLOCKS = 5; 
   }
 
   interface DatabaseConstants {
@@ -71,18 +70,19 @@ public interface Parameter {
     ENERGY_FEE, // drop, 11
     EXCHANGE_CREATE_FEE, // drop, 12
     MAX_CPU_TIME_OF_ONE_TX // ms, 13
-//    ONE_DAY_NET_LIMIT,
-//    MAX_FROZEN_TIME,
-//    MIN_FROZEN_TIME,
-//    MAX_FROZEN_SUPPLY_NUMBER,
-//    MAX_FROZEN_SUPPLY_TIME,
-//    MIN_FROZEN_SUPPLY_TIME,
-//    WITNESS_ALLOWANCE_FROZEN_TIME,
-//    PUBLIC_NET_LIMIT,
-//    FREE_NET_LIMIT,
-//    TOTAL_NET_LIMIT,
-//    EXCHANGE_BALANCE_LIMIT,
-//    TOTAL_ENERGY_LIMIT,
+    //  ONE_DAY_NET_LIMIT,
+    //  MAX_FROZEN_TIME,
+    //  MIN_FROZEN_TIME,
+    //  MAX_FROZEN_SUPPLY_NUMBER,
+    //  MAX_FROZEN_SUPPLY_TIME,
+    //  MIN_FROZEN_SUPPLY_TIME,
+    //  WITNESS_ALLOWANCE_FROZEN_TIME,
+    //  PUBLIC_NET_LIMIT,
+    //  FREE_NET_LIMIT,
+    //  TOTAL_NET_LIMIT,
+    //  EXCHANGE_BALANCE_LIMIT,
+    //  TOTAL_ENERGY_LIMIT,
+      
   }
 
 }
