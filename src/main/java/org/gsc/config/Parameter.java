@@ -9,7 +9,7 @@ public interface Parameter {
     int PRIVATE_KEY_LENGTH = 64;
     int MAX_ACTIVE_WITNESS_NUM = 23;
     int BLOCK_SIZE = 2_000_000;
-    int BLOCK_PRODUCED_INTERVAL = 3000; //ms,produce block period, must be divisible by 60. millisecond
+    int BLOCK_PRODUCED_INTERVAL = 3000; //ms, produce block period, must be divisible by 60 millisecond
     long CLOCK_MAX_DELAY = 3600000; // 3600 * 1000 ms
     int BLOCK_PRODUCED_TIME_OUT = 75; // 75%
     long PRECISION = 1000_000;
@@ -33,8 +33,6 @@ public interface Parameter {
     long MAX_BLOCKS_SYNC_FROM_ONE_PEER = 1000;
     long SYNC_CHAIN_LIMIT_NUM = 500;
     int MAX_TRANSACTION_PENDING = 2000;
-    
-    
   }
 
   interface NetConstants {
@@ -82,7 +80,6 @@ public interface Parameter {
     //  TOTAL_NET_LIMIT,
     //  EXCHANGE_BALANCE_LIMIT,
     //  TOTAL_ENERGY_LIMIT,
-      
   }
 
 }
