@@ -93,9 +93,6 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
     this.transaction = trx;
   }
 
-  /**
-   * get account from bytes data.
-   */
   public TransactionWrapper(byte[] data) throws BadItemException {
     try {
       this.transaction = Transaction.parseFrom(data);
@@ -104,7 +101,7 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
     }
   }
 
-  /*lll
+  /*
   public TransactionWrapper(byte[] key, long value) throws IllegalArgumentException {
     if (!Wallet.addressValid(key)) {
       throw new IllegalArgumentException("Invalid address");
