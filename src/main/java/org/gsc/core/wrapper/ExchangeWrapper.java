@@ -88,7 +88,6 @@ public class ExchangeWrapper implements ProtoWrapper<Exchange> {
     return this.exchange.getSecondTokenBalance();
   }
 
-
   public byte[] createDbKey() {
     return calculateDbKey(getID());
   }
@@ -122,7 +121,6 @@ public class ExchangeWrapper implements ProtoWrapper<Exchange> {
           .setSecondTokenBalance(secondTokenBalance + sellTokenQuant)
           .build();
     }
-
     return buyTokenQuant;
   }
 
@@ -135,5 +133,4 @@ public class ExchangeWrapper implements ProtoWrapper<Exchange> {
   public Exchange getInstance() {
     return this.exchange;
   }
-
 }
