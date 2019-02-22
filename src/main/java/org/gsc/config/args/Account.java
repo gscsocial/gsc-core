@@ -41,9 +41,6 @@ public class Account implements Serializable {
 
   private String balance;
 
-//  public byte[] getAddressBytes() {
-//    return ByteArray.fromHexString(this.address);
-//  }
 
   /**
    * Account address is a 21-bits hex string.
