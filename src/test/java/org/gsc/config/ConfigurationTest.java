@@ -46,9 +46,7 @@ public class ConfigurationTest {
   public void testGetEcKey() {
     ECKey key = ECKey.fromPrivate(
         Hex.decode("1cd5a70741c6e583d2dd3c5f17231e608eb1e52437210d948c5085e141c2d830"));
-
-//    log.debug("address = {}", ByteArray.toHexString(key.getOwnerAddress()));
-
+    
     assertEquals(Wallet.getAddressPreFixString() + "125b6c87b3d67114b3873977888c34582f27bbb0",
         ByteArray.toHexString(key.getAddress()));
   }
