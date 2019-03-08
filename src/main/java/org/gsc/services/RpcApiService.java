@@ -106,7 +106,6 @@ public class RpcApiService implements Service {
                 serverBuilder = serverBuilder.addService(new WalletApi());
             }
 
-            // Set configs from config.conf or default value
             serverBuilder
                     .maxConcurrentCallsPerConnection(args.getMaxConcurrentCallsPerConnection())
                     .flowControlWindow(args.getFlowControlWindow())
@@ -157,9 +156,6 @@ public class RpcApiService implements Service {
         return builder.build();
     }
 
-    /**
-     * DatabaseApi.
-     */
     private class DatabaseApi extends DatabaseImplBase {
 
         @Override
@@ -213,9 +209,6 @@ public class RpcApiService implements Service {
         }
     }
 
-    /**
-     * WalletSolidityApi.
-     */
     private class WalletSolidityApi extends WalletSolidityImplBase {
 
         @Override
@@ -375,9 +368,6 @@ public class RpcApiService implements Service {
 
     }
 
-    /**
-     * WalletExtensionApi.
-     */
     private class WalletExtensionApi extends WalletExtensionGrpc.WalletExtensionImplBase {
 
         private TransactionListExtention transactionList2Extention(TransactionList transactionList) {
@@ -1413,9 +1403,6 @@ public class RpcApiService implements Service {
         }
     }
 
-    /**
-     * ...
-     */
     public void blockUntilShutdown() {
         if (apiServer != null) {
             try {
