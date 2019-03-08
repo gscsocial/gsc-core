@@ -77,9 +77,7 @@ public class Start {
 
             appT.initServices(cfgArgs);
             appT.startServices();
-//    appT.startup();
 
-            //Disable peer discovery for solidity node
             DiscoverServer discoverServer = context.getBean(DiscoverServer.class);
             discoverServer.close();
             ChannelManager channelManager = context.getBean(ChannelManager.class);
@@ -136,7 +134,6 @@ public class Start {
                 logger.error("Error in sync solidity block" + t.getMessage(), t);
             }
         }, 5000, 5000, TimeUnit.MILLISECONDS);
-        //new Thread(() -> syncLoop(cfgArgs), logger.getName()).start();
     }
 
     public void setDbManager(Manager dbManager) {
