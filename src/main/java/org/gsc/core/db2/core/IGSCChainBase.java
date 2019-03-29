@@ -6,6 +6,9 @@ import org.gsc.common.utils.Quitable;
 import org.gsc.core.exception.BadItemException;
 import org.gsc.core.exception.ItemNotFoundException;
 
+/**
+ * Interface for the basic chain db
+ */
 public interface IGSCChainBase<T> extends Iterable<Entry<byte[], T>>, Quitable {
 
   /**
@@ -31,5 +34,5 @@ public interface IGSCChainBase<T> extends Iterable<Entry<byte[], T>>, Quitable {
   String getName();
 
   String getDbName();
-
+  
 }
