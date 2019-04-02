@@ -43,7 +43,8 @@ GSC (Global Social Chain) is the new generation of social networking chain. This
 ```bash
 ./gradlew run -Pwitness
 ```
- 
+## Read the [Wiki](https://wiki.gsc.social/) for detail
+
 ## Links
 * [Webiste](https://gscan.social/)
 * [Telegram](https://t.me/gscofficial)
@@ -53,7 +54,6 @@ GSC (Global Social Chain) is the new generation of social networking chain. This
 * [Meidum](https://medium.com/@gsc_socialchain)
 * [Reddit](https://www.reddit.com/user/GSCOfficial/)
 * [Youtube](https://www.youtube.com/channel/UCWcQhl4N6_ggZFdHwTxuuIQ)
-* [Wiki](https://wiki.gsc.social/)
  
 ## How to Contribute
 
