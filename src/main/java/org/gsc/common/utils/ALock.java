@@ -22,7 +22,6 @@ import java.util.concurrent.locks.Lock;
 
 /**
  * AutoClosable Lock wrapper. Use case:
- * try (ALock l = wLock.lock()) { // do smth under lock }
  */
 public final class ALock implements AutoCloseable {
 
