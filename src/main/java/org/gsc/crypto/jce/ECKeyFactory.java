@@ -55,9 +55,7 @@ public final class ECKeyFactory {
   }
 
   private static class Holder {
-
     private static final KeyFactory INSTANCE;
-
     static {
       try {
         INSTANCE = KeyFactory.getInstance(ALGORITHM);
