@@ -66,7 +66,6 @@ public class Account implements Serializable {
     } catch (NumberFormatException e) {
       throw new IllegalArgumentException("Balance(" + balance + ") must be Long type.");
     }
-
     this.balance = balance;
   }
 
@@ -88,7 +87,6 @@ public class Account implements Serializable {
     if (StringUtils.isBlank(accountName)) {
       throw new IllegalArgumentException("Account name must be non-empty.");
     }
-
     this.accountName = accountName;
   }
 
@@ -106,7 +104,6 @@ public class Account implements Serializable {
     if (!this.isAccountType(accountType)) {
       throw new IllegalArgumentException("Account type error: Not Normal/AssetIssue/Contract");
     }
-
     this.accountType = accountType;
   }
 
