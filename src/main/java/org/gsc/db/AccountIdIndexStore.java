@@ -32,6 +32,13 @@ public class AccountIdIndexStore extends GSCStoreWithRevoking<BytesWrapper> {
   }
 
   @Override
+  public boolean has(byte[] key) {
+    byte[] lowerCaseKey = getLowerCaseAccountId(key);
+    byte[] value = revokingDB.getUnchecked(lowerCaseKey);
+    return !ArrayUtils.isEmpty(value);
+  }
+
+  @Override
   public BytesWrapper get(byte[] key) {
     byte[] lowerCaseKey = getLowerCaseAccountId(key);
     byte[] value = revokingDB.getUnchecked(lowerCaseKey);
@@ -39,13 +46,6 @@ public class AccountIdIndexStore extends GSCStoreWithRevoking<BytesWrapper> {
       return null;
     }
     return new BytesWrapper(value);
-  }
-
-  @Override
-  public boolean has(byte[] key) {
-    byte[] lowerCaseKey = getLowerCaseAccountId(key);
-    byte[] value = revokingDB.getUnchecked(lowerCaseKey);
-    return !ArrayUtils.isEmpty(value);
   }
 
   private static byte[] getLowerCaseAccountId(byte[] bsAccountId) {
