@@ -56,7 +56,7 @@ GSC (Global Social Chain) is the new generation of social networking chain. This
 * [Reddit](https://www.reddit.com/user/GSCOfficial/)
 * [Youtube](https://www.youtube.com/channel/UCWcQhl4N6_ggZFdHwTxuuIQ)
  
-## How to Contribute
+## How to Contribute, Report bugs, issues using GitHub issues.
 
 If you have a reasonable understanding of blockchain technology and at least some notions of Java you can of course 
 contribute by using GitHub issues and Pull Requests. We also appreciate other types of contributions such as 
@@ -73,3 +73,5 @@ If the problem needs debating or you have questions on how to implement a featur
 [issue](https://github.com/gscsocial/gsc-core/issues). If you spotted a typo or a code formatting issue, just directly 
 opening a Pull Request is fine. 
 
+License
+GSC-Core is under the GNU General Public License v3. See LICENSE.
