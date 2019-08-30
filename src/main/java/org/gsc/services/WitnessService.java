@@ -257,18 +257,18 @@ public class WitnessService implements Service {
         }
     }
 
+    private BlockWrapper generateBlock(long when, ByteString witnessAddress)
+            throws ValidateSignatureException, ContractValidateException, ContractExeException, UnLinkedBlockException, ValidateScheduleException, AccountResourceInsufficientException, ReceiptException, TransactionTraceException {
+        return gscApp.getDbManager().generateBlock(this.localWitnessStateMap.get(witnessAddress), when,
+                this.privateKeyMap.get(witnessAddress));
+    }
+    
     private void broadcastBlock(BlockWrapper block) {
         try {
             gscApp.getP2pNode().broadcast(new BlockMessage(block.getData()));
         } catch (Exception ex) {
             throw new RuntimeException("BroadcastBlock error");
         }
-    }
-
-    private BlockWrapper generateBlock(long when, ByteString witnessAddress)
-            throws ValidateSignatureException, ContractValidateException, ContractExeException, UnLinkedBlockException, ValidateScheduleException, AccountResourceInsufficientException, ReceiptException, TransactionTraceException {
-        return gscApp.getDbManager().generateBlock(this.localWitnessStateMap.get(witnessAddress), when,
-                this.privateKeyMap.get(witnessAddress));
     }
 
     /**
