@@ -48,10 +48,10 @@ GSC (Global Social Chain) is the new generation of social networking chain. This
 ## Links
 * [Webiste](https://gscan.social/)
 * [GSC Exploer](https://gscan.social/)
+* [Github](https://github.com/gscsocial)
 * [Telegram](https://t.me/gscofficial)
 * [Twitter](https://twitter.com/gsc_socialchain)
 * [Facebook](https://www.facebook.com/GSCCoin/)
-* [Github](https://github.com/gscsocial)
 * [Meidum](https://medium.com/@gsc_socialchain)
 * [Reddit](https://www.reddit.com/user/GSCOfficial/)
 * [Youtube](https://www.youtube.com/channel/UCWcQhl4N6_ggZFdHwTxuuIQ)
