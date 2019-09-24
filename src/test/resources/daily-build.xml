@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Daily Build">
+  <listeners>
+    <listener class-name="org.gsc.wallet.common.client.utils.DailyBuildReport"></listener>
+  </listeners>
+  <test name="stest">
+    <packages>
+      <package name="org.gsc.wallet.dailybuild.*">
+      </package>
+    </packages>
+  </test>
+</suite>

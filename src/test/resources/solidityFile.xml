@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Confirmed File">
+  <listeners>
+    <listener class-name="org.gsc.wallet.common.client.utils.RetryListener"></listener>
+  </listeners>
+  <test name="solidity part 1">
+    <packages>
+      <package name="org.gsc.wallet.dailybuild.grammar.*"></package>
+      <package name="org.gsc.wallet.dailybuild.internaltransaction.*"></package>
+    </packages>
+    <classes>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken077"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken078"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken079"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken080"></class>
+    </classes>
+  </test>
+  <test name="solidity part 2">
+    <classes>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken001"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken002"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken003"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken005"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken011"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken012"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken014"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken018"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken023"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken026"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken027"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken028"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken029"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken030"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken031"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken034"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken035"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken036"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken037"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken038"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken039"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken041"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken043"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken048"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken049"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken050"></class>
+    </classes>
+  </test>
+  <test name="solidity part 3">
+    <packages>
+      <package name="stest.gsc.wallet.solidityadd.*"></package>
+    </packages>
+  </test>
+  <test name="solidity part 4">
+    <packages>
+      <package name="stest.gsc.wallet.contract.*"></package>
+    </packages>
+    <classes>
+      <class name="org.gsc.wallet.dailybuild.manual.ContractLinkage001"></class>
+      <class name="org.gsc.wallet.dailybuild.manual.ContractLinkage005"></class>
+      <class name="org.gsc.wallet.dailybuild.manual.ContractLinkage006"></class>
+      <class name="org.gsc.wallet.dailybuild.manual.ContractScenario002"></class>
+      <class name="org.gsc.wallet.dailybuild.manual.ContractScenario011"></class>
+      <class name="org.gsc.wallet.dailybuild.manual.ContractScenario014"></class>
+      <class name="org.gsc.wallet.dailybuild.manual.ContractUnknownException"></class>
+      <class name="org.gsc.wallet.dailybuild.manual.RequireException"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken051"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken052"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken054"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken055"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken060"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken061"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken064"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken066"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken067"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken073"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken075"></class>
+      <class name="org.gsc.wallet.dailybuild.grctoken.ContractGrcToken076"></class>
+    </classes>
+  </test>
+</suite>
