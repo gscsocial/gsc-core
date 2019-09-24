@@ -15,7 +15,7 @@ package org.gsc.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.BooleanUtils;
-import org.gsc.services.interfaceOnConfirmed.ConfirmedNodeRpcApiService;
+import org.gsc.services.interfaceOnConfirmed.ConfirmedRpcApiService;
 import org.rocksdb.RocksDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -31,7 +31,7 @@ import org.gsc.db.api.IndexHelper;
 import org.gsc.db.backup.BackupRocksDBAspect;
 import org.gsc.db.backup.NeedBeanCondition;
 import org.gsc.db.db2.core.SnapshotManager;
-import org.gsc.services.interfaceOnConfirmed.http.confirmed.ConfirmedNodeHttpApiService;
+import org.gsc.services.interfaceOnConfirmed.http.confirmed.ConfirmedHttpApiService;
 
 @Slf4j(topic = "app")
 @Configuration
@@ -81,22 +81,22 @@ public class DefaultConfig {
 
 
     @Bean
-    public ConfirmedNodeRpcApiService getRpcApiServiceOnConfirmed() {
+    public ConfirmedRpcApiService getRpcApiServiceOnConfirmed() {
         boolean isConfirmedNode = Args.getInstance().isConfirmedNode();
         int dbVersion = Args.getInstance().getStorage().getDbVersion();
         if (!isConfirmedNode && dbVersion == 2) {
-            return new ConfirmedNodeRpcApiService();
+            return new ConfirmedRpcApiService();
         }
 
         return null;
     }
 
     @Bean
-    public ConfirmedNodeHttpApiService getHttpApiOnConfirmedService() {
+    public ConfirmedHttpApiService getHttpApiOnConfirmedService() {
         boolean isConfirmedNode = Args.getInstance().isConfirmedNode();
         int dbVersion = Args.getInstance().getStorage().getDbVersion();
         if (!isConfirmedNode && dbVersion == 2) {
-            return new ConfirmedNodeHttpApiService();
+            return new ConfirmedHttpApiService();
         }
 
         return null;

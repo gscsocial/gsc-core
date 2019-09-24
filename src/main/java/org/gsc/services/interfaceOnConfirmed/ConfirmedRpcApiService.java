@@ -59,7 +59,7 @@ import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.TransactionInfo;
 
 @Slf4j(topic = "API")
-public class ConfirmedNodeRpcApiService implements Service {
+public class ConfirmedRpcApiService implements Service {
 
     private int port = Args.getInstance().getRpcOnConfirmedPort();
     private Server apiServer;
@@ -107,7 +107,7 @@ public class ConfirmedNodeRpcApiService implements Service {
             logger.debug(e.getMessage(), e);
         }
 
-        logger.info("ConfirmedNodeRpcApiService started, listening on " + port);
+        logger.info("ConfirmedRpcApiService started, listening on " + port);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.err.println("*** shutting down gRPC server on confirmed since JVM is shutting down");

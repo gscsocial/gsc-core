@@ -19,6 +19,7 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import java.io.File;
 
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.services.interfaceOnConfirmed.ConfirmedRpcApiService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.gsc.application.Application;
@@ -30,8 +31,7 @@ import org.gsc.config.args.Args;
 import org.gsc.services.RpcApiService;
 import org.gsc.services.WitnessService;
 import org.gsc.services.http.FullNodeHttpApiService;
-import org.gsc.services.interfaceOnConfirmed.ConfirmedNodeRpcApiService;
-import org.gsc.services.interfaceOnConfirmed.http.confirmed.ConfirmedNodeHttpApiService;
+import org.gsc.services.interfaceOnConfirmed.http.confirmed.ConfirmedHttpApiService;
 
 @Slf4j(topic = "app")
 public class Start {
@@ -76,10 +76,10 @@ public class Start {
 
         // provide confirmed rpc and http server on the confirmed node.
         if (Args.getInstance().getStorage().getDbVersion() == 2) {
-            ConfirmedNodeRpcApiService confirmedNodeRpcApiService = context.getBean(ConfirmedNodeRpcApiService.class);
-            application.addService(confirmedNodeRpcApiService);
-            ConfirmedNodeHttpApiService confirmedNodeHttpApiService = context.getBean(ConfirmedNodeHttpApiService.class);
-            application.addService(confirmedNodeHttpApiService);
+            ConfirmedRpcApiService confirmedRpcApiService = context.getBean(ConfirmedRpcApiService.class);
+            application.addService(confirmedRpcApiService);
+            ConfirmedHttpApiService confirmedHttpApiService = context.getBean(ConfirmedHttpApiService.class);
+            application.addService(confirmedHttpApiService);
         }
 
         application.initServices(cfgArgs);

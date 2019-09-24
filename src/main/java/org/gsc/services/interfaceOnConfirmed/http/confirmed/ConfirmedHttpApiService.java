@@ -24,7 +24,7 @@ import org.gsc.config.args.Args;
 import org.gsc.services.interfaceOnConfirmed.http.*;
 
 @Slf4j(topic = "API")
-public class ConfirmedNodeHttpApiService implements Service {
+public class ConfirmedHttpApiService implements Service {
 
     private int port = Args.getInstance().getConfirmedHttpPort();
 
