@@ -1,7 +1,7 @@
 package org.gsc.keystore;
 
 import org.gsc.crypto.ECKey;
-import org.gsc.common.utils.ByteArray;
+import org.gsc.utils.ByteArray;
 
 /**
  * Credentials wrapper.

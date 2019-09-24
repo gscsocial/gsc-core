@@ -1,23 +1,35 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.db;
 
 import java.io.File;
-
-import org.gsc.core.wrapper.TransactionInfoWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.gsc.common.application.GSCApplicationContext;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.FileUtil;
+import org.gsc.application.GSCApplicationContext;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.FileUtil;
 import org.gsc.core.Constant;
+import org.gsc.core.wrapper.TransactionInfoWrapper;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.core.exception.BadItemException;
 
 public class TransactionHistoryTest {
 
-  private static String dbPath = "output_TransactionHistoryStore_test";
+  private static String dbPath = "db_TransactionHistoryStore_test";
   private static String dbDirectory = "db_TransactionHistoryStore_test";
   private static String indexDirectory = "index_TransactionHistoryStore_test";
   private static GSCApplicationContext context;
@@ -27,11 +39,11 @@ public class TransactionHistoryTest {
   static {
     Args.setParam(
         new String[]{
-            "--output-directory", dbPath,
+            "--db-directory", dbPath,
             "--storage-db-directory", dbDirectory,
             "--storage-index-directory", indexDirectory
         },
-        Constant.TEST_CONF
+        Constant.TEST_NET_CONF
     );
     context = new GSCApplicationContext(DefaultConfig.class);
   }
@@ -39,30 +51,30 @@ public class TransactionHistoryTest {
   @AfterClass
   public static void destroy() {
     Args.clearParam();
-    FileUtil.deleteDir(new File(dbPath));
     context.destroy();
+    FileUtil.deleteDir(new File(dbPath));
   }
 
   @BeforeClass
   public static void init() {
     transactionHistoryStore = context.getBean(TransactionHistoryStore.class);
-    TransactionInfoWrapper transactionInfoCapsule = new TransactionInfoWrapper();
+    TransactionInfoWrapper transactionInfoWrapper = new TransactionInfoWrapper();
 
-    transactionInfoCapsule.setId(transactionId);
-    transactionInfoCapsule.setFee(1000L);
-    transactionInfoCapsule.setBlockNumber(100L);
-    transactionInfoCapsule.setBlockTimeStamp(200L);
-    transactionHistoryStore.put(transactionId, transactionInfoCapsule);
+    transactionInfoWrapper.setId(transactionId);
+    transactionInfoWrapper.setFee(1000L);
+    transactionInfoWrapper.setBlockNumber(100L);
+    transactionInfoWrapper.setBlockTimeStamp(200L);
+    transactionHistoryStore.put(transactionId, transactionInfoWrapper);
   }
 
   @Test
   public void get() throws BadItemException {
     //test get and has Method
-    TransactionInfoWrapper resultCapsule = transactionHistoryStore.get(transactionId);
-    Assert.assertEquals(1000L, resultCapsule.getFee());
-    Assert.assertEquals(100L, resultCapsule.getBlockNumber());
-    Assert.assertEquals(200L, resultCapsule.getBlockTimeStamp());
+    TransactionInfoWrapper resultWrapper = transactionHistoryStore.get(transactionId);
+    Assert.assertEquals(1000L, resultWrapper.getFee());
+    Assert.assertEquals(100L, resultWrapper.getBlockNumber());
+    Assert.assertEquals(200L, resultWrapper.getBlockTimeStamp());
     Assert.assertEquals(ByteArray.toHexString(transactionId),
-        ByteArray.toHexString(resultCapsule.getId()));
+        ByteArray.toHexString(resultWrapper.getId()));
   }
 }

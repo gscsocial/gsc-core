@@ -1,20 +1,16 @@
 /*
- * Copyright (c) [2016] [ <ether.camp> ]
- * This file is part of the ethereumJ library.
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
  *
- * The ethereumJ library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The ethereumJ library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
  */
+
 package org.gsc.runtime.vm;
 
 import java.util.Arrays;
@@ -24,9 +20,8 @@ import java.util.Map;
 
 
 /**
- * Instruction set for the Ethereum Virtual Machine
- * See Yellow Paper: http://www.gavwood.com/Paper.pdf
- * - Appendix G. Virtual Machine Specification
+ * Instruction set for the Ethereum Virtual Machine See Yellow Paper:
+ * http://www.gavwood.com/Paper.pdf - Appendix G. Virtual Machine Specification
  */
 public enum OpCode {
     // TODO #POC9 Need to make tiers more accurate
@@ -66,13 +61,11 @@ public enum OpCode {
      */
     SMOD(0x07, 2, 1, OpCode.Tier.LowTier),
     /**
-     * (0x08) Addition combined with modulo
-     * remainder operation
+     * (0x08) Addition combined with modulo remainder operation
      */
     ADDMOD(0x08, 3, 1, OpCode.Tier.MidTier),
     /**
-     * (0x09) Multiplication combined with modulo
-     * remainder operation
+     * (0x09) Multiplication combined with modulo remainder operation
      */
     MULMOD(0x09, 3, 1, OpCode.Tier.MidTier),
     /**
@@ -130,6 +123,18 @@ public enum OpCode {
      * (0x1a) Retrieve single byte from word
      */
     BYTE(0x1a, 2, 1, OpCode.Tier.VeryLowTier),
+    /**
+     * (0x1b) Shift left
+     */
+    SHL(0x1b, 2, 1, OpCode.Tier.VeryLowTier),
+    /**
+     * (0x1c) Logical shift right
+     */
+    SHR(0x1c, 2, 1, OpCode.Tier.VeryLowTier),
+    /**
+     * (0x1d) Arithmetic shift right
+     */
+    SAR(0x1d, 2, 1, OpCode.Tier.VeryLowTier),
 
     /*  Cryptographic Operations    */
 
@@ -141,8 +146,7 @@ public enum OpCode {
     /*  Environmental Information   */
 
     /**
-     * (0x30)  Get address of currently
-     * executing account
+     * (0x30)  Get address of currently executing account
      */
     ADDRESS(0x30, 0, 1, OpCode.Tier.BaseTier),
     /**
@@ -158,34 +162,27 @@ public enum OpCode {
      */
     CALLER(0x33, 0, 1, OpCode.Tier.BaseTier),
     /**
-     * (0x34) Get deposited value by the
-     * instruction/transaction responsible
-     * for this execution
+     * (0x34) Get deposited value by the instruction/transaction responsible for this execution
      */
     CALLVALUE(0x34, 0, 1, OpCode.Tier.BaseTier),
     /**
-     * (0x35) Get input data of current
-     * environment
+     * (0x35) Get input data of current environment
      */
     CALLDATALOAD(0x35, 1, 1, OpCode.Tier.VeryLowTier),
     /**
-     * (0x36) Get size of input data in current
-     * environment
+     * (0x36) Get size of input data in current environment
      */
     CALLDATASIZE(0x36, 0, 1, OpCode.Tier.BaseTier),
     /**
-     * (0x37) Copy input data in current
-     * environment to memory
+     * (0x37) Copy input data in current environment to memory
      */
     CALLDATACOPY(0x37, 3, 0, OpCode.Tier.VeryLowTier),
     /**
-     * (0x38) Get size of code running in
-     * current environment
+     * (0x38) Get size of code running in current environment
      */
     CODESIZE(0x38, 0, 1, OpCode.Tier.BaseTier),
     /**
-     * (0x39) Copy code running in current
-     * environment to memory
+     * (0x39) Copy code running in current environment to memory
      */
     CODECOPY(0x39, 3, 0, OpCode.Tier.VeryLowTier), // [len code_start mem_start CODECOPY]
 
@@ -193,26 +190,26 @@ public enum OpCode {
 
     RETURNDATACOPY(0x3e, 3, 0, OpCode.Tier.VeryLowTier),
     /**
-     * (0x3a) Get price of gas in current
-     * environment
+     * (0x3a) Get price of gas in current environment
      */
     GASPRICE(0x3a, 0, 1, OpCode.Tier.BaseTier),
     /**
-     * (0x3b) Get size of code running in
-     * current environment with given offset
+     * (0x3b) Get size of code running in current environment with given offset
      */
     EXTCODESIZE(0x3b, 1, 1, OpCode.Tier.ExtTier),
     /**
-     * (0x3c) Copy code running in current
-     * environment to memory with given offset
+     * (0x3c) Copy code running in current environment to memory with given offset
      */
     EXTCODECOPY(0x3c, 4, 0, OpCode.Tier.ExtTier),
+    /**
+     * (0x3f) Returns the keccak256 hash of a contract’s code
+     */
+    EXTCODEHASH(0x3f, 1, 1, OpCode.Tier.ExtTier),
 
     /*  Block Information   */
 
     /**
-     * (0x40) Get hash of most recent
-     * complete block
+     * (0x40) Get hash of most recent complete block
      */
     BLOCKHASH(0x40, 1, 1, OpCode.Tier.ExtTier),
     /**
@@ -267,8 +264,7 @@ public enum OpCode {
      */
     JUMP(0x56, 1, 0, OpCode.Tier.MidTier),
     /**
-     * (0x57) Conditionally alter the program
-     * counter
+     * (0x57) Conditionally alter the program counter
      */
     JUMPI(0x57, 2, 0, OpCode.Tier.HighTier),
     /**
@@ -415,8 +411,7 @@ public enum OpCode {
      */
     PUSH31(0x7e, 0, 1, OpCode.Tier.VeryLowTier),
     /**
-     * (0x7f) Place 32-byte (full word)
-     * item on stack
+     * (0x7f) Place 32-byte (full word) item on stack
      */
     PUSH32(0x7f, 0, 1, OpCode.Tier.VeryLowTier),
 
@@ -566,6 +561,17 @@ public enum OpCode {
     /*  System operations   */
 
     /**
+     * (0xd0) Message-call into an account with grc10 token
+     */
+    CALLTOKEN(0xd0, 8, 1, OpCode.Tier.SpecialTier, CallFlags.Call, CallFlags.HasValue),
+
+    TOKENBALANCE(0xd1, 2, 1, OpCode.Tier.ExtTier),
+
+    CALLTOKENVALUE(0xd2, 0, 1, OpCode.Tier.BaseTier),
+
+    CALLTOKENID(0xd3, 0, 1, OpCode.Tier.BaseTier),
+
+    /**
      * (0xf0) Create a new account with associated code
      */
     CREATE(0xf0, 3, 1, OpCode.Tier.SpecialTier),   //       [in_size] [in_offs] [gas_val] CREATE
@@ -576,40 +582,45 @@ public enum OpCode {
     //       [out_data_size] [out_data_start] [in_data_size] [in_data_start] [value] [to_addr]
     // [gas] CALL
     /**
-     * (0xf2) Calls self, but grabbing the code from the
-     * TO argument instead of from one's own address
+     * (0xf2) Calls self, but grabbing the code from the TO argument instead of from one's own
+     * address
      */
-    CALLCODE(0xf2, 7, 1, OpCode.Tier.SpecialTier, CallFlags.Call, CallFlags.HasValue, CallFlags.Stateless),
+    CALLCODE(0xf2, 7, 1, OpCode.Tier.SpecialTier, CallFlags.Call, CallFlags.HasValue,
+            CallFlags.Stateless),
     /**
      * (0xf3) Halt execution returning output data
      */
     RETURN(0xf3, 2, 0, OpCode.Tier.ZeroTier),
 
     /**
-     *  opcode that can be used to call another contract (or itself) while disallowing any
-     *  modifications to the state during the call (and its subcalls, if present).
-     *  Any opcode that attempts to perform such a modification (see below for details)
-     *  will result in an exception instead of performing the modification.
+     * (0xf4)  similar in idea to CALLCODE, except that it propagates the sender and value from the
+     * parent scope to the child scope, ie. the call created has the same sender and value as the
+     * original call. also the Value parameter is omitted for this opCode
+     */
+    DELEGATECALL(0xf4, 6, 1, OpCode.Tier.SpecialTier, CallFlags.Call, CallFlags.Stateless,
+            CallFlags.Delegate),
+
+    /**
+     * (0xf5) Skinny CREATE2, same as CREATE but with deterministic address
+     */
+    CREATE2(0xf5, 4, 1, OpCode.Tier.SpecialTier),
+
+    /**
+     * opcode that can be used to call another contract (or itself) while disallowing any
+     * modifications to the state during the call (and its subcalls, if present). Any opcode that
+     * attempts to perform such a modification (see below for details) will result in an exception
+     * instead of performing the modification.
      */
     STATICCALL(0xfa, 6, 1, OpCode.Tier.SpecialTier, CallFlags.Call, CallFlags.Static),
 
     /**
-     * (0xf4)  similar in idea to CALLCODE, except that it propagates the sender and value
-     *  from the parent scope to the child scope, ie. the call created has the same sender
-     *  and value as the original call.
-     *  also the Value parameter is omitted for this opCode
-     */
-    DELEGATECALL(0xf4, 6, 1, OpCode.Tier.SpecialTier, CallFlags.Call, CallFlags.Stateless, CallFlags.Delegate),
-
-    /**
      * (0xfd) The `REVERT` instruction will stop execution, roll back all state changes done so far
-     * and provide a pointer to a memory section, which can be interpreted as an error code or message.
-     * While doing so, it will not consume all the remaining gas.
+     * and provide a pointer to a memory section, which can be interpreted as an error code or
+     * message. While doing so, it will not consume all the remaining gas.
      */
     REVERT(0xfd, 2, 0, OpCode.Tier.ZeroTier),
     /**
-     * (0xff) Halt execution and register account for
-     * later deletion
+     * (0xff) Halt execution and register account for later deletion
      */
     SUICIDE(0xff, 1, 0, OpCode.Tier.ZeroTier);
 
@@ -631,7 +642,7 @@ public enum OpCode {
 
     //require = required args
     //return = required return
-    private OpCode(int op, int require, int ret, Tier tier, CallFlags ... callFlags) {
+    private OpCode(int op, int require, int ret, Tier tier, CallFlags... callFlags) {
         this.opcode = (byte) op;
         this.require = require;
         this.tier = tier;
@@ -686,11 +697,13 @@ public enum OpCode {
     }
 
     private void checkCall() {
-        if (!isCall()) throw new RuntimeException("Opcode is not a call: " + this);
+        if (!isCall()) {
+            throw new RuntimeException("Opcode is not a call: " + this);
+        }
     }
 
     /**
-     *  Indicates that the code is executed in the context of the caller
+     * Indicates that the code is executed in the context of the caller
      */
     public boolean callIsStateless() {
         checkCall();
@@ -698,7 +711,7 @@ public enum OpCode {
     }
 
     /**
-     *  Indicates that the opcode has value parameter (3rd on stack)
+     * Indicates that the opcode has value parameter (3rd on stack)
      */
     public boolean callHasValue() {
         checkCall();
@@ -706,7 +719,7 @@ public enum OpCode {
     }
 
     /**
-     *  Indicates that any state modifications are disallowed during the call
+     * Indicates that any state modifications are disallowed during the call
      */
     public boolean callIsStatic() {
         checkCall();
@@ -714,7 +727,7 @@ public enum OpCode {
     }
 
     /**
-     *  Indicates that value and message sender are propagated from parent to child scope
+     * Indicates that value and message sender are propagated from parent to child scope
      */
     public boolean callIsDelegate() {
         checkCall();
@@ -755,22 +768,22 @@ public enum OpCode {
         Call,
 
         /**
-         *  Indicates that the code is executed in the context of the caller
+         * Indicates that the code is executed in the context of the caller
          */
         Stateless,
 
         /**
-         *  Indicates that the opcode has value parameter (3rd on stack)
+         * Indicates that the opcode has value parameter (3rd on stack)
          */
         HasValue,
 
         /**
-         *  Indicates that any state modifications are disallowed during the call
+         * Indicates that any state modifications are disallowed during the call
          */
         Static,
 
         /**
-         *  Indicates that value and message sender are propagated from parent to child scope
+         * Indicates that value and message sender are propagated from parent to child scope
          */
         Delegate
     }

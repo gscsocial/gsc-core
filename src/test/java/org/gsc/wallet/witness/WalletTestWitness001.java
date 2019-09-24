@@ -1,3 +1,16 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.wallet.witness;
 
 import com.google.protobuf.ByteString;
@@ -8,8 +21,12 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.api.WalletGrpc;
-import org.gsc.crypto.ECKey;
+import org.gsc.wallet.common.client.Configuration;
+import org.gsc.wallet.common.client.Parameter;
+import org.gsc.wallet.common.client.WalletClient;
+import org.gsc.wallet.common.client.utils.Base58;
+import org.gsc.wallet.common.client.utils.PublicMethed;
+import org.gsc.wallet.common.client.utils.TransactionUtils;
 import org.spongycastle.util.encoders.Hex;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -19,7 +36,9 @@ import org.testng.annotations.Test;
 import org.gsc.api.GrpcAPI;
 import org.gsc.api.GrpcAPI.NumberMessage;
 import org.gsc.api.GrpcAPI.Return;
-import org.gsc.common.utils.ByteArray;
+import org.gsc.api.WalletGrpc;
+import org.gsc.crypto.ECKey;
+import org.gsc.utils.ByteArray;
 import org.gsc.core.Wallet;
 import org.gsc.protos.Contract;
 import org.gsc.protos.Contract.FreezeBalanceContract;
@@ -27,27 +46,19 @@ import org.gsc.protos.Contract.UnfreezeBalanceContract;
 import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.Transaction;
-import org.gsc.common.overlay.Configuration;
-import org.gsc.common.overlay.Parameter;
-import org.gsc.common.overlay.WalletClient;
-import org.gsc.common.overlay.util.Base58;
-import org.gsc.common.overlay.util.PublicMethed;
-import org.gsc.common.overlay.util.TransactionUtils;
 
 @Slf4j
 public class WalletTestWitness001 {
 
-  //testng001、testng002、testng003、testng004
-
-  private final String testKey002 =
-      "FC8BF0238748587B9617EB6D15D47A66C0E07C1A1959033CF249C6532DC29FE6";
-
-
-  /*  //testng001、testng002、testng003、testng004
-  private static final byte[] fromAddress = Base58
-      .decodeFromBase58Check("THph9K2M2nLvkianrMGswRhz5hjSA9fuH7");*/
+  private final String testKey002 = Configuration.getByPath("testng.conf")
+      .getString("foundationAccount.key1");
   private final byte[] fromAddress = PublicMethed.getFinalAddress(testKey002);
-
+  private final String testKey003 = Configuration.getByPath("testng.conf")
+      .getString("foundationAccount.key2");
+  private final byte[] toAddress = PublicMethed.getFinalAddress(testKey003);
+  private final String witnessKey001 = Configuration.getByPath("testng.conf")
+      .getString("witness.key1");
+  private final byte[] witnessAddress = PublicMethed.getFinalAddress(witnessKey001);
 
 
   private ManagedChannel channelFull = null;
@@ -63,13 +74,17 @@ public class WalletTestWitness001 {
   @BeforeSuite
   public void beforeSuite() {
     Wallet wallet = new Wallet();
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
+
+  /**
+   * constructor.
+   */
 
   @BeforeClass
   public void beforeClass() {
 
-    WalletClient.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    WalletClient.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
     logger.info("Pre fix byte =====  " + WalletClient.getAddressPreFixByte());
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
         .usePlaintext(true)
@@ -84,9 +99,7 @@ public class WalletTestWitness001 {
 
   @Test(enabled = true)
   public void testVoteWitness() {
-    Base58.encode58Check(fromAddress);
-    logger.info(Base58.encode58Check(fromAddress));
-    String voteStr = "TB4B1RMhoPeivkj4Hebm6tttHjRY9yQFes";
+    String voteStr = Base58.encode58Check(witnessAddress);
     HashMap<String, String> smallVoteMap = new HashMap<String, String>();
     smallVoteMap.put(voteStr, "1");
     HashMap<String, String> wrongVoteMap = new HashMap<String, String>();
@@ -103,8 +116,9 @@ public class WalletTestWitness001 {
     //Assert.assertFalse(VoteWitness(smallVoteMap, NO_FROZEN_ADDRESS, no_frozen_balance_testKey));
 
     //Freeze balance to get vote ability.
-    Assert.assertTrue(PublicMethed.freezeBalance(fromAddress, 10000000L, 3L, testKey002,blockingStubFull));
-
+    Assert.assertTrue(PublicMethed.freezeBalance(fromAddress, 1200000L, 5,
+        testKey002, blockingStubFull));
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
     //Vote failed when the vote is large than the freeze balance.
     Assert.assertFalse(voteWitness(veryLargeMap, fromAddress, testKey002));
     //Vote failed due to 0 vote.
@@ -114,11 +128,15 @@ public class WalletTestWitness001 {
     //Vote is so large, vote failed.
     Assert.assertFalse(voteWitness(wrongDropMap, fromAddress, testKey002));
 
-    //Vote success, the second latest vote is cover by the latest vote.
+    //Vote success
     Assert.assertTrue(voteWitness(smallVoteMap, fromAddress, testKey002));
-    Assert.assertTrue(voteWitness(smallVoteMap, fromAddress, testKey002));
-    Assert.assertTrue(voteWitness(smallVoteMap, fromAddress, testKey002));
+
+
   }
+
+  /**
+   * constructor.
+   */
 
   @AfterClass
   public void shutdown() throws InterruptedException {
@@ -129,6 +147,10 @@ public class WalletTestWitness001 {
       searchChannelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
+
+  /**
+   * constructor.
+   */
 
   public Boolean voteWitness(HashMap<String, String> witness, byte[] addRess, String priKey) {
 
@@ -150,7 +172,7 @@ public class WalletTestWitness001 {
     builder.setOwnerAddress(ByteString.copyFrom(addRess));
     for (String addressBase58 : witness.keySet()) {
       String value = witness.get(addressBase58);
-      long count = Long.parseLong(value);
+      final long count = Long.parseLong(value);
       Contract.VoteWitnessContract.Vote.Builder voteBuilder = Contract.VoteWitnessContract.Vote
           .newBuilder();
       byte[] address = WalletClient.decodeFromBase58Check(addressBase58);
@@ -201,6 +223,10 @@ public class WalletTestWitness001 {
     return true;
   }
 
+  /**
+   * constructor.
+   */
+
   public Boolean freezeBalance(byte[] addRess, long freezeBalance, long freezeDuration,
       String priKey) {
     byte[] address = addRess;
@@ -219,11 +245,8 @@ public class WalletTestWitness001 {
     Account beforeFronzen = queryAccount(ecKey, blockingStubFull);
 
     Long beforeFrozenBalance = 0L;
-    //Long beforeBandwidth     = beforeFronzen.getBandwidth();
     if (beforeFronzen.getFrozenCount() != 0) {
       beforeFrozenBalance = beforeFronzen.getFrozen(0).getFrozenBalance();
-      //beforeBandwidth     = beforeFronzen.getBandwidth();
-      //logger.info(Long.toString(beforeFronzen.getBandwidth()));
       logger.info(Long.toString(beforeFronzen.getFrozen(0).getFrozenBalance()));
     }
 
@@ -269,29 +292,20 @@ public class WalletTestWitness001 {
       }
     }
 
-
     Account afterFronzen = queryAccount(ecKey, searchBlockingStubFull);
     Long afterFrozenBalance = afterFronzen.getFrozen(0).getFrozenBalance();
-    //Long afterBandwidth     = afterFronzen.getBandwidth();
-    //logger.info(Long.toString(afterFronzen.getBandwidth()));
-    //logger.info(Long.toString(afterFronzen.getFrozen(0).getFrozenBalance()));
-    //logger.info(Integer.toString(search.getFrozenCount()));
     logger.info(
         "afterfrozenbalance =" + Long.toString(afterFrozenBalance) + "beforefrozenbalance =  "
             + beforeFrozenBalance + "freezebalance = " + Long.toString(freezeBalance));
-    //logger.info("afterbandwidth = " + Long.toString(afterBandwidth) + " beforebandwidth =
-    // " + Long.toString(beforeBandwidth));
-    //if ((afterFrozenBalance - beforeFrozenBalance != freezeBalance) ||
-    //       (freezeBalance * frozen_duration -(afterBandwidth - beforeBandwidth) !=0)){
-    //  logger.info("After 20 second, two node still not synchronous");
-    // }
     Assert.assertTrue(afterFrozenBalance - beforeFrozenBalance == freezeBalance);
-    //Assert.assertTrue(freezeBalance * frozen_duration - (afterBandwidth -
-    // beforeBandwidth) <= 1000000);
     return true;
 
 
   }
+
+  /**
+   * constructor.
+   */
 
   public boolean unFreezeBalance(byte[] addRess, String priKey) {
     byte[] address = addRess;
@@ -330,6 +344,9 @@ public class WalletTestWitness001 {
     }
   }
 
+  /**
+   * constructor.
+   */
 
   public Account queryAccount(ECKey ecKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
@@ -355,11 +372,19 @@ public class WalletTestWitness001 {
     return ecKey.getAddress();
   }
 
+  /**
+   * constructor.
+   */
+
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
   }
+
+  /**
+   * constructor.
+   */
 
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();

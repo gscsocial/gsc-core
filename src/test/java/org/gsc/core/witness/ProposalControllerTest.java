@@ -1,3 +1,16 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.core.witness;
 
 import com.google.protobuf.ByteString;
@@ -6,19 +19,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.gsc.common.application.GSCApplicationContext;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
 import org.gsc.core.wrapper.ProposalWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.gsc.application.GSCApplicationContext;
 import org.testng.collections.Lists;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.FileUtil;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
 import org.gsc.db.DynamicPropertiesStore;
 import org.gsc.db.Manager;
 import org.gsc.protos.Protocol.Proposal;
@@ -28,11 +41,11 @@ public class ProposalControllerTest {
 
   private static Manager dbManager = new Manager();
   private static GSCApplicationContext context;
-  private static String dbPath = "output_proposal_controller_test";
+  private static String dbPath = "db_proposal_controller_test";
   private static ProposalController proposalController;
 
   static {
-    Args.setParam(new String[]{"-d", dbPath}, Constant.TEST_CONF);
+    Args.setParam(new String[]{"-d", dbPath}, Constant.TEST_NET_CONF);
     context = new GSCApplicationContext(DefaultConfig.class);
   }
 
@@ -46,8 +59,8 @@ public class ProposalControllerTest {
   @AfterClass
   public static void removeDb() {
     Args.clearParam();
-    FileUtil.deleteDir(new File(dbPath));
     context.destroy();
+    FileUtil.deleteDir(new File(dbPath));
   }
 
   @Test

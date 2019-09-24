@@ -1,13 +1,26 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.core.wrapper.utils;
 
 import java.util.ArrayList;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.core.wrapper.utils.MerkleTree.Leaf;
 import org.junit.Assert;
 import org.junit.Test;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.Sha256Hash;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.Sha256Hash;
+import org.gsc.core.wrapper.utils.MerkleTree.Leaf;
 
 @Slf4j
 public class MerkleTreeTest {
@@ -56,10 +69,10 @@ public class MerkleTreeTest {
   public void test1HashNum() {
     List<Sha256Hash> hashList = getHash(1);
     MerkleTree tree = MerkleTree.getInstance().createTree(hashList);
-    MerkleTree.Leaf root = tree.getRoot();
+    Leaf root = tree.getRoot();
     Assert.assertEquals(root.getHash(), hashList.get(0));
 
-    MerkleTree.Leaf left = root.getLeft();
+    Leaf left = root.getLeft();
     Assert.assertEquals(left.getHash(), hashList.get(0));
     Assert.assertTrue(left.getLeft() == null);
     Assert.assertTrue(left.getRight() == null);
@@ -79,7 +92,7 @@ public class MerkleTreeTest {
   public void test2HashNum() {
     List<Sha256Hash> hashList = getHash(2);
     MerkleTree tree = MerkleTree.getInstance().createTree(hashList);
-    MerkleTree.Leaf root = tree.getRoot();
+    Leaf root = tree.getRoot();
     Assert.assertEquals(root.getHash(), computeHash(hashList.get(0), hashList.get(1)));
 
     Leaf left = root.getLeft();
@@ -113,7 +126,7 @@ public class MerkleTreeTest {
    */
   public void testAnyHashNum() {
     int maxNum = 128;
-    for (int hashNum = 1; hashNum <= maxNum; hashNum++){
+    for (int hashNum = 1; hashNum <= maxNum; hashNum++) {
       int maxRank = getRank(hashNum);
       List<Sha256Hash> hashList = getHash(hashNum);
       MerkleTree tree = MerkleTree.getInstance().createTree(hashList);
@@ -132,12 +145,14 @@ public class MerkleTreeTest {
       number = number << 1;
       pareTree(left, hashList, maxRank, curBank, number);
       number++;
-      if ( (number<<(maxRank-curBank)) >= hashList.size()) {    //The smallest leaf child number = number<<(maxRank-curBank)
+      if ((number << (maxRank - curBank)) >= hashList
+          .size()) {    //The smallest leaf child number = number<<(maxRank-curBank)
         Assert.assertTrue(right == null);
         Assert.assertEquals(head.getHash(), left.getHash());  //No right, leaf = left
       } else {
         pareTree(right, hashList, maxRank, curBank, number);
-        Assert.assertEquals(head.getHash(), computeHash(left.getHash(), right.getHash())); //hash = sha256(left || right)
+        Assert.assertEquals(head.getHash(),
+            computeHash(left.getHash(), right.getHash())); //hash = sha256(left || right)
       }
     } else {
       // last rank, no child, it is real leaf. Its hash in hashList.

@@ -1,17 +1,17 @@
 /*
- * java-gsc is free software: you can redistribute it and/or modify
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * java-gsc is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
  */
+
+
 
 package org.gsc.core.wrapper;
 
@@ -22,19 +22,23 @@ import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.utils.ByteArray;
+import org.gsc.utils.ByteArray;
+import org.gsc.db.Manager;
 import org.gsc.protos.Contract.AccountCreateContract;
 import org.gsc.protos.Contract.AccountUpdateContract;
 import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Account.AccountResource;
+import org.gsc.protos.Protocol.Account.Builder;
 import org.gsc.protos.Protocol.Account.Frozen;
 import org.gsc.protos.Protocol.AccountType;
+import org.gsc.protos.Protocol.Key;
+import org.gsc.protos.Protocol.Permission;
+import org.gsc.protos.Protocol.Permission.PermissionType;
 import org.gsc.protos.Protocol.Vote;
 
-@Slf4j
+@Slf4j(topic = "wrapper")
 public class AccountWrapper implements ProtoWrapper<Account>, Comparable<AccountWrapper> {
 
     private Account account;
@@ -57,7 +61,7 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     }
 
     /**
-     * initial account capsule.
+     * initial account wrapper.
      */
     public AccountWrapper(ByteString accountName, ByteString address, AccountType accountType,
                           long balance) {
@@ -80,16 +84,32 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
                 .build();
     }
 
+
     /**
      * construct account from AccountCreateContract and createTime.
      */
-    public AccountWrapper(final AccountCreateContract contract, long createTime) {
-        this.account = Account.newBuilder()
-                .setType(contract.getType())
-                .setAddress(contract.getAccountAddress())
-                .setTypeValue(contract.getTypeValue())
-                .setCreateTime(createTime)
-                .build();
+    public AccountWrapper(final AccountCreateContract contract, long createTime,
+                          boolean withDefaultPermission, Manager manager) {
+        if (withDefaultPermission) {
+            Permission owner = createDefaultOwnerPermission(contract.getAccountAddress());
+            Permission active = createDefaultActivePermission(contract.getAccountAddress(), manager);
+
+            this.account = Account.newBuilder()
+                    .setType(contract.getType())
+                    .setAddress(contract.getAccountAddress())
+                    .setTypeValue(contract.getTypeValue())
+                    .setCreateTime(createTime)
+                    .setOwnerPermission(owner)
+                    .addActivePermission(active)
+                    .build();
+        } else {
+            this.account = Account.newBuilder()
+                    .setType(contract.getType())
+                    .setAddress(contract.getAccountAddress())
+                    .setTypeValue(contract.getTypeValue())
+                    .setCreateTime(createTime)
+                    .build();
+        }
     }
 
     /**
@@ -126,12 +146,27 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
      * get account from address.
      */
     public AccountWrapper(ByteString address,
-                          AccountType accountType, long createTime) {
-        this.account = Account.newBuilder()
-                .setType(accountType)
-                .setAddress(address)
-                .setCreateTime(createTime)
-                .build();
+                          AccountType accountType, long createTime,
+                          boolean withDefaultPermission, Manager manager) {
+        if (withDefaultPermission) {
+            Permission owner = createDefaultOwnerPermission(address);
+            Permission active = createDefaultActivePermission(address, manager);
+
+            this.account = Account.newBuilder()
+                    .setType(accountType)
+                    .setAddress(address)
+                    .setCreateTime(createTime)
+                    .setOwnerPermission(owner)
+                    .addActivePermission(active)
+                    .build();
+        } else {
+            this.account = Account.newBuilder()
+                    .setType(accountType)
+                    .setAddress(address)
+                    .setCreateTime(createTime)
+                    .build();
+        }
+
     }
 
     public AccountWrapper(Account account) {
@@ -175,6 +210,82 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
         return this.account.getAccountId();
     }
 
+
+    private static ByteString getActiveDefaultOperations(Manager manager) {
+        return ByteString.copyFrom(manager.getDynamicPropertiesStore().getActiveDefaultOperations());
+    }
+
+    public static Permission createDefaultOwnerPermission(ByteString address) {
+        Key.Builder key = Key.newBuilder();
+        key.setAddress(address);
+        key.setWeight(1);
+
+        Permission.Builder owner = Permission.newBuilder();
+        owner.setType(PermissionType.Owner);
+        owner.setId(0);
+        owner.setPermissionName("owner");
+        owner.setThreshold(1);
+        owner.setParentId(0);
+        owner.addKeys(key);
+
+        return owner.build();
+    }
+
+    public static Permission createDefaultActivePermission(ByteString address, Manager manager) {
+        Key.Builder key = Key.newBuilder();
+        key.setAddress(address);
+        key.setWeight(1);
+
+        Permission.Builder active = Permission.newBuilder();
+        active.setType(PermissionType.Active);
+        active.setId(2);
+        active.setPermissionName("active");
+        active.setThreshold(1);
+        active.setParentId(0);
+        active.setOperations(getActiveDefaultOperations(manager));
+        active.addKeys(key);
+
+        return active.build();
+    }
+
+    public static Permission createDefaultWitnessPermission(ByteString address) {
+        Key.Builder key = Key.newBuilder();
+        key.setAddress(address);
+        key.setWeight(1);
+
+        Permission.Builder active = Permission.newBuilder();
+        active.setType(PermissionType.Witness);
+        active.setId(1);
+        active.setPermissionName("witness");
+        active.setThreshold(1);
+        active.setParentId(0);
+        active.addKeys(key);
+
+        return active.build();
+    }
+
+    public void setDefaultWitnessPermission(Manager manager) {
+        Account.Builder builder = this.account.toBuilder();
+        Permission witness = createDefaultWitnessPermission(this.getAddress());
+        if (!this.account.hasOwnerPermission()) {
+            Permission owner = createDefaultOwnerPermission(this.getAddress());
+            builder.setOwnerPermission(owner);
+        }
+        if (this.account.getActivePermissionCount() == 0) {
+            Permission active = createDefaultActivePermission(this.getAddress(), manager);
+            builder.addActivePermission(active);
+        }
+        this.account = builder.setWitnessPermission(witness).build();
+    }
+
+    public byte[] getWitnessPermissionAddress() {
+        if (this.account.getWitnessPermission().getKeysCount() == 0) {
+            return getAddress().toByteArray();
+        } else {
+            return this.account.getWitnessPermission().getKeys(0).getAddress().toByteArray();
+        }
+    }
+
     public long getBalance() {
         return this.account.getBalance();
     }
@@ -207,6 +318,67 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
         this.account = this.account.toBuilder().setBalance(balance).build();
     }
 
+    public void addDelegatedFrozenBalanceForNet(long balance) {
+        this.account = this.account.toBuilder().setDelegatedFrozenBalanceForNet(
+                this.account.getDelegatedFrozenBalanceForNet() + balance).build();
+    }
+
+
+    public long getAcquiredDelegatedFrozenBalanceForNet() {
+        return this.account.getAcquiredDelegatedFrozenBalanceForNet();
+    }
+
+
+    public void setAcquiredDelegatedFrozenBalanceForNet(long balance) {
+        this.account = this.account.toBuilder().setAcquiredDelegatedFrozenBalanceForNet(balance)
+                .build();
+    }
+
+    public void addAcquiredDelegatedFrozenBalanceForNet(long balance) {
+        this.account = this.account.toBuilder().setAcquiredDelegatedFrozenBalanceForNet(
+                this.account.getAcquiredDelegatedFrozenBalanceForNet() + balance)
+                .build();
+    }
+
+    public long getAcquiredDelegatedFrozenBalanceForCpu() {
+        return getAccountResource().getAcquiredDelegatedFrozenBalanceForCpu();
+    }
+
+    public long getDelegatedFrozenBalanceForCpu() {
+        return getAccountResource().getDelegatedFrozenBalanceForCpu();
+    }
+
+    public long getDelegatedFrozenBalanceForNet() {
+        return this.account.getDelegatedFrozenBalanceForNet();
+    }
+
+    public void setDelegatedFrozenBalanceForNet(long balance) {
+        this.account = this.account.toBuilder()
+                .setDelegatedFrozenBalanceForNet(balance)
+                .build();
+    }
+
+    public void addAcquiredDelegatedFrozenBalanceForCpu(long balance) {
+        AccountResource newAccountResource = getAccountResource().toBuilder()
+                .setAcquiredDelegatedFrozenBalanceForCpu(
+                        getAccountResource().getAcquiredDelegatedFrozenBalanceForCpu() + balance).build();
+
+        this.account = this.account.toBuilder()
+                .setAccountResource(newAccountResource)
+                .build();
+    }
+
+    public void addDelegatedFrozenBalanceForCpu(long balance) {
+        AccountResource newAccountResource = getAccountResource().toBuilder()
+                .setDelegatedFrozenBalanceForCpu(
+                        getAccountResource().getDelegatedFrozenBalanceForCpu() + balance).build();
+
+        this.account = this.account.toBuilder()
+                .setAccountResource(newAccountResource)
+                .build();
+    }
+
+
     public void setAllowance(long allowance) {
         this.account = this.account.toBuilder().setAllowance(allowance).build();
     }
@@ -227,6 +399,24 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
                 .build();
     }
 
+    public void clearAssetV2() {
+        this.account = this.account.toBuilder()
+                .clearAssetV2()
+                .build();
+    }
+
+    public void clearLatestAssetOperationTimeV2() {
+        this.account = this.account.toBuilder()
+                .clearLatestAssetOperationTimeV2()
+                .build();
+    }
+
+    public void clearFreeAssetNetUsageV2() {
+        this.account = this.account.toBuilder()
+                .clearFreeAssetNetUsageV2()
+                .build();
+    }
+
     public void clearVotes() {
         this.account = this.account.toBuilder()
                 .clearVotes()
@@ -244,16 +434,16 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
         }
     }
 
-    //tp:gsc_Power
+    //tp:GSC_Power
     public long getGSCPower() {
         long tp = 0;
-        //long now = Time.getCurrentMillis();
         for (int i = 0; i < account.getFrozenCount(); ++i) {
-            if(account.getFrozen(i).getExpireTime() == 0L)
-                tp += account.getFrozen(i).getFrozenBalance();
+            tp += account.getFrozen(i).getFrozenBalance();
         }
 
-        tp += account.getAccountResource().getFrozenBalanceForEnergy().getFrozenBalance();
+        tp += account.getAccountResource().getFrozenBalanceForCpu().getFrozenBalance();
+        tp += account.getDelegatedFrozenBalanceForNet();
+        tp += account.getAccountResource().getDelegatedFrozenBalanceForCpu();
         return tp;
     }
 
@@ -264,6 +454,23 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
         Map<String, Long> assetMap = this.account.getAssetMap();
         String nameKey = ByteArray.toStr(key);
         Long currentAmount = assetMap.get(nameKey);
+
+        return amount > 0 && null != currentAmount && amount <= currentAmount;
+    }
+
+    public boolean assetBalanceEnoughV2(byte[] key, long amount, Manager manager) {
+        Map<String, Long> assetMap;
+        String nameKey;
+        Long currentAmount;
+        if (manager.getDynamicPropertiesStore().getAllowSameTokenName() == 0) {
+            assetMap = this.account.getAssetMap();
+            nameKey = ByteArray.toStr(key);
+            currentAmount = assetMap.get(nameKey);
+        } else {
+            String tokenID = ByteArray.toStr(key);
+            assetMap = this.account.getAssetV2Map();
+            currentAmount = assetMap.get(tokenID);
+        }
 
         return amount > 0 && null != currentAmount && amount <= currentAmount;
     }
@@ -286,6 +493,41 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     }
 
     /**
+     * reduce asset amount.
+     */
+    public boolean reduceAssetAmountV2(byte[] key, long amount, Manager manager) {
+        //key is token name
+        if (manager.getDynamicPropertiesStore().getAllowSameTokenName() == 0) {
+            Map<String, Long> assetMap = this.account.getAssetMap();
+            AssetIssueWrapper assetIssueWrapper = manager.getAssetIssueStore().get(key);
+            String tokenID = assetIssueWrapper.getId();
+            String nameKey = ByteArray.toStr(key);
+            Long currentAmount = assetMap.get(nameKey);
+            if (amount > 0 && null != currentAmount && amount <= currentAmount) {
+                this.account = this.account.toBuilder()
+                        .putAsset(nameKey, Math.subtractExact(currentAmount, amount))
+                        .putAssetV2(tokenID, Math.subtractExact(currentAmount, amount))
+                        .build();
+                return true;
+            }
+        }
+        //key is token id
+        if (manager.getDynamicPropertiesStore().getAllowSameTokenName() == 1) {
+            String tokenID = ByteArray.toStr(key);
+            Map<String, Long> assetMapV2 = this.account.getAssetV2Map();
+            Long currentAmount = assetMapV2.get(tokenID);
+            if (amount > 0 && null != currentAmount && amount <= currentAmount) {
+                this.account = this.account.toBuilder()
+                        .putAssetV2(tokenID, Math.subtractExact(currentAmount, amount))
+                        .build();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * add asset amount.
      */
     public boolean addAssetAmount(byte[] key, long amount) {
@@ -297,6 +539,40 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
         }
         this.account = this.account.toBuilder().putAsset(nameKey, Math.addExact(currentAmount, amount))
                 .build();
+        return true;
+    }
+
+    /**
+     * add asset amount.
+     */
+    public boolean addAssetAmountV2(byte[] key, long amount, Manager manager) {
+        //key is token name
+        if (manager.getDynamicPropertiesStore().getAllowSameTokenName() == 0) {
+            Map<String, Long> assetMap = this.account.getAssetMap();
+            AssetIssueWrapper assetIssueWrapper = manager.getAssetIssueStore().get(key);
+            String tokenID = assetIssueWrapper.getId();
+            String nameKey = ByteArray.toStr(key);
+            Long currentAmount = assetMap.get(nameKey);
+            if (currentAmount == null) {
+                currentAmount = 0L;
+            }
+            this.account = this.account.toBuilder()
+                    .putAsset(nameKey, Math.addExact(currentAmount, amount))
+                    .putAssetV2(tokenID, Math.addExact(currentAmount, amount))
+                    .build();
+        }
+        //key is token id
+        if (manager.getDynamicPropertiesStore().getAllowSameTokenName() == 1) {
+            String tokenIDStr = ByteArray.toStr(key);
+            Map<String, Long> assetMapV2 = this.account.getAssetV2Map();
+            Long currentAmount = assetMapV2.get(tokenIDStr);
+            if (currentAmount == null) {
+                currentAmount = 0L;
+            }
+            this.account = this.account.toBuilder()
+                    .putAssetV2(tokenIDStr, Math.addExact(currentAmount, amount))
+                    .build();
+        }
         return true;
     }
 
@@ -320,10 +596,8 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     public boolean addAsset(byte[] key, long value) {
         Map<String, Long> assetMap = this.account.getAssetMap();
         String nameKey = ByteArray.toStr(key);
-        if (!assetMap.isEmpty()) {
-            if (assetMap.containsKey(nameKey)) {
-                return false;
-            }
+        if (!assetMap.isEmpty() && assetMap.containsKey(nameKey)) {
+            return false;
         }
 
         this.account = this.account.toBuilder().putAsset(nameKey, value).build();
@@ -331,9 +605,28 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
         return true;
     }
 
+    public boolean addAssetV2(byte[] key, long value) {
+        String tokenID = ByteArray.toStr(key);
+        Map<String, Long> assetV2Map = this.account.getAssetV2Map();
+        if (!assetV2Map.isEmpty() && assetV2Map.containsKey(tokenID)) {
+            return false;
+        }
+
+        this.account = this.account.toBuilder()
+                .putAssetV2(tokenID, value)
+                .build();
+        return true;
+    }
+
     /**
      * add asset.
      */
+    public boolean addAssetMapV2(Map<String, Long> assetMap) {
+        this.account = this.account.toBuilder().putAllAssetV2(assetMap).build();
+        return true;
+    }
+
+
     public Map<String, Long> getAssetMap() {
         Map<String, Long> assetMap = this.account.getAssetMap();
         if (assetMap.isEmpty()) {
@@ -343,15 +636,43 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
         return assetMap;
     }
 
+    public Map<String, Long> getAssetMapV2() {
+        Map<String, Long> assetMap = this.account.getAssetV2Map();
+        if (assetMap.isEmpty()) {
+            assetMap = Maps.newHashMap();
+        }
+
+        return assetMap;
+    }
+
+    public boolean addAllLatestAssetOperationTimeV2(Map<String, Long> map) {
+        this.account = this.account.toBuilder().putAllLatestAssetOperationTimeV2(map).build();
+        return true;
+    }
+
+    public Map<String, Long> getLatestAssetOperationTimeMap() {
+        return this.account.getLatestAssetOperationTimeMap();
+    }
+
+    public Map<String, Long> getLatestAssetOperationTimeMapV2() {
+        return this.account.getLatestAssetOperationTimeV2Map();
+    }
 
     public long getLatestAssetOperationTime(String assetName) {
         return this.account.getLatestAssetOperationTimeOrDefault(assetName, 0);
+    }
+
+    public long getLatestAssetOperationTimeV2(String assetName) {
+        return this.account.getLatestAssetOperationTimeV2OrDefault(assetName, 0);
     }
 
     public void putLatestAssetOperationTimeMap(String key, Long value) {
         this.account = this.account.toBuilder().putLatestAssetOperationTime(key, value).build();
     }
 
+    public void putLatestAssetOperationTimeMapV2(String key, Long value) {
+        this.account = this.account.toBuilder().putLatestAssetOperationTimeV2(key, value).build();
+    }
 
     public int getFrozenCount() {
         return getInstance().getFrozenCount();
@@ -364,9 +685,13 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     public long getFrozenBalance() {
         List<Frozen> frozenList = getFrozenList();
         final long[] frozenBalance = {0};
-        frozenList.stream().filter(frozen -> frozen.getExpireTime() == 0L).collect(Collectors.toList())
-                .forEach(frozen -> frozenBalance[0] = Long.sum(frozenBalance[0], frozen.getFrozenBalance()));
+        frozenList.forEach(frozen -> frozenBalance[0] = Long.sum(frozenBalance[0],
+                frozen.getFrozenBalance()));
         return frozenBalance[0];
+    }
+
+    public long getAllFrozenBalanceForNet() {
+        return getFrozenBalance() + getAcquiredDelegatedFrozenBalanceForNet();
     }
 
     public int getFrozenSupplyCount() {
@@ -380,8 +705,8 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     public long getFrozenSupplyBalance() {
         List<Frozen> frozenSupplyList = getFrozenSupplyList();
         final long[] frozenSupplyBalance = {0};
-        frozenSupplyList.stream().filter(frozen -> frozen.getExpireTime() == 0L).collect(Collectors.toList())
-                .forEach(frozen -> frozenSupplyBalance[0] = Long.sum(frozenSupplyBalance[0], frozen.getFrozenBalance()));
+        frozenSupplyList.forEach(frozen -> frozenSupplyBalance[0] = Long.sum(frozenSupplyBalance[0],
+                frozen.getFrozenBalance()));
         return frozenSupplyBalance[0];
     }
 
@@ -392,6 +717,15 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     public void setAssetIssuedName(byte[] nameKey) {
         ByteString assetIssuedName = ByteString.copyFrom(nameKey);
         this.account = this.account.toBuilder().setAssetIssuedName(assetIssuedName).build();
+    }
+
+    public ByteString getAssetIssuedID() {
+        return getInstance().getAssetIssuedID();
+    }
+
+    public void setAssetIssuedID(byte[] id) {
+        ByteString assetIssuedID = ByteString.copyFrom(id);
+        this.account = this.account.toBuilder().setAssetIssuedID(assetIssuedID).build();
     }
 
     public long getAllowance() {
@@ -418,6 +752,26 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
         this.account = this.account.toBuilder().setIsCommittee(isCommittee).build();
     }
 
+    public void setFrozenForNet(long frozenBalance, long expireTime) {
+        Frozen newFrozen = Frozen.newBuilder()
+                .setFrozenBalance(frozenBalance)
+                .setExpireTime(expireTime)
+                .build();
+
+        long frozenCount = getFrozenCount();
+        if (frozenCount == 0) {
+            setInstance(getInstance().toBuilder()
+                    .addFrozen(newFrozen)
+                    .build());
+        } else {
+            setInstance(getInstance().toBuilder()
+                    .setFrozen(0, newFrozen)
+                    .build()
+            );
+        }
+    }
+
+    //set FrozenBalanceForNet
     //for test only
     public void setFrozen(long frozenBalance, long expireTime) {
         Frozen newFrozen = Frozen.newBuilder()
@@ -451,14 +805,14 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     }
 
 
-    public void setFrozenForEnergy(long newFrozenBalanceForEnergy, long time) {
-        Frozen newFrozenForEnergy = Frozen.newBuilder()
-                .setFrozenBalance(newFrozenBalanceForEnergy)
+    public void setFrozenForCpu(long newFrozenBalanceForCpu, long time) {
+        Frozen newFrozenForCpu = Frozen.newBuilder()
+                .setFrozenBalance(newFrozenBalanceForCpu)
                 .setExpireTime(time)
                 .build();
 
         AccountResource newAccountResource = getAccountResource().toBuilder()
-                .setFrozenBalanceForEnergy(newFrozenForEnergy).build();
+                .setFrozenBalanceForCpu(newFrozenForCpu).build();
 
         this.account = this.account.toBuilder()
                 .setAccountResource(newAccountResource)
@@ -466,30 +820,35 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     }
 
 
-    public long getEnergyFrozenBalance() {
-        return this.account.getAccountResource().getFrozenBalanceForEnergy().getFrozenBalance();
+    public long getCpuFrozenBalance() {
+        return this.account.getAccountResource().getFrozenBalanceForCpu().getFrozenBalance();
     }
 
-    public long getEnergyUsage() {
-        return this.account.getAccountResource().getEnergyUsage();
+    public long getCpuUsage() {
+        return this.account.getAccountResource().getCpuUsage();
     }
 
-    public void setEnergyUsage(long energyUsage) {
+    public long getAllFrozenBalanceForCpu() {
+        return getCpuFrozenBalance() + getAcquiredDelegatedFrozenBalanceForCpu();
+    }
+
+
+    public void setCpuUsage(long cpuUsage) {
         this.account = this.account.toBuilder()
                 .setAccountResource(
-                        this.account.getAccountResource().toBuilder().setEnergyUsage(energyUsage).build())
+                        this.account.getAccountResource().toBuilder().setCpuUsage(cpuUsage).build())
                 .build();
     }
 
-    public void setLatestConsumeTimeForEnergy(long latest_time) {
+    public void setLatestConsumeTimeForCpu(long latest_time) {
         this.account = this.account.toBuilder()
                 .setAccountResource(
-                        this.account.getAccountResource().toBuilder().setLatestConsumeTimeForEnergy(latest_time)
+                        this.account.getAccountResource().toBuilder().setLatestConsumeTimeForCpu(latest_time)
                                 .build()).build();
     }
 
-    public long getLatestConsumeTimeForEnergy() {
-        return this.account.getAccountResource().getLatestConsumeTimeForEnergy();
+    public long getLatestConsumeTimeForCpu() {
+        return this.account.getAccountResource().getLatestConsumeTimeForCpu();
     }
 
     public long getFreeNetUsage() {
@@ -501,17 +860,36 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
                 .setFreeNetUsage(freeNetUsage).build();
     }
 
+
+    public boolean addAllFreeAssetNetUsageV2(Map<String, Long> map) {
+        this.account = this.account.toBuilder().putAllFreeAssetNetUsageV2(map).build();
+        return true;
+    }
+
     public long getFreeAssetNetUsage(String assetName) {
         return this.account.getFreeAssetNetUsageOrDefault(assetName, 0);
+    }
+
+    public long getFreeAssetNetUsageV2(String assetName) {
+        return this.account.getFreeAssetNetUsageV2OrDefault(assetName, 0);
     }
 
     public Map<String, Long> getAllFreeAssetNetUsage() {
         return this.account.getFreeAssetNetUsageMap();
     }
 
+    public Map<String, Long> getAllFreeAssetNetUsageV2() {
+        return this.account.getFreeAssetNetUsageV2Map();
+    }
+
     public void putFreeAssetNetUsage(String s, long freeAssetNetUsage) {
         this.account = this.account.toBuilder()
                 .putFreeAssetNetUsage(s, freeAssetNetUsage).build();
+    }
+
+    public void putFreeAssetNetUsageV2(String s, long freeAssetNetUsage) {
+        this.account = this.account.toBuilder()
+                .putFreeAssetNetUsageV2(s, freeAssetNetUsage).build();
     }
 
     public long getStorageLimit() {
@@ -569,4 +947,60 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
                 .setAccountResource(accountResource)
                 .build();
     }
+
+    public static Permission getDefaultPermission(ByteString owner) {
+        return createDefaultOwnerPermission(owner);
+    }
+
+    public Permission getPermissionById(int id) {
+        if (id == 0) {
+            if (this.account.hasOwnerPermission()) {
+                return this.account.getOwnerPermission();
+            }
+            return getDefaultPermission(this.account.getAddress());
+        }
+        if (id == 1) {
+            if (this.account.hasWitnessPermission()) {
+                return this.account.getWitnessPermission();
+            }
+            return null;
+        }
+        for (Permission permission : this.account.getActivePermissionList()) {
+            if (id == permission.getId()) {
+                return permission;
+            }
+        }
+        return null;
+    }
+
+    public void updatePermissions(Permission owner, Permission witness, List<Permission> actives) {
+        Account.Builder builder = this.account.toBuilder();
+        owner = owner.toBuilder().setId(0).build();
+        builder.setOwnerPermission(owner);
+        if (builder.getIsWitness()) {
+            witness = witness.toBuilder().setId(1).build();
+            builder.setWitnessPermission(witness);
+        }
+        builder.clearActivePermission();
+        for (int i = 0; i < actives.size(); i++) {
+            Permission permission = actives.get(i).toBuilder().setId(i + 2).build();
+            builder.addActivePermission(permission);
+        }
+        this.account = builder.build();
+    }
+
+    public void updateAccountType(AccountType accountType) {
+        this.account = this.account.toBuilder().setType(accountType).build();
+    }
+
+    // just for vm create2 instruction
+    public void clearDelegatedResource() {
+        Builder builder = account.toBuilder();
+        AccountResource newAccountResource = getAccountResource().toBuilder()
+                .setAcquiredDelegatedFrozenBalanceForCpu(0L).build();
+        builder.setAccountResource(newAccountResource);
+        builder.setAcquiredDelegatedFrozenBalanceForNet(0L);
+        this.account = builder.build();
+    }
+
 }

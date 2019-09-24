@@ -1,28 +1,24 @@
 /*
- * Copyright (c) [2016] [ <ether.camp> ]
- * This file is part of the ethereumJ library.
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
  *
- * The ethereumJ library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The ethereumJ library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
  */
+
 package org.gsc.runtime.vm;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.spongycastle.util.Arrays;
 import org.spongycastle.util.encoders.Hex;
-import org.gsc.common.utils.ByteUtil;
-import org.gsc.common.utils.FastByteComparisons;
+import org.gsc.utils.ByteUtil;
+import org.gsc.utils.FastByteComparisons;
 import org.gsc.db.ByteArrayWrapper;
 
 import java.math.BigInteger;
@@ -38,11 +34,20 @@ import java.nio.ByteBuffer;
 public class DataWord implements Comparable<DataWord> {
 
     /* Maximum value of the DataWord */
-    public static final int DATAWORD_UNIT_SIZE = 32;
+    public static final int WORD_SIZE = 32;
+    public static final int MAX_POW = 256;
     public static final BigInteger _2_256 = BigInteger.valueOf(2).pow(256);
     public static final BigInteger MAX_VALUE = _2_256.subtract(BigInteger.ONE);
+    // TODO not safe
     public static final DataWord ZERO = new DataWord(new byte[32]);      // don't push it in to the stack
-    public static final DataWord ZERO_EMPTY_ARRAY = new DataWord(new byte[0]);      // don't push it in to the stack
+
+    public static DataWord ONE() {
+        return DataWord.of((byte) 1);
+    }
+
+    public static DataWord ZERO() {
+        return new DataWord(new byte[32]);
+    }
 
     private byte[] data = new byte[32];
 
@@ -58,10 +63,17 @@ public class DataWord implements Comparable<DataWord> {
     }
 
     private DataWord(ByteBuffer buffer) {
-        final ByteBuffer data = ByteBuffer.allocate(32);
+        final ByteBuffer targetByteBuffer = ByteBuffer.allocate(WORD_SIZE);
         final byte[] array = buffer.array();
-        System.arraycopy(array, 0, data.array(), 32 - array.length, array.length);
-        this.data = data.array();
+        System.arraycopy(array, 0, targetByteBuffer.array(), WORD_SIZE - array.length, array.length);
+        this.data = targetByteBuffer.array();
+    }
+
+    public static DataWord of(byte num) {
+        byte[] bb = new byte[WORD_SIZE];
+        bb[31] = num;
+        return new DataWord(bb);
+
     }
 
     @JsonCreator
@@ -69,23 +81,39 @@ public class DataWord implements Comparable<DataWord> {
         this(Hex.decode(data));
     }
 
-    public DataWord(ByteArrayWrapper wrappedData){
+    public DataWord(ByteArrayWrapper wrappedData) {
         this(wrappedData.getData());
     }
 
     public DataWord(byte[] data) {
-        if (data == null)
+        if (data == null) {
             this.data = ByteUtil.EMPTY_BYTE_ARRAY;
-        else if (data.length == 32)
+        } else if (data.length == WORD_SIZE) {
             this.data = data;
-        else if (data.length <= 32)
-            System.arraycopy(data, 0, this.data, 32 - data.length, data.length);
-        else
-            throw new RuntimeException("Data word can't exceed 32 bytes: " + data);
+        } else if (data.length < WORD_SIZE) {
+            System.arraycopy(data, 0, this.data, WORD_SIZE - data.length, data.length);
+        } else {
+            throw new RuntimeException("Data word can't exceed 32 bytes: " + ByteUtil.toHexString(data));
+        }
     }
 
     public byte[] getData() {
         return data;
+    }
+
+    /**
+     * be careful, this one will not throw Exception when data.length > WORD_SIZE
+     *
+     * @return
+     */
+    public byte[] getClonedData() {
+        byte[] ret = ByteUtil.EMPTY_BYTE_ARRAY;
+        if (data != null) {
+            ret = new byte[WORD_SIZE];
+            int dataSize = Math.min(data.length, WORD_SIZE);
+            System.arraycopy(data, 0, ret, 0, dataSize);
+        }
+        return ret;
     }
 
     public byte[] getNoLeadZeroesData() {
@@ -162,8 +190,21 @@ public class DataWord implements Comparable<DataWord> {
         return new BigInteger(data);
     }
 
-    public String  bigIntValue() {
+    public static String bigIntValue(byte[] data) {
         return new BigInteger(data).toString();
+    }
+
+    public String bigIntValue() {
+        return new BigInteger(data).toString();
+    }
+
+    public static boolean isZero(byte[] data) {
+        for (byte tmp : data) {
+            if (tmp != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean isZero() {
@@ -206,17 +247,10 @@ public class DataWord implements Comparable<DataWord> {
     }
 
     public void negate() {
-
         if (this.isZero()) return;
 
-        for (int i = 0; i < this.data.length; ++i) {
-            this.data[i] = (byte) ~this.data[i];
-        }
-
-        for (int i = this.data.length - 1; i >= 0; --i) {
-            this.data[i] = (byte) (1 + this.data[i] & 0xFF);
-            if (this.data[i] != 0) break;
-        }
+        bnot();
+        add(DataWord.ONE());
     }
 
     public void bnot() {
@@ -304,7 +338,7 @@ public class DataWord implements Comparable<DataWord> {
     public void sMod(DataWord word) {
 
         if (word.isZero()) {
-            this.and(ZERO);
+            this.and(ZERO());
             return;
         }
 
@@ -352,6 +386,12 @@ public class DataWord implements Comparable<DataWord> {
         return Hex.toHexString(pref).substring(0, 6);
     }
 
+    public static String shortHex(byte[] data) {
+        byte[] bytes = ByteUtil.stripLeadingZeroes(data);
+        String hexValue = Hex.toHexString(bytes).toUpperCase();
+        return "0x" + hexValue.replaceFirst("^0+(?!$)", "");
+    }
+
     public String shortHex() {
         String hexValue = Hex.toHexString(getNoLeadZeroesData()).toUpperCase();
         return "0x" + hexValue.replaceFirst("^0+(?!$)", "");
@@ -360,6 +400,7 @@ public class DataWord implements Comparable<DataWord> {
     public DataWord clone() {
         return new DataWord(Arrays.clone(data));
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -406,11 +447,66 @@ public class DataWord implements Comparable<DataWord> {
         return Hex.toHexString(data).equals(hex);
     }
 
-    public String asString(){
+    public String asString() {
         return new String(getNoLeadZeroesData());
     }
 
     public String toHexString() {
-            return Hex.toHexString(data);
+        return Hex.toHexString(data);
+    }
+
+    /**
+     * Shift left, both this and input arg are treated as unsigned
+     *
+     * @param arg
+     * @return this << arg
+     */
+    public DataWord shiftLeft(DataWord arg) {
+        if (arg.value().compareTo(BigInteger.valueOf(MAX_POW)) >= 0) {
+            return DataWord.ZERO();
+        }
+
+        BigInteger result = value().shiftLeft(arg.intValueSafe());
+        return new DataWord(ByteUtil.copyToArray(result.and(MAX_VALUE)));
+    }
+
+    /**
+     * Shift right, both this and input arg are treated as unsigned
+     *
+     * @param arg
+     * @return this >> arg
+     */
+    public DataWord shiftRight(DataWord arg) {
+        if (arg.value().compareTo(BigInteger.valueOf(MAX_POW)) >= 0) {
+            return DataWord.ZERO();
+        }
+
+        BigInteger result = value().shiftRight(arg.intValueSafe());
+        return new DataWord(ByteUtil.copyToArray(result.and(MAX_VALUE)));
+    }
+
+    /**
+     * Shift right, this is signed, while input arg is treated as unsigned
+     *
+     * @param arg
+     * @return this >> arg
+     */
+    public DataWord shiftRightSigned(DataWord arg) {
+        if (arg.value().compareTo(BigInteger.valueOf(MAX_POW)) >= 0) {
+            if (this.isNegative()) {
+                DataWord result = ONE();
+                result.negate();
+                return result;
+            } else {
+                return ZERO();
+            }
+        }
+
+        BigInteger result = sValue().shiftRight(arg.intValueSafe());
+        return new DataWord(ByteUtil.copyToArray(result.and(MAX_VALUE)));
+    }
+
+    public static long sizeInWords(long bytesSize) {
+        return bytesSize == 0 ? 0 : (bytesSize - 1) / WORD_SIZE + 1;
     }
 }

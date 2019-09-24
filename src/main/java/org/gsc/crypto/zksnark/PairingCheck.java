@@ -21,27 +21,21 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.gsc.crypto.zksnark.Params.*;
-
 /**
- * Implementation of a Pairing Check operation over points of two twisted Barreto–Naehrig curves {@link BN128Fp}, {@link BN128Fp2}<br/>
- * <br/>
- *
- * The Pairing itself is a transformation of the form G1 x G2 -> Gt, <br/>
- * where G1 and G2 are members of {@link BN128G1} {@link BN128G2} respectively, <br/>
- * Gt is a subgroup of roots of unity in {@link Fp12} field, root degree equals to {@link Params#R} <br/>
- * <br/>
- *
- * Pairing Check input is a sequence of point pairs, the result is either 1 or 0, 1 is considered as success, 0 as fail <br/>
- * <br/>
- *
- * Usage:
- * <ul>
- *      <li>add pairs sequentially with {@link #addPair(BN128G1, BN128G2)}</li>
- *      <li>run check with {@link #run()} after all paris have been added</li>
- *      <li>get result with {@link #result()}</li>
- * </ul>
- *
+ * Implementation of a Pairing Check operation over points of two twisted Barreto–Naehrig curves
+ * {@link BN128Fp}, {@link BN128Fp2}<br/> <br/>
+ * <p>
+ * The Pairing itself is a transformation of the form G1 x G2 -> Gt, <br/> where G1 and G2 are
+ * members of {@link BN128G1} {@link BN128G2} respectively, <br/> Gt is a subgroup of roots of unity
+ * in {@link Fp12} field, root degree equals to {@link Params#R} <br/> <br/>
+ * <p>
+ * Pairing Check input is a sequence of point pairs, the result is either 1 or 0, 1 is considered as
+ * success, 0 as fail <br/> <br/>
+ * <p>
+ * Usage: <ul> <li>add pairs sequentially with {@link #addPair(BN128G1, BN128G2)}</li> <li>run check
+ * with {@link #run()} after all paris have been added</li> <li>get result with {@link
+ * #result()}</li> </ul>
+ * <p>
  * Arithmetic has been ported from <a href="https://github.com/scipr-lab/libff/blob/master/libff/algebra/curves/alt_bn128/alt_bn128_pairing.cpp">libff</a>
  * Ate pairing algorithms
  *
@@ -55,7 +49,8 @@ public class PairingCheck {
     List<Pair> pairs = new ArrayList<>();
     Fp12 product = Fp12._1;
 
-    private PairingCheck() {}
+    private PairingCheck() {
+    }
 
     public static PairingCheck create() {
         return new PairingCheck();
@@ -72,7 +67,9 @@ public class PairingCheck {
             Fp12 miller = pair.millerLoop();
 
             if (!miller.equals(Fp12._1))    // run mul code only if necessary
+            {
                 product = product.mul(miller);
+            }
         }
 
         // finalize
@@ -96,7 +93,7 @@ public class PairingCheck {
         int idx = 0;
 
         // for each bit except most significant one
-        for (int i = LOOP_COUNT.bitLength() - 2; i >=0; i--) {
+        for (int i = LOOP_COUNT.bitLength() - 2; i >= 0; i--) {
 
             EllCoeffs c = coeffs.get(idx++);
             f = f.squared();
@@ -125,7 +122,7 @@ public class PairingCheck {
         BN128G2 addend = base;
 
         // for each bit except most significant one
-        for (int i = LOOP_COUNT.bitLength() - 2; i >=0; i--) {
+        for (int i = LOOP_COUNT.bitLength() - 2; i >= 0; i--) {
 
             Precomputed doubling = flippedMillerLoopDoubling(addend);
 
@@ -142,7 +139,7 @@ public class PairingCheck {
         BN128G2 q1 = base.mulByP();
         BN128G2 q2 = q1.mulByP();
 
-        q2 = new BN128G2(q2.x, q2.y.negate(), q2.z) ; // q2.y = -q2.y
+        q2 = new BN128G2(q2.x, q2.y.negate(), q2.z); // q2.y = -q2.y
 
         Precomputed addition = flippedMillerLoopMixedAddition(q1, addend);
         addend = addition.g2;
@@ -155,7 +152,7 @@ public class PairingCheck {
     }
 
     private static Precomputed flippedMillerLoopMixedAddition(BN128G2 base, BN128G2 addend) {
-        
+
         Fp2 x1 = addend.x, y1 = addend.y, z1 = addend.z;
         Fp2 x2 = base.x, y2 = base.y;
 
@@ -171,7 +168,7 @@ public class PairingCheck {
         Fp2 y3 = e.mul(i.sub(j)).sub(h.mul(y1));     // y3 = e * (i - j) - h * y1)
         Fp2 z3 = z1.mul(h);                          // z3 = Z1*H
 
-        Fp2 ell0 = TWIST.mul(e.mul(x2).sub(d.mul(y2)));     // ell_0 = TWIST * (e * x2 - d * y2)
+        Fp2 ell0 = Params.TWIST.mul(e.mul(x2).sub(d.mul(y2)));     // ell_0 = TWIST * (e * x2 - d * y2)
         Fp2 ellVV = e.negate();                             // ell_VV = -e
         Fp2 ellVW = d;                                      // ell_VW = d
 
@@ -189,7 +186,7 @@ public class PairingCheck {
         Fp2 b = y.squared();                        // b = y^2
         Fp2 c = z.squared();                        // c = z^2
         Fp2 d = c.add(c).add(c);                    // d = 3 * c
-        Fp2 e = B_Fp2.mul(d);                       // e = twist_b * d
+        Fp2 e = Params.B_Fp2.mul(d);                       // e = twist_b * d
         Fp2 f = e.add(e).add(e);                    // f = 3 * e
         Fp2 g = Fp._2_INV.mul(b.add(f));            // g = (b + f) / 2
         Fp2 h = y.add(z).squared().sub(b.add(c));   // h = (y + z)^2 - (b + c)
@@ -201,7 +198,7 @@ public class PairingCheck {
         Fp2 ry = g.squared().sub(e2.add(e2).add(e2));   // ry = g^2 - 3 * e^2
         Fp2 rz = b.mul(h);                              // rz = b * h
 
-        Fp2 ell0 = TWIST.mul(i);        // ell_0 = twist * i
+        Fp2 ell0 = Params.TWIST.mul(i);        // ell_0 = twist * i
         Fp2 ellVW = h.negate();         // ell_VW = -h
         Fp2 ellVV = j.add(j).add(j);    // ell_VV = 3 * j
 
@@ -221,13 +218,13 @@ public class PairingCheck {
         Fp12 pre = z.mul(y);
 
         // last chunk
-        Fp12 a = pre.negExp(PAIRING_FINAL_EXPONENT_Z);
+        Fp12 a = pre.negExp(Params.PAIRING_FINAL_EXPONENT_Z);
         Fp12 b = a.cyclotomicSquared();
         Fp12 c = b.cyclotomicSquared();
         Fp12 d = c.mul(b);
-        Fp12 e = d.negExp(PAIRING_FINAL_EXPONENT_Z);
+        Fp12 e = d.negExp(Params.PAIRING_FINAL_EXPONENT_Z);
         Fp12 f = e.cyclotomicSquared();
-        Fp12 g = f.negExp(PAIRING_FINAL_EXPONENT_Z);
+        Fp12 g = f.negExp(Params.PAIRING_FINAL_EXPONENT_Z);
         Fp12 h = d.unitaryInverse();
         Fp12 i = g.unitaryInverse();
         Fp12 j = i.mul(e);
@@ -279,14 +276,19 @@ public class PairingCheck {
         Fp12 millerLoop() {
 
             // miller loop result equals "1" if at least one of the points is zero
-            if (g1.isZero()) return Fp12._1;
-            if (g2.isZero()) return Fp12._1;
+            if (g1.isZero()) {
+                return Fp12._1;
+            }
+            if (g2.isZero()) {
+                return Fp12._1;
+            }
 
             return PairingCheck.millerLoop(g1, g2);
         }
     }
 
     static class EllCoeffs {
+
         Fp2 ell0;
         Fp2 ellVW;
         Fp2 ellVV;

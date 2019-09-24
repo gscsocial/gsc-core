@@ -1,59 +1,74 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.wallet.account;
 
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.gsc.api.GrpcAPI.NumberMessage;
-import org.gsc.api.WalletGrpc;
-import org.gsc.api.WalletSolidityGrpc;
-import org.gsc.common.overlay.Configuration;
-import org.gsc.common.overlay.Parameter;
-import org.gsc.common.overlay.util.PublicMethed;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.core.Wallet;
-import org.gsc.crypto.ECKey;
-import org.gsc.protos.Protocol.Account;
-import org.gsc.protos.Protocol.Block;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.spongycastle.util.encoders.Hex;
-import org.testng.annotations.BeforeSuite;
-
 import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.gsc.wallet.common.client.Configuration;
+import org.gsc.wallet.common.client.Parameter;
+import org.gsc.wallet.common.client.utils.PublicMethed;
+import org.spongycastle.util.encoders.Hex;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.Test;
+import org.gsc.api.GrpcAPI.NumberMessage;
+import org.gsc.api.WalletGrpc;
+import org.gsc.api.WalletConfirmedGrpc;
+import org.gsc.crypto.ECKey;
+import org.gsc.utils.ByteArray;
+import org.gsc.core.Wallet;
+import org.gsc.protos.Protocol.Account;
+import org.gsc.protos.Protocol.Block;
 
 
 @Slf4j
 public class WalletTestAccount001 {
-  private final String testKey002 =
-      "FC8BF0238748587B9617EB6D15D47A66C0E07C1A1959033CF249C6532DC29FE6";
+
+  private final String testKey002 = Configuration.getByPath("testng.conf")
+      .getString("foundationAccount.key1");
+  private final byte[] fromAddress = PublicMethed.getFinalAddress(testKey002);
   private final String invalidTestKey =
       "592BB6C9BB255409A6A45EFD18E9A74FECDDCCE93A40D96B70FBE334E6361E36";
 
-  private final byte[] fromAddress = PublicMethed.getFinalAddress(testKey002);
-
   private ManagedChannel channelFull = null;
-  private ManagedChannel channelSolidity = null;
+  private ManagedChannel channelConfirmed = null;
   private WalletGrpc.WalletBlockingStub blockingStubFull = null;
-  private WalletSolidityGrpc.WalletSolidityBlockingStub blockingStubSolidity = null;
+  private WalletConfirmedGrpc.WalletConfirmedBlockingStub blockingStubConfirmed = null;
 
   private static final long now = System.currentTimeMillis();
 
   private String fullnode = Configuration.getByPath("testng.conf").getStringList("fullnode.ip.list")
       .get(0);
-  private String soliditynode = Configuration.getByPath("testng.conf")
-      .getStringList("solidityNode.ip.list").get(0);
+  private String confirmedNode = Configuration.getByPath("testng.conf")
+      .getStringList("confirmedNode.ip.list").get(0);
 
   @BeforeSuite
   public void beforeSuite() {
     Wallet wallet = new Wallet();
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
+  /**
+   * constructor.
+   */
   @BeforeClass
   public void beforeClass() {
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
@@ -61,23 +76,23 @@ public class WalletTestAccount001 {
         .build();
     blockingStubFull = WalletGrpc.newBlockingStub(channelFull);
 
-    channelSolidity = ManagedChannelBuilder.forTarget(soliditynode)
+    channelConfirmed = ManagedChannelBuilder.forTarget(confirmedNode)
         .usePlaintext(true)
         .build();
-    blockingStubSolidity = WalletSolidityGrpc.newBlockingStub(channelSolidity);
+    blockingStubConfirmed = WalletConfirmedGrpc.newBlockingStub(channelConfirmed);
   }
 
 
   @Test
   public void testqueryaccountfromfullnode() {
-    //Query success, get the right balance,bandwidth and the account name.
+    //Query success, get the right balance,net and the account name.
     Account queryResult = queryAccount(testKey002, blockingStubFull);
     /*    Account queryResult = PublicMethed.queryAccountByAddress(fromAddress,blockingStubFull);
     logger.info(ByteArray.toStr(queryResult.getAccountName().toByteArray()));
     logger.info(Long.toString(queryResult.getBalance()));
     logger.info(ByteArray.toStr(queryResult.getAddress().toByteArray()));*/
     Assert.assertTrue(queryResult.getBalance() > 0);
-    //Assert.assertTrue(queryResult.getBandwidth() >= 0);
+    //Assert.assertTrue(queryResult.getNet() >= 0);
     Assert.assertTrue(queryResult.getAccountName().toByteArray().length > 0);
     Assert.assertFalse(queryResult.getAddress().isEmpty());
 
@@ -94,31 +109,39 @@ public class WalletTestAccount001 {
   }
 
   @Test
-  public void testqueryaccountfromsoliditynode() {
-    //Query success, get the right balance,bandwidth and the account name.
-    Account queryResult = solidityqueryAccount(testKey002, blockingStubSolidity);
+  public void testqueryaccountfromconfirmednode() {
+    //Query success, get the right balance,net and the account name.
+    Account queryResult = confirmedQueryAccount(testKey002, blockingStubConfirmed);
     Assert.assertTrue(queryResult.getBalance() > 0);
-    //Assert.assertTrue(queryResult.getBandwidth() >= 0);
+    //Assert.assertTrue(queryResult.getNet() >= 0);
     Assert.assertTrue(queryResult.getAccountName().toByteArray().length > 0);
     Assert.assertFalse(queryResult.getAddress().isEmpty());
 
     //Query failed
-    Account invalidQueryResult = solidityqueryAccount(invalidTestKey, blockingStubSolidity);
+    Account invalidQueryResult = confirmedQueryAccount(invalidTestKey, blockingStubConfirmed);
     Assert.assertTrue(invalidQueryResult.getAccountName().isEmpty());
     Assert.assertTrue(invalidQueryResult.getAddress().isEmpty());
 
 
   }
 
+  /**
+   * constructor.
+   */
+
   @AfterClass
   public void shutdown() throws InterruptedException {
     if (channelFull != null) {
       channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
-    if (channelSolidity != null) {
-      channelSolidity.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    if (channelConfirmed != null) {
+      channelConfirmed.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
+
+  /**
+   * constructor.
+   */
 
   public Account queryAccount(String priKey,
       WalletGrpc.WalletBlockingStub blockingStubFull) {
@@ -149,9 +172,12 @@ public class WalletTestAccount001 {
     //return grpcQueryAccount(address,blockingStubFull);
   }
 
+  /**
+   * constructor.
+   */
 
-  public Account solidityqueryAccount(String priKey,
-      WalletSolidityGrpc.WalletSolidityBlockingStub blockingStubSolidity) {
+  public Account confirmedQueryAccount(String priKey,
+                                       WalletConfirmedGrpc.WalletConfirmedBlockingStub blockingStubConfirmed) {
 
     ECKey temKey = null;
     try {
@@ -172,9 +198,13 @@ public class WalletTestAccount001 {
       ecKey = ECKey.fromPublicOnly(pubKeyHex);
     }
     //byte[] address = PublicMethed.AddPreFix(ecKey.getAddress());
-    return grpcQueryAccountSolidity(ecKey.getAddress(), blockingStubSolidity);
-    //return grpcQueryAccountSolidity(address,blockingStubSolidity);
+    return grpcQueryAccountConfirmed(ecKey.getAddress(), blockingStubConfirmed);
+    //return grpcQueryAccountConfirmed(address,blockingStubConfirmed);
   }
+
+  /**
+   * constructor.
+   */
 
   public String loadPubKey() {
     char[] buf = new char[0x100];
@@ -185,6 +215,10 @@ public class WalletTestAccount001 {
     return ecKey.getAddress();
   }
 
+  /**
+   * constructor.
+   */
+
   public Account grpcQueryAccount(byte[] address,
       WalletGrpc.WalletBlockingStub blockingStubFull) {
     //address = PublicMethed.AddPreFix(address);
@@ -193,14 +227,21 @@ public class WalletTestAccount001 {
     return blockingStubFull.getAccount(request);
   }
 
-  public Account grpcQueryAccountSolidity(byte[] address,
-      WalletSolidityGrpc.WalletSolidityBlockingStub blockingStubSolidity) {
+  /**
+   * constructor.
+   */
+
+  public Account grpcQueryAccountConfirmed(byte[] address,
+      WalletConfirmedGrpc.WalletConfirmedBlockingStub blockingStubConfirmed) {
     //address = PublicMethed.AddPreFix(address);
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
-    return blockingStubSolidity.getAccount(request);
+    return blockingStubConfirmed.getAccount(request);
   }
 
+  /**
+   * constructor.
+   */
 
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();

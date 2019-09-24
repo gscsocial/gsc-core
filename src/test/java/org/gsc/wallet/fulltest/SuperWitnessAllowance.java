@@ -1,3 +1,16 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.wallet.fulltest;
 
 import com.google.protobuf.ByteString;
@@ -9,7 +22,12 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.api.WalletGrpc;
+import org.gsc.wallet.common.client.Configuration;
+import org.gsc.wallet.common.client.Parameter;
+import org.gsc.wallet.common.client.WalletClient;
+import org.gsc.wallet.common.client.utils.Base58;
+import org.gsc.wallet.common.client.utils.PublicMethed;
+import org.gsc.wallet.common.client.utils.TransactionUtils;
 import org.spongycastle.util.encoders.Hex;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -20,23 +38,18 @@ import org.gsc.api.GrpcAPI;
 import org.gsc.api.GrpcAPI.NumberMessage;
 import org.gsc.api.GrpcAPI.Return;
 import org.gsc.api.GrpcAPI.WitnessList;
+import org.gsc.api.WalletGrpc;
 import org.gsc.crypto.ECKey;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.Utils;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.Utils;
 import org.gsc.core.Wallet;
 import org.gsc.protos.Contract;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.Transaction;
-import org.gsc.common.overlay.Configuration;
-import org.gsc.common.overlay.Parameter;
-import org.gsc.common.overlay.WalletClient;
-import org.gsc.common.overlay.util.Base58;
-import org.gsc.common.overlay.util.PublicMethed;
-import org.gsc.common.overlay.util.TransactionUtils;
 
-//import org.gsc.wallet.common.client.AccountComparator;
+//import stest.gsc.wallet.common.client.AccountComparator;
 
 @Slf4j
 public class SuperWitnessAllowance {
@@ -76,15 +89,18 @@ public class SuperWitnessAllowance {
   @BeforeSuite
   public void beforeSuite() {
     Wallet wallet = new Wallet();
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
+
+  /**
+   * constructor.
+   */
 
   @BeforeClass
   public void beforeClass() {
     logger.info(lowBalTest);
     logger.info(ByteArray.toHexString(PublicMethed.getFinalAddress(lowBalTest)));
     logger.info(Base58.encode58Check(PublicMethed.getFinalAddress(lowBalTest)));
-
 
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
         .usePlaintext(true)
@@ -110,8 +126,8 @@ public class SuperWitnessAllowance {
       String lowBalTest = ByteArray.toHexString(ecKey.getPrivKeyBytes());
       logger.info(lowBalTest);
       Assert.assertTrue(sendcoin(lowBalAddress, costForCreateWitness, fromAddress, testKey002));
-      Assert.assertTrue(PublicMethed.freezeBalance(lowBalAddress,1000000,
-          3,lowBalTest,blockingStubFull));
+      Assert.assertTrue(PublicMethed.freezeBalance(lowBalAddress, 1000000,
+          5, lowBalTest, blockingStubFull));
       Assert.assertTrue(createWitness(lowBalAddress, createUrl, lowBalTest));
       String voteStr = Base58.encode58Check(PublicMethed.getFinalAddress(lowBalTest));
       HashMap<String, String> smallVoteMap = new HashMap<String, String>();
@@ -154,6 +170,9 @@ public class SuperWitnessAllowance {
 
   }
 
+  /**
+   * constructor.
+   */
 
   @AfterClass
   public void shutdown() throws InterruptedException {
@@ -161,6 +180,10 @@ public class SuperWitnessAllowance {
       channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
+
+  /**
+   * constructor.
+   */
 
 
   public Boolean createWitness(byte[] owner, byte[] url, String priKey) {
@@ -190,6 +213,10 @@ public class SuperWitnessAllowance {
     }
 
   }
+
+  /**
+   * constructor.
+   */
 
   public Boolean updateWitness(byte[] owner, byte[] url, String priKey) {
     ECKey temKey = null;
@@ -222,6 +249,9 @@ public class SuperWitnessAllowance {
 
   }
 
+  /**
+   * constructor.
+   */
 
   public Boolean sendcoin(byte[] to, long amount, byte[] owner, String priKey) {
 
@@ -257,6 +287,9 @@ public class SuperWitnessAllowance {
     }
   }
 
+  /**
+   * constructor.
+   */
 
   public Account queryAccount(String priKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
@@ -290,11 +323,19 @@ public class SuperWitnessAllowance {
     return ecKey.getAddress();
   }
 
+  /**
+   * constructor.
+   */
+
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
   }
+
+  /**
+   * constructor.
+   */
 
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();
@@ -312,6 +353,10 @@ public class SuperWitnessAllowance {
     return TransactionUtils.sign(transaction, ecKey);
   }
 
+  /**
+   * constructor.
+   */
+
   public Boolean voteWitness(HashMap<String, String> witness, byte[] addRess, String priKey) {
 
     ECKey temKey = null;
@@ -322,7 +367,7 @@ public class SuperWitnessAllowance {
       ex.printStackTrace();
     }
     final ECKey ecKey = temKey;
-    Account beforeVote  = PublicMethed.queryAccount(priKey,blockingStubFull);
+    Account beforeVote = PublicMethed.queryAccount(priKey, blockingStubFull);
     //Account beforeVote = queryAccount(ecKey, blockingStubFull);
     Long beforeVoteNum = 0L;
     if (beforeVote.getVotesCount() != 0) {

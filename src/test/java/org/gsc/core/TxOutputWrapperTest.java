@@ -1,16 +1,14 @@
 /*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
  * gsc-core is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
  */
 
 package org.gsc.core;
@@ -19,12 +17,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.gsc.core.wrapper.TxOutputWrapper;
 import org.junit.Assert;
 import org.junit.Test;
-import org.gsc.common.utils.ByteArray;
+import org.gsc.utils.ByteArray;
 
 @Slf4j
 public class TxOutputWrapperTest {
+
   @Test
-  public void testTxOutputCapsule() {
+  public void testTxOutputWrapper() {
     long value = 123456L;
     String address = "3450dde5007c67a50ec2e09489fa53ec1ff59c61e7ddea9638645e6e5f62e5f5";
     TxOutputWrapper txOutputWrapper = new TxOutputWrapper(value, address);
@@ -52,6 +51,8 @@ public class TxOutputWrapperTest {
     Assert.assertEquals("",
         ByteArray.toHexString(txOutputWrapper3.getTxOutput().getPubKeyHash().toByteArray()));
     Assert.assertTrue(txOutputWrapper3.validate());
+
   }
+
 }
 

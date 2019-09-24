@@ -1,16 +1,29 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.db;
 
 import com.google.protobuf.ByteString;
 import java.io.File;
 import java.util.Random;
 
-import org.gsc.common.application.GSCApplicationContext;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.gsc.common.utils.FileUtil;
+import org.gsc.application.GSCApplicationContext;
+import org.gsc.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
 import org.gsc.config.DefaultConfig;
@@ -19,7 +32,7 @@ import org.gsc.protos.Protocol.AccountType;
 
 public class AccountIdIndexStoreTest {
 
-  private static String dbPath = "output_AccountIndexStore_test";
+  private static String dbPath = "db_AccountIndexStore_test";
   private static GSCApplicationContext context;
   private static AccountIdIndexStore accountIdIndexStore;
   private static final byte[] ACCOUNT_ADDRESS_ONE = randomBytes(16);
@@ -37,16 +50,16 @@ public class AccountIdIndexStoreTest {
   private static AccountWrapper accountWrapper4;
 
   static {
-    Args.setParam(new String[]{"--output-directory", dbPath},
-        Constant.TEST_CONF);
+    Args.setParam(new String[]{"--db-directory", dbPath},
+        Constant.TEST_NET_CONF);
     context = new GSCApplicationContext(DefaultConfig.class);
   }
 
   @AfterClass
   public static void destroy() {
     Args.clearParam();
-    FileUtil.deleteDir(new File(dbPath));
     context.destroy();
+    FileUtil.deleteDir(new File(dbPath));
   }
 
   @BeforeClass
@@ -133,7 +146,8 @@ public class AccountIdIndexStoreTest {
     // generate the random number
     byte[] result = new byte[length];
     new Random().nextBytes(result);
-    result[0] = Wallet.getAddressPreFixByte();
+    byte[] addressPre = Wallet.getAddressPreFixByte();
+    System.arraycopy(addressPre, 0, result, 0, addressPre.length);
     return result;
   }
 }

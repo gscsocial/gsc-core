@@ -1,20 +1,16 @@
 /*
- * Copyright (c) [2016] [ <ether.camp> ]
- * This file is part of the ethereumJ library.
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
  *
- * The ethereumJ library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The ethereumJ library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
  */
+
 package org.gsc.runtime.vm.trace;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -25,30 +21,31 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
+
 import java.io.IOException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import lombok.extern.slf4j.Slf4j;
 import org.spongycastle.util.encoders.Hex;
 import org.gsc.runtime.vm.DataWord;
 import org.gsc.runtime.vm.OpCode;
 
+@Slf4j(topic = "VM")
 public final class Serializers {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger("vmtrace");
 
     public static class DataWordSerializer extends JsonSerializer<DataWord> {
 
         @Override
-        public void serialize(DataWord energy, JsonGenerator jgen, SerializerProvider provider)
-            throws IOException, JsonProcessingException {
-            jgen.writeString(energy.value().toString());
+        public void serialize(DataWord cpu, JsonGenerator jgen, SerializerProvider provider)
+                throws IOException, JsonProcessingException {
+            jgen.writeString(cpu.value().toString());
         }
     }
 
     public static class ByteArraySerializer extends JsonSerializer<byte[]> {
 
         @Override
-        public void serialize(byte[] memory, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+        public void serialize(byte[] memory, JsonGenerator jgen, SerializerProvider provider)
+                throws IOException, JsonProcessingException {
             jgen.writeString(Hex.toHexString(memory));
         }
     }
@@ -56,7 +53,8 @@ public final class Serializers {
     public static class OpCodeSerializer extends JsonSerializer<Byte> {
 
         @Override
-        public void serialize(Byte op, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+        public void serialize(Byte op, JsonGenerator jgen, SerializerProvider provider)
+                throws IOException, JsonProcessingException {
             jgen.writeString(OpCode.code(op).name());
         }
     }
@@ -69,7 +67,7 @@ public final class Serializers {
 
             return mapper.writeValueAsString(value);
         } catch (Exception e) {
-            LOGGER.error("JSON serialization error: ", e);
+            logger.error("JSON serialization error: ", e);
             return "{}";
         }
     }

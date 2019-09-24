@@ -1,23 +1,36 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.core.operator;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.application.GSCApplicationContext;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
 import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.FileUtil;
+import org.gsc.application.GSCApplicationContext;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
+import org.gsc.core.wrapper.TransactionResultWrapper;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
@@ -30,7 +43,7 @@ public class SetAccountIdOperatorTest {
 
   private static GSCApplicationContext context;
   private static Manager dbManager;
-  private static final String dbPath = "output_setaccountid_test";
+  private static final String dbPath = "db_setaccountid_test";
   private static final String ACCOUNT_NAME = "ownertest";
   private static final String ACCOUNT_NAME_1 = "ownertest1";
   private static final String OWNER_ADDRESS;
@@ -38,10 +51,10 @@ public class SetAccountIdOperatorTest {
   private static final String OWNER_ADDRESS_INVALID = "aaaa";
 
   static {
-    Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
+    Args.setParam(new String[]{"--db-directory", dbPath}, Constant.TEST_NET_CONF);
     context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS = Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a1abc";
-    OWNER_ADDRESS_1 = Wallet.getAddressPreFixString() + "abd4b9367799eaa3197fecb144eb71de1e049abc";
+    OWNER_ADDRESS_1 = Wallet.getAddressPreFixString() + "6f24fc8a9e3712e9de397643ee2db721c7242919";
   }
 
   /**
@@ -53,16 +66,16 @@ public class SetAccountIdOperatorTest {
   }
 
   /**
-   * create temp Capsule test need.
+   * create temp Wrapper test need.
    */
   @Before
-  public void createCapsule() {
-    AccountWrapper ownerCapsule =
+  public void createWrapper() {
+    AccountWrapper ownerWrapper =
         new AccountWrapper(
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)),
             ByteString.EMPTY,
             AccountType.Normal);
-    dbManager.getAccountStore().put(ownerCapsule.createDbKey(), ownerCapsule);
+    dbManager.getAccountStore().put(ownerWrapper.createDbKey(), ownerWrapper);
     dbManager.getAccountStore().delete(ByteArray.fromHexString(OWNER_ADDRESS_1));
     dbManager.getAccountIdIndexStore().delete(ACCOUNT_NAME.getBytes());
     dbManager.getAccountIdIndexStore().delete(ACCOUNT_NAME_1.getBytes());
@@ -93,11 +106,11 @@ public class SetAccountIdOperatorTest {
   @Test
   public void rightSetAccountId() {
     TransactionResultWrapper ret = new TransactionResultWrapper();
-    SetAccountIdOperator actuator = new SetAccountIdOperator(
+    SetAccountIdOperator operator = new SetAccountIdOperator(
         getContract(ACCOUNT_NAME, OWNER_ADDRESS), dbManager);
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper accountWrapper = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
@@ -114,11 +127,11 @@ public class SetAccountIdOperatorTest {
   @Test
   public void invalidAddress() {
     TransactionResultWrapper ret = new TransactionResultWrapper();
-    SetAccountIdOperator actuator = new SetAccountIdOperator(
+    SetAccountIdOperator operator = new SetAccountIdOperator(
         getContract(ACCOUNT_NAME, OWNER_ADDRESS_INVALID), dbManager);
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertFalse(true);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -131,11 +144,11 @@ public class SetAccountIdOperatorTest {
   @Test
   public void noExistAccount() {
     TransactionResultWrapper ret = new TransactionResultWrapper();
-    SetAccountIdOperator actuator = new SetAccountIdOperator(
+    SetAccountIdOperator operator = new SetAccountIdOperator(
         getContract(ACCOUNT_NAME, OWNER_ADDRESS_1), dbManager);
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertFalse(true);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -148,13 +161,13 @@ public class SetAccountIdOperatorTest {
   @Test
   public void twiceUpdateAccount() {
     TransactionResultWrapper ret = new TransactionResultWrapper();
-    SetAccountIdOperator actuator = new SetAccountIdOperator(
+    SetAccountIdOperator operator = new SetAccountIdOperator(
         getContract(ACCOUNT_NAME, OWNER_ADDRESS), dbManager);
-    SetAccountIdOperator actuator1 = new SetAccountIdOperator(
+    SetAccountIdOperator operator1 = new SetAccountIdOperator(
         getContract(ACCOUNT_NAME_1, OWNER_ADDRESS), dbManager);
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper accountWrapper = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
@@ -167,8 +180,8 @@ public class SetAccountIdOperatorTest {
     }
 
     try {
-      actuator1.validate();
-      actuator1.execute(ret);
+      operator1.validate();
+      operator1.execute(ret);
       Assert.assertFalse(true);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -184,13 +197,13 @@ public class SetAccountIdOperatorTest {
   @Test
   public void nameAlreadyUsed() {
     TransactionResultWrapper ret = new TransactionResultWrapper();
-    SetAccountIdOperator actuator = new SetAccountIdOperator(
+    SetAccountIdOperator operator = new SetAccountIdOperator(
         getContract(ACCOUNT_NAME, OWNER_ADDRESS), dbManager);
-    SetAccountIdOperator actuator1 = new SetAccountIdOperator(
+    SetAccountIdOperator operator1 = new SetAccountIdOperator(
         getContract(ACCOUNT_NAME, OWNER_ADDRESS_1), dbManager);
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper accountWrapper = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
@@ -203,16 +216,16 @@ public class SetAccountIdOperatorTest {
       Assert.assertFalse(e instanceof ContractExeException);
     }
 
-    AccountWrapper ownerCapsule =
+    AccountWrapper ownerWrapper =
         new AccountWrapper(
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_1)),
             ByteString.EMPTY,
             AccountType.Normal);
-    dbManager.getAccountStore().put(ownerCapsule.getAddress().toByteArray(), ownerCapsule);
+    dbManager.getAccountStore().put(ownerWrapper.getAddress().toByteArray(), ownerWrapper);
 
     try {
-      actuator1.validate();
-      actuator1.execute(ret);
+      operator1.validate();
+      operator1.execute(ret);
       Assert.assertFalse(true);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -233,10 +246,10 @@ public class SetAccountIdOperatorTest {
     TransactionResultWrapper ret = new TransactionResultWrapper();
     //Just OK 32 bytes is OK
     try {
-      SetAccountIdOperator actuator = new SetAccountIdOperator(
+      SetAccountIdOperator operator = new SetAccountIdOperator(
           getContract("testname0123456789abcdefghijgklm", OWNER_ADDRESS), dbManager);
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper accountWrapper = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
@@ -255,10 +268,10 @@ public class SetAccountIdOperatorTest {
     accountWrapper.setAccountId(ByteString.EMPTY.toByteArray());
     dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     try {
-      SetAccountIdOperator actuator = new SetAccountIdOperator(
+      SetAccountIdOperator operator = new SetAccountIdOperator(
           getContract("test1111", OWNER_ADDRESS), dbManager);
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       accountWrapper = dbManager.getAccountStore()
           .get(ByteArray.fromHexString(OWNER_ADDRESS));
@@ -278,10 +291,10 @@ public class SetAccountIdOperatorTest {
     accountWrapper.setAccountId(ByteString.EMPTY.toByteArray());
     dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     try {
-      SetAccountIdOperator actuator = new SetAccountIdOperator(
+      SetAccountIdOperator operator = new SetAccountIdOperator(
           getContract(ByteString.EMPTY, OWNER_ADDRESS), dbManager);
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -296,13 +309,13 @@ public class SetAccountIdOperatorTest {
     accountWrapper.setAccountId(ByteString.EMPTY.toByteArray());
     dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     try {
-      SetAccountIdOperator actuator = new SetAccountIdOperator(
+      SetAccountIdOperator operator = new SetAccountIdOperator(
           getContract("testname0123456789abcdefghijgklmo0123456789abcdefghijgk"
               + "lmo0123456789abcdefghijgklmo0123456789abcdefghijgklmo0123456789abcdefghijgklmo"
               + "0123456789abcdefghijgklmo0123456789abcdefghijgklmo0123456789abcdefghijgklmo"
               + "0123456789abcdefghijgklmo0123456789abcdefghijgklmo", OWNER_ADDRESS), dbManager);
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertFalse(true);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -317,10 +330,10 @@ public class SetAccountIdOperatorTest {
     accountWrapper.setAccountId(ByteString.EMPTY.toByteArray());
     dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     try {
-      SetAccountIdOperator actuator = new SetAccountIdOperator(
+      SetAccountIdOperator operator = new SetAccountIdOperator(
           getContract("testnam", OWNER_ADDRESS), dbManager);
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertFalse(true);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -335,10 +348,10 @@ public class SetAccountIdOperatorTest {
     accountWrapper.setAccountId(ByteString.EMPTY.toByteArray());
     dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     try {
-      SetAccountIdOperator actuator = new SetAccountIdOperator(
+      SetAccountIdOperator operator = new SetAccountIdOperator(
           getContract("t e", OWNER_ADDRESS), dbManager);
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertFalse(true);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -353,11 +366,11 @@ public class SetAccountIdOperatorTest {
     accountWrapper.setAccountId(ByteString.EMPTY.toByteArray());
     dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     try {
-      SetAccountIdOperator actuator = new SetAccountIdOperator(
+      SetAccountIdOperator operator = new SetAccountIdOperator(
           getContract(ByteString.copyFrom(ByteArray.fromHexString("E6B58BE8AF95"))
               , OWNER_ADDRESS), dbManager);
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertFalse(true);
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -373,11 +386,11 @@ public class SetAccountIdOperatorTest {
   @AfterClass
   public static void destroy() {
     Args.clearParam();
+    context.destroy();
     if (FileUtil.deleteDir(new File(dbPath))) {
       logger.info("Release resources successful.");
     } else {
       logger.info("Release resources failure.");
     }
-    context.destroy();
   }
 }

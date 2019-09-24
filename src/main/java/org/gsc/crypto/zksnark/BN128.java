@@ -20,29 +20,24 @@ package org.gsc.crypto.zksnark;
 import java.math.BigInteger;
 
 /**
- * Implementation of Barreto–Naehrig curve defined over abstract finite field. This curve is one of the keys to zkSNARKs. <br/>
- * This specific curve was introduced in
- * <a href="https://github.com/scipr-lab/libff#elliptic-curve-choices">libff</a>
- * and used by a proving system in
- * <a href="https://github.com/zcash/zcash/wiki/specification#zcash-protocol">ZCash protocol</a> <br/>
- * <br/>
- *
- * Curve equation: <br/>
- * Y^2 = X^3 + b, where "b" is a constant number belonging to corresponding specific field <br/>
- * Point at infinity is encoded as <code>(0, 0, 0)</code> <br/>
- * <br/>
- *
- * This curve has embedding degree 12 with respect to "r" (see {@link Params#R}), which means that "r" is a multiple of "p ^ 12 - 1",
- * this condition is important for pairing operation implemented in {@link PairingCheck}<br/>
- * <br/>
- *
- * Code of curve arithmetic has been ported from
- * <a href="https://github.com/scipr-lab/libff/blob/master/libff/algebra/curves/alt_bn128/alt_bn128_g1.cpp">libff</a> <br/>
- * <br/>
- *
- * Current implementation uses Jacobian coordinate system as
- * <a href="https://github.com/scipr-lab/libff/blob/master/libff/algebra/curves/alt_bn128/alt_bn128_g1.cpp">libff</a> does,
- * use {@link #toEthNotation()} to convert Jacobian coords to Ethereum encoding <br/>
+ * Implementation of Barreto–Naehrig curve defined over abstract finite field. This curve is one of
+ * the keys to zkSNARKs. <br/> This specific curve was introduced in <a
+ * href="https://github.com/scipr-lab/libff#elliptic-curve-choices">libff</a> and used by a proving
+ * system in <a href="https://github.com/zcash/zcash/wiki/specification#zcash-protocol">ZCash
+ * protocol</a> <br/> <br/>
+ * <p>
+ * Curve equation: <br/> Y^2 = X^3 + b, where "b" is a constant number belonging to corresponding
+ * specific field <br/> Point at infinity is encoded as <code>(0, 0, 0)</code> <br/> <br/>
+ * <p>
+ * This curve has embedding degree 12 with respect to "r" (see {@link Params#R}), which means that
+ * "r" is a multiple of "p ^ 12 - 1", this condition is important for pairing operation implemented
+ * in {@link PairingCheck}<br/> <br/>
+ * <p>
+ * Code of curve arithmetic has been ported from <a href="https://github.com/scipr-lab/libff/blob/master/libff/algebra/curves/alt_bn128/alt_bn128_g1.cpp">libff</a>
+ * <br/> <br/>
+ * <p>
+ * Current implementation uses Jacobian coordinate system as <a href="https://github.com/scipr-lab/libff/blob/master/libff/algebra/curves/alt_bn128/alt_bn128_g1.cpp">libff</a>
+ * does, use {@link #toEthNotation()} to convert Jacobian coords to Ethereum encoding <br/>
  *
  * @author Mikhail Kalinin
  * @since 05.09.2017
@@ -60,12 +55,15 @@ public abstract class BN128<T extends Field<T>> {
     }
 
     /**
-     * Point at infinity in Ethereum notation: should return (0; 0; 0),
-     * {@link #isZero()} method called for that point, also, returns {@code true}
+     * Point at infinity in Ethereum notation: should return (0; 0; 0), {@link #isZero()} method
+     * called for that point, also, returns {@code true}
      */
     abstract protected BN128<T> zero();
+
     abstract protected BN128<T> instance(T x, T y, T z);
+
     abstract protected T b();
+
     abstract protected T one();
 
     /**
@@ -104,22 +102,28 @@ public abstract class BN128<T extends Field<T>> {
 
     protected boolean isOnCurve() {
 
-        if (isZero()) return true;
+        if (isZero()) {
+            return true;
+        }
 
         T z6 = z.squared().mul(z).squared();
 
-        T left  = y.squared();                          // y^2
+        T left = y.squared();                          // y^2
         T right = x.squared().mul(x).add(b().mul(z6));  // x^3 + b * z^6
         return left.equals(right);
     }
 
     public BN128<T> add(BN128<T> o) {
 
-        if (this.isZero()) return o; // 0 + P = P
-        if (o.isZero()) return this; // P + 0 = P
+        if (this.isZero()) {
+            return o; // 0 + P = P
+        }
+        if (o.isZero()) {
+            return this; // P + 0 = P
+        }
 
         T x1 = this.x, y1 = this.y, z1 = this.z;
-        T x2 = o.x,    y2 = o.y,    z2 = o.z;
+        T x2 = o.x, y2 = o.y, z2 = o.z;
 
         // ported code is started from here
         // next calculations are done in Jacobian coordinates
@@ -158,9 +162,13 @@ public abstract class BN128<T extends Field<T>> {
     public BN128<T> mul(BigInteger s) {
 
         if (s.compareTo(BigInteger.ZERO) == 0) // P * 0 = 0
+        {
             return zero();
+        }
 
-        if (isZero()) return this; // 0 * s = 0
+        if (isZero()) {
+            return this; // 0 * s = 0
+        }
 
         BN128<T> res = zero();
 
@@ -178,7 +186,9 @@ public abstract class BN128<T extends Field<T>> {
 
     private BN128<T> dbl() {
 
-        if (isZero()) return this;
+        if (isZero()) {
+            return this;
+        }
 
         // ported code is started from here
         // next calculations are done in Jacobian coordinates with z = 1
@@ -233,13 +243,21 @@ public abstract class BN128<T extends Field<T>> {
     @Override
     @SuppressWarnings("all")
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof BN128)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof BN128)) {
+            return false;
+        }
 
         BN128<?> bn128 = (BN128<?>) o;
 
-        if (x != null ? !x.equals(bn128.x) : bn128.x != null) return false;
-        if (y != null ? !y.equals(bn128.y) : bn128.y != null) return false;
+        if (x != null ? !x.equals(bn128.x) : bn128.x != null) {
+            return false;
+        }
+        if (y != null ? !y.equals(bn128.y) : bn128.y != null) {
+            return false;
+        }
         return !(z != null ? !z.equals(bn128.z) : bn128.z != null);
     }
 }

@@ -1,3 +1,16 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.core.operator;
 
 import static junit.framework.TestCase.fail;
@@ -7,23 +20,22 @@ import com.google.protobuf.ByteString;
 import java.io.File;
 import java.util.HashMap;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.application.GSCApplicationContext;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
-import org.gsc.core.wrapper.AccountWrapper;
-import org.gsc.core.wrapper.ProposalWrapper;
-import org.gsc.core.wrapper.TransactionResultWrapper;
-import org.gsc.core.wrapper.WitnessWrapper;
+import org.gsc.core.wrapper.*;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.FileUtil;
-import org.gsc.common.utils.StringUtil;
+import org.gsc.application.GSCApplicationContext;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.FileUtil;
+import org.gsc.utils.StringUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
+import org.gsc.core.wrapper.AccountWrapper;
+import org.gsc.core.wrapper.ProposalWrapper;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
@@ -39,20 +51,20 @@ public class ProposalApproveOperatorTest {
 
   private static GSCApplicationContext context;
   private static Manager dbManager;
-  private static final String dbPath = "output_ProposalApprove_test";
+  private static final String dbPath = "db_ProposalApprove_test";
   private static final String ACCOUNT_NAME_FIRST = "ownerF";
   private static final String OWNER_ADDRESS_FIRST;
   private static final String ACCOUNT_NAME_SECOND = "ownerS";
   private static final String OWNER_ADDRESS_SECOND;
-  private static final String URL = "https://gscan.social";
+  private static final String URL = "https://gsc.network";
   private static final String OWNER_ADDRESS_INVALID = "aaaa";
   private static final String OWNER_ADDRESS_NOACCOUNT;
 
   static {
-    Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
+    Args.setParam(new String[]{"--db-directory", dbPath}, Constant.TEST_NET_CONF);
     context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS_FIRST =
-        Wallet.getAddressPreFixString() + "abd4b9367799eaa3197fecb144eb71de1e049abc";
+        Wallet.getAddressPreFixString() + "6f24fc8a9e3712e9de397643ee2db721c7242919";
     OWNER_ADDRESS_SECOND =
         Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a1abc";
     OWNER_ADDRESS_NOACCOUNT =
@@ -73,31 +85,31 @@ public class ProposalApproveOperatorTest {
   @AfterClass
   public static void destroy() {
     Args.clearParam();
+    context.destroy();
     if (FileUtil.deleteDir(new File(dbPath))) {
       logger.info("Release resources successful.");
     } else {
       logger.info("Release resources failure.");
     }
-    context.destroy();
   }
 
   /**
-   * create temp Capsule test need.
+   * create temp Wrapper test need.
    */
   @Before
   public void initTest() {
-    WitnessWrapper ownerWitnessFirstCapsule =
+    WitnessWrapper ownerWitnessFirstWrapper =
         new WitnessWrapper(
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_FIRST)),
             10_000_000L,
             URL);
-    AccountWrapper ownerAccountFirstCapsule =
+    AccountWrapper ownerAccountFirstWrapper =
         new AccountWrapper(
             ByteString.copyFromUtf8(ACCOUNT_NAME_FIRST),
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_FIRST)),
             AccountType.Normal,
             300_000_000L);
-    AccountWrapper ownerAccountSecondCapsule =
+    AccountWrapper ownerAccountSecondWrapper =
         new AccountWrapper(
             ByteString.copyFromUtf8(ACCOUNT_NAME_SECOND),
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_SECOND)),
@@ -105,12 +117,12 @@ public class ProposalApproveOperatorTest {
             200_000_000_000L);
 
     dbManager.getAccountStore()
-        .put(ownerAccountFirstCapsule.getAddress().toByteArray(), ownerAccountFirstCapsule);
+        .put(ownerAccountFirstWrapper.getAddress().toByteArray(), ownerAccountFirstWrapper);
     dbManager.getAccountStore()
-        .put(ownerAccountSecondCapsule.getAddress().toByteArray(), ownerAccountSecondCapsule);
+        .put(ownerAccountSecondWrapper.getAddress().toByteArray(), ownerAccountSecondWrapper);
 
-    dbManager.getWitnessStore().put(ownerWitnessFirstCapsule.getAddress().toByteArray(),
-        ownerWitnessFirstCapsule);
+    dbManager.getWitnessStore().put(ownerWitnessFirstWrapper.getAddress().toByteArray(),
+        ownerWitnessFirstWrapper);
 
     dbManager.getDynamicPropertiesStore().saveLatestBlockHeaderTimestamp(1000000);
     dbManager.getDynamicPropertiesStore().saveLatestBlockHeaderNumber(10);
@@ -122,13 +134,13 @@ public class ProposalApproveOperatorTest {
     dbManager.getProposalStore().delete(ByteArray.fromLong(2));
     HashMap<Long, Long> paras = new HashMap<>();
     paras.put(0L, 6 * 27 * 1000L);
-    ProposalCreateOperator actuator =
+    ProposalCreateOperator operator =
         new ProposalCreateOperator(getContract(OWNER_ADDRESS_FIRST, paras), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     Assert.assertEquals(dbManager.getDynamicPropertiesStore().getLatestProposalNum(), 0);
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       ProposalWrapper proposalWrapper = dbManager.getProposalStore().get(ByteArray.fromLong(id));
       Assert.assertNotNull(proposalWrapper);
@@ -173,7 +185,7 @@ public class ProposalApproveOperatorTest {
     long id = 1;
 
     // isAddApproval == true
-    ProposalApproveOperator actuator = new ProposalApproveOperator(
+    ProposalApproveOperator operator = new ProposalApproveOperator(
         getContract(OWNER_ADDRESS_FIRST, id, true), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     ProposalWrapper proposalWrapper;
@@ -185,8 +197,8 @@ public class ProposalApproveOperatorTest {
     }
     Assert.assertEquals(proposalWrapper.getApprovals().size(), 0);
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       try {
         proposalWrapper = dbManager.getProposalStore().get(ByteArray.fromLong(id));
@@ -204,7 +216,7 @@ public class ProposalApproveOperatorTest {
     }
 
     // isAddApproval == false
-    ProposalApproveOperator actuator2 = new ProposalApproveOperator(
+    ProposalApproveOperator operator2 = new ProposalApproveOperator(
         getContract(OWNER_ADDRESS_FIRST, 1, false), dbManager);
     TransactionResultWrapper ret2 = new TransactionResultWrapper();
     try {
@@ -215,8 +227,8 @@ public class ProposalApproveOperatorTest {
     }
     Assert.assertEquals(proposalWrapper.getApprovals().size(), 1);
     try {
-      actuator2.validate();
-      actuator2.execute(ret2);
+      operator2.validate();
+      operator2.execute(ret2);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       try {
         proposalWrapper = dbManager.getProposalStore().get(ByteArray.fromLong(id));
@@ -241,7 +253,7 @@ public class ProposalApproveOperatorTest {
     long id = 1;
 
     // isAddApproval == true
-    ProposalApproveOperator actuator = new ProposalApproveOperator(
+    ProposalApproveOperator operator = new ProposalApproveOperator(
         getContract(OWNER_ADDRESS_INVALID, id, true), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     ProposalWrapper proposalWrapper;
@@ -253,8 +265,8 @@ public class ProposalApproveOperatorTest {
     }
     Assert.assertEquals(proposalWrapper.getApprovals().size(), 0);
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       fail("Invalid address");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -273,7 +285,7 @@ public class ProposalApproveOperatorTest {
     long id = 1;
 
     // isAddApproval == true
-    ProposalApproveOperator actuator = new ProposalApproveOperator(
+    ProposalApproveOperator operator = new ProposalApproveOperator(
         getContract(OWNER_ADDRESS_NOACCOUNT, id, true), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     ProposalWrapper proposalWrapper;
@@ -285,12 +297,12 @@ public class ProposalApproveOperatorTest {
     }
     Assert.assertEquals(proposalWrapper.getApprovals().size(), 0);
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       fail("account[+OWNER_ADDRESS_NOACCOUNT+] not exists");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("account[" + OWNER_ADDRESS_NOACCOUNT + "] not exists",
+      Assert.assertEquals("Account[" + OWNER_ADDRESS_NOACCOUNT + "] not exists",
           e.getMessage());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
@@ -306,7 +318,7 @@ public class ProposalApproveOperatorTest {
     long id = 1;
 
     // isAddApproval == true
-    ProposalApproveOperator actuator = new ProposalApproveOperator(
+    ProposalApproveOperator operator = new ProposalApproveOperator(
         getContract(OWNER_ADDRESS_SECOND, id, true), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     ProposalWrapper proposalWrapper;
@@ -318,8 +330,8 @@ public class ProposalApproveOperatorTest {
     }
     Assert.assertEquals(proposalWrapper.getApprovals().size(), 0);
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       fail("witness[+OWNER_ADDRESS_NOWITNESS+] not exists");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -339,12 +351,12 @@ public class ProposalApproveOperatorTest {
     long id = 2;
 
     // isAddApproval == true
-    ProposalApproveOperator actuator = new ProposalApproveOperator(
+    ProposalApproveOperator operator = new ProposalApproveOperator(
         getContract(OWNER_ADDRESS_FIRST, id, true), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       fail("Proposal[" + id + "] not exists");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -363,7 +375,7 @@ public class ProposalApproveOperatorTest {
     dbManager.getDynamicPropertiesStore().saveLatestBlockHeaderTimestamp(1000100);
     long id = 1;
 
-    ProposalApproveOperator actuator = new ProposalApproveOperator(
+    ProposalApproveOperator operator = new ProposalApproveOperator(
         getContract(OWNER_ADDRESS_FIRST, id, true), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     ProposalWrapper proposalWrapper;
@@ -379,13 +391,13 @@ public class ProposalApproveOperatorTest {
     String readableOwnerAddress = StringUtil.createReadableString(
         ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS_FIRST)));
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       fail("witness [" + readableOwnerAddress + "]has approved proposal[" + id
           + "] before");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("witness [" + readableOwnerAddress + "]has approved "
+      Assert.assertEquals("Witness[" + readableOwnerAddress + "]has approved "
               + "proposal[" + id + "] before",
           e.getMessage());
     } catch (ContractExeException e) {
@@ -402,12 +414,12 @@ public class ProposalApproveOperatorTest {
     long id = 1;
 
     // isAddApproval == true
-    ProposalApproveOperator actuator = new ProposalApproveOperator(
+    ProposalApproveOperator operator = new ProposalApproveOperator(
         getContract(OWNER_ADDRESS_FIRST, id, true), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       fail("Proposal[" + id + "] expired");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -427,7 +439,7 @@ public class ProposalApproveOperatorTest {
     long id = 1;
 
     // isAddApproval == true
-    ProposalApproveOperator actuator = new ProposalApproveOperator(
+    ProposalApproveOperator operator = new ProposalApproveOperator(
         getContract(OWNER_ADDRESS_FIRST, id, true), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     ProposalWrapper proposalWrapper;
@@ -441,8 +453,8 @@ public class ProposalApproveOperatorTest {
     }
     Assert.assertEquals(proposalWrapper.getApprovals().size(), 0);
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       fail("Proposal[" + id + "] canceled");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -463,7 +475,7 @@ public class ProposalApproveOperatorTest {
     long id = 1;
 
     // isAddApproval == true
-    ProposalApproveOperator actuator = new ProposalApproveOperator(
+    ProposalApproveOperator operator = new ProposalApproveOperator(
         getContract(OWNER_ADDRESS_FIRST, id, false), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     String readableOwnerAddress = StringUtil.createReadableString(
@@ -478,12 +490,12 @@ public class ProposalApproveOperatorTest {
     }
     Assert.assertEquals(proposalWrapper.getApprovals().size(), 0);
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       fail("witness [" + readableOwnerAddress + "]has not approved proposal[" + id + "] before");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("witness [" + readableOwnerAddress + "]has not approved "
+      Assert.assertEquals("Witness[" + readableOwnerAddress + "]has not approved "
               + "proposal[" + id + "] before",
           e.getMessage());
     } catch (ContractExeException e) {

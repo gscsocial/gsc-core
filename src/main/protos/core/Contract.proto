@@ -1,16 +1,14 @@
 /*
- * java-gsc is free software: you can redistribute it and/or modify
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * java-gsc is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
  */
 
 syntax = "proto3";
@@ -19,6 +17,7 @@ package protocol;
 
 option java_package = "org.gsc.protos"; //Specify the name of the package that generated the Java file
 option java_outer_classname = "Contract"; //Specify the class name of the generated Java file
+option go_package = "github.com/gscsocial/grpc-gateway/core";
 
 import "core/GSC.proto";
 
@@ -47,12 +46,11 @@ message TransferContract {
 }
 
 message TransferAssetContract {
-  bytes asset_name = 1;
+  bytes asset_name = 1; // this field is token name before the proposal ALLOW_SAME_TOKEN_NAME is active, otherwise it is token id and token is should be in string format.
   bytes owner_address = 2;
   bytes to_address = 3;
   int64 amount = 4;
 }
-
 
 message VoteAssetContract {
   bytes owner_address = 1;
@@ -77,6 +75,17 @@ message UpdateSettingContract {
   int64 consume_user_resource_percent = 3;
 }
 
+message UpdateCpuLimitContract {
+  bytes owner_address = 1;
+  bytes contract_address = 2;
+  int64 origin_cpu_limit = 3;
+}
+
+message ClearABIContract {
+  bytes owner_address = 1;
+  bytes contract_address = 2;
+}
+
 message WitnessCreateContract {
   bytes owner_address = 1;
   bytes url = 2;
@@ -88,6 +97,8 @@ message WitnessUpdateContract {
 }
 
 message AssetIssueContract {
+  string id = 41;
+
   message FrozenSupply {
     int64 frozen_amount = 1;
     int64 frozen_days = 2;
@@ -98,10 +109,11 @@ message AssetIssueContract {
   int64 total_supply = 4;
   repeated FrozenSupply frozen_supply = 5;
   int32 gsc_num = 6;
-  int64 num = 8;
+  int32 precision = 7;
+  int32 num = 8;
   int64 start_time = 9;
   int64 end_time = 10;
-  int64 order = 11; // the order of tokens of the same name // remove: Avoid TOKEN's duplicate name
+  int64 order = 11; // useless
   int32 vote_score = 16;
   bytes description = 20;
   bytes url = 21;
@@ -111,22 +123,16 @@ message AssetIssueContract {
   int64 public_latest_free_net_time = 25;
 }
 
-
 message ParticipateAssetIssueContract {
   bytes owner_address = 1;
   bytes to_address = 2;
-  bytes asset_name = 3; // the namekey of target asset, include name and order
+  bytes asset_name = 3; // this field is token name before the proposal ALLOW_SAME_TOKEN_NAME is active, otherwise it is token id and token is should be in string format.
   int64 amount = 4; // the amount of drops
 }
 
-
 enum ResourceCode {
-  BANDWIDTH = 0x00;
-  ENERGY = 0x01;
-}
-enum UnfreezeCode {
-  ACTIVATE = 0x00; // active the fronzen balance, after frozen balance
-  RECOVER = 0x01; // be able to withdraw the active balance after 3 days
+  NET = 0x00;
+  CPU = 0x01;
 }
 
 message FreezeBalanceContract {
@@ -135,12 +141,14 @@ message FreezeBalanceContract {
   int64 frozen_duration = 3;
 
   ResourceCode resource = 10;
+  bytes receiver_address = 15;
 }
 
 message UnfreezeBalanceContract {
   bytes owner_address = 1;
-  ResourceCode resource = 2;
-  UnfreezeCode type = 3;
+
+  ResourceCode resource = 10;
+  bytes receiver_address = 15;
 }
 
 message UnfreezeAssetContract {
@@ -178,6 +186,8 @@ message ProposalDeleteContract {
 message CreateSmartContract {
   bytes owner_address = 1;
   SmartContract new_contract = 2;
+  int64 call_token_value = 3;
+  int64 token_id = 4;
 }
 
 message TriggerSmartContract {
@@ -185,11 +195,13 @@ message TriggerSmartContract {
   bytes contract_address = 2;
   int64 call_value = 3;
   bytes data = 4;
+  int64 call_token_value = 5;
+  int64 token_id = 6;
 }
 
 message BuyStorageContract {
   bytes owner_address = 1;
-  int64 quant = 2; // gsc quantity for buy storage (sun)
+  int64 quant = 2; // gsc quantity for buy storage (dot)
 }
 
 message BuyStorageBytesContract {
@@ -229,4 +241,12 @@ message ExchangeTransactionContract {
   int64 exchange_id = 2;
   bytes token_id = 3;
   int64 quant = 4;
+  int64 expected = 5;
+}
+
+message AccountPermissionUpdateContract {
+  bytes owner_address = 1;
+  Permission owner = 2;  //Empty is invalidate
+  Permission witness = 3;//Can be empty
+  repeated Permission actives = 4;//Empty is invalidate
 }

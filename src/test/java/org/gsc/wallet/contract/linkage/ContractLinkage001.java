@@ -1,137 +1,361 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.wallet.contract.linkage;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import java.util.HashMap;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.api.WalletGrpc;
-import org.gsc.crypto.ECKey;
+import org.gsc.wallet.common.client.Configuration;
+import org.gsc.wallet.common.client.Parameter;
+import org.gsc.wallet.common.client.utils.PublicMethed;
 import org.junit.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 import org.gsc.api.GrpcAPI.AccountResourceMessage;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.Utils;
+import org.gsc.api.WalletGrpc;
+import org.gsc.crypto.ECKey;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.Utils;
 import org.gsc.core.Wallet;
 import org.gsc.protos.Protocol.Account;
-import org.gsc.protos.Protocol.SmartContract;
-import org.gsc.common.overlay.Configuration;
-import org.gsc.common.overlay.Parameter;
-import org.gsc.common.overlay.util.PublicMethed;
+import org.gsc.protos.Protocol.TransactionInfo;
 
 @Slf4j
 public class ContractLinkage001 {
 
-  //testng001、testng002、testng003、testng004
-  private final String testKey002 =
-      "FC8BF0238748587B9617EB6D15D47A66C0E07C1A1959033CF249C6532DC29FE6";
+  private final String testKey002 = Configuration.getByPath("testng.conf")
+      .getString("foundationAccount.key1");
   private final byte[] fromAddress = PublicMethed.getFinalAddress(testKey002);
 
   private ManagedChannel channelFull = null;
   private WalletGrpc.WalletBlockingStub blockingStubFull = null;
   private String fullnode = Configuration.getByPath("testng.conf")
       .getStringList("fullnode.ip.list").get(0);
+  private ManagedChannel channelFull1 = null;
+  private WalletGrpc.WalletBlockingStub blockingStubFull1 = null;
+  private String fullnode1 = Configuration.getByPath("testng.conf")
+      .getStringList("fullnode.ip.list").get(1);
+  private Long maxFeeLimit = Configuration.getByPath("testng.conf")
+      .getLong("defaultParameter.maxFeeLimit");
+
+  String contractName;
+  String code;
+  String abi;
+  byte[] contractAddress;
 
   ECKey ecKey1 = new ECKey(Utils.getRandom());
-  byte[] linkage001Address = ecKey1.getAddress();
-  String linkage001Key = ByteArray.toHexString(ecKey1.getPrivKeyBytes());
+  byte[] linkage007Address = ecKey1.getAddress();
+  String linkage007Key = ByteArray.toHexString(ecKey1.getPrivKeyBytes());
 
   @BeforeSuite
   public void beforeSuite() {
     Wallet wallet = new Wallet();
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
+
+  /**
+   * constructor.
+   */
 
   @BeforeClass(enabled = true)
   public void beforeClass() {
-    PublicMethed.printAddress(linkage001Key);
+    PublicMethed.printAddress(linkage007Key);
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
         .usePlaintext(true)
         .build();
     blockingStubFull = WalletGrpc.newBlockingStub(channelFull);
-    Assert.assertTrue(PublicMethed.sendcoin(linkage001Address,20000000L,fromAddress,
-        testKey002,blockingStubFull));
-    Assert.assertTrue(PublicMethed.freezeBalanceGetEnergy(linkage001Address, 5000000L,
-        3,1,linkage001Key,blockingStubFull));
-    /*    Assert.assertTrue(PublicMethed.buyStorage(5000000L,linkage001Address,linkage001Key,
-        blockingStubFull));*/
+    channelFull1 = ManagedChannelBuilder.forTarget(fullnode1)
+        .usePlaintext(true)
+        .build();
+    blockingStubFull1 = WalletGrpc.newBlockingStub(channelFull1);
 
   }
 
   @Test(enabled = true)
-  public void deployContentValue() {
-    String contractName = "gscNative";
-    String noPayableCode = "608060405260008054600160a060020a031990811662010001179091556001805482166201000217905560028054821662010003179055600380548216620100041790556004805482166201000517905560058054821662010006179055600680549091166201000717905534801561007757600080fd5b506104ce806100876000396000f3006080604052600436106100da5763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416630a90265081146100df5780630dfb51ac146100fc57806345bd20101461012d5780634efaaa1b1461014257806352ae1b811461016657806353c4263f1461017b5780635fd8c710146101905780637c369c90146101a55780637f2b7f93146101ba5780638259d5531461020f578063906fbec914610227578063961a8be71461023c578063cee14bb414610251578063ec9928bd14610275578063fb4f32aa14610292575b600080fd5b3480156100eb57600080fd5b506100fa6004356024356102a7565b005b34801561010857600080fd5b506101116102dc565b60408051600160a060020a039092168252519081900360200190f35b34801561013957600080fd5b506101116102eb565b34801561014e57600080fd5b506100fa600160a060020a03600435166024356102fa565b34801561017257600080fd5b50610111610320565b34801561018757600080fd5b5061011161032f565b34801561019c57600080fd5b506100fa61033e565b3480156101b157600080fd5b5061011161035d565b3480156101c657600080fd5b50604080516020600480358082013583810280860185019096528085526100fa9536959394602494938501929182918501908490808284375094975061036c9650505050505050565b34801561021b57600080fd5b506100fa6004356103c6565b34801561023357600080fd5b506101116103f7565b34801561024857600080fd5b50610111610406565b34801561025d57600080fd5b506100fa600160a060020a0360043516602435610415565b34801561028157600080fd5b506100fa600435602435151561044d565b34801561029e57600080fd5b506100fa610483565b60015460408051848152602081018490528151600160a060020a0390931692818301926000928290030181855af45050505050565b600654600160a060020a031681565b600354600160a060020a031681565b816080528060a0526000608060406080620100016000f4151561031c57600080fd5b5050565b600254600160a060020a031681565b600454600160a060020a031681565b600354604051600160a060020a03909116906000818181855af4505050565b600554600160a060020a031681565b6005546040518251600160a060020a039092169183919081906020808501910280838360005b838110156103aa578181015183820152602001610392565b50505050905001915050600060405180830381855af450505050565b600654604080518381529051600160a060020a039092169160208083019260009291908290030181855af450505050565b600054600160a060020a031681565b600154600160a060020a031681565b6000805460408051600160a060020a03868116825260208201869052825193169381830193909290918290030181855af45050505050565b6004546040805184815283151560208201528151600160a060020a0390931692818301926000928290030181855af45050505050565b600254604051600160a060020a03909116906000818181855af45050505600a165627a7a7230582076efe233a097282a46d3aefb879b720ed02a4ad3c6cf053cc5936a01e366c7dc0029";
-    String noPayableAbi = "[{\"constant\":false,\"inputs\":[{\"name\":\"frozen_Balance\",\"type\":\"uint256\"},{\"name\":\"frozen_Duration\",\"type\":\"uint256\"}],\"name\":\"freezeBalance\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"deleteProposalAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"withdrawBalanceAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"witnessAddr\",\"type\":\"address\"},{\"name\":\"voteValue\",\"type\":\"uint256\"}],\"name\":\"voteUsingAssembly\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"unFreezeBalanceAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"approveProposalAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"withdrawBalance\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"createProposalAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"data\",\"type\":\"bytes32[]\"}],\"name\":\"createProposal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"deleteProposal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"voteContractAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"freezeBalanceAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"witnessAddr\",\"type\":\"address\"},{\"name\":\"voteValue\",\"type\":\"uint256\"}],\"name\":\"voteForSingleWitness\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"isApprove\",\"type\":\"bool\"}],\"name\":\"approveProposal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"unFreezeBalance\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]";
+  public void testRangeOfFeeLimit() {
 
-    String payableCode = "608060405260008054600160a060020a03199081166201000117909155600180548216620100021790556002805482166201000317905560038054821662010004179055600480548216620100051790556005805482166201000617905560068054909116620100071790556104ce8061007a6000396000f3006080604052600436106100da5763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416630a90265081146100df5780630dfb51ac146100fc57806345bd20101461012d5780634efaaa1b1461014257806352ae1b811461016657806353c4263f1461017b5780635fd8c710146101905780637c369c90146101a55780637f2b7f93146101ba5780638259d5531461020f578063906fbec914610227578063961a8be71461023c578063cee14bb414610251578063ec9928bd14610275578063fb4f32aa14610292575b600080fd5b3480156100eb57600080fd5b506100fa6004356024356102a7565b005b34801561010857600080fd5b506101116102dc565b60408051600160a060020a039092168252519081900360200190f35b34801561013957600080fd5b506101116102eb565b34801561014e57600080fd5b506100fa600160a060020a03600435166024356102fa565b34801561017257600080fd5b50610111610320565b34801561018757600080fd5b5061011161032f565b34801561019c57600080fd5b506100fa61033e565b3480156101b157600080fd5b5061011161035d565b3480156101c657600080fd5b50604080516020600480358082013583810280860185019096528085526100fa9536959394602494938501929182918501908490808284375094975061036c9650505050505050565b34801561021b57600080fd5b506100fa6004356103c6565b34801561023357600080fd5b506101116103f7565b34801561024857600080fd5b50610111610406565b34801561025d57600080fd5b506100fa600160a060020a0360043516602435610415565b34801561028157600080fd5b506100fa600435602435151561044d565b34801561029e57600080fd5b506100fa610483565b60015460408051848152602081018490528151600160a060020a0390931692818301926000928290030181855af45050505050565b600654600160a060020a031681565b600354600160a060020a031681565b816080528060a0526000608060406080620100016000f4151561031c57600080fd5b5050565b600254600160a060020a031681565b600454600160a060020a031681565b600354604051600160a060020a03909116906000818181855af4505050565b600554600160a060020a031681565b6005546040518251600160a060020a039092169183919081906020808501910280838360005b838110156103aa578181015183820152602001610392565b50505050905001915050600060405180830381855af450505050565b600654604080518381529051600160a060020a039092169160208083019260009291908290030181855af450505050565b600054600160a060020a031681565b600154600160a060020a031681565b6000805460408051600160a060020a03868116825260208201869052825193169381830193909290918290030181855af45050505050565b6004546040805184815283151560208201528151600160a060020a0390931692818301926000928290030181855af45050505050565b600254604051600160a060020a03909116906000818181855af45050505600a165627a7a72305820bf65c4013bea4495f2cbccf685ee1442e2585d226cf4bd8184c636cdd1d485dc0029";
-    String payableAbi = "[{\"constant\":false,\"inputs\":[{\"name\":\"frozen_Balance\",\"type\":\"uint256\"},{\"name\":\"frozen_Duration\",\"type\":\"uint256\"}],\"name\":\"freezeBalance\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"deleteProposalAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"withdrawBalanceAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"witnessAddr\",\"type\":\"address\"},{\"name\":\"voteValue\",\"type\":\"uint256\"}],\"name\":\"voteUsingAssembly\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"unFreezeBalanceAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"approveProposalAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"withdrawBalance\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"createProposalAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"data\",\"type\":\"bytes32[]\"}],\"name\":\"createProposal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"}],\"name\":\"deleteProposal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"voteContractAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"freezeBalanceAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"witnessAddr\",\"type\":\"address\"},{\"name\":\"voteValue\",\"type\":\"uint256\"}],\"name\":\"voteForSingleWitness\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"isApprove\",\"type\":\"bool\"}],\"name\":\"approveProposal\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"unFreezeBalance\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"constructor\"}]";
-    AccountResourceMessage accountResource = PublicMethed.getAccountResource(linkage001Address,
+    //Now the feelimit range is 0-1000000000,including 0 and 1000000000
+    Assert.assertTrue(PublicMethed.sendcoin(linkage007Address, 2000000000L, fromAddress,
+        testKey002, blockingStubFull));
+
+    AccountResourceMessage resourceInfo = PublicMethed.getAccountResource(linkage007Address,
         blockingStubFull);
-    Long energyLimit = accountResource.getEnergyLimit();
-    //Long storageLimit = accountResource.getStorageLimit();
-    Long energyUsage = accountResource.getEnergyUsed();
-    //Long storageUsage = accountResource.getStorageUsed();
+    Account info;
+    info = PublicMethed.queryAccount(linkage007Address, blockingStubFull);
+    Long beforeBalance = info.getBalance();
+    Long beforeCpuLimit = resourceInfo.getCpuLimit();
+    Long beforeCpuUsed = resourceInfo.getCpuUsed();
+    Long beforeFreeNetLimit = resourceInfo.getFreeNetLimit();
+    Long beforeNetLimit = resourceInfo.getNetLimit();
+    Long beforeNetUsed = resourceInfo.getNetUsed();
+    Long beforeFreeNetUsed = resourceInfo.getFreeNetUsed();
+    logger.info("beforeBalance:" + beforeBalance);
+    logger.info("beforeCpuLimit:" + beforeCpuLimit);
+    logger.info("beforeCpuUsed:" + beforeCpuUsed);
+    logger.info("beforeFreeNetLimit:" + beforeFreeNetLimit);
+    logger.info("beforeNetLimit:" + beforeNetLimit);
+    logger.info("beforeNetUsed:" + beforeNetUsed);
+    logger.info("beforeFreeNetUsed:" + beforeFreeNetUsed);
+    //When the feelimit is large, the deploy will be failed,No used everything.
 
-    logger.info("before energy limit is " + Long.toString(energyLimit));
-    logger.info("before energy usage is " + Long.toString(energyUsage));
-    //logger.info("before storage limit is " + Long.toString(storageLimit));
-    //logger.info("before storage usaged is " + Long.toString(storageUsage));
-    Long maxFeeLimit = 5000000L;
+    String filePath = "./src/test/resources/soliditycode_v0.5.4/contractLinkage002.sol";
+    String contractName = "divideIHaveArgsReturnStorage";
+    HashMap retMap = PublicMethed.getByCodeAbi(filePath, contractName);
 
-    Account account = PublicMethed.queryAccount(linkage001Key,blockingStubFull);
-    Long beforeAccountBalance = account.getBalance();
-    logger.info("before balance is " + Long.toString(account.getBalance()));
+    String code = retMap.get("byteCode").toString();
+    String abi = retMap.get("abi").toString();
 
-    //Value is 1 drop.
-    byte [] contractAddress = PublicMethed.deployContract(contractName,payableAbi,payableCode,"",maxFeeLimit,
-        1L, 100,null,linkage001Key,linkage001Address,blockingStubFull);
-    SmartContract smartContract = PublicMethed.getContract(contractAddress,blockingStubFull);
+    String txid;
+    txid = PublicMethed.deployContractAndGetTransactionInfoById(contractName, abi, code,
+        "", maxFeeLimit + 1, 0L, 100, null, linkage007Key,
+        linkage007Address, blockingStubFull);
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+    Account infoafter = PublicMethed.queryAccount(linkage007Address, blockingStubFull1);
+    AccountResourceMessage resourceInfoafter = PublicMethed.getAccountResource(linkage007Address,
+        blockingStubFull1);
+    Long afterBalance = infoafter.getBalance();
+    Long afterCpuLimit = resourceInfoafter.getCpuLimit();
+    Long afterCpuUsed = resourceInfoafter.getCpuUsed();
+    Long afterFreeNetLimit = resourceInfoafter.getFreeNetLimit();
+    Long afterNetLimit = resourceInfoafter.getNetLimit();
+    Long afterNetUsed = resourceInfoafter.getNetUsed();
+    Long afterFreeNetUsed = resourceInfoafter.getFreeNetUsed();
+    logger.info("afterBalance:" + afterBalance);
+    logger.info("afterCpuLimit:" + afterCpuLimit);
+    logger.info("afterCpuUsed:" + afterCpuUsed);
+    logger.info("afterFreeNetLimit:" + afterFreeNetLimit);
+    logger.info("afterNetLimit:" + afterNetLimit);
+    logger.info("afterNetUsed:" + afterNetUsed);
+    logger.info("afterFreeNetUsed:" + afterFreeNetUsed);
+    Assert.assertEquals(beforeBalance, afterBalance);
+    Assert.assertTrue(afterCpuUsed == 0);
+    Assert.assertTrue(afterNetUsed == 0);
+    Assert.assertTrue(afterFreeNetUsed == 0);
 
-    accountResource = PublicMethed.getAccountResource(linkage001Address,blockingStubFull);
-    energyLimit = accountResource.getEnergyLimit();
-    //storageLimit = accountResource.getStorageLimit();
-    energyUsage = accountResource.getEnergyUsed();
-    //storageUsage = accountResource.getStorageUsed();
+    Assert.assertTrue(txid == null);
+    AccountResourceMessage resourceInfo1 = PublicMethed.getAccountResource(linkage007Address,
+        blockingStubFull);
+    Account info1 = PublicMethed.queryAccount(linkage007Address, blockingStubFull);
+    Long beforeBalance1 = info1.getBalance();
+    Long beforeCpuLimit1 = resourceInfo1.getCpuLimit();
+    Long beforeCpuUsed1 = resourceInfo1.getCpuUsed();
+    Long beforeFreeNetLimit1 = resourceInfo1.getFreeNetLimit();
+    Long beforeNetLimit1 = resourceInfo1.getNetLimit();
+    Long beforeNetUsed1 = resourceInfo1.getNetUsed();
+    Long beforeFreeNetUsed1 = resourceInfo1.getFreeNetUsed();
+    logger.info("beforeBalance1:" + beforeBalance1);
+    logger.info("beforeCpuLimit1:" + beforeCpuLimit1);
+    logger.info("beforeCpuUsed1:" + beforeCpuUsed1);
+    logger.info("beforeFreeNetLimit1:" + beforeFreeNetLimit1);
+    logger.info("beforeNetLimit1:" + beforeNetLimit1);
+    logger.info("beforeNetUsed1:" + beforeNetUsed1);
+    logger.info("beforeFreeNetUsed1:" + beforeFreeNetUsed1);
+    //When the feelimit is 0, the deploy will be failed.Only use FreeNet,balance not change.
+    txid = PublicMethed.deployContractAndGetTransactionInfoById(contractName, abi, code,
+        "", 0L, 0L, 100, null, linkage007Key,
+        linkage007Address, blockingStubFull);
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+    Account infoafter1 = PublicMethed.queryAccount(linkage007Address, blockingStubFull1);
+    AccountResourceMessage resourceInfoafter1 = PublicMethed.getAccountResource(linkage007Address,
+        blockingStubFull1);
+    Long afterBalance1 = infoafter1.getBalance();
+    Long afterCpuLimit1 = resourceInfoafter1.getCpuLimit();
+    Long afterCpuUsed1 = resourceInfoafter1.getCpuUsed();
+    Long afterFreeNetLimit1 = resourceInfoafter1.getFreeNetLimit();
+    Long afterNetLimit1 = resourceInfoafter1.getNetLimit();
+    Long afterNetUsed1 = resourceInfoafter1.getNetUsed();
+    Long afterFreeNetUsed1 = resourceInfoafter1.getFreeNetUsed();
+    logger.info("afterBalance1:" + afterBalance1);
+    logger.info("afterCpuLimit1:" + afterCpuLimit1);
+    logger.info("afterCpuUsed1:" + afterCpuUsed1);
+    logger.info("afterFreeNetLimit1:" + afterFreeNetLimit1);
+    logger.info("afterNetLimit1:" + afterNetLimit1);
+    logger.info("afterNetUsed1:" + afterNetUsed1);
+    logger.info("afterFreeNetUsed1:" + afterFreeNetUsed1);
+    logger.info("---------------:");
+    Assert.assertEquals(beforeBalance1, afterBalance1);
+    Assert.assertTrue(afterFreeNetUsed1 > 0);
+    Assert.assertTrue(afterNetUsed1 == 0);
+    Assert.assertTrue(afterCpuUsed1 == 0);
+    Optional<TransactionInfo> infoById;
 
-    logger.info("after energy limit is " + Long.toString(energyLimit));
-    logger.info("after energy usage is " + Long.toString(energyUsage));
-    //logger.info("after storage limit is " + Long.toString(storageLimit));
-    //logger.info("after storage usaged is " + Long.toString(storageUsage));
+    infoById = PublicMethed.getTransactionInfoById(txid, blockingStubFull);
+    Assert.assertTrue(infoById.get().getResultValue() == 1);
 
-    account = PublicMethed.queryAccount(linkage001Key,blockingStubFull);
-    Long afterAccountBalance = account.getBalance();
-    logger.info(Long.toString(beforeAccountBalance));
-    logger.info(Long.toString(afterAccountBalance));
-    Assert.assertTrue(beforeAccountBalance - 1L == afterAccountBalance);
-    account = PublicMethed.queryAccount(contractAddress,blockingStubFull);
-    Assert.assertTrue(account.getBalance() == 1L);
+    //Deploy the contract.success.use FreeNet,CpuFee.balcne change
+    AccountResourceMessage resourceInfo2 = PublicMethed.getAccountResource(linkage007Address,
+        blockingStubFull);
+    Account info2 = PublicMethed.queryAccount(linkage007Address, blockingStubFull);
+    Long beforeBalance2 = info2.getBalance();
+    Long beforeCpuLimit2 = resourceInfo2.getCpuLimit();
+    Long beforeCpuUsed2 = resourceInfo2.getCpuUsed();
+    Long beforeFreeNetLimit2 = resourceInfo2.getFreeNetLimit();
+    Long beforeNetLimit2 = resourceInfo2.getNetLimit();
+    Long beforeNetUsed2 = resourceInfo2.getNetUsed();
+    Long beforeFreeNetUsed2 = resourceInfo2.getFreeNetUsed();
+    logger.info("beforeBalance2:" + beforeBalance2);
+    logger.info("beforeCpuLimit2:" + beforeCpuLimit2);
+    logger.info("beforeCpuUsed2:" + beforeCpuUsed2);
+    logger.info("beforeFreeNetLimit2:" + beforeFreeNetLimit2);
+    logger.info("beforeNetLimit2:" + beforeNetLimit2);
+    logger.info("beforeNetUsed2:" + beforeNetUsed2);
+    logger.info("beforeFreeNetUsed2:" + beforeFreeNetUsed2);
+    txid = PublicMethed.deployContractAndGetTransactionInfoById(contractName, abi, code,
+        "", maxFeeLimit, 0L, 100, null, linkage007Key,
+        linkage007Address, blockingStubFull);
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+    Optional<TransactionInfo> infoById2 = PublicMethed
+        .getTransactionInfoById(txid, blockingStubFull);
+    Long cpuUsageTotal2 = infoById2.get().getReceipt().getCpuUsageTotal();
+    Long fee2 = infoById2.get().getFee();
+    Long cpuFee2 = infoById2.get().getReceipt().getCpuFee();
+    Long netUsed2 = infoById2.get().getReceipt().getNetUsage();
+    Long cpuUsed2 = infoById2.get().getReceipt().getCpuUsage();
+    Long netFee2 = infoById2.get().getReceipt().getNetFee();
+    logger.info("cpuUsageTotal2:" + cpuUsageTotal2);
+    logger.info("fee2:" + fee2);
+    logger.info("cpuFee2:" + cpuFee2);
+    logger.info("netUsed2:" + netUsed2);
+    logger.info("cpuUsed2:" + cpuUsed2);
+    logger.info("netFee2:" + netFee2);
+    Account infoafter2 = PublicMethed.queryAccount(linkage007Address, blockingStubFull1);
+    AccountResourceMessage resourceInfoafter2 = PublicMethed.getAccountResource(linkage007Address,
+        blockingStubFull1);
+    Long afterBalance2 = infoafter2.getBalance();
+    Long afterCpuLimit2 = resourceInfoafter2.getCpuLimit();
+    Long afterCpuUsed2 = resourceInfoafter2.getCpuUsed();
+    Long afterFreeNetLimit2 = resourceInfoafter2.getFreeNetLimit();
+    Long afterNetLimit2 = resourceInfoafter2.getNetLimit();
+    Long afterNetUsed2 = resourceInfoafter2.getNetUsed();
+    Long afterFreeNetUsed2 = resourceInfoafter2.getFreeNetUsed();
+    logger.info("afterBalance2:" + afterBalance2);
+    logger.info("afterCpuLimit2:" + afterCpuLimit2);
+    logger.info("afterCpuUsed2:" + afterCpuUsed2);
+    logger.info("afterFreeNetLimit2:" + afterFreeNetLimit2);
+    logger.info("afterNetLimit2:" + afterNetLimit2);
+    logger.info("afterNetUsed2:" + afterNetUsed2);
+    logger.info("afterFreeNetUsed2:" + afterFreeNetUsed2);
+    logger.info("---------------:");
+    Assert.assertTrue((beforeBalance2 - fee2) == afterBalance2);
+    Assert.assertTrue(afterCpuUsed2 == 0);
+    Assert.assertTrue(afterFreeNetUsed2 > beforeFreeNetUsed2);
+    Assert.assertTrue(infoById2.get().getResultValue() == 0);
+    contractAddress = infoById2.get().getContractAddress().toByteArray();
 
-    //Value is account all balance plus 1.
-    account = PublicMethed.queryAccount(linkage001Key,blockingStubFull);
-    Long valueBalance = account.getBalance();
-    contractAddress = PublicMethed.deployContract(contractName,payableAbi,payableCode,"",maxFeeLimit,
-        valueBalance + 1, 100,null,linkage001Key,linkage001Address,blockingStubFull);
-    Assert.assertTrue(contractAddress == null);
-
-    //Value is account all balance.
-    account = PublicMethed.queryAccount(linkage001Key,blockingStubFull);
-    valueBalance = account.getBalance();
-    contractAddress = PublicMethed.deployContract(contractName,payableAbi,payableCode,"",maxFeeLimit,
-        valueBalance, 100,null,linkage001Key,linkage001Address,blockingStubFull);
-    smartContract = PublicMethed.getContract(contractAddress,blockingStubFull);
-    Assert.assertTrue(PublicMethed.queryAccount(linkage001Key,blockingStubFull).getBalance() == 0);
-    Assert.assertTrue(PublicMethed.queryAccount(contractAddress,blockingStubFull).getBalance() == valueBalance);
-
-
-
-
-
+    //When the feelimit is large, the trigger will be failed.Only use FreeNetUsed,Balance not change
+    AccountResourceMessage resourceInfo3 = PublicMethed.getAccountResource(linkage007Address,
+        blockingStubFull);
+    Account info3 = PublicMethed.queryAccount(linkage007Address, blockingStubFull);
+    Long beforeBalance3 = info3.getBalance();
+    Long beforeCpuLimit3 = resourceInfo3.getCpuLimit();
+    Long beforeCpuUsed3 = resourceInfo3.getCpuUsed();
+    Long beforeFreeNetLimit3 = resourceInfo3.getFreeNetLimit();
+    Long beforeNetLimit3 = resourceInfo3.getNetLimit();
+    Long beforeNetUsed3 = resourceInfo3.getNetUsed();
+    Long beforeFreeNetUsed3 = resourceInfo3.getFreeNetUsed();
+    logger.info("beforeBalance3:" + beforeBalance3);
+    logger.info("beforeCpuLimit3:" + beforeCpuLimit3);
+    logger.info("beforeCpuUsed3:" + beforeCpuUsed3);
+    logger.info("beforeFreeNetLimit3:" + beforeFreeNetLimit3);
+    logger.info("beforeNetLimit3:" + beforeNetLimit3);
+    logger.info("beforeNetUsed3:" + beforeNetUsed3);
+    logger.info("beforeFreeNetUsed3:" + beforeFreeNetUsed3);
+    //String initParmes = "\"" + Base58.encode58Check(fromAddress) + "\",\"63\"";
+    String num = "4" + "," + "2";
+    txid = PublicMethed.triggerContract(contractAddress,
+        "divideIHaveArgsReturn(int256,int256)", num, false,
+        1000, maxFeeLimit + 1, linkage007Address, linkage007Key, blockingStubFull);
+    Account infoafter3 = PublicMethed.queryAccount(linkage007Address, blockingStubFull1);
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+    AccountResourceMessage resourceInfoafter3 = PublicMethed.getAccountResource(linkage007Address,
+        blockingStubFull1);
+    Long afterBalance3 = infoafter3.getBalance();
+    Long afterCpuLimit3 = resourceInfoafter3.getCpuLimit();
+    Long afterCpuUsed3 = resourceInfoafter3.getCpuUsed();
+    Long afterFreeNetLimit3 = resourceInfoafter3.getFreeNetLimit();
+    Long afterNetLimit3 = resourceInfoafter3.getNetLimit();
+    Long afterNetUsed3 = resourceInfoafter3.getNetUsed();
+    Long afterFreeNetUsed3 = resourceInfoafter3.getFreeNetUsed();
+    logger.info("afterBalance3:" + afterBalance3);
+    logger.info("afterCpuLimit3:" + afterCpuLimit3);
+    logger.info("afterCpuUsed3:" + afterCpuUsed3);
+    logger.info("afterFreeNetLimit3:" + afterFreeNetLimit3);
+    logger.info("afterNetLimit3:" + afterNetLimit3);
+    logger.info("afterNetUsed3:" + afterNetUsed3);
+    logger.info("afterFreeNetUsed3:" + afterFreeNetUsed3);
+    logger.info("---------------:");
+    Assert.assertTrue(txid == null);
+    Assert.assertEquals(beforeBalance3, afterBalance3);
+    Assert.assertTrue(afterFreeNetUsed3 > beforeNetUsed3);
+    Assert.assertTrue(afterNetUsed3 == 0);
+    Assert.assertTrue(afterCpuUsed3 == 0);
+    //When the feelimit is 0, the trigger will be failed.Only use FreeNetUsed,Balance not change
+    AccountResourceMessage resourceInfo4 = PublicMethed.getAccountResource(linkage007Address,
+        blockingStubFull);
+    Account info4 = PublicMethed.queryAccount(linkage007Address, blockingStubFull);
+    Long beforeBalance4 = info4.getBalance();
+    Long beforeCpuLimit4 = resourceInfo4.getCpuLimit();
+    Long beforeCpuUsed4 = resourceInfo4.getCpuUsed();
+    Long beforeFreeNetLimit4 = resourceInfo4.getFreeNetLimit();
+    Long beforeNetLimit4 = resourceInfo4.getNetLimit();
+    Long beforeNetUsed4 = resourceInfo4.getNetUsed();
+    Long beforeFreeNetUsed4 = resourceInfo4.getFreeNetUsed();
+    logger.info("beforeBalance4:" + beforeBalance4);
+    logger.info("beforeCpuLimit4:" + beforeCpuLimit4);
+    logger.info("beforeCpuUsed4:" + beforeCpuUsed4);
+    logger.info("beforeFreeNetLimit4:" + beforeFreeNetLimit4);
+    logger.info("beforeNetLimit4:" + beforeNetLimit4);
+    logger.info("beforeNetUsed4:" + beforeNetUsed4);
+    logger.info("beforeFreeNetUsed4:" + beforeFreeNetUsed4);
+    txid = PublicMethed.triggerContract(contractAddress,
+        "divideIHaveArgsReturn(int256,int256)", num, false,
+        1000, maxFeeLimit + 1, linkage007Address, linkage007Key, blockingStubFull);
+    Account infoafter4 = PublicMethed.queryAccount(linkage007Address, blockingStubFull1);
+    AccountResourceMessage resourceInfoafter4 = PublicMethed.getAccountResource(linkage007Address,
+        blockingStubFull1);
+    Long afterBalance4 = infoafter4.getBalance();
+    Long afterCpuLimit4 = resourceInfoafter4.getCpuLimit();
+    Long afterCpuUsed4 = resourceInfoafter4.getCpuUsed();
+    Long afterFreeNetLimit4 = resourceInfoafter4.getFreeNetLimit();
+    Long afterNetLimit4 = resourceInfoafter4.getNetLimit();
+    Long afterNetUsed4 = resourceInfoafter4.getNetUsed();
+    Long afterFreeNetUsed4 = resourceInfoafter4.getFreeNetUsed();
+    logger.info("afterBalance4:" + afterBalance4);
+    logger.info("afterCpuLimit4:" + afterCpuLimit4);
+    logger.info("afterCpuUsed4:" + afterCpuUsed4);
+    logger.info("afterFreeNetLimit4:" + afterFreeNetLimit4);
+    logger.info("afterNetLimit4:" + afterNetLimit4);
+    logger.info("afterNetUsed4:" + afterNetUsed4);
+    logger.info("afterFreeNetUsed4:" + afterFreeNetUsed4);
+    logger.info("---------------:");
+    Assert.assertEquals(beforeBalance4, afterBalance4);
+    Assert.assertTrue(afterFreeNetUsed4 > beforeNetUsed4);
+    Assert.assertTrue(afterNetUsed4 == 0);
+    Assert.assertTrue(afterCpuUsed4 == 0);
+    infoById = PublicMethed.getTransactionInfoById(txid, blockingStubFull);
+    logger.info(Integer.toString(infoById.get().getResultValue()));
+    Assert.assertTrue(infoById.get().getFee() == 0);
   }
 
-
+  /**
+   * constructor.
+   */
 
   @AfterClass
   public void shutdown() throws InterruptedException {
@@ -139,6 +363,8 @@ public class ContractLinkage001 {
       channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
+
+
 }
 
 

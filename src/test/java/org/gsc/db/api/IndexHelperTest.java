@@ -1,3 +1,16 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.db.api;
 
 import static com.googlecode.cqengine.query.QueryFactory.equal;
@@ -7,15 +20,18 @@ import com.google.protobuf.ByteString;
 import com.googlecode.cqengine.resultset.ResultSet;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.application.GSCApplicationContext;
 import org.gsc.core.wrapper.*;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.FileUtil;
+import org.gsc.application.Application;
+import org.gsc.application.ApplicationFactory;
+import org.gsc.application.GSCApplicationContext;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.FileUtil;
+import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
@@ -35,12 +51,14 @@ public class IndexHelperTest {
   private static Manager dbManager;
   private static IndexHelper indexHelper;
   private static GSCApplicationContext context;
-  private static String dbPath = "output_IndexHelper_test";
+  private static String dbPath = "db_IndexHelper_test";
+  private static Application AppT;
 
   static {
     Args.setParam(new String[]{"-d", dbPath, "-w"}, "config-test-index.conf");
-    Args.getInstance().setSolidityNode(true);
+    Args.getInstance().setConfirmedNode(true);
     context = new GSCApplicationContext(DefaultConfig.class);
+    AppT = ApplicationFactory.create(context);
   }
 
   @BeforeClass
@@ -61,13 +79,13 @@ public class IndexHelperTest {
                         .build())
                 .build());
     dbManager.getBlockStore().put(blockWrapper.getBlockId().getBytes(), blockWrapper);
-    WitnessWrapper witnessCapsule =
+    WitnessWrapper witnessWrapper =
         new WitnessWrapper(
             Witness.newBuilder()
                 .setAddress(ByteString.copyFrom(ByteArray.fromHexString("121212abc")))
                 .build());
-    dbManager.getWitnessStore().put(ByteArray.fromHexString("121212abc"), witnessCapsule);
-    TransactionWrapper transactionCapsule =
+    dbManager.getWitnessStore().put(ByteArray.fromHexString("121212abc"), witnessWrapper);
+    TransactionWrapper transactionWrapper =
         new TransactionWrapper(
             Transaction.newBuilder()
                 .setRawData(
@@ -78,22 +96,24 @@ public class IndexHelperTest {
                 .build());
     dbManager
         .getTransactionStore()
-        .put(transactionCapsule.getTransactionId().getBytes(), transactionCapsule);
-    AssetIssueWrapper assetIssueCapsule =
+        .put(transactionWrapper.getTransactionId().getBytes(), transactionWrapper);
+    AssetIssueWrapper assetIssueWrapper =
         new AssetIssueWrapper(
             AssetIssueContract.newBuilder()
                 .setName(ByteString.copyFrom("assetIssueName".getBytes()))
                 .setNum(12581)
                 .build());
-    dbManager.getAssetIssueStore().put("assetIssueName".getBytes(), assetIssueCapsule);
+    dbManager.getAssetIssueStore().put("assetIssueName".getBytes(), assetIssueWrapper);
     indexHelper = context.getBean(IndexHelper.class);
   }
 
   @AfterClass
   public static void removeDb() {
     Args.clearParam();
-    FileUtil.deleteDir(new File(dbPath));
+    AppT.shutdownServices();
+    AppT.shutdown();
     context.destroy();
+    FileUtil.deleteDir(new File(dbPath));
   }
 
   @Ignore
@@ -168,16 +188,16 @@ public class IndexHelperTest {
   @Ignore
   @Test
   public void addAndRemoveWitness() {
-    WitnessWrapper witnessCapsule =
+    WitnessWrapper witnessWrapper =
         new WitnessWrapper(
             Witness.newBuilder()
                 .setAddress(ByteString.copyFrom(ByteArray.fromHexString("343434abc")))
                 .build());
-    dbManager.getWitnessStore().put(witnessCapsule.createDbKey(), witnessCapsule);
-    indexHelper.add(witnessCapsule.getInstance());
+    dbManager.getWitnessStore().put(witnessWrapper.createDbKey(), witnessWrapper);
+    indexHelper.add(witnessWrapper.getInstance());
     int size = getIndexSizeOfWitness();
     Assert.assertEquals("witness index add", 2, size);
-    indexHelper.remove(witnessCapsule.getInstance());
+    indexHelper.remove(witnessWrapper.getInstance());
     size = getIndexSizeOfWitness();
     Assert.assertEquals("witness index remove", 1, size);
   }
@@ -190,7 +210,7 @@ public class IndexHelperTest {
 
   @Test
   public void addAndRemoveTransaction() {
-    TransactionWrapper transactionCapsule =
+    TransactionWrapper transactionWrapper =
         new TransactionWrapper(
             Transaction.newBuilder()
                 .setRawData(
@@ -200,11 +220,11 @@ public class IndexHelperTest {
                         .build())
                 .build());
     dbManager.getTransactionStore()
-        .put(transactionCapsule.getTransactionId().getBytes(), transactionCapsule);
-    indexHelper.add(transactionCapsule.getInstance());
+        .put(transactionWrapper.getTransactionId().getBytes(), transactionWrapper);
+    indexHelper.add(transactionWrapper.getInstance());
     int size = getIndexSizeOfTransaction();
     Assert.assertEquals("account index add", 1, size);
-    indexHelper.remove(transactionCapsule.getInstance());
+    indexHelper.remove(transactionWrapper.getInstance());
     size = getIndexSizeOfTransaction();
     Assert.assertEquals("account index remove", 0, size);
   }
@@ -218,18 +238,18 @@ public class IndexHelperTest {
   @Ignore
   @Test
   public void addAndRemoveAssetIssue() {
-    AssetIssueWrapper assetIssueCapsule =
+    AssetIssueWrapper assetIssueWrapper =
         new AssetIssueWrapper(
             AssetIssueContract.newBuilder()
                 .setName(ByteString.copyFrom("assetIssueName".getBytes()))
                 .setNum(12581)
                 .build());
     dbManager.getAssetIssueStore()
-        .put(assetIssueCapsule.createDbKey(), assetIssueCapsule);
-    indexHelper.add(assetIssueCapsule.getInstance());
+        .put(assetIssueWrapper.createDbKey(), assetIssueWrapper);
+    indexHelper.add(assetIssueWrapper.getInstance());
     int size = getIndexSizeOfAssetIssue();
     Assert.assertEquals("account index add", 1, size);
-    indexHelper.remove(assetIssueCapsule.getInstance());
+    indexHelper.remove(assetIssueWrapper.getInstance());
     size = getIndexSizeOfAssetIssue();
     Assert.assertEquals("account index remove", 0, size);
   }

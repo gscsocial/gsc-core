@@ -1,26 +1,34 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.services.http;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.crypto.ECKey;
-import org.gsc.protos.Protocol;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.gsc.api.GrpcAPI;
 import org.gsc.core.Wallet;
+import org.gsc.protos.Protocol.Transaction;
 
-import static org.apache.commons.codec.digest.DigestUtils.sha256;
 
 @Component
-@Slf4j
+@Slf4j(topic = "API")
 public class BroadcastServlet extends HttpServlet {
 
     @Autowired
@@ -30,32 +38,11 @@ public class BroadcastServlet extends HttpServlet {
         try {
             String input = request.getReader().lines()
                     .collect(Collectors.joining(System.lineSeparator()));
-            Protocol.Transaction transaction = Util.packTransaction(input);
-
-             /*
-
-            //transaction = sign(transaction, );
-            String privStr = "ad146374a75310b9666e834ee4ad0866d6f4035967bfc76217c5a495fff9f0d0";
-            BigInteger privKey = new BigInteger(privStr, 16);
-            ECKey key = ECKey.fromPrivate(privKey);
-
-            Protocol.Transaction.Builder tbs = transaction.toBuilder();
-            byte[] hash = sha256(transaction.getRawData().toByteArray());
-            List<Protocol.Transaction.Contract> contractList = transaction.getRawData().getContractList();
-            for (int i = 0; i < contractList.size(); i++) {
-                ECKey.ECDSASignature signature = key.sign(hash);
-                ByteString byteString = ByteString.copyFrom(signature.toByteArray());
-                tbs.addSignature(byteString);
-            }
-
-            System.out.println("=====================================================");
-            System.out.println(tbs.toString());
-
-            GrpcAPI.Return retur = wallet.broadcastTransaction(tbs.build());
-            */
-
+            Util.checkBodySize(input);
+            boolean visible = Util.getVisiblePost(input);
+            Transaction transaction = Util.packTransaction(input, visible);
             GrpcAPI.Return retur = wallet.broadcastTransaction(transaction);
-            response.getWriter().println(JsonFormat.printToString(retur));
+            response.getWriter().println(JsonFormat.printToString(retur, visible));
         } catch (Exception e) {
             logger.debug("Exception: {}", e.getMessage());
             try {

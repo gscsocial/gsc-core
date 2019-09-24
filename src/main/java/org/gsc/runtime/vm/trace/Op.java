@@ -1,23 +1,20 @@
 /*
- * Copyright (c) [2016] [ <ether.camp> ]
- * This file is part of the ethereumJ library.
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
  *
- * The ethereumJ library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The ethereumJ library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
  */
+
 package org.gsc.runtime.vm.trace;
 
 import java.math.BigInteger;
+
 import org.gsc.runtime.vm.OpCode;
 
 public class Op {
@@ -25,7 +22,7 @@ public class Op {
     private OpCode code;
     private int deep;
     private int pc;
-    private BigInteger energy;
+    private BigInteger cpu;
     private OpActions actions;
 
     public OpCode getCode() {
@@ -52,12 +49,12 @@ public class Op {
         this.pc = pc;
     }
 
-    public BigInteger getEnergy() {
-        return energy;
+    public BigInteger getCpu() {
+        return cpu;
     }
 
-    public void setEnergy(BigInteger energy) {
-        this.energy = energy;
+    public void setCpu(BigInteger cpu) {
+        this.cpu = cpu;
     }
 
     public OpActions getActions() {

@@ -17,13 +17,10 @@
  */
 package org.gsc.crypto.zksnark;
 
-import static org.gsc.crypto.zksnark.Params.B_Fp;
-
 /**
  * Definition of {@link BN128} over F_p, where "p" equals {@link Params#P} <br/>
- *
- * Curve equation: <br/>
- * Y^2 = X^3 + b, where "b" equals {@link Params#B_Fp} <br/>
+ * <p>
+ * Curve equation: <br/> Y^2 = X^3 + b, where "b" equals {@link Params#B_Fp} <br/>
  *
  * @author Mikhail Kalinin
  * @since 21.08.2017
@@ -49,7 +46,7 @@ public class BN128Fp extends BN128<Fp> {
 
     @Override
     protected Fp b() {
-        return B_Fp;
+        return Params.B_Fp;
     }
 
     @Override
@@ -58,11 +55,10 @@ public class BN128Fp extends BN128<Fp> {
     }
 
     /**
-     * Checks whether x and y belong to Fp,
-     * then checks whether point with (x; y) coordinates lays on the curve.
-     *
-     * Returns new point if all checks have been passed,
-     * otherwise returns null
+     * Checks whether x and y belong to Fp, then checks whether point with (x; y) coordinates lays on
+     * the curve.
+     * <p>
+     * Returns new point if all checks have been passed, otherwise returns null
      */
     public static BN128<Fp> create(byte[] xx, byte[] yy) {
 

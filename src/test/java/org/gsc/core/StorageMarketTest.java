@@ -1,18 +1,31 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.core;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.application.GSCApplicationContext;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.FileUtil;
+import org.gsc.application.GSCApplicationContext;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.FileUtil;
 import org.gsc.config.DefaultConfig;
 import org.gsc.config.Parameter.ChainConstant;
 import org.gsc.config.args.Args;
@@ -26,7 +39,7 @@ public class StorageMarketTest {
 
   private static Manager dbManager;
   private static StorageMarket storageMarket;
-  private static final String dbPath = "output_buy_storage_test";
+  private static final String dbPath = "db_storage_market_test";
   private static GSCApplicationContext context;
   private static final String OWNER_ADDRESS;
   private static final String OWNER_ADDRESS_INVALID = "aaaa";
@@ -34,7 +47,7 @@ public class StorageMarketTest {
   private static final long initBalance = 10_000_000_000_000_000L;
 
   static {
-    Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
+    Args.setParam(new String[]{"--db-directory", dbPath}, Constant.TEST_NET_CONF);
     context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS = Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a1abc";
     OWNER_ACCOUNT_INVALID =
@@ -48,7 +61,7 @@ public class StorageMarketTest {
   public static void init() {
     dbManager = context.getBean(Manager.class);
     storageMarket = new StorageMarket(dbManager);
-    //    Args.setParam(new String[]{"--output-directory", dbPath},
+    //    Args.setParam(new String[]{"--db-directory", dbPath},
     //        "config-junit.conf");
     //    dbManager = new Manager();
     //    dbManager.init();
@@ -60,26 +73,26 @@ public class StorageMarketTest {
   @AfterClass
   public static void destroy() {
     Args.clearParam();
+    context.destroy();
     if (FileUtil.deleteDir(new File(dbPath))) {
       logger.info("Release resources successful.");
     } else {
       logger.info("Release resources failure.");
     }
-    context.destroy();
   }
 
   /**
-   * create temp Capsule test need.
+   * create temp Wrapper test need.
    */
   @Before
-  public void createAccountCapsule() {
-    AccountWrapper ownerCapsule =
+  public void createAccountWrapper() {
+    AccountWrapper ownerWrapper =
         new AccountWrapper(
             ByteString.copyFromUtf8("owner"),
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)),
             AccountType.Normal,
             initBalance);
-    dbManager.getAccountStore().put(ownerCapsule.getAddress().toByteArray(), ownerCapsule);
+    dbManager.getAccountStore().put(ownerWrapper.getAddress().toByteArray(), ownerWrapper);
 
     dbManager.getDynamicPropertiesStore().saveTotalStorageReserved(
         128L * 1024 * 1024 * 1024);
@@ -107,7 +120,7 @@ public class StorageMarketTest {
     AccountWrapper owner =
         dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
 
-    long quant = 2_000_000_000_000L; // 2 million trx
+    long quant = 2_000_000_000_000L; // 2 million gsc
     storageMarket.buyStorage(owner, quant);
 
     Assert.assertEquals(owner.getBalance(), initBalance - quant
@@ -130,7 +143,7 @@ public class StorageMarketTest {
     AccountWrapper owner =
         dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
 
-    long quant = 1_000_000_000_000L; // 1 million trx
+    long quant = 1_000_000_000_000L; // 1 million gsc
 
     storageMarket.buyStorage(owner, quant);
 
@@ -165,7 +178,7 @@ public class StorageMarketTest {
     AccountWrapper owner =
         dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
 
-    long bytes = 2694881440L; // 2 million trx
+    long bytes = 2694881440L; // 2 million gsc
     storageMarket.buyStorageBytes(owner, bytes);
 
     Assert.assertEquals(owner.getBalance(), initBalance - 2_000_000_000_000L
@@ -222,7 +235,7 @@ public class StorageMarketTest {
     AccountWrapper owner =
         dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
 
-    long quant = 2_000_000_000_000L; // 2 million trx
+    long quant = 2_000_000_000_000L; // 2 million gsc
     storageMarket.buyStorage(owner, quant);
 
     Assert.assertEquals(owner.getBalance(), initBalance - quant
@@ -255,7 +268,7 @@ public class StorageMarketTest {
     AccountWrapper owner =
         dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
 
-    long quant = 2_000_000_000_000L; // 2 million trx
+    long quant = 2_000_000_000_000L; // 2 million gsc
     storageMarket.buyStorage(owner, quant);
 
     Assert.assertEquals(owner.getBalance(), initBalance - quant
@@ -266,8 +279,8 @@ public class StorageMarketTest {
     Assert.assertEquals(currentPool + quant,
         dbManager.getDynamicPropertiesStore().getTotalStoragePool());
 
-    long bytes1 = 2694881440L - 1360781717L; // 1 million trx
-    long bytes2 = 1360781717L; // 1 million trx
+    long bytes1 = 2694881440L - 1360781717L; // 1 million gsc
+    long bytes2 = 1360781717L; // 1 million gsc
 
     storageMarket.sellStorage(owner, bytes1);
 

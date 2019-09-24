@@ -1,3 +1,16 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.wallet.fulltest;
 
 import com.google.protobuf.ByteString;
@@ -7,15 +20,19 @@ import io.grpc.ManagedChannelBuilder;
 import java.math.BigInteger;
 import java.util.Random;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.api.WalletGrpc;
-import org.gsc.crypto.ECKey;
+import org.gsc.wallet.common.client.Configuration;
+import org.gsc.wallet.common.client.Parameter;
+import org.gsc.wallet.common.client.utils.PublicMethed;
+import org.gsc.wallet.common.client.utils.TransactionUtils;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 import org.gsc.api.GrpcAPI;
 import org.gsc.api.GrpcAPI.Return;
-import org.gsc.common.utils.ByteArray;
+import org.gsc.api.WalletGrpc;
+import org.gsc.crypto.ECKey;
+import org.gsc.utils.ByteArray;
 import org.gsc.core.Wallet;
 import org.gsc.protos.Contract;
 import org.gsc.protos.Contract.TransferContract;
@@ -24,10 +41,6 @@ import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.Transaction;
-import org.gsc.common.overlay.Configuration;
-import org.gsc.common.overlay.Parameter;
-import org.gsc.common.overlay.util.PublicMethed;
-import org.gsc.common.overlay.util.TransactionUtils;
 
 @Slf4j
 public class AttackSendcoin {
@@ -57,7 +70,7 @@ public class AttackSendcoin {
 
 
   private final byte[] fromAddress = PublicMethed.getFinalAddress(testKey002);
-  private final byte[] toAddress   = PublicMethed.getFinalAddress(testKey003);
+  private final byte[] toAddress = PublicMethed.getFinalAddress(testKey003);
   private final byte[] attackAddress = PublicMethed.getFinalAddress(testKey001);
   private final byte[] normal1Address = PublicMethed.getFinalAddress(normalKey001);
   private final byte[] normal2Address = PublicMethed.getFinalAddress(normalKey002);
@@ -96,8 +109,12 @@ public class AttackSendcoin {
   @BeforeSuite
   public void beforeSuite() {
     Wallet wallet = new Wallet();
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
+
+  /**
+   * constructor.
+   */
 
   @BeforeClass(enabled = true)
   public void beforeClass() {
@@ -105,12 +122,12 @@ public class AttackSendcoin {
         .usePlaintext(true)
         .build();
     blockingStubFull = WalletGrpc.newBlockingStub(channelFull);
-    final Account fromInfo = PublicMethed.queryAccount(testKey002,blockingStubFull);
-    final Account attackInfo = PublicMethed.queryAccount(testKey001,blockingStubFull);
-    final Account normal1Info = PublicMethed.queryAccount(normalKey001,blockingStubFull);
-    final Account normal2Info = PublicMethed.queryAccount(normalKey002,blockingStubFull);
-    final Account normal3Info = PublicMethed.queryAccount(normalKey003,blockingStubFull);
-    final Account normal4Info = PublicMethed.queryAccount(normalKey004,blockingStubFull);
+    final Account fromInfo = PublicMethed.queryAccount(testKey002, blockingStubFull);
+    final Account attackInfo = PublicMethed.queryAccount(testKey001, blockingStubFull);
+    final Account normal1Info = PublicMethed.queryAccount(normalKey001, blockingStubFull);
+    final Account normal2Info = PublicMethed.queryAccount(normalKey002, blockingStubFull);
+    final Account normal3Info = PublicMethed.queryAccount(normalKey003, blockingStubFull);
+    final Account normal4Info = PublicMethed.queryAccount(normalKey004, blockingStubFull);
     beforeFromBalance = fromInfo.getBalance();
     beforeNormal1Balance = normal1Info.getBalance();
     beforeNormal2Balance = normal2Info.getBalance();
@@ -121,7 +138,7 @@ public class AttackSendcoin {
   }
 
   //@Test(enabled = true)
-  @Test(enabled = false,threadPoolSize = 200, invocationCount = 200)
+  @Test(enabled = false, threadPoolSize = 200, invocationCount = 200)
   public void freezeAndSendcoin() throws InterruptedException {
 
     Integer i = 0;
@@ -140,9 +157,9 @@ public class AttackSendcoin {
       blockingStubFull = WalletGrpc.newBlockingStub(channelFull);
 
       if (randNum == 3) {
-        PublicMethed.sendcoin(attackAddress, attackAmount, fromAddress, testKey002, 
+        PublicMethed.sendcoin(attackAddress, attackAmount, fromAddress, testKey002,
             blockingStubFull);
-        PublicMethed.sendcoin(attackAddress, attackAmount, fromAddress, testKey002, 
+        PublicMethed.sendcoin(attackAddress, attackAmount, fromAddress, testKey002,
             blockingStubFull);
         /*        PublicMethed.sendcoin(attackAddress, attackAmount, fromAddress, testKey002,
             blockingStubFull);
@@ -159,27 +176,31 @@ public class AttackSendcoin {
       }
 
       if (randNum == 0) {
-        PublicMethed.sendcoin(normal1Address, sendNromal1Amount, fromAddress, 
+        PublicMethed.sendcoin(normal1Address, sendNromal1Amount, fromAddress,
             testKey002, blockingStubFull);
         continue;
       }
       if (randNum == 1) {
-        PublicMethed.sendcoin(normal2Address, sendNromal2Amount, fromAddress, 
+        PublicMethed.sendcoin(normal2Address, sendNromal2Amount, fromAddress,
             testKey002, blockingStubFull);
         continue;
       }
       if (randNum == 2) {
-        PublicMethed.sendcoin(normal3Address, sendNromal3Amount, fromAddress, 
+        PublicMethed.sendcoin(normal3Address, sendNromal3Amount, fromAddress,
             testKey002, blockingStubFull);
         continue;
       }
       if (randNum == 3) {
-        PublicMethed.sendcoin(normal4Address, sendNromal4Amount, fromAddress, 
+        PublicMethed.sendcoin(normal4Address, sendNromal4Amount, fromAddress,
             testKey002, blockingStubFull);
         continue;
       }
     }
   }
+
+  /**
+   * constructor.
+   */
 
   @AfterClass(enabled = true)
   public void shutdown() throws InterruptedException {
@@ -188,12 +209,12 @@ public class AttackSendcoin {
     logger.info("The time is " + Long.toString(end - start));
 
     //Print 6 account balance information.
-    final Account fromInfo = PublicMethed.queryAccount(testKey002,blockingStubFull);
-    final Account attackInfo = PublicMethed.queryAccount(testKey001,blockingStubFull);
-    final Account normal1Info = PublicMethed.queryAccount(normalKey001,blockingStubFull);
-    final Account normal2Info = PublicMethed.queryAccount(normalKey002,blockingStubFull);
-    final Account normal3Info = PublicMethed.queryAccount(normalKey003,blockingStubFull);
-    final Account normal4Info = PublicMethed.queryAccount(normalKey004,blockingStubFull);
+    final Account fromInfo = PublicMethed.queryAccount(testKey002, blockingStubFull);
+    final Account attackInfo = PublicMethed.queryAccount(testKey001, blockingStubFull);
+    final Account normal1Info = PublicMethed.queryAccount(normalKey001, blockingStubFull);
+    final Account normal2Info = PublicMethed.queryAccount(normalKey002, blockingStubFull);
+    final Account normal3Info = PublicMethed.queryAccount(normalKey003, blockingStubFull);
+    final Account normal4Info = PublicMethed.queryAccount(normalKey004, blockingStubFull);
 
     afterFromBalance = fromInfo.getBalance();
     afterNormal1Balance = normal1Info.getBalance();
@@ -202,15 +223,15 @@ public class AttackSendcoin {
     afterNormal4Balance = normal4Info.getBalance();
     afterAttackBalance = attackInfo.getBalance();
 
-    logger.info("attack transaction success num is " 
+    logger.info("attack transaction success num is "
         + (afterAttackBalance - beforeAttackBalance) / attackAmount);
-    logger.info("Normal 1 transaction success num is " 
+    logger.info("Normal 1 transaction success num is "
         + (afterNormal1Balance - beforeNormal1Balance) / sendNromal1Amount);
-    logger.info("Normal 2 transaction success num is " 
+    logger.info("Normal 2 transaction success num is "
         + (afterNormal2Balance - beforeNormal2Balance) / sendNromal2Amount);
-    logger.info("Normal 3 transaction success num is " 
+    logger.info("Normal 3 transaction success num is "
         + (afterNormal3Balance - beforeNormal3Balance) / sendNromal3Amount);
-    logger.info("Normal 4 transaction success num is " 
+    logger.info("Normal 4 transaction success num is "
         + (afterNormal4Balance - beforeNormal4Balance) / sendNromal4Amount);
 
     Long totalSuccessNum = (afterAttackBalance - beforeAttackBalance) / attackAmount
@@ -225,9 +246,6 @@ public class AttackSendcoin {
         + (afterNormal4Balance - beforeNormal4Balance) / sendNromal4Amount
         + (afterNormal2Balance - beforeNormal2Balance) / sendNromal2Amount;
     logger.info("Total normal success transaction is " + Long.toString(normaltotalSuccessNum));
-
-
-
 
     Integer blockTimes = 0;
     Integer blockTransNum = 0;
@@ -293,9 +311,13 @@ public class AttackSendcoin {
 
   }
 
+  /**
+   * constructor.
+   */
+
   public static Boolean freezeBalance(byte[] addRess, long freezeBalance, long freezeDuration,
       String priKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
     byte[] address = addRess;
     long frozenBalance = freezeBalance;
     long frozenDuration = freezeDuration;
@@ -312,7 +334,7 @@ public class AttackSendcoin {
         .EmptyMessage.newBuilder().build());
     final Long beforeBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
     Long beforeFrozenBalance = 0L;
-    //Long beforeBandwidth     = beforeFronzen.getBandwidth();
+    //Long beforeNet     = beforeFronzen.getNet();
 
     Contract.FreezeBalanceContract.Builder builder = Contract.FreezeBalanceContract.newBuilder();
     ByteString byteAddreess = ByteString.copyFrom(address);
@@ -346,6 +368,10 @@ public class AttackSendcoin {
     }
     return true;
   }
+
+  /**
+   * constructor.
+   */
 
   public boolean unFreezeBalance(byte[] addRess, String priKey) {
     byte[] address = addRess;
@@ -383,6 +409,10 @@ public class AttackSendcoin {
       return true;
     }
   }
+
+  /**
+   * constructor.
+   */
 
   public boolean withdrawBalance(byte[] address, String priKey) {
     ECKey temKey = null;

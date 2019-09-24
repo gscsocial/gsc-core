@@ -1,25 +1,22 @@
 /*
- * Copyright (c) [2016] [ <ether.camp> ]
- * This file is part of the ethereumJ library.
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
  *
- * The ethereumJ library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The ethereumJ library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
  */
+
+
 package org.gsc.runtime.vm.program.invoke;
 
 import org.gsc.runtime.vm.DataWord;
-import org.gsc.common.storage.Deposit;
-import org.gsc.db.BlockStore;
+import org.gsc.db.dbsource.Deposit;
+import org.gsc.core.wrapper.BlockWrapper;
 
 /**
  * @author Roman Mandeleil
@@ -27,47 +24,51 @@ import org.gsc.db.BlockStore;
  */
 public interface ProgramInvoke {
 
-  DataWord getOwnerAddress();
+    DataWord getContractAddress();
 
-  DataWord getBalance();
+    DataWord getBalance();
 
-  DataWord getOriginAddress();
+    DataWord getOriginAddress();
 
-  DataWord getCallerAddress();
+    DataWord getCallerAddress();
 
-  DataWord getCallValue();
+    DataWord getCallValue();
 
-  DataWord getDataSize();
+    DataWord getTokenValue();
 
-  DataWord getDataValue(DataWord indexData);
+    DataWord getTokenId();
 
-  byte[] getDataCopy(DataWord offsetData, DataWord lengthData);
+    DataWord getDataSize();
 
-  DataWord getPrevHash();
+    DataWord getDataValue(DataWord indexData);
 
-  DataWord getCoinbase();
+    byte[] getDataCopy(DataWord offsetData, DataWord lengthData);
 
-  DataWord getTimestamp();
+    DataWord getPrevHash();
 
-  DataWord getNumber();
+    DataWord getCoinbase();
 
-  DataWord getDifficulty();
+    DataWord getTimestamp();
 
-  boolean byTransaction();
+    DataWord getNumber();
 
-  boolean byTestingSuite();
+    DataWord getDifficulty();
 
-  int getCallDeep();
+    boolean byTestingSuite();
 
-  Deposit getDeposit();
+    int getCallDeep();
 
-  BlockStore getBlockStore();
+    Deposit getDeposit();
 
-  boolean isStaticCall();
+    boolean isStaticCall();
 
-  long getVmShouldEndInUs();
+    long getVmShouldEndInUs();
 
-  long getVmStartInUs();
+    long getVmStartInUs();
 
-  long getEnergyLimit();
+    long getCpuLimit();
+
+    void setStaticCall();
+
+    BlockWrapper getBlockByNum(int index);
 }

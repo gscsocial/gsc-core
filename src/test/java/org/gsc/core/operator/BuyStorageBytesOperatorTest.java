@@ -1,13 +1,22 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.core.operator;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.application.GSCApplicationContext;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.Parameter;
-import org.gsc.config.args.Args;
 import org.gsc.core.wrapper.AccountWrapper;
 import org.gsc.core.wrapper.TransactionResultWrapper;
 import org.junit.AfterClass;
@@ -15,10 +24,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.FileUtil;
+import org.gsc.application.GSCApplicationContext;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.Parameter.ChainConstant;
+import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
@@ -30,7 +43,7 @@ import org.gsc.protos.Protocol.Transaction.Result.code;
 public class BuyStorageBytesOperatorTest {
 
   private static Manager dbManager;
-  private static final String dbPath = "output_buy_storage_bytes_test";
+  private static final String dbPath = "db_buy_storage_bytes_test";
   private static GSCApplicationContext context;
   private static final String OWNER_ADDRESS;
   private static final String OWNER_ADDRESS_INVALID = "aaaa";
@@ -38,7 +51,7 @@ public class BuyStorageBytesOperatorTest {
   private static final long initBalance = 10_000_000_000_000_000L;
 
   static {
-    Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
+    Args.setParam(new String[]{"--db-directory", dbPath}, Constant.TEST_NET_CONF);
     context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS = Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a1abc";
     OWNER_ACCOUNT_INVALID =
@@ -51,7 +64,7 @@ public class BuyStorageBytesOperatorTest {
   @BeforeClass
   public static void init() {
     dbManager = context.getBean(Manager.class);
-    //    Args.setParam(new String[]{"--output-directory", dbPath},
+    //    Args.setParam(new String[]{"--db-directory", dbPath},
     //        "config-junit.conf");
     //    dbManager = new Manager();
     //    dbManager.init();
@@ -63,26 +76,26 @@ public class BuyStorageBytesOperatorTest {
   @AfterClass
   public static void destroy() {
     Args.clearParam();
+    context.destroy();
     if (FileUtil.deleteDir(new File(dbPath))) {
       logger.info("Release resources successful.");
     } else {
       logger.info("Release resources failure.");
     }
-    context.destroy();
   }
 
   /**
-   * create temp Capsule test need.
+   * create temp Wrapper test need.
    */
   @Before
-  public void createAccountCapsule() {
-    AccountWrapper ownerCapsule =
+  public void createAccountWrapper() {
+    AccountWrapper accountWrapper =
         new AccountWrapper(
             ByteString.copyFromUtf8("owner"),
             ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)),
             AccountType.Normal,
             initBalance);
-    dbManager.getAccountStore().put(ownerCapsule.getAddress().toByteArray(), ownerCapsule);
+    dbManager.getAccountStore().put(accountWrapper.getAddress().toByteArray(), accountWrapper);
 
     dbManager.getDynamicPropertiesStore().saveTotalStorageReserved(
         128L * 1024 * 1024 * 1024);
@@ -107,20 +120,20 @@ public class BuyStorageBytesOperatorTest {
     Assert.assertEquals(currentPool, 100_000_000_000000L);
     Assert.assertEquals(currentReserved, 128L * 1024 * 1024 * 1024);
 
-    long bytes = 2694881440L; // 2 million trx
+    long bytes = 2694881440L; // 2 million gsc
     long quant = 2_000_000_000_000L;
-    BuyStorageBytesOperator actuator = new BuyStorageBytesOperator(
+    BuyStorageBytesOperator operator = new BuyStorageBytesOperator(
         getContract(OWNER_ADDRESS, bytes), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
 
       Assert.assertEquals(owner.getBalance(), initBalance - quant
-          - Parameter.ChainConstant.TRANSFER_FEE);
+          - ChainConstant.TRANSFER_FEE);
       Assert.assertEquals(2694881440L, owner.getStorageLimit());
       Assert.assertEquals(currentReserved - 2694881440L,
           dbManager.getDynamicPropertiesStore().getTotalStorageReserved());
@@ -140,39 +153,39 @@ public class BuyStorageBytesOperatorTest {
     Assert.assertEquals(currentPool, 100_000_000_000000L);
     Assert.assertEquals(currentReserved, 128L * 1024 * 1024 * 1024);
 
-    long quant = 1_000_000_000_000L; // 1 million trx
+    long quant = 1_000_000_000_000L; // 1 million gsc
     long bytes1 = 1360781717L;
     long bytes2 = 2694881439L - bytes1;
 
-    BuyStorageBytesOperator actuator = new BuyStorageBytesOperator(
+    BuyStorageBytesOperator operator = new BuyStorageBytesOperator(
         getContract(OWNER_ADDRESS, bytes1), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
 
-    BuyStorageBytesOperator actuator2 = new BuyStorageBytesOperator(
+    BuyStorageBytesOperator operator2 = new BuyStorageBytesOperator(
         getContract(OWNER_ADDRESS, bytes2), dbManager);
     TransactionResultWrapper ret2 = new TransactionResultWrapper();
 
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
       AccountWrapper owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       Assert.assertEquals(owner.getBalance(), initBalance - quant
-          - Parameter.ChainConstant.TRANSFER_FEE);
+          - ChainConstant.TRANSFER_FEE);
       Assert.assertEquals(bytes1, owner.getStorageLimit());
       Assert.assertEquals(currentReserved - bytes1,
           dbManager.getDynamicPropertiesStore().getTotalStorageReserved());
       Assert.assertEquals(currentPool + quant,
           dbManager.getDynamicPropertiesStore().getTotalStoragePool());
 
-      actuator2.validate();
-      actuator2.execute(ret2);
+      operator2.validate();
+      operator2.execute(ret2);
       Assert.assertEquals(ret2.getInstance().getRet(), code.SUCESS);
       owner =
           dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
       Assert.assertEquals(owner.getBalance(), initBalance - 2 * quant
-          - Parameter.ChainConstant.TRANSFER_FEE);
+          - ChainConstant.TRANSFER_FEE);
       Assert.assertEquals(bytes1 + bytes2, owner.getStorageLimit());
       Assert.assertEquals(currentReserved - bytes1 - bytes2,
           dbManager.getDynamicPropertiesStore().getTotalStorageReserved());
@@ -193,19 +206,19 @@ public class BuyStorageBytesOperatorTest {
 //    Assert.assertEquals(currentPool, 100_000_000_000000L);
 //    Assert.assertEquals(currentReserved, 128L * 1024 * 1024 * 1024);
 //
-//    long quant = 1_000_000_000_000L; // 2 million trx
+//    long quant = 1_000_000_000_000L; // 2 million gsc
 //
-//    BuyStorageOperator actuator = new BuyStorageOperator(
+//    BuyStorageOperator operator = new BuyStorageOperator(
 //        getContract(OWNER_ADDRESS, quant), dbManager);
 //    TransactionResultWrapper ret = new TransactionResultWrapper();
 //
-//    BuyStorageOperator actuator2 = new BuyStorageOperator(
+//    BuyStorageOperator operator2 = new BuyStorageOperator(
 //        getContract(OWNER_ADDRESS, quant), dbManager);
 //    TransactionResultWrapper ret2 = new TransactionResultWrapper();
 //
 //    try {
-//      actuator.validate();
-//      actuator.execute(ret);
+//      operator.validate();
+//      operator.execute(ret);
 //      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
 //      AccountWrapper owner =
 //          dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
@@ -219,8 +232,8 @@ public class BuyStorageBytesOperatorTest {
 //
 //      dbManager.getDynamicPropertiesStore()
 //          .saveLatestBlockHeaderTimestamp(365 * 24 * 3600 * 1000L);
-//      actuator2.validate();
-//      actuator2.execute(ret);
+//      operator2.validate();
+//      operator2.execute(ret);
 //      Assert.assertEquals(ret2.getInstance().getRet(), code.SUCESS);
 //      owner =
 //          dbManager.getAccountStore().get(ByteArray.fromHexString(OWNER_ADDRESS));
@@ -245,12 +258,12 @@ public class BuyStorageBytesOperatorTest {
   @Test
   public void buyLessThanZero() {
     long bytes = -1_000_000_000L;
-    BuyStorageBytesOperator actuator = new BuyStorageBytesOperator(
+    BuyStorageBytesOperator operator = new BuyStorageBytesOperator(
         getContract(OWNER_ADDRESS, bytes), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.fail("cannot run here.");
 
     } catch (ContractValidateException e) {
@@ -264,12 +277,12 @@ public class BuyStorageBytesOperatorTest {
   @Test
   public void buyLessThan1Byte() {
     long bytes = 0L;
-    BuyStorageBytesOperator actuator = new BuyStorageBytesOperator(
+    BuyStorageBytesOperator operator = new BuyStorageBytesOperator(
         getContract(OWNER_ADDRESS, bytes), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.fail("cannot run here.");
 
     } catch (ContractValidateException e) {
@@ -281,19 +294,19 @@ public class BuyStorageBytesOperatorTest {
   }
 
   @Test
-  public void buyLessThan1Trx() {
+  public void buyLessThan1Gsc() {
     long bytes = 1L;
-    BuyStorageBytesOperator actuator = new BuyStorageBytesOperator(
+    BuyStorageBytesOperator operator = new BuyStorageBytesOperator(
         getContract(OWNER_ADDRESS, bytes), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.fail("cannot run here.");
 
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("quantity must be larger than 1TRX", e.getMessage());
+      Assert.assertEquals("quantity must be larger than 1GSC", e.getMessage());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
@@ -309,13 +322,13 @@ public class BuyStorageBytesOperatorTest {
 
     long bytes = 136178171754L;
 
-    BuyStorageBytesOperator actuator = new BuyStorageBytesOperator(
+    BuyStorageBytesOperator operator = new BuyStorageBytesOperator(
         getContract(OWNER_ADDRESS, bytes), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
 
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.fail("cannot run here.");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);
@@ -328,12 +341,12 @@ public class BuyStorageBytesOperatorTest {
   @Test
   public void invalidOwnerAddress() {
     long bytes = 1_000_000_000L;
-    BuyStorageBytesOperator actuator = new BuyStorageBytesOperator(
+    BuyStorageBytesOperator operator = new BuyStorageBytesOperator(
         getContract(OWNER_ADDRESS_INVALID, bytes), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.fail("cannot run here.");
 
     } catch (ContractValidateException e) {
@@ -350,12 +363,12 @@ public class BuyStorageBytesOperatorTest {
   @Test
   public void invalidOwnerAccount() {
     long bytes = 1_000_000_000L;
-    BuyStorageBytesOperator actuator = new BuyStorageBytesOperator(
+    BuyStorageBytesOperator operator = new BuyStorageBytesOperator(
         getContract(OWNER_ACCOUNT_INVALID, bytes), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
     try {
-      actuator.validate();
-      actuator.execute(ret);
+      operator.validate();
+      operator.execute(ret);
       Assert.fail("cannot run here.");
     } catch (ContractValidateException e) {
       Assert.assertTrue(e instanceof ContractValidateException);

@@ -2,6 +2,7 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.3'
@@ -22,6 +23,9 @@ apply plugin: 'checkstyle'
 apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: "jacoco"
 apply plugin: 'maven-publish'
+
+jar.enabled = true
+shadowJar.enabled = true
 
 sourceCompatibility = 1.8
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
@@ -48,6 +52,8 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven { url 'http://repo.spring.io/plugins-release' }
+    // maven { url 'https://maven.aliyun.com/nexus/content/repositories/central/' }
+    maven { url 'https://jitpack.io' }
 }
 def versions = [
         checkstyle: '8.7',
@@ -85,6 +91,10 @@ if (isWindows()) {
     }
 }
 
+task version(type: Exec) {
+    commandLine 'bash', '-c', './ver.sh'
+}
+
 dependencies {
     //local libraries
     compile fileTree(dir: 'libs', include: '*.jar')
@@ -99,7 +109,8 @@ dependencies {
     compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
 
-    compile "org.projectlombok:lombok:1.16.18"
+//    compile "org.projectlombok:lombok:1.16.18"
+    compile group: 'org.projectlombok', name: 'lombok', version: '1.18.2'
 
     compile group: 'commons-codec', name: 'commons-codec', version: '1.11'
 
@@ -109,8 +120,11 @@ dependencies {
     compile group: 'com.google.guava', name: 'guava', version: '24.1-jre'
 
     compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.4.0'
+    compile group: 'com.google.protobuf', name: 'protobuf-java-util', version: '3.4.0'
 
     compile "org.iq80.leveldb:leveldb:0.7"
+
+    compile group: 'org.rocksdb', name: 'rocksdbjni', version: '5.15.10'
 
     compile group: leveldbGroup, name: leveldbName, version: leveldbVersion
 
@@ -146,11 +160,11 @@ dependencies {
 
     compile group: 'io.dropwizard.metrics', name: 'metrics-core', version: '3.1.2'
 
-    checkstyleConfig "com.puppycrawl.tools:checkstyle:${versions.checkstyle}"
+//    checkstyleConfig "com.puppycrawl.tools:checkstyle:${versions.checkstyle}"
     // google grpc
-    compile group: 'io.grpc', name: 'grpc-netty', version: '1.14.0'
-    compile group: 'io.grpc', name: 'grpc-protobuf', version: '1.14.0'
-    compile group: 'io.grpc', name: 'grpc-stub', version: '1.14.0'
+    compile group: 'io.grpc', name: 'grpc-netty', version: '1.15.0'
+    compile group: 'io.grpc', name: 'grpc-protobuf', version: '1.15.0'
+    compile group: 'io.grpc', name: 'grpc-stub', version: '1.15.0'
     // end google grpc
 
     compile group: 'com.carrotsearch', name: 'java-sizeof', version: '0.0.5'
@@ -165,15 +179,21 @@ dependencies {
     compile 'org.eclipse.jetty:jetty-server:9.4.11.v20180605'
     compile 'org.eclipse.jetty:jetty-servlet:9.4.11.v20180605'
     compile 'com.alibaba:fastjson:1.2.47'
+    compile group: 'org.apache.httpcomponents', name: 'httpasyncclient', version: '4.1.1'
     // end http
+
+    compile "io.vavr:vavr:0.9.2"
+    compile group: 'org.pf4j', name: 'pf4j', version: '2.5.0'
+
+    compile group: 'org.zeromq', name: 'jeromq', version: '0.5.0'
+
 }
 
 check.dependsOn 'lint'
 
 checkstyle {
     toolVersion = "${versions.checkstyle}"
-    config = resources.text.fromArchiveEntry(configurations.checkstyleConfig, 'google_checks.xml')
-
+    configFile = file("config/checkstyle/checkStyleAll.xml")
 }
 
 checkstyleMain {
@@ -185,7 +205,7 @@ task lint(type: Checkstyle) {
     delete fileTree(dir: "${project.rootDir}/app/build/reports")
     source 'src'
     include '**/*.java'
-    exclude 'main/gen/**'
+    exclude 'main/grpc/**'
     exclude 'test/**'
     // empty classpath
     classpath = files()
@@ -207,7 +227,7 @@ sourceSets {
             srcDir 'src/main/protos'
         }
         java {
-            srcDir 'src/main/gen'
+            srcDir 'src/main/grpc'
             srcDir 'src/main/java'
         }
     }
@@ -228,12 +248,12 @@ protobuf {
     generateProtoTasks {
         all().each { task ->
             task.builtins {
-                java { outputSubDir = "gen" }
+                java { outputSubDir = "grpc" }
             }
         }
         all()*.plugins {
             grpc {
-                outputSubDir = "gen"
+                outputSubDir = "grpc"
             }
         }
     }
@@ -261,6 +281,11 @@ test {
         destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
         classDumpDir = file("$buildDir/jacoco/classpathdumps")
     }
+    if (isWindows()) {
+        //exclude '**/ShieldedTransferOperatorTest.class'
+        exclude '**/BackupDbUtilTest.class'
+        exclude '**/ManagerTest.class'
+    }
 }
 
 task stest(type: Test) {
@@ -283,6 +308,15 @@ task stest(type: Test) {
         classDumpDir = file("$buildDir/jacoco/classpathdumps")
     }
 }
+
+task dailyBuild(type: Test) {
+    useTestNG {
+        suites(file('src/test/resources/daily-build.xml'))
+        parallel 'tests'
+        threadCount 1
+    }
+}
+
 
 jacocoTestReport {
     reports {
@@ -314,6 +348,6 @@ def binaryRelease(taskName, jarName, mainClass) {
 }
 
 artifacts {
-    archives(binaryRelease('buildStartJar', 'Start', 'org.gsc.program.Start'),
-            binaryRelease('buildKeystoreFactoryJar', 'KeystoreFactory', 'org.gsc.program.KeystoreFactory'))
+    archives(binaryRelease('buildStartJar', 'Start', 'org.gsc.Start'),
+            binaryRelease('buildKeystoreFactoryJar', 'KeystoreFactory', 'org.gsc.utils.KeystoreFactory'))
 }

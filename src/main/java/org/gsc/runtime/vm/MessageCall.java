@@ -1,25 +1,21 @@
 /*
- * Copyright (c) [2016] [ <ether.camp> ]
- * This file is part of the ethereumJ library.
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
  *
- * The ethereumJ library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The ethereumJ library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
  */
+
 package org.gsc.runtime.vm;
 
 /**
- * A wrapper for a message call from a contract to another account.
- * This can either be a normal CALL, CALLCODE, DELEGATECALL or POST call.
+ * A wrapper for a message call from a contract to another account. This can either be a normal
+ * CALL, CALLCODE, DELEGATECALL or POST call.
  */
 public class MessageCall {
 
@@ -29,9 +25,9 @@ public class MessageCall {
     private final OpCode type;
 
     /**
-     * energy to pay for the call, remaining energy will be refunded to the caller
+     * cpu to pay for the call, remaining cpu will be refunded to the caller
      */
-    private final DataWord energy;
+    private final DataWord cpu;
     /**
      * address of account which code to call
      */
@@ -57,20 +53,27 @@ public class MessageCall {
      */
     private DataWord outDataSize;
 
-    public MessageCall(OpCode type, DataWord energy, DataWord codeAddress,
-                       DataWord endowment, DataWord inDataOffs, DataWord inDataSize) {
+    private DataWord tokenId;
+
+    private boolean isTokenTransferMsg;
+
+    public MessageCall(OpCode type, DataWord cpu, DataWord codeAddress,
+                       DataWord endowment, DataWord inDataOffs, DataWord inDataSize, DataWord tokenId,
+                       boolean isTokenTransferMsg) {
         this.type = type;
-        this.energy = energy;
+        this.cpu = cpu;
         this.codeAddress = codeAddress;
         this.endowment = endowment;
         this.inDataOffs = inDataOffs;
         this.inDataSize = inDataSize;
+        this.tokenId = tokenId;
+        this.isTokenTransferMsg = isTokenTransferMsg;
     }
 
-    public MessageCall(OpCode type, DataWord energy, DataWord codeAddress,
+    public MessageCall(OpCode type, DataWord cpu, DataWord codeAddress,
                        DataWord endowment, DataWord inDataOffs, DataWord inDataSize,
-                       DataWord outDataOffs, DataWord outDataSize) {
-        this(type, energy, codeAddress, endowment, inDataOffs, inDataSize);
+                       DataWord outDataOffs, DataWord outDataSize, DataWord tokenId, boolean isTokenTransferMsg) {
+        this(type, cpu, codeAddress, endowment, inDataOffs, inDataSize, tokenId, isTokenTransferMsg);
         this.outDataOffs = outDataOffs;
         this.outDataSize = outDataSize;
     }
@@ -79,8 +82,8 @@ public class MessageCall {
         return type;
     }
 
-    public DataWord getEnergy() {
-        return energy;
+    public DataWord getCpu() {
+        return cpu;
     }
 
     public DataWord getCodeAddress() {
@@ -105,5 +108,13 @@ public class MessageCall {
 
     public DataWord getOutDataSize() {
         return outDataSize;
+    }
+
+    public DataWord getTokenId() {
+        return tokenId;
+    }
+
+    public boolean isTokenTransferMsg() {
+        return isTokenTransferMsg;
     }
 }

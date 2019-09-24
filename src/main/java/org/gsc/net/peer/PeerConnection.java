@@ -1,295 +1,221 @@
-package org.gsc.net.peer;
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
 
-import static org.gsc.config.Parameter.NetConstants.MAX_INVENTORY_SIZE_IN_MINUTES;
-import static org.gsc.config.Parameter.NetConstants.NET_MAX_TRX_PER_SECOND;
+package org.gsc.net.peer;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
 import javafx.util.Pair;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-import org.gsc.common.overlay.message.HelloMessage;
-import org.gsc.common.overlay.message.Message;
-import org.gsc.common.overlay.server.Channel;
-import org.gsc.common.utils.Sha256Hash;
-import org.gsc.common.utils.Time;
+import org.gsc.net.peer.p2p.HelloMessage;
+import org.gsc.net.peer.p2p.Message;
+import org.gsc.net.server.Channel;
+import org.gsc.utils.Sha256Hash;
 import org.gsc.core.wrapper.BlockWrapper.BlockId;
 import org.gsc.config.Parameter.NodeConstant;
-import org.gsc.net.node.Item;
+import org.gsc.net.GSCNetDelegate;
+import org.gsc.net.service.AdvService;
+import org.gsc.net.service.SyncService;
 
-@Slf4j
+@Slf4j(topic = "net")
 @Component
 @Scope("prototype")
 public class PeerConnection extends Channel {
 
-  private Cache<Sha256Hash, Integer> syncBlockIdCache = CacheBuilder.newBuilder()
-      .maximumSize(2 * NodeConstant.SYNC_FETCH_BATCH_NUM).build();
+    @Autowired
+    private GSCNetDelegate gscNetDelegate;
 
-  @Setter
-  @Getter
-  private BlockId lastSyncBlockId;
+    @Autowired
+    private SyncService syncService;
 
-  @Setter
-  @Getter
-  private long remainNum;
+    @Autowired
+    private AdvService advService;
 
-  private volatile boolean syncFlag = true;
+    @Setter
+    @Getter
+    private HelloMessage helloMessage;
 
-  private HelloMessage helloMessage;
+    private int invCacheSize = 100_000;
 
-  //broadcast
-  private Queue<Sha256Hash> invToUs = new LinkedBlockingQueue<>();
+    @Setter
+    @Getter
+    private Cache<Item, Long> advInvReceive = CacheBuilder.newBuilder().maximumSize(invCacheSize)
+            .expireAfterWrite(1, TimeUnit.HOURS).recordStats().build();
 
-  private Queue<Sha256Hash> invWeAdv = new LinkedBlockingQueue<>();
+    @Setter
+    @Getter
+    private Cache<Item, Long> advInvSpread = CacheBuilder.newBuilder().maximumSize(invCacheSize)
+            .expireAfterWrite(1, TimeUnit.HOURS).recordStats().build();
 
-  private Map<Sha256Hash, Long> advObjSpreadToUs = new ConcurrentHashMap<>();
+    @Setter
+    @Getter
+    private Map<Item, Long> advInvRequest = new ConcurrentHashMap<>();
 
-  private Map<Sha256Hash, Long> advObjWeSpread = new ConcurrentHashMap<>();
+    @Setter
+    private BlockId fastForwardBlock;
 
-  private Map<Item, Long> advObjWeRequested = new ConcurrentHashMap<>();
+    @Getter
+    private BlockId blockBothHave = new BlockId();
 
-  private boolean advInhibit = false;
-
-  public Map<Sha256Hash, Long> getAdvObjSpreadToUs() {
-    return advObjSpreadToUs;
-  }
-
-  public Map<Sha256Hash, Long> getAdvObjWeSpread() {
-    return advObjWeSpread;
-  }
-
-  public boolean isAdvInhibit() {
-    return advInhibit;
-  }
-
-  public void setAdvInhibit(boolean advInhibit) {
-    this.advInhibit = advInhibit;
-  }
-
-  //sync chain
-  private BlockId headBlockWeBothHave = new BlockId();
-
-  private long headBlockTimeWeBothHave;
-
-  private Deque<BlockId> syncBlockToFetch = new ConcurrentLinkedDeque<>();
-
-  private Map<BlockId, Long> syncBlockRequested = new ConcurrentHashMap<>();
-
-  private Pair<Deque<BlockId>, Long> syncChainRequested = null;
-
-  public Pair<Deque<BlockId>, Long> getSyncChainRequested() {
-    return syncChainRequested;
-  }
-
-  public Cache<Sha256Hash, Integer> getSyncBlockIdCache() {
-    return syncBlockIdCache;
-  }
-
-  public Map<BlockId, Long> getSyncBlockRequested() {
-    return syncBlockRequested;
-  }
-  
-  public void setSyncChainRequested(
-      Pair<Deque<BlockId>, Long> syncChainRequested) {
-    this.syncChainRequested = syncChainRequested;
-  }
-
-  public void setSyncBlockRequested(ConcurrentHashMap<BlockId, Long> syncBlockRequested) {
-    this.syncBlockRequested = syncBlockRequested;
-  }
-
-  public long getUnfetchSyncNum() {
-    return unfetchSyncNum;
-  }
-
-  public void setUnfetchSyncNum(long unfetchSyncNum) {
-    this.unfetchSyncNum = unfetchSyncNum;
-  }
-
-  private long unfetchSyncNum = 0L;
-
-  private boolean needSyncFromPeer;
-
-  private boolean needSyncFromUs;
-
-  public Set<BlockId> getBlockInProc() {
-    return blockInProc;
-  }
-
-  public void setBlockInProc(Set<BlockId> blockInProc) {
-    this.blockInProc = blockInProc;
-  }
-
-  private boolean banned;
-
-  private Set<BlockId> blockInProc = new HashSet<>();
-
-  public Map<Item, Long> getAdvObjWeRequested() {
-    return advObjWeRequested;
-  }
-
-  public void setAdvObjWeRequested(ConcurrentHashMap<Item, Long> advObjWeRequested) {
-    this.advObjWeRequested = advObjWeRequested;
-  }
-
-  public void setHelloMessage(HelloMessage helloMessage) {
-    this.helloMessage = helloMessage;
-  }
-
-  public HelloMessage getHelloMessage() {
-    return this.helloMessage;
-  }
-
-  public void cleanInvGarbage() {
-    long oldestTimestamp =
-        Time.getCurrentMillis() - MAX_INVENTORY_SIZE_IN_MINUTES * 60 * 1000;
-
-    Iterator<Entry<Sha256Hash, Long>> iterator = this.advObjSpreadToUs.entrySet().iterator();
-
-    removeIterator(iterator, oldestTimestamp);
-
-    iterator = this.advObjWeSpread.entrySet().iterator();
-
-    removeIterator(iterator, oldestTimestamp);
-  }
-
-  private void removeIterator(Iterator<Entry<Sha256Hash, Long>> iterator, long oldestTimestamp) {
-    while (iterator.hasNext()) {
-      Entry<Sha256Hash, Long> entry = iterator.next();
-      Long ts = entry.getValue();
-
-      if (ts < oldestTimestamp) {
-        iterator.remove();
-      }
+    public void setBlockBothHave(BlockId blockId) {
+        this.blockBothHave = blockId;
+        this.blockBothHaveUpdateTime = System.currentTimeMillis();
     }
-  }
 
-  public boolean isAdvInvFull() {
-    return advObjSpreadToUs.size() > MAX_INVENTORY_SIZE_IN_MINUTES * 60 * NET_MAX_TRX_PER_SECOND;
-  }
+    @Getter
+    private volatile long blockBothHaveUpdateTime = System.currentTimeMillis();
 
-  public boolean isBanned() {
-    return banned;
-  }
+    @Setter
+    @Getter
+    private BlockId lastSyncBlockId;
 
-  public void setBanned(boolean banned) {
-    this.banned = banned;
-  }
+    @Setter
+    @Getter
+    private volatile long remainNum;
 
-  public BlockId getHeadBlockWeBothHave() {
-    return headBlockWeBothHave;
-  }
+    @Getter
+    private Cache<Sha256Hash, Long> syncBlockIdCache = CacheBuilder.newBuilder()
+            .maximumSize(2 * NodeConstant.SYNC_FETCH_BATCH_NUM).recordStats().build();
 
-  public void setHeadBlockWeBothHave(BlockId headBlockWeBothHave) {
-    this.headBlockWeBothHave = headBlockWeBothHave;
-  }
+    @Setter
+    @Getter
+    private Deque<BlockId> syncBlockToFetch = new ConcurrentLinkedDeque<>();
 
-  public long getHeadBlockTimeWeBothHave() {
-    return headBlockTimeWeBothHave;
-  }
+    @Setter
+    @Getter
+    private Map<BlockId, Long> syncBlockRequested = new ConcurrentHashMap<>();
 
-  public void setHeadBlockTimeWeBothHave(long headBlockTimeWeBothHave) {
-    this.headBlockTimeWeBothHave = headBlockTimeWeBothHave;
-  }
+    @Setter
+    @Getter
+    private Pair<Deque<BlockId>, Long> syncChainRequested = null;
 
-  public Deque<BlockId> getSyncBlockToFetch() {
-    return syncBlockToFetch;
-  }
+    @Setter
+    @Getter
+    private Set<BlockId> syncBlockInProcess = new HashSet<>();
 
-  public boolean isNeedSyncFromPeer() {
-    return needSyncFromPeer;
-  }
+    @Setter
+    @Getter
+    private volatile boolean needSyncFromPeer;
 
-  public void setNeedSyncFromPeer(boolean needSyncFromPeer) {
-    this.needSyncFromPeer = needSyncFromPeer;
-  }
+    @Setter
+    @Getter
+    private volatile boolean needSyncFromUs;
 
-  public boolean isNeedSyncFromUs() {
-    return needSyncFromUs;
-  }
+    public boolean isIdle() {
+        return advInvRequest.isEmpty() && syncBlockRequested.isEmpty() && syncChainRequested == null;
+    }
 
-  public void setNeedSyncFromUs(boolean needSyncFromUs) {
-    this.needSyncFromUs = needSyncFromUs;
-  }
+    public void sendMessage(Message message) {
+        msgQueue.sendMessage(message);
+    }
 
-  public Queue<Sha256Hash> getInvToUs() {
-    return invToUs;
-  }
+    public void onConnect() {
+        if (getHelloMessage().getHeadBlockId().getNum() > gscNetDelegate.getHeadBlockId().getNum()) {
+            setGSCState(GSCState.SYNCING);
+            syncService.startSync(this);
+        } else {
+            setGSCState(GSCState.SYNC_COMPLETED);
+        }
+    }
 
-  public void setInvToUs(Queue<Sha256Hash> invToUs) {
-    this.invToUs = invToUs;
-  }
+    public void onDisconnect() {
+        syncService.onDisconnect(this);
+        advService.onDisconnect(this);
+        advInvReceive.cleanUp();
+        advInvSpread.cleanUp();
+        advInvRequest.clear();
+        syncBlockIdCache.cleanUp();
+        syncBlockToFetch.clear();
+        syncBlockRequested.clear();
+        syncBlockInProcess.clear();
+        syncBlockInProcess.clear();
+    }
 
-  public Queue<Sha256Hash> getInvWeAdv() {
-    return invWeAdv;
-  }
+    public String log() {
+        long now = System.currentTimeMillis();
+//    logger.info("Peer {}:{} [ {}, ping {} ms]-----------\n"
+//            + "connect time: {}\n"
+//            + "last know block num: {}\n"
+//            + "needSyncFromPeer:{}\n"
+//            + "needSyncFromUs:{}\n"
+//            + "syncToFetchSize:{}\n"
+//            + "syncToFetchSizePeekNum:{}\n"
+//            + "syncBlockRequestedSize:{}\n"
+//            + "remainNum:{}\n"
+//            + "syncChainRequested:{}\n"
+//            + "blockInProcess:{}\n"
+//            + "{}",
+//        this.getNode().getHost(), this.getNode().getPort(), this.getNode().getHexIdShort(),
+//        (int) this.getPeerStats().getAvgLatency(),
+//        (now - super.getStartTime()) / 1000,
+//        blockBothHave.getNum(),
+//        isNeedSyncFromPeer(),
+//        isNeedSyncFromUs(),
+//        syncBlockToFetch.size(),
+//        syncBlockToFetch.size() > 0 ? syncBlockToFetch.peek().getNum() : -1,
+//        syncBlockRequested.size(),
+//        remainNum,
+//        syncChainRequested == null ? 0 : (now - syncChainRequested.getValue()) / 1000,
+//        syncBlockInProcess.size(),
+//        nodeStatistics.toString());
+////
+        return String.format(
+                "Peer %s [%8s]\n"
+                        + "ping msg: count %d, max-average-min-last: %d %d %d %d\n"
+                        + "connect time: %ds\n"
+                        + "last know block num: %s\n"
+                        + "needSyncFromPeer:%b\n"
+                        + "needSyncFromUs:%b\n"
+                        + "syncToFetchSize:%d\n"
+                        + "syncToFetchSizePeekNum:%d\n"
+                        + "syncBlockRequestedSize:%d\n"
+                        + "remainNum:%d\n"
+                        + "syncChainRequested:%d\n"
+                        + "blockInProcess:%d\n",
+                getNode().getHost() + ":" + getNode().getPort(),
+                getNode().getHexIdShort(),
 
-  public void setInvWeAdv(Queue<Sha256Hash> invWeAdv) {
-    this.invWeAdv = invWeAdv;
-  }
+                getNodeStatistics().pingMessageLatency.getCount(),
+                getNodeStatistics().pingMessageLatency.getMax(),
+                getNodeStatistics().pingMessageLatency.getAvrg(),
+                getNodeStatistics().pingMessageLatency.getMin(),
+                getNodeStatistics().pingMessageLatency.getLast(),
 
-  public void setSyncFlag(boolean syncFlag) {
-    this.syncFlag = syncFlag;
-  }
+                (now - getStartTime()) / 1000,
+                fastForwardBlock != null ? fastForwardBlock.getNum() : blockBothHave.getNum(),
+                isNeedSyncFromPeer(),
+                isNeedSyncFromUs(),
+                syncBlockToFetch.size(),
+                syncBlockToFetch.size() > 0 ? syncBlockToFetch.peek().getNum() : -1,
+                syncBlockRequested.size(),
+                remainNum,
+                syncChainRequested == null ? 0 : (now - syncChainRequested.getValue()) / 1000,
+                syncBlockInProcess.size())
+                + nodeStatistics.toString() + "\n";
+    }
 
-  public boolean getSyncFlag() {
-    return syncFlag;
-  }
-  
-  public String logSyncStats() {
-    return String.format(
-        "Peer %s: [ %18s, ping %6s ms]-----------\n"
-            + "connect time: %s\n"
-            + "last know block num: %s\n"
-            + "needSyncFromPeer:%b\n"
-            + "needSyncFromUs:%b\n"
-            + "syncToFetchSize:%d\n"
-            + "syncToFetchSizePeekNum:%d\n"
-            + "syncBlockRequestedSize:%d\n"
-            + "unFetchSynNum:%d\n"
-            + "syncChainRequested:%s\n"
-            + "blockInPorc:%d\n",
-        this.getNode().getHost() + ":" + this.getNode().getPort(),
-        this.getNode().getHexIdShort(),
-        (int) this.getPeerStats().getAvgLatency(),
-        Time.getTimeString(super.getStartTime()),
-        headBlockWeBothHave.getNum(),
-        isNeedSyncFromPeer(),
-        isNeedSyncFromUs(),
-        syncBlockToFetch.size(),
-        syncBlockToFetch.size() > 0 ? syncBlockToFetch.peek().getNum() : -1,
-        syncBlockRequested.size(),
-        unfetchSyncNum,
-        syncChainRequested == null ? "NULL" : Time.getTimeString(syncChainRequested.getValue()),
-        blockInProc.size())
-        + nodeStatistics.toString() + "\n";
-  }
-
-  public boolean isBusy() {
-    return !idle();
-  }
-
-  public void sendMessage(Message message) {
-    msgQueue.sendMessage(message);
-  }
-  
-  public boolean idle() {
-    return advObjWeRequested.isEmpty()
-        && syncBlockRequested.isEmpty()
-        && syncChainRequested == null;
-  }
-  
 }

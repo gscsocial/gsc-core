@@ -1,34 +1,54 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.db;
 
-import org.gsc.core.db2.common.IRevokingDB;
-import org.gsc.core.db2.core.ISession;
+import org.gsc.db.db2.common.IRevokingDB;
+import org.gsc.db.db2.core.ISession;
 import org.gsc.core.exception.RevokingStoreIllegalStateException;
 
 public interface RevokingDatabase {
 
-  ISession buildSession();
+    ISession buildSession();
 
-  ISession buildSession(boolean forceEnable);
+    ISession buildSession(boolean forceEnable);
 
-  void add(IRevokingDB revokingDB);
+    void setMode(boolean mode);
 
-  void merge() throws RevokingStoreIllegalStateException;
+    void add(IRevokingDB revokingDB);
 
-  void revoke() throws RevokingStoreIllegalStateException;
+    void merge() throws RevokingStoreIllegalStateException;
 
-  void commit() throws RevokingStoreIllegalStateException;
+    void revoke() throws RevokingStoreIllegalStateException;
 
-  void pop() throws RevokingStoreIllegalStateException;
+    void commit() throws RevokingStoreIllegalStateException;
 
-  void enable();
+    void pop() throws RevokingStoreIllegalStateException;
 
-  void check();
+    void fastPop() throws RevokingStoreIllegalStateException;
 
-  int size();
-  
-  void setMaxSize(int maxSize);
+    void enable();
 
-  void disable();
+    int size();
 
-  void shutdown();
+    void check();
+
+    void setMaxSize(int maxSize);
+
+    void disable();
+
+    void setMaxFlushCount(int maxFlushCount);
+
+    void shutdown();
+
 }

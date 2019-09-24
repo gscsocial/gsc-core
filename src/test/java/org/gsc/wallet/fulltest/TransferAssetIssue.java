@@ -1,3 +1,16 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.wallet.fulltest;
 
 import com.google.protobuf.ByteString;
@@ -9,8 +22,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.api.WalletGrpc;
-import org.gsc.crypto.ECKey;
+import org.gsc.wallet.common.client.Configuration;
+import org.gsc.wallet.common.client.Parameter;
+import org.gsc.wallet.common.client.utils.PublicMethed;
+import org.gsc.wallet.common.client.utils.Sha256Hash;
+import org.gsc.wallet.common.client.utils.TransactionUtils;
 import org.junit.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -18,19 +34,16 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 import org.gsc.api.GrpcAPI;
 import org.gsc.api.GrpcAPI.BytesMessage;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.Utils;
+import org.gsc.api.WalletGrpc;
+import org.gsc.crypto.ECKey;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.Utils;
 import org.gsc.core.Wallet;
 import org.gsc.protos.Contract;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.Transaction;
-import org.gsc.common.overlay.Configuration;
-import org.gsc.common.overlay.Parameter;
-import org.gsc.common.overlay.util.PublicMethed;
-import org.gsc.common.overlay.util.Sha256Hash;
-import org.gsc.common.overlay.util.TransactionUtils;
 
 
 @Slf4j
@@ -43,7 +56,7 @@ public class TransferAssetIssue {
       "6815B367FDDE637E53E9ADC8E69424E07724333C9A2B973CFA469975E20753FC";
 
   private final byte[] fromAddress = PublicMethed.getFinalAddress(testKey002);
-  private final byte[] toAddress   = PublicMethed.getFinalAddress(testKey003);
+  private final byte[] toAddress = PublicMethed.getFinalAddress(testKey003);
 
   private static final long now = System.currentTimeMillis();
   private static String name = "PartAssetIssue_" + Long.toString(now);
@@ -82,10 +95,14 @@ public class TransferAssetIssue {
   @BeforeSuite
   public void beforeSuite() {
     Wallet wallet = new Wallet();
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  @BeforeClass(enabled = true)
+  /**
+   * constructor.
+   */
+
+  @BeforeClass(enabled = false)
   public void beforeClass() {
     logger.info(testKeyForCreate);
     logger.info(testKeyForParticipate);
@@ -98,9 +115,8 @@ public class TransferAssetIssue {
         fromAddress, testKey002, blockingStubFull));
     Assert.assertTrue(PublicMethed.sendcoin(participateAssetAddress,
         sendAmount, fromAddress, testKey002, blockingStubFull));
-    //Participate account freeze balance to get bandwidth.
-    Assert.assertTrue(PublicMethed.freezeBalance(participateAssetAddress,10000000L,3,
-        testKeyForParticipate,blockingStubFull));
+    Assert.assertTrue(PublicMethed.freezeBalance(participateAssetAddress, 10000000L, 5,
+        testKeyForParticipate, blockingStubFull));
     //Create an asset issue.
     Long start = System.currentTimeMillis() + 2000;
     Long end = System.currentTimeMillis() + 1000000000;
@@ -112,7 +128,7 @@ public class TransferAssetIssue {
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
-    final Account createInfo = PublicMethed.queryAccount(testKeyForCreate,blockingStubFull);
+    final Account createInfo = PublicMethed.queryAccount(testKeyForCreate, blockingStubFull);
     final Account participateInfo = PublicMethed.queryAccount(testKeyForParticipate,
         blockingStubFull);
 
@@ -132,8 +148,8 @@ public class TransferAssetIssue {
     start1 = System.currentTimeMillis();
   }
 
-  //@Test(enabled = true)
-  @Test(enabled = false,threadPoolSize = 200, invocationCount = 200)
+  //@Test(enabled = false)
+  @Test(enabled = false, threadPoolSize = 200, invocationCount = 200)
   public void transferAssetIssue() throws InterruptedException {
     Integer i = 0;
     Integer randNum;
@@ -148,26 +164,26 @@ public class TransferAssetIssue {
           .build();
       blockingStubFull = WalletGrpc.newBlockingStub(channelFull);
 
-
-      transferAsset(participateAssetAddress,name.getBytes(),1,
-          createAddress,testKeyForCreate,blockingStubFull);
+      transferAsset(participateAssetAddress, name.getBytes(), 1,
+          createAddress, testKeyForCreate, blockingStubFull);
     }
   }
 
+  /**
+   * constructor.
+   */
 
-  @AfterClass(enabled = true)
+
+  @AfterClass(enabled = false)
   public void shutdown() throws InterruptedException {
     //Print the duration.
     end1 = System.currentTimeMillis();
     logger.info("The time is " + Long.toString(end1 - start1));
 
-
-
     Map<String, Long> createAssetIssueMap = new HashMap<String, Long>();
 
-
     Long temp = 0L;
-    Account createInfo = PublicMethed.queryAccount(testKeyForCreate,blockingStubFull);
+    Account createInfo = PublicMethed.queryAccount(testKeyForCreate, blockingStubFull);
     createAssetIssueMap = createInfo.getAssetMap();
     for (String key : createAssetIssueMap.keySet()) {
 
@@ -180,7 +196,7 @@ public class TransferAssetIssue {
     afterCreateAssetIssueBalance = temp;
 
     temp = 0L;
-    Account participateInfo = PublicMethed.queryAccount(testKeyForParticipate,blockingStubFull);
+    Account participateInfo = PublicMethed.queryAccount(testKeyForParticipate, blockingStubFull);
     Map<String, Long> participateAssetIssueMap = new HashMap<String, Long>();
     participateAssetIssueMap = participateInfo.getAssetMap();
     for (Long key : participateAssetIssueMap.values()) {
@@ -237,8 +253,8 @@ public class TransferAssetIssue {
     logger.info("Use Net num is " + Integer.toString(useNet));
     logger.info("Use Fee num is " + Integer.toString(useFee));
 
-    createInfo = PublicMethed.queryAccount(testKeyForCreate,blockingStubFull);
-    participateInfo = PublicMethed.queryAccount(testKeyForParticipate,blockingStubFull);
+    createInfo = PublicMethed.queryAccount(testKeyForCreate, blockingStubFull);
+    participateInfo = PublicMethed.queryAccount(testKeyForParticipate, blockingStubFull);
     createAssetIssueMap = new HashMap<String, Long>();
     participateAssetIssueMap = new HashMap<String, Long>();
 
@@ -274,9 +290,14 @@ public class TransferAssetIssue {
     }
   }
 
+  /**
+   * constructor.
+   */
+
+
   public static boolean participateAssetIssue(byte[] to, byte[] assertName, long amount,
       byte[] from, String priKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
     ECKey temKey = null;
     try {
       BigInteger priK = new BigInteger(priKey, 16);
@@ -306,9 +327,13 @@ public class TransferAssetIssue {
     }
   }
 
+  /**
+   * constructor.
+   */
+
   public static Protocol.Transaction signTransaction(ECKey ecKey,
       Protocol.Transaction transaction) {
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
     if (ecKey == null || ecKey.getPrivKey() == null) {
       //logger.warn("Warning: Can't sign,there is no private key !!");
       return null;
@@ -317,9 +342,13 @@ public class TransferAssetIssue {
     return TransactionUtils.sign(transaction, ecKey);
   }
 
+  /**
+   * constructor.
+   */
+
   public static boolean transferAsset(byte[] to, byte[] assertName, long amount, byte[] address,
       String priKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
     ECKey temKey = null;
     try {
       BigInteger priK = new BigInteger(priKey, 16);

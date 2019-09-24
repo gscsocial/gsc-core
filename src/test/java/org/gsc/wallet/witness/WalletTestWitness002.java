@@ -1,3 +1,16 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.wallet.witness;
 
 import com.google.protobuf.ByteString;
@@ -10,8 +23,10 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.api.WalletGrpc;
-import org.gsc.crypto.ECKey;
+import org.gsc.wallet.common.client.Configuration;
+import org.gsc.wallet.common.client.Parameter;
+import org.gsc.wallet.common.client.WalletClient;
+import org.gsc.wallet.common.client.utils.TransactionUtils;
 import org.spongycastle.util.encoders.Hex;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -20,52 +35,54 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 import org.gsc.api.GrpcAPI;
 import org.gsc.api.GrpcAPI.NumberMessage;
-import org.gsc.api.WalletSolidityGrpc;
+import org.gsc.api.WalletGrpc;
+import org.gsc.api.WalletConfirmedGrpc;
+import org.gsc.crypto.ECKey;
 import org.gsc.core.Wallet;
 import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.Transaction;
-import org.gsc.common.overlay.Configuration;
-import org.gsc.common.overlay.Parameter;
-import org.gsc.common.overlay.WalletClient;
-import org.gsc.common.overlay.util.TransactionUtils;
 
-//import org.gsc.wallet.common.client.WitnessComparator;
+//import stest.gsc.wallet.common.client.WitnessComparator;
 
-//import org.gsc.wallet.common.client.WitnessComparator;
+//import stest.gsc.wallet.common.client.WitnessComparator;
 
 @Slf4j
 public class WalletTestWitness002 {
 
 
   private ManagedChannel channelFull = null;
-  private ManagedChannel channelSolidity = null;
+  private ManagedChannel channelConfirmed = null;
   private WalletGrpc.WalletBlockingStub blockingStubFull = null;
-  private WalletSolidityGrpc.WalletSolidityBlockingStub blockingStubSolidity = null;
+  private WalletConfirmedGrpc.WalletConfirmedBlockingStub blockingStubConfirmed = null;
   private String fullnode = Configuration.getByPath("testng.conf").getStringList("fullnode.ip.list")
       .get(0);
-  private String soliditynode = Configuration.getByPath("testng.conf")
-      .getStringList("solidityNode.ip.list").get(0);
+  private String confirmednode = Configuration.getByPath("testng.conf")
+      .getStringList("confirmednode.ip.list").get(0);
 
   @BeforeSuite
   public void beforeSuite() {
     Wallet wallet = new Wallet();
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
+
+  /**
+   * constructor.
+   */
 
   @BeforeClass
   public void beforeClass() {
-    WalletClient.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    WalletClient.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
         .usePlaintext(true)
         .build();
     blockingStubFull = WalletGrpc.newBlockingStub(channelFull);
 
-    channelSolidity = ManagedChannelBuilder.forTarget(soliditynode)
+    channelConfirmed = ManagedChannelBuilder.forTarget(confirmednode)
         .usePlaintext(true)
         .build();
-    blockingStubSolidity = WalletSolidityGrpc.newBlockingStub(channelSolidity);
+    blockingStubConfirmed = WalletConfirmedGrpc.newBlockingStub(channelConfirmed);
   }
 
   @Test(enabled = true)
@@ -104,10 +121,10 @@ public class WalletTestWitness002 {
   }
 
   @Test(enabled = true)
-  public void testSolidityQueryAllWitness() {
-    GrpcAPI.WitnessList solidityWitnessList = blockingStubSolidity
+  public void testConfirmedQueryAllWitness() {
+    GrpcAPI.WitnessList confirmedWitnessList = blockingStubConfirmed
         .listWitnesses(GrpcAPI.EmptyMessage.newBuilder().build());
-    Optional<GrpcAPI.WitnessList> result = Optional.ofNullable(solidityWitnessList);
+    Optional<GrpcAPI.WitnessList> result = Optional.ofNullable(confirmedWitnessList);
     if (result.isPresent()) {
       GrpcAPI.WitnessList witnessList = result.get();
       List<Protocol.Witness> list = witnessList.getWitnessesList();
@@ -126,13 +143,17 @@ public class WalletTestWitness002 {
     }
   }
 
+  /**
+   * constructor.
+   */
+
   @AfterClass
   public void shutdown() throws InterruptedException {
     if (channelFull != null) {
       channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
-    if (channelSolidity != null) {
-      channelSolidity.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    if (channelConfirmed != null) {
+      channelConfirmed.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
 
@@ -143,6 +164,10 @@ public class WalletTestWitness002 {
           .compare(((Protocol.Witness) o2).getVoteCount(), ((Protocol.Witness) o1).getVoteCount());
     }
   }
+
+  /**
+   * constructor.
+   */
 
   public Account queryAccount(ECKey ecKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
@@ -168,11 +193,19 @@ public class WalletTestWitness002 {
     return ecKey.getAddress();
   }
 
+  /**
+   * constructor.
+   */
+
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
   }
+
+  /**
+   * constructor.
+   */
 
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();

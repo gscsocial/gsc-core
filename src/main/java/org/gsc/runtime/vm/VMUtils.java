@@ -1,38 +1,40 @@
 /*
- * Copyright (c) [2016] [ <ether.camp> ]
- * This file is part of the ethereumJ library.
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
  *
- * The ethereumJ library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The ethereumJ library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
  */
-package org.gsc.runtime.vm;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.gsc.runtime.config.SystemProperties;
-import java.io.*;
-import java.util.zip.Deflater;
-import java.util.zip.DeflaterOutputStream;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterOutputStream;
+package org.gsc.runtime.vm;
 
 import static java.lang.String.format;
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
-public final class VMUtils {
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterOutputStream;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("VM");
+import lombok.extern.slf4j.Slf4j;
+import org.gsc.runtime.config.VMConfig;
+
+@Slf4j(topic = "VM")
+public final class VMUtils {
 
     private VMUtils() {
     }
@@ -43,11 +45,11 @@ public final class VMUtils {
                 closeable.close();
             }
         } catch (IOException ioe) {
-            // ignore
+// ignore
         }
     }
 
-    private static File createProgramTraceFile(SystemProperties config, String txHash) {
+    private static File createProgramTraceFile(VMConfig config, String txHash) {
         File result = null;
 
         if (config.vmTrace()) {
@@ -79,14 +81,14 @@ public final class VMUtils {
             if (data != null) {
                 out.write(data.getBytes("UTF-8"));
             }
-        } catch (Exception e){
-            LOGGER.error(format("Cannot write to file '%s': ", file.getAbsolutePath()), e);
+        } catch (Exception e) {
+            logger.error(format("Cannot write to file '%s': ", file.getAbsolutePath()), e);
         } finally {
             closeQuietly(out);
         }
     }
 
-    public static void saveProgramTraceFile(SystemProperties config, String txHash, String content) {
+    public static void saveProgramTraceFile(VMConfig config, String txHash, String content) {
         File file = createProgramTraceFile(config, txHash);
         if (file != null) {
             writeStringToFile(file, content);
@@ -122,15 +124,6 @@ public final class VMUtils {
         return compress(content.getBytes("UTF-8"));
     }
 
-    public static String zipAndEncode(String content) {
-        try {
-            return encodeBase64String(compress(content));
-        } catch (Exception e) {
-            LOGGER.error("Cannot zip or encode: ", e);
-            return content;
-        }
-    }
-    
     public static byte[] decompress(byte[] data) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream(data.length);
 
@@ -142,12 +135,21 @@ public final class VMUtils {
         return baos.toByteArray();
     }
 
+    public static String zipAndEncode(String content) {
+        try {
+            return encodeBase64String(compress(content));
+        } catch (Exception e) {
+            logger.error("Cannot zip or encode: ", e);
+            return content;
+        }
+    }
+
     public static String unzipAndDecode(String content) {
         try {
             byte[] decoded = decodeBase64(content);
             return new String(decompress(decoded), "UTF-8");
         } catch (Exception e) {
-            LOGGER.error("Cannot unzip or decode: ", e);
+            logger.error("Cannot unzip or decode: ", e);
             return content;
         }
     }

@@ -1,27 +1,24 @@
 /*
- * Copyright (c) [2016] [ <ether.camp> ]
- * This file is part of the ethereumJ library.
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
  *
- * The ethereumJ library is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * The ethereumJ library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with the ethereumJ library. If not, see <http://www.gnu.org/licenses/>.
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
  */
+
+
 package org.gsc.runtime.vm.program.invoke;
 
 import org.gsc.runtime.vm.DataWord;
 import org.gsc.runtime.vm.program.InternalTransaction;
 import org.gsc.runtime.vm.program.InternalTransaction.ExecutorType;
 import org.gsc.runtime.vm.program.Program;
-import org.gsc.common.storage.Deposit;
+import org.gsc.db.dbsource.Deposit;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.Transaction;
@@ -32,14 +29,15 @@ import org.gsc.protos.Protocol.Transaction;
  */
 public interface ProgramInvokeFactory {
 
-  ProgramInvoke createProgramInvoke(InternalTransaction.TrxType trxType, ExecutorType executorType,
-      Transaction tx, Block block, Deposit deposit, long vmStartInUs, long vmShouldEndInUs,
-      long energyLimit) throws ContractValidateException;
+    ProgramInvoke createProgramInvoke(InternalTransaction.TrxType trxType, ExecutorType executorType,
+                                      Transaction tx, long tokenValue, long tokenId, Block block, Deposit deposit, long vmStartInUs,
+                                      long vmShouldEndInUs,
+                                      long cpuLimit) throws ContractValidateException;
 
-  ProgramInvoke createProgramInvoke(Program program, DataWord toAddress, DataWord callerAddress,
-      DataWord inValue,
-      long balanceInt, byte[] dataIn, Deposit deposit, boolean staticCall, boolean byTestingSuite,
-      long vmStartInUs, long vmShouldEndInUs, long energyLimit);
+    ProgramInvoke createProgramInvoke(Program program, DataWord toAddress, DataWord callerAddress,
+                                      DataWord inValue, DataWord tokenValue, DataWord tokenId,
+                                      long balanceInt, byte[] dataIn, Deposit deposit, boolean staticCall, boolean byTestingSuite,
+                                      long vmStartInUs, long vmShouldEndInUs, long cpuLimit);
 
 
 }

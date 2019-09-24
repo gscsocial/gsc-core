@@ -1,3 +1,16 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.core.wrapper;
 
 import com.google.protobuf.ByteString;
@@ -8,9 +21,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.FileUtil;
+import org.gsc.application.GSCApplicationContext;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
 import org.gsc.config.DefaultConfig;
@@ -24,16 +37,16 @@ public class ExchangeWrapperTest {
 
   private static Manager dbManager;
   private static StorageMarket storageMarket;
-  private static final String dbPath = "output_buy_storage_test";
-  private static AnnotationConfigApplicationContext context;
+  private static final String dbPath = "db_exchange_wrapper_test_test";
+  private static GSCApplicationContext context;
   private static final String OWNER_ADDRESS;
   private static final String OWNER_ADDRESS_INVALID = "aaaa";
   private static final String OWNER_ACCOUNT_INVALID;
   private static final long initBalance = 10_000_000_000_000_000L;
 
   static {
-    Args.setParam(new String[]{"--output-directory", dbPath}, Constant.TEST_CONF);
-    context = new AnnotationConfigApplicationContext(DefaultConfig.class);
+    Args.setParam(new String[]{"--db-directory", dbPath}, Constant.TEST_NET_CONF);
+    context = new GSCApplicationContext(DefaultConfig.class);
     OWNER_ADDRESS = Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a1abc";
     OWNER_ACCOUNT_INVALID =
         Wallet.getAddressPreFixString() + "548794500882809695a8a687866e76d4271a3456";
@@ -46,7 +59,7 @@ public class ExchangeWrapperTest {
   public static void init() {
     dbManager = context.getBean(Manager.class);
     storageMarket = new StorageMarket(dbManager);
-    //    Args.setParam(new String[]{"--output-directory", dbPath},
+    //    Args.setParam(new String[]{"--db-directory", dbPath},
     //        "config-junit.conf");
     //    dbManager = new Manager();
     //    dbManager.init();
@@ -58,23 +71,23 @@ public class ExchangeWrapperTest {
   @AfterClass
   public static void destroy() {
     Args.clearParam();
+    context.destroy();
     if (FileUtil.deleteDir(new File(dbPath))) {
       logger.info("Release resources successful.");
     } else {
       logger.info("Release resources failure.");
     }
-    context.destroy();
   }
 
   /**
-   * create temp Capsule test need.
+   * create temp Wrapper test need.
    */
   @Before
-  public void createExchangeWapper() {
+  public void createExchangeWrapper() {
     dbManager.getDynamicPropertiesStore().saveLatestBlockHeaderTimestamp(0);
 
     long now = dbManager.getHeadBlockTimeStamp();
-    ExchangeWrapper exchangeCapsulee =
+    ExchangeWrapper exchangeWrappere =
         new ExchangeWrapper(
             ByteString.copyFromUtf8("owner"),
             1,
@@ -82,7 +95,7 @@ public class ExchangeWrapperTest {
             "abc".getBytes(),
             "def".getBytes());
 
-    dbManager.getExchangeStore().put(exchangeCapsulee.createDbKey(), exchangeCapsulee);
+    dbManager.getExchangeStore().put(exchangeWrappere.createDbKey(), exchangeWrappere);
 
   }
 
@@ -121,5 +134,6 @@ public class ExchangeWrapperTest {
     }
 
   }
+
 
 }

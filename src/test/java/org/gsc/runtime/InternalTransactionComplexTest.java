@@ -1,25 +1,40 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.runtime;
 
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.application.GSCApplicationContext;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spongycastle.util.encoders.Hex;
 import org.testng.Assert;
+import org.gsc.application.Application;
+import org.gsc.application.ApplicationFactory;
+import org.gsc.application.GSCApplicationContext;
 import org.gsc.runtime.vm.DataWord;
-import org.gsc.common.storage.DepositImpl;
-import org.gsc.common.utils.FileUtil;
+import org.gsc.db.dbsource.DepositImpl;
+import org.gsc.utils.FileUtil;
 import org.gsc.core.Constant;
 import org.gsc.core.Wallet;
+import org.gsc.config.DefaultConfig;
+import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
 import org.gsc.core.exception.ContractExeException;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.core.exception.ReceiptCheckErrException;
-import org.gsc.core.exception.TransactionTraceException;
+import org.gsc.core.exception.VMIllegalException;
 import org.gsc.protos.Protocol.AccountType;
 
 @Slf4j
@@ -28,15 +43,17 @@ public class InternalTransactionComplexTest {
   private static Runtime runtime;
   private static Manager dbManager;
   private static GSCApplicationContext context;
+  private static Application appT;
   private static DepositImpl deposit;
-  private static final String dbPath = "output_InternalTransactionComplexTest";
+  private static final String dbPath = "db_InternalTransactionComplexTest";
   private static final String OWNER_ADDRESS;
 
   static {
-    Args.setParam(new String[]{"--output-directory" , dbPath, "--debug", "--support-constant"},
-        Constant.TEST_CONF);
+    Args.setParam(new String[]{"--db-directory", dbPath, "--debug", "--support-constant"},
+        Constant.TEST_NET_CONF);
     context = new GSCApplicationContext(DefaultConfig.class);
-    OWNER_ADDRESS = Wallet.getAddressPreFixString() + "abd4b9367799eaa3197fecb144eb71de1e049abc";
+    appT = ApplicationFactory.create(context);
+    OWNER_ADDRESS = Wallet.getAddressPreFixString() + "6f24fc8a9e3712e9de397643ee2db721c7242919";
   }
 
   /**
@@ -51,7 +68,7 @@ public class InternalTransactionComplexTest {
   }
 
   /**
-   * pragma solidity 0.4.24;
+   * pragma confirmed 0.4.24;
    *
    * // this is to test wither the TVM is returning vars from one contract calling another //
    * contract's functions.
@@ -72,19 +89,19 @@ public class InternalTransactionComplexTest {
    */
   @Test
   public void internalTransactionAsInstanceTest()
-      throws ContractExeException, ReceiptCheckErrException, TransactionTraceException, ContractValidateException {
+      throws ContractExeException, ReceiptCheckErrException, ContractValidateException, VMIllegalException {
     byte[] calledContractAddress = deployCalledContractandGetItsAddress();
     byte[] callerContractAddress = deployCallerContractAndGetItsAddress(calledContractAddress);
 
     /* =================================== CALL makeTheCall =================================== */
-    byte[] triggerData1 = GVMTestUtils.parseABI("makeTheCall()", "");
+    byte[] triggerData1 = GVMTestUtils.parseAbi("makeTheCall()", "");
     runtime = GVMTestUtils
         .triggerContractWholeProcessReturnContractAddress(Hex.decode(OWNER_ADDRESS),
             callerContractAddress, triggerData1,
             0, 100000000, deposit, null);
 
     /* =================================== CALL testCallbackReturns_ to check data =================================== */
-    byte[] triggerData2 = GVMTestUtils.parseABI("testCallbackReturns_()", "");
+    byte[] triggerData2 = GVMTestUtils.parseAbi("testCallbackReturns_()", "");
     runtime = GVMTestUtils
         .triggerContractWholeProcessReturnContractAddress(Hex.decode(OWNER_ADDRESS),
             callerContractAddress, triggerData2,
@@ -97,12 +114,14 @@ public class InternalTransactionComplexTest {
         "0000000000000000000000000000000000000000000000000000000000000001"
             + "000000000000000000000000000000000000000000000000000000000004cb2f"
             + "0000000000000000000000000000000000000000000000000000000000123456");
+
+
   }
 
 
   // Just for the caller/called example above
   private byte[] deployCalledContractandGetItsAddress()
-      throws ContractExeException, ReceiptCheckErrException, TransactionTraceException, ContractValidateException {
+      throws ContractExeException, ReceiptCheckErrException, ContractValidateException, VMIllegalException {
     String contractName = "calledContract";
     byte[] address = Hex.decode(OWNER_ADDRESS);
     String ABI =
@@ -127,7 +146,7 @@ public class InternalTransactionComplexTest {
 
   // Just for the caller/called example above
   private byte[] deployCallerContractAndGetItsAddress(byte[] calledContractAddress)
-      throws ContractExeException, ReceiptCheckErrException, TransactionTraceException, ContractValidateException {
+      throws ContractExeException, ReceiptCheckErrException, ContractValidateException, VMIllegalException {
     String contractName = "calledContract";
     byte[] address = Hex.decode(OWNER_ADDRESS);
     String ABI =
@@ -166,12 +185,14 @@ public class InternalTransactionComplexTest {
   @AfterClass
   public static void destroy() {
     Args.clearParam();
+    appT.shutdownServices();
+    appT.shutdown();
+    context.destroy();
     if (FileUtil.deleteDir(new File(dbPath))) {
       logger.info("Release resources successful.");
     } else {
       logger.info("Release resources failure.");
     }
-    context.destroy();
   }
 
 }

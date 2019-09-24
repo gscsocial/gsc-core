@@ -1,12 +1,28 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.services.http;
 
 import com.google.protobuf.ByteString;
+
 import java.io.IOException;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.wrapper.TransactionWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.gsc.api.GrpcAPI;
@@ -15,7 +31,6 @@ import org.gsc.api.GrpcAPI.EasyTransferResponse;
 import org.gsc.api.GrpcAPI.Return.response_code;
 import org.gsc.crypto.ECKey;
 import org.gsc.core.Wallet;
-import org.gsc.core.wrapper.TransactionWrapper;
 import org.gsc.core.exception.ContractValidateException;
 import org.gsc.services.http.JsonFormat.ParseException;
 import org.gsc.protos.Contract.TransferContract;
@@ -23,54 +38,59 @@ import org.gsc.protos.Protocol.Transaction.Contract.ContractType;
 
 
 @Component
-@Slf4j
+@Slf4j(topic = "API")
 public class EasyTransferServlet extends HttpServlet {
 
-  @Autowired
-  private Wallet wallet;
+    @Autowired
+    private Wallet wallet;
 
-  protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
 
-  }
-
-  protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-    GrpcAPI.Return.Builder returnBuilder = GrpcAPI.Return.newBuilder();
-    EasyTransferResponse.Builder responseBuild = EasyTransferResponse.newBuilder();
-    try {
-      String input = request.getReader().lines()
-          .collect(Collectors.joining(System.lineSeparator()));
-      EasyTransferMessage.Builder build = EasyTransferMessage.newBuilder();
-      JsonFormat.merge(input, build);
-      byte[] privateKey = wallet.pass2Key(build.getPassPhrase().toByteArray());
-      ECKey ecKey = ECKey.fromPrivate(privateKey);
-      byte[] owner = ecKey.getAddress();
-      TransferContract.Builder builder = TransferContract.newBuilder();
-      builder.setOwnerAddress(ByteString.copyFrom(owner));
-      builder.setToAddress(build.getToAddress());
-      builder.setAmount(build.getAmount());
-
-      TransactionWrapper transactionCapsule;
-      transactionCapsule = wallet
-          .createTransactionCapsule(builder.build(), ContractType.TransferContract);
-      transactionCapsule.sign(privateKey);
-      GrpcAPI.Return retur = wallet.broadcastTransaction(transactionCapsule.getInstance());
-      responseBuild.setTransaction(transactionCapsule.getInstance());
-      responseBuild.setResult(retur);
-      response.getWriter().println(Util.printEasyTransferResponse(responseBuild.build()));
-    } catch (ParseException e) {
-      logger.debug("ParseException: {}", e.getMessage());
-    } catch (IOException e) {
-      logger.debug("IOException: {}", e.getMessage());
-    } catch (ContractValidateException e) {
-      returnBuilder.setResult(false).setCode(response_code.CONTRACT_VALIDATE_ERROR)
-          .setMessage(ByteString.copyFromUtf8(e.getMessage()));
-      responseBuild.setResult(returnBuilder.build());
-      try {
-        response.getWriter().println(JsonFormat.printToString(responseBuild.build()));
-      } catch (IOException ioe) {
-        logger.debug("IOException: {}", ioe.getMessage());
-      }
-      return;
     }
-  }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        GrpcAPI.Return.Builder returnBuilder = GrpcAPI.Return.newBuilder();
+        EasyTransferResponse.Builder responseBuild = EasyTransferResponse.newBuilder();
+        boolean visible = false;
+        try {
+            String input = request.getReader().lines()
+                    .collect(Collectors.joining(System.lineSeparator()));
+            Util.checkBodySize(input);
+            visible = Util.getVisiblePost(input);
+            EasyTransferMessage.Builder build = EasyTransferMessage.newBuilder();
+            JsonFormat.merge(input, build, visible);
+            byte[] privateKey = wallet.pass2Key(build.getPassPhrase().toByteArray());
+            ECKey ecKey = ECKey.fromPrivate(privateKey);
+            byte[] owner = ecKey.getAddress();
+            TransferContract.Builder builder = TransferContract.newBuilder();
+            builder.setOwnerAddress(ByteString.copyFrom(owner));
+            builder.setToAddress(build.getToAddress());
+            builder.setAmount(build.getAmount());
+
+            TransactionWrapper transactionWrapper;
+            transactionWrapper = wallet
+                    .createTransactionWrapper(builder.build(), ContractType.TransferContract);
+            transactionWrapper.sign(privateKey);
+            GrpcAPI.Return retur = wallet.broadcastTransaction(transactionWrapper.getInstance());
+            responseBuild.setTransaction(transactionWrapper.getInstance());
+            responseBuild.setResult(retur);
+            response.getWriter().println(Util.printEasyTransferResponse(responseBuild.build(), visible));
+        } catch (ParseException e) {
+            logger.debug("ParseException: {}", e.getMessage());
+        } catch (IOException e) {
+            logger.debug("IOException: {}", e.getMessage());
+        } catch (ContractValidateException e) {
+            returnBuilder.setResult(false).setCode(response_code.CONTRACT_VALIDATE_ERROR)
+                    .setMessage(ByteString.copyFromUtf8(e.getMessage()));
+            responseBuild.setResult(returnBuilder.build());
+            try {
+                response.getWriter().println(JsonFormat.printToString(responseBuild.build(), visible));
+            } catch (IOException ioe) {
+                logger.debug("IOException: {}", ioe.getMessage());
+            }
+            return;
+        } catch (Exception e) {
+            logger.debug("Exception: {}", e.getMessage());
+        }
+    }
 }

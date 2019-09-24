@@ -1,16 +1,14 @@
 /*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
  * gsc-core is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gsc-core is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
  */
 
 package org.gsc.core;
@@ -22,8 +20,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.Sha256Hash;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.Sha256Hash;
 import org.gsc.core.wrapper.utils.BlockUtil;
 import org.gsc.config.args.Args;
 import org.gsc.protos.Protocol.Block;
@@ -35,7 +33,7 @@ public class BlockUtilTest {
 
   @Before
   public void initConfiguration() {
-    Args.setParam(new String[]{}, Constant.TEST_CONF);
+    Args.setParam(new String[]{}, Constant.TEST_NET_CONF);
   }
 
   @After
@@ -45,18 +43,16 @@ public class BlockUtilTest {
 
   @Test
   public void testBlockUtil() {
-    //test create GenesisBlockCapsule
-    BlockWrapper blockWrapper1 = BlockUtil.newGenesisBlockCapsule();
+    //test create GenesisBlockWrapper
+    BlockWrapper blockWrapper1 = BlockUtil.newGenesisBlockWrapper();
     Sha256Hash sha256Hash = Sha256Hash.wrap(ByteArray
         .fromHexString("0x0000000000000000000000000000000000000000000000000000000000000000"));
 
-    Assert.assertEquals(0, blockWrapper1.getTimeStamp());
+    Assert.assertEquals(1565913600000L, blockWrapper1.getTimeStamp());
     Assert.assertEquals(sha256Hash,
         blockWrapper1.getParentHash());
     Assert.assertEquals(0, blockWrapper1.getNum());
 
-    //test isParentOf method: create blockWrapper2 and blockWrapper3
-    // blockWrapper3.setParentHash() equals blockWrapper2.getBlockId
     BlockWrapper blockWrapper2 = new BlockWrapper(Block.newBuilder().setBlockHeader(
         BlockHeader.newBuilder().setRawData(raw.newBuilder().setParentHash(ByteString.copyFrom(
             ByteArray
@@ -73,6 +69,5 @@ public class BlockUtilTest {
     Assert.assertFalse(BlockUtil.isParentOf(blockWrapper1, blockWrapper2));
     Assert.assertEquals(true, BlockUtil.isParentOf(blockWrapper2, blockWrapper3));
     Assert.assertTrue(BlockUtil.isParentOf(blockWrapper2, blockWrapper3));
-
   }
 }

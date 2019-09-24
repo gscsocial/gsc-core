@@ -1,61 +1,72 @@
-package org.gsc.net;
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
 
-import java.io.File;
-import lombok.extern.slf4j.Slf4j;
-import org.gsc.common.application.GSCApplicationContext;
-import org.junit.Assert;
-import org.junit.Test;
-import org.springframework.context.ApplicationContext;
-import org.testng.collections.Lists;
-import org.gsc.common.net.udp.message.discover.FindNodeMessage;
-import org.gsc.common.net.udp.message.Message;
-import org.gsc.common.net.udp.message.discover.NeighborsMessage;
-import org.gsc.common.net.udp.message.discover.PingMessage;
-import org.gsc.common.net.udp.message.discover.PongMessage;
-import org.gsc.common.overlay.discover.node.Node;
-import org.gsc.common.overlay.discover.node.NodeManager;
-import org.gsc.common.overlay.discover.RefreshTask;
-import org.gsc.common.utils.FileUtil;
-import org.gsc.config.DefaultConfig;
-import org.gsc.config.args.Args;
+package org.gsc.net;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Assert;
+import org.testng.collections.Lists;
+import org.gsc.application.GSCApplicationContext;
+import org.gsc.net.discover.message.Message;
+import org.gsc.net.discover.message.discover.FindNodeMessage;
+import org.gsc.net.discover.message.discover.NeighborsMessage;
+import org.gsc.net.discover.message.discover.PingMessage;
+import org.gsc.net.discover.message.discover.PongMessage;
+import org.gsc.net.discover.RefreshTask;
+import org.gsc.net.node.Node;
+import org.gsc.net.node.NodeManager;
+import org.gsc.config.args.Args;
 
 @Slf4j
 public class UdpTest {
 
-  ApplicationContext context;
+  private NodeManager nodeManager;
+  private int port = Args.getInstance().getNodeListenPort();
+//  private volatile boolean finishFlag = false;
+//  private long timeOut = 30_000;
 
-  NodeManager nodeManager;
-
-  //@Before
-  public void before(){
-    new Thread(() -> {
-      Args.setParam(
-          new String[]{ "--output-directory", "udp_test", "--storage-db-directory", "database",
-              "--storage-index-directory", "index"},"config.conf"
-      );
-      Args cfgArgs = Args.getInstance();
-      cfgArgs.getSeedNode().setIpList(Lists.newArrayList());
-      cfgArgs.setNodeP2pVersion(100);
-      cfgArgs.setNodeListenPort(10001);
-      context = new GSCApplicationContext(DefaultConfig.class);
-    }).start();
+  public UdpTest(GSCApplicationContext context) {
+    nodeManager = context.getBean(NodeManager.class);
   }
 
-  @Test
-  public void test() {}
+  public void test() throws Exception {
+    /*
+    Thread thread = new Thread(() -> {
+      try {
+        discover();
+      } catch (Exception e) {
+        logger.info("Discover test failed.", e);
+      }
+    });
+    thread.start();
 
-  //@Test
-  public void udpTest() throws Exception {
+    long time = System.currentTimeMillis();
+    while (!finishFlag && System.currentTimeMillis() - time < timeOut) {
+      Thread.sleep(1000);
+    }
+    if (!finishFlag) {
+      thread.interrupt();
+      Assert.assertTrue(false);
+    }
+    */
+  }
 
-    Thread.sleep(10000);
-
-    nodeManager = context.getBean(NodeManager.class);
+  public void discover() throws Exception {
 
     InetAddress server = InetAddress.getByName("127.0.0.1");
 
@@ -68,27 +79,14 @@ public class UdpTest {
     Assert.assertTrue(nodeManager.getTable().getAllNodes().isEmpty());
 
     PingMessage pingMessage = new PingMessage(from, nodeManager.getPublicHomeNode());
-
-    PongMessage pongMessage = new PongMessage(from);
+    DatagramPacket pingPacket = new DatagramPacket(pingMessage.getSendData(),
+        pingMessage.getSendData().length, server, port);
 
     FindNodeMessage findNodeMessage = new FindNodeMessage(from, RefreshTask.getNodeId());
-
-    List<Node> peers = Lists.newArrayList(peer1, peer2);
-    NeighborsMessage neighborsMessage = new NeighborsMessage(from, peers);
+    DatagramPacket findNodePacket = new DatagramPacket(findNodeMessage.getSendData(),
+        findNodeMessage.getSendData().length, server, port);
 
     DatagramSocket socket = new DatagramSocket();
-
-    DatagramPacket pingPacket = new DatagramPacket(pingMessage.getSendData(),
-        pingMessage.getSendData().length, server, 10001);
-
-    DatagramPacket pongPacket = new DatagramPacket(pongMessage.getSendData(),
-        pongMessage.getSendData().length, server, 10001);
-
-    DatagramPacket findNodePacket = new DatagramPacket(findNodeMessage.getSendData(),
-        findNodeMessage.getSendData().length, server, 10001);
-
-    DatagramPacket neighborsPacket = new DatagramPacket(neighborsMessage.getSendData(),
-        neighborsMessage.getSendData().length, server, 10001);
 
     // send ping msg
     socket.send(pingPacket);
@@ -103,11 +101,15 @@ public class UdpTest {
       socket.receive(packet);
       byte[] bytes = Arrays.copyOfRange(data, 0, packet.getLength());
       Message msg = Message.parse(bytes);
-      Assert.assertTrue(Arrays.equals(msg.getFrom().getId(), nodeManager.getPublicHomeNode().getId()));
+      Assert.assertTrue(
+          Arrays.equals(msg.getFrom().getId(), nodeManager.getPublicHomeNode().getId()));
       if (!pingFlag) {
         pingFlag = true;
         Assert.assertTrue(msg instanceof PingMessage);
         Assert.assertTrue(Arrays.equals(((PingMessage) msg).getTo().getId(), from.getId()));
+        PongMessage pongMessage = new PongMessage(from, msg.getTimestamp());
+        DatagramPacket pongPacket = new DatagramPacket(pongMessage.getSendData(),
+            pongMessage.getSendData().length, server, port);
         socket.send(pongPacket);
       } else if (!pongFlag) {
         pongFlag = true;
@@ -115,6 +117,10 @@ public class UdpTest {
       } else if (!findNodeFlag) {
         findNodeFlag = true;
         Assert.assertTrue(msg instanceof FindNodeMessage);
+        List<Node> peers = Lists.newArrayList(peer1, peer2);
+        NeighborsMessage neighborsMessage = new NeighborsMessage(from, peers, msg.getTimestamp());
+        DatagramPacket neighborsPacket = new DatagramPacket(neighborsMessage.getSendData(),
+            neighborsMessage.getSendData().length, server, port);
         socket.send(neighborsPacket);
         socket.send(findNodePacket);
       } else if (!neighborsFlag) {
@@ -128,11 +134,8 @@ public class UdpTest {
     Assert.assertTrue(nodeManager.getTable().getAllNodes().size() == 1);
 
     socket.close();
-  }
 
-  //@After
-  public void after() {
-    FileUtil.deleteDir(new File("udp_test"));
+//    finishFlag = true;
   }
 }
 

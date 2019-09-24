@@ -1,3 +1,16 @@
+/*
+ * GSC (Global Social Chain), a blockchain fit for mass adoption and
+ * a sustainable token economy model, is the decentralized global social
+ * chain with highly secure, low latency, and near-zero fee transactional system.
+ *
+ * gsc-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * License GSC-Core is under the GNU General Public License v3. See LICENSE.
+ */
+
 package org.gsc.wallet.transfer;
 
 import com.google.protobuf.ByteString;
@@ -7,8 +20,10 @@ import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.gsc.api.WalletGrpc;
-import org.gsc.crypto.ECKey;
+import org.gsc.wallet.common.client.Configuration;
+import org.gsc.wallet.common.client.Parameter;
+import org.gsc.wallet.common.client.utils.PublicMethed;
+import org.gsc.wallet.common.client.utils.TransactionUtils;
 import org.spongycastle.util.encoders.Hex;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -18,34 +33,25 @@ import org.testng.annotations.Test;
 import org.gsc.api.GrpcAPI;
 import org.gsc.api.GrpcAPI.NumberMessage;
 import org.gsc.api.GrpcAPI.Return;
-import org.gsc.common.utils.ByteArray;
-import org.gsc.common.utils.Utils;
+import org.gsc.api.WalletGrpc;
+import org.gsc.crypto.ECKey;
+import org.gsc.utils.ByteArray;
+import org.gsc.utils.Utils;
 import org.gsc.core.Wallet;
 import org.gsc.protos.Contract;
 import org.gsc.protos.Contract.FreezeBalanceContract;
 import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.Transaction;
-import org.gsc.common.overlay.Configuration;
-import org.gsc.common.overlay.Parameter;
-import org.gsc.common.overlay.util.PublicMethed;
-import org.gsc.common.overlay.util.TransactionUtils;
 
 @Slf4j
 public class WalletTestTransfer001 {
 
-  //testng001、testng002、testng003、testng004
-  private final String testKey002 =
-      "FC8BF0238748587B9617EB6D15D47A66C0E07C1A1959033CF249C6532DC29FE6";
-  private final String testKey003 =
-      "6815B367FDDE637E53E9ADC8E69424E07724333C9A2B973CFA469975E20753FC";
-
-  /*  //testng001、testng002、testng003、testng004
-  private static final byte[] fromAddress = Base58
-      .decodeFromBase58Check("THph9K2M2nLvkianrMGswRhz5hjSA9fuH7");
-  private static final byte[] toAddress = Base58
-      .decodeFromBase58Check("TV75jZpdmP2juMe1dRwGrwpV6AMU6mr1EU");*/
+  private final String testKey002 = Configuration.getByPath("testng.conf")
+      .getString("foundationAccount.key1");
   private final byte[] fromAddress = PublicMethed.getFinalAddress(testKey002);
+  private final String testKey003 = Configuration.getByPath("testng.conf")
+      .getString("foundationAccount.key2");
   private final byte[] toAddress = PublicMethed.getFinalAddress(testKey003);
 
 
@@ -57,23 +63,27 @@ public class WalletTestTransfer001 {
       .get(0);
   private String searchFullnode = Configuration.getByPath("testng.conf")
       .getStringList("fullnode.ip.list").get(1);
-  private
 
   //send account
   ECKey ecKey1 = new ECKey(Utils.getRandom());
-  byte[] sendAccountAddress = ecKey1.getAddress();
+  final byte[] sendAccountAddress = ecKey1.getAddress();
   String sendAccountKey = ByteArray.toHexString(ecKey1.getPrivKeyBytes());
 
   //receipt account
   ECKey ecKey2 = new ECKey(Utils.getRandom());
-  byte[] receiptAccountAddress = ecKey2.getAddress();
+  final byte[] receiptAccountAddress = ecKey2.getAddress();
   String receiptAccountKey = ByteArray.toHexString(ecKey2.getPrivKeyBytes());
+
 
   @BeforeSuite
   public void beforeSuite() {
     Wallet wallet = new Wallet();
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE_MAINNET);
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
+
+  /**
+   * constructor.
+   */
 
   @BeforeClass
   public void beforeClass() {
@@ -86,48 +96,59 @@ public class WalletTestTransfer001 {
         .usePlaintext(true)
         .build();
     searchBlockingStubFull = WalletGrpc.newBlockingStub(searchChannelFull);
-
-    Assert.assertTrue(PublicMethed.sendcoin(sendAccountAddress,90000000000L,
-        fromAddress,testKey002,blockingStubFull));
   }
 
   @Test
   public void testSendCoin() {
+    //send account
+    ecKey1 = new ECKey(Utils.getRandom());
+    final byte[] sendAccountAddress = ecKey1.getAddress();
+    sendAccountKey = ByteArray.toHexString(ecKey1.getPrivKeyBytes());
+
+    //receipt account
+    ecKey2 = new ECKey(Utils.getRandom());
+    final byte[] receiptAccountAddress = ecKey2.getAddress();
+    receiptAccountKey = ByteArray.toHexString(ecKey2.getPrivKeyBytes());
+
+    Assert.assertTrue(PublicMethed.sendcoin(sendAccountAddress, 90000000000L,
+        fromAddress, testKey002, blockingStubFull));
+
     logger.info(receiptAccountKey);
     //Test send coin.
-    Account sendAccount = PublicMethed.queryAccount(sendAccountKey,blockingStubFull);
+    Account sendAccount = PublicMethed.queryAccount(sendAccountKey, blockingStubFull);
     Long sendAccountBeforeBalance = sendAccount.getBalance();
     Assert.assertTrue(sendAccountBeforeBalance == 90000000000L);
-    Account receiptAccount = PublicMethed.queryAccount(receiptAccountKey,blockingStubFull);
+    Account receiptAccount = PublicMethed.queryAccount(receiptAccountKey, blockingStubFull);
     Long receiptAccountBeforeBalance = receiptAccount.getBalance();
     Assert.assertTrue(receiptAccountBeforeBalance == 0);
 
     //Test send coin
-    Assert.assertTrue(PublicMethed.sendcoin(receiptAccountAddress,49880000000L,
-        sendAccountAddress,sendAccountKey,blockingStubFull));
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+    Assert.assertTrue(PublicMethed.sendcoin(receiptAccountAddress, 49880000000L,
+        sendAccountAddress, sendAccountKey, blockingStubFull));
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
 
-    sendAccount = PublicMethed.queryAccount(sendAccountKey,blockingStubFull);
+    sendAccount = PublicMethed.queryAccount(sendAccountKey, blockingStubFull);
     Long sendAccountAfterBalance = sendAccount.getBalance();
     logger.info(Long.toString(sendAccountAfterBalance));
     Assert.assertTrue(sendAccountAfterBalance == 90000000000L - 49880000000L - 100000L);
 
-    receiptAccount = PublicMethed.queryAccount(receiptAccountKey,blockingStubFull);
+    receiptAccount = PublicMethed.queryAccount(receiptAccountKey, blockingStubFull);
     Long receiptAccountAfterBalance = receiptAccount.getBalance();
     logger.info(Long.toString(receiptAccountAfterBalance));
     Assert.assertTrue(receiptAccountAfterBalance == 49880000000L);
-
-
-    //Freeze balance to get bandwidth.
-    Assert.assertTrue(PublicMethed.freezeBalance(fromAddress, 10000000L, 3L,
-        testKey002,blockingStubFull));
 
     //Send coin failed due to no enough balance.
     Assert.assertFalse(sendcoin(toAddress, 9199999999999999999L, fromAddress, testKey002));
     //Send coin failed due to the amount is 0.
     Assert.assertFalse(sendcoin(toAddress, 0L, fromAddress, testKey002));
-    //Send coin failed due to the amount is -1Trx.
+    //Send coin failed due to the amount is -1Gsc.
     Assert.assertFalse(sendcoin(toAddress, -1000000L, fromAddress, testKey002));
   }
+
+  /**
+   * constructor.
+   */
 
   @AfterClass
   public void shutdown() throws InterruptedException {
@@ -138,6 +159,10 @@ public class WalletTestTransfer001 {
       searchChannelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
+
+  /**
+   * constructor.
+   */
 
   public Boolean freezeBalance(byte[] addRess, long freezeBalance, long freezeDuration,
       String priKey) {
@@ -158,11 +183,8 @@ public class WalletTestTransfer001 {
     final Long beforeBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
     Account beforeFronzen = queryAccount(ecKey, blockingStubFull);
     Long beforeFrozenBalance = 0L;
-    //Long beforeBandwidth     = beforeFronzen.getBandwidth();
     if (beforeFronzen.getFrozenCount() != 0) {
       beforeFrozenBalance = beforeFronzen.getFrozen(0).getFrozenBalance();
-      //beforeBandwidth     = beforeFronzen.getBandwidth();
-      //logger.info(Long.toString(beforeFronzen.getBandwidth()));
       logger.info(Long.toString(beforeFronzen.getFrozen(0).getFrozenBalance()));
     }
 
@@ -206,19 +228,17 @@ public class WalletTestTransfer001 {
 
     Account afterFronzen = queryAccount(ecKey, searchBlockingStubFull);
     Long afterFrozenBalance = afterFronzen.getFrozen(0).getFrozenBalance();
-    //Long afterBandwidth     = afterFronzen.getBandwidth();
-    //logger.info(Long.toString(afterFronzen.getBandwidth()));
     logger.info(Long.toString(afterFronzen.getFrozen(0).getFrozenBalance()));
-    //logger.info(Integer.toString(search.getFrozenCount()));
     logger.info(
         "beforefronen" + beforeFrozenBalance.toString() + "    afterfronzen" + afterFrozenBalance
             .toString());
     Assert.assertTrue(afterFrozenBalance - beforeFrozenBalance == freezeBalance);
-    //Assert.assertTrue(afterBandwidth - beforeBandwidth == freezeBalance * frozen_duration);
     return true;
-
-
   }
+
+  /**
+   * constructor.
+   */
 
   public Boolean sendcoin(byte[] to, long amount, byte[] owner, String priKey) {
 
@@ -254,6 +274,10 @@ public class WalletTestTransfer001 {
     }
   }
 
+  /**
+   * constructor.
+   */
+
   public Account queryAccount(ECKey ecKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
     if (ecKey == null) {
@@ -278,11 +302,19 @@ public class WalletTestTransfer001 {
     return ecKey.getAddress();
   }
 
+  /**
+   * constructor.
+   */
+
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
   }
+
+  /**
+   * constructor.
+   */
 
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();
