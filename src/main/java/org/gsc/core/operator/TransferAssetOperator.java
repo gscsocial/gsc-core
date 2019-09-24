@@ -223,12 +223,12 @@ public class TransferAssetOperator extends AbstractOperator {
         }
 
         if (deposit.getAssetIssue(tokenIdWithoutLeadingZero) == null) {
-            System.out.println(Hex.toHexString(tokenIdWithoutLeadingZero));
-            System.out.println("deposit.getAssetIssue(tokenIdWithoutLeadingZero) == null");
+//            System.out.println(Hex.toHexString(tokenIdWithoutLeadingZero));
+//            System.out.println("deposit.getAssetIssue(tokenIdWithoutLeadingZero) == null");
             throw new ContractValidateException("No asset !");
         }
         if (!deposit.getDbManager().getAssetIssueStoreFinal().has(tokenIdWithoutLeadingZero)) {
-            System.out.println("!deposit.getDbManager().getAssetIssueStoreFinal().has(tokenIdWithoutLeadingZero)");
+//            System.out.println("!deposit.getDbManager().getAssetIssueStoreFinal().has(tokenIdWithoutLeadingZero)");
             throw new ContractValidateException("No asset !");
         }
 

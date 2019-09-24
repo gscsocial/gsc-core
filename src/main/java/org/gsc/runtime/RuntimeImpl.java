@@ -212,11 +212,6 @@ public class RuntimeImpl implements Runtime {
         long availableCpu = Math.addExact(leftFrozenCpu, cpuFromBalance);
 
         long cpuFromFeeLimit = feeLimit / dotPerCpu;
-        System.out.println("dotPerCpu: " + dotPerCpu);
-        System.out.println("leftFrozenCpu: " + leftFrozenCpu);
-        System.out.println("cpuFromBalance: " + cpuFromBalance);
-        System.out.println("availableCpu: " + availableCpu);
-        System.out.println("cpuFromFeeLimit: " + cpuFromFeeLimit);
         return min(availableCpu, cpuFromFeeLimit);
 
     }
@@ -321,8 +316,6 @@ public class RuntimeImpl implements Runtime {
                 );
             }
         }
-        System.out.println("callerCpuLimit: " + callerCpuLimit);
-        System.out.println("creatorCpuLimit: " + creatorCpuLimit);
         return Math.addExact(callerCpuLimit, creatorCpuLimit);
     }
 

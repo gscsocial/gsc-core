@@ -56,8 +56,6 @@ public class MUtil {
         if (0 == amount) {
             return;
         }
-        System.out.println("deposit--- fromAddress: " + Hex.toHexString(fromAddress) + ", " +
-                "toAddress: " + Hex.toHexString(toAddress) + ", tokenId.getBytes():" + Hex.toHexString(tokenId.getBytes()) + ", amount" + amount);
         TransferAssetOperator
                 .validateForSmartContract(deposit, fromAddress, toAddress, tokenId.getBytes(), amount);
         deposit.addTokenBalance(toAddress, tokenId.getBytes(), amount);
@@ -73,10 +71,5 @@ public class MUtil {
             address = newAddress;
         }
         return address;
-    }
-
-    public static void main(String[] args) {
-        byte[] adddr = Hex.decode("63ab67ead97e4f48de58f76e3d32a72d5b774251");
-        System.out.println(Hex.toHexString(convertToGSCAddress(adddr)));
     }
 }

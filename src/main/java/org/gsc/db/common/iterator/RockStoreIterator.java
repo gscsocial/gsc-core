@@ -48,11 +48,11 @@ public final class RockStoreIterator implements DBIterator {
                 dbIterator.close();
             }
         } catch (Exception e) {
-            System.out.println("e:" + e);
+//            System.out.println("e:" + e);
             try {
                 dbIterator.close();
             } catch (Exception e1) {
-                System.out.println("e1:" + e1);
+//                System.out.println("e1:" + e1);
             }
         }
         return hasNext;

@@ -78,18 +78,15 @@ public class Base58 {
         if (input.length() == 0) {
             return new byte[0];
         }
-//        System.out.println("input: " + input);
         byte[] input58 = new byte[input.length()];
         // Transform the String to a base58 byte sequence
         for (int i = 0; i < input.length(); ++i) {
             char c = input.charAt(i);
 
-//            System.out.println("c: " + c);
             int digit58 = -1;
             if (c >= 0 && c < 128) {
                 digit58 = INDEXES[c];
             }
-//            System.out.println("digit58: " + digit58);
             if (digit58 < 0) {
                 throw new IllegalArgumentException("Illegal character " + c + " at " + i);
             }

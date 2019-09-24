@@ -358,7 +358,6 @@ public class DepositImpl implements Deposit {
     @Override
     public synchronized AssetIssueWrapper getAssetIssue(byte[] tokenId) {
         byte[] tokenIdWithoutLeadingZero = ByteUtil.stripLeadingZeroes(tokenId);
-        System.out.println("tokenIdWithoutLeadingZero" + tokenIdWithoutLeadingZero);
         Key key = Key.create(tokenIdWithoutLeadingZero);
         if (assetIssueCache.containsKey(key)) {
             return assetIssueCache.get(key).getAssetIssue();
@@ -373,7 +372,6 @@ public class DepositImpl implements Deposit {
         if (assetIssueWrapper != null) {
             assetIssueCache.put(key, Value.create(assetIssueWrapper.getData()));
         }
-        System.out.println("assetIssueWrapper.getId()" + assetIssueWrapper.getId());
         return assetIssueWrapper;
     }
 

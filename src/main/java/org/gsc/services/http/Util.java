@@ -720,7 +720,6 @@ public class Util {
     public static String parseMethod(String methodSign, String input) {
         byte[] selector = new byte[4];
         System.arraycopy(Hash.sha3(methodSign.getBytes()), 0, selector, 0, 4);
-        //System.out.println(methodSign + ":" + Hex.toHexString(selector));
         if (StringUtils.isNullOrEmpty(input)) {
             return Hex.toHexString(selector);
         }
