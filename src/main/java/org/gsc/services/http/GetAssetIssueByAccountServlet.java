@@ -63,8 +63,7 @@ public class GetAssetIssueByAccountServlet extends HttpServlet {
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         try {
-            String account = request.getReader().lines()
-                    .collect(Collectors.joining(System.lineSeparator()));
+            String account = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
             Util.checkBodySize(account);
             boolean visible = Util.getVisiblePost(account);
             Account.Builder build = Account.newBuilder();

@@ -60,7 +60,6 @@ public class WitnessController {
         return instance;
     }
 
-
     public void initWits() {
         // getWitnesses().clear();
         List<ByteString> witnessAddresses = new ArrayList<>();
@@ -415,7 +414,6 @@ public class WitnessController {
     private static boolean witnessSetChanged(List<ByteString> list1, List<ByteString> list2) {
         return !CollectionUtils.isEqualCollection(list1, list2);
     }
-
 
     public int calculateParticipationRate() {
         return manager.getDynamicPropertiesStore().calculateFilledSlotsCount();

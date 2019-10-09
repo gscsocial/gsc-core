@@ -15,6 +15,9 @@ package org.gsc.utils;
 
 import com.google.protobuf.ByteString;
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.core.exception.BadItemException;
+import org.gsc.core.wrapper.BlockWrapper;
+import org.gsc.services.http.Util;
 import org.rocksdb.*;
 
 @Slf4j
@@ -27,14 +30,14 @@ public class SelectRocksDBData {
     // "/home/kay/workspace/mico/gsc-core/db-directory/database/";
     // "/home/kay/Desktop/gsc-full1/db-directory/database/";
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws BadItemException {
 
          data("dynamic_parameter");
-        // data("peers");
-        data("account");
+//         data("block");
+//        data("account");
     }
 
-    public static void data(String dataName) {
+    public static void data(String dataName) throws BadItemException {
         Options options = new Options();
         //options.createIfMissing(true);
         RocksDB db = null;
@@ -62,6 +65,8 @@ public class SelectRocksDBData {
                     case "peers":
                         peers(iterator.key(), iterator.value());
                         break;
+                    case "":
+                        block(iterator.key(), iterator.value());
                     default:
                         break;
                 }
@@ -93,6 +98,18 @@ public class SelectRocksDBData {
         long valueLong = ByteArray.toLong(value);
 
         System.out.println(keyStr + "\t:" + valueLong);
+    }
+
+    public static void block(byte[] key, byte[] value) throws BadItemException {
+
+        String keyStr = ByteArray.toHexString(key);
+        BlockWrapper blockWrapper = new BlockWrapper(value);
+        String valueStr = Util.printBlock(blockWrapper.getInstance(), true);
+
+        System.out.println("key:" + keyStr + ", value:" + valueStr);
+        blockWrapper.getInstance().getTransactionsList().forEach(transaction -> {
+            System.out.println(Util.printTransaction(transaction, true));
+        });
     }
 
 }

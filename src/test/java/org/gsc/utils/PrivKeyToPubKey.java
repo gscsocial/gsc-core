@@ -32,7 +32,9 @@ import org.gsc.wallet.common.client.utils.PublicMethed;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static org.apache.commons.codec.digest.DigestUtils.sha256;
 
@@ -43,7 +45,16 @@ public class PrivKeyToPubKey {
     public void common(){
 //        System.out.println(System.nanoTime());
 
-        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GSCgH5ZAQZqFgE9dnoFxRLHjwx6u7uWxkavN")));
+//        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GSCgH5ZAQZqFgE9dnoFxRLHjwx6u7uWxkavN")));
+//        // 01f80c
+//        System.out.println("GSCgH5ZAQZqFgE9dnoFxRLHjwx6u7uWxkavN".length());
+//        String add = Wallet.encode58Check(Hex.decode("41aae518abfa1c4bcf4705e69a4fcbecb62a49ca"));
+//        System.out.println(add);
+//        System.out.println(add.length());
+
+
+        int[] blockFilledSlots = new int[]{1,0,3,0,1,0};
+        double[] sum = IntStream.of(blockFilledSlots).asDoubleStream().toArray();
     }
 
     @Test
