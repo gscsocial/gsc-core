@@ -678,6 +678,10 @@ public class Util {
         return visible;
     }
 
+    public static String getHexString(final String string) {
+        return ByteArray.toHexString(ByteString.copyFromUtf8(string).toByteArray());
+    }
+
     public static String getHexAddress(final String address) {
         if (address != null) {
             byte[] addressByte = Wallet.decodeFromBase58Check(address);
@@ -685,10 +689,6 @@ public class Util {
         } else {
             return null;
         }
-    }
-
-    public static String getHexString(final String string) {
-        return ByteArray.toHexString(ByteString.copyFromUtf8(string).toByteArray());
     }
 
     public static Transaction setTransactionPermissionId(JSONObject jsonObject,

@@ -44,8 +44,6 @@ import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Block;
 
-//import stest.gsc.wallet.common.client.AccountComparator;
-
 @Slf4j
 public class WalletTestAccount003 {
 

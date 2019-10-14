@@ -95,9 +95,6 @@ public class WalletTestAccount005 {
     //Withdraw failed when you are not witness
     Assert.assertFalse(withdrawBalance(notWitness, notWitnessTestKey));
     //Due to it's hard to automation, withdraw balance success case is not automation,
-    // please test by manual
-    //Assert.assertTrue(WithdrawBalance(fromAddress,testKey002));
-    //Withdraw failed when the latest time to withdraw within 1 day.
 
     if (withdrawBalance(fromAddress, testKey002)) {
       Assert.assertFalse(withdrawBalance(fromAddress, testKey002));
@@ -206,7 +203,6 @@ public class WalletTestAccount005 {
       return false;
     }
     Account afterVote = queryAccount(ecKey, searchBlockingStubFull);
-    //Long afterVoteNum = afterVote.getVotes(0).getVoteCount();
     for (String key : witness.keySet()) {
       for (int j = 0; j < afterVote.getVotesCount(); j++) {
         if (key.equals(afterVote.getVotes(j).getVoteAddress())) {

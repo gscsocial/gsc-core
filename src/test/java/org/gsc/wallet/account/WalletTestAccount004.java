@@ -108,20 +108,20 @@ public class WalletTestAccount004 {
         fromAddress, testKey002, blockingStubFull));
     //Freeze failed when freeze amount is large than currently balance.
     Assert.assertFalse(freezeBalance(account004AddressForFreeze, 9000000000000000000L,
-        3L, account004KeyForFreeze));
+        5L, account004KeyForFreeze));
     //Freeze failed when freeze amount less than 1Gsc
-    Assert.assertFalse(freezeBalance(account004AddressForFreeze, 999999L, 3L,
+    Assert.assertFalse(freezeBalance(account004AddressForFreeze, 999999L, 5L,
         account004KeyForFreeze));
-    //Freeze failed when freeze duration isn't 3 days.
+    //Freeze failed when freeze duration isn't 5 days.
     //Assert.assertFalse(freezeBalance(fromAddress, 1000000L, 2L, testKey002));
-    //Unfreeze balance failed when 3 days hasn't come.
+    //Unfreeze balance failed when 5 days hasn't come.
     Assert.assertFalse(PublicMethed.unFreezeBalance(account004AddressForFreeze,
         account004KeyForFreeze, 0, null, blockingStubFull));
     //Freeze failed when freeze amount is 0.
-    Assert.assertFalse(freezeBalance(account004AddressForFreeze, 0L, 3L,
+    Assert.assertFalse(freezeBalance(account004AddressForFreeze, 0L, 5L,
         account004KeyForFreeze));
     //Freeze failed when freeze amount is -1.
-    Assert.assertFalse(freezeBalance(account004AddressForFreeze, -1L, 3L,
+    Assert.assertFalse(freezeBalance(account004AddressForFreeze, -1L, 5L,
         account004KeyForFreeze));
     //Freeze failed when freeze duration is -1.
     //Assert.assertFalse(freezeBalance(fromAddress, 1000000L, -1L, testKey002));
@@ -209,8 +209,6 @@ public class WalletTestAccount004 {
     //Long beforeNet     = beforeFronzen.getNet();
     if (beforeFronzen.getFrozenCount() != 0) {
       beforeFrozenBalance = beforeFronzen.getFrozen(0).getFrozenBalance();
-      //beforeNet     = beforeFronzen.getNet();
-      //logger.info(Long.toString(beforeFronzen.getNet()));
       logger.info(Long.toString(beforeFronzen.getFrozen(0).getFrozenBalance()));
     }
 
@@ -238,24 +236,9 @@ public class WalletTestAccount004 {
     Long afterBlockNum = 0L;
     Integer wait = 0;
     PublicMethed.waitProduceNextBlock(searchBlockingStubFull);
-    /*    while (afterBlockNum < beforeBlockNum + 1 && wait < 10) {
-      Block currentBlock1 = searchBlockingStubFull.getNowBlock(EmptyMessage.newBuilder().build());
-      afterBlockNum = currentBlock1.getBlockHeader().getRawData().getNumber();
-      wait++;
-      try {
-        Thread.sleep(2000);
-        logger.info("wait 2 second");
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }*/
-
     Account afterFronzen = queryAccount(ecKey, searchBlockingStubFull);
     Long afterFrozenBalance = afterFronzen.getFrozen(0).getFrozenBalance();
-    //Long afterNet     = afterFronzen.getNet();
-    //logger.info(Long.toString(afterFronzen.getNet()));
     logger.info(Long.toString(afterFronzen.getFrozen(0).getFrozenBalance()));
-    //logger.info(Integer.toString(search.getFrozenCount()));
     logger.info(
         "beforefronen" + beforeFrozenBalance.toString() + "    afterfronzen" + afterFrozenBalance
             .toString());

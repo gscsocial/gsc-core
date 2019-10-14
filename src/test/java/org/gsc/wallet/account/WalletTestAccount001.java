@@ -53,8 +53,6 @@ public class WalletTestAccount001 {
   private WalletGrpc.WalletBlockingStub blockingStubFull = null;
   private WalletConfirmedGrpc.WalletConfirmedBlockingStub blockingStubConfirmed = null;
 
-  private static final long now = System.currentTimeMillis();
-
   private String fullnode = Configuration.getByPath("testng.conf").getStringList("fullnode.ip.list")
       .get(0);
   private String confirmedNode = Configuration.getByPath("testng.conf")
@@ -87,12 +85,10 @@ public class WalletTestAccount001 {
   public void testqueryaccountfromfullnode() {
     //Query success, get the right balance,net and the account name.
     Account queryResult = queryAccount(testKey002, blockingStubFull);
-    /*    Account queryResult = PublicMethed.queryAccountByAddress(fromAddress,blockingStubFull);
     logger.info(ByteArray.toStr(queryResult.getAccountName().toByteArray()));
     logger.info(Long.toString(queryResult.getBalance()));
-    logger.info(ByteArray.toStr(queryResult.getAddress().toByteArray()));*/
+    logger.info(ByteArray.toStr(queryResult.getAddress().toByteArray()));
     Assert.assertTrue(queryResult.getBalance() > 0);
-    //Assert.assertTrue(queryResult.getNet() >= 0);
     Assert.assertTrue(queryResult.getAccountName().toByteArray().length > 0);
     Assert.assertFalse(queryResult.getAddress().isEmpty());
 
@@ -113,7 +109,6 @@ public class WalletTestAccount001 {
     //Query success, get the right balance,net and the account name.
     Account queryResult = confirmedQueryAccount(testKey002, blockingStubConfirmed);
     Assert.assertTrue(queryResult.getBalance() > 0);
-    //Assert.assertTrue(queryResult.getNet() >= 0);
     Assert.assertTrue(queryResult.getAccountName().toByteArray().length > 0);
     Assert.assertFalse(queryResult.getAddress().isEmpty());
 
@@ -165,11 +160,11 @@ public class WalletTestAccount001 {
     }
     logger.info(Integer.toString(ecKey.getAddress().length));
 
-    //PublicMethed.AddPreFix();
+    // PublicMethed.AddPreFix();
+    logger.info("address: ", Hex.toHexString(ecKey.getAddress()));
     logger.info(Integer.toString(ecKey.getAddress().length));
-    System.out.println("address ====== " + ByteArray.toHexString(ecKey.getAddress()));
     return grpcQueryAccount(ecKey.getAddress(), blockingStubFull);
-    //return grpcQueryAccount(address,blockingStubFull);
+//    return grpcQueryAccount(ecKey.getAddress(), blockingStubFull);
   }
 
   /**
@@ -188,7 +183,7 @@ public class WalletTestAccount001 {
     }
     ECKey ecKey = temKey;
     if (ecKey == null) {
-      String pubKey = loadPubKey(); //04 PubKey[128]
+      String pubKey = loadPubKey();
       if (StringUtils.isEmpty(pubKey)) {
         logger.warn("Warning: QueryAccount failed, no wallet address !!");
         return null;
@@ -197,9 +192,8 @@ public class WalletTestAccount001 {
       byte[] pubKeyHex = Hex.decode(pubKeyAsc);
       ecKey = ECKey.fromPublicOnly(pubKeyHex);
     }
-    //byte[] address = PublicMethed.AddPreFix(ecKey.getAddress());
     return grpcQueryAccountConfirmed(ecKey.getAddress(), blockingStubConfirmed);
-    //return grpcQueryAccountConfirmed(address,blockingStubConfirmed);
+//     return grpcQueryAccountConfirmed(ecKey.getAddress(), blockingStubConfirmed);
   }
 
   /**
@@ -221,7 +215,6 @@ public class WalletTestAccount001 {
 
   public Account grpcQueryAccount(byte[] address,
       WalletGrpc.WalletBlockingStub blockingStubFull) {
-    //address = PublicMethed.AddPreFix(address);
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
@@ -233,7 +226,6 @@ public class WalletTestAccount001 {
 
   public Account grpcQueryAccountConfirmed(byte[] address,
       WalletConfirmedGrpc.WalletConfirmedBlockingStub blockingStubConfirmed) {
-    //address = PublicMethed.AddPreFix(address);
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubConfirmed.getAccount(request);

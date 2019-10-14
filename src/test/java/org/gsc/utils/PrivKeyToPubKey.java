@@ -59,17 +59,19 @@ public class PrivKeyToPubKey {
 
     @Test
     public void privKeyToPubKey() {
-        String privStr = "a284c5935e33ec2c363913b6cf628da5c81defc2f96afb64690ae7a2f5535620";
+        String privStr = "FD5BB82CBCB378740082FD9E8DC3CC3A959FCD8176CFD829D403D1AF3ED0DDA8";
         BigInteger privKey = new BigInteger(privStr, 16);
 
         // Wallet.setAddressPreFixByte((byte) 0x26);
-        final ECKey ecKey = ECKey.fromPrivate(privKey);
+       // final ECKey ecKey = ECKey.fromPrivate(privKey);
+        ECKey ecKey = new ECKey(new SecureRandom());
         byte[] address = ecKey.getAddress();
         String pubkey = Wallet.encode58Check(address);
 
         logger.info("------------ kayfhan ---------------------------------");
         System.out.println();
-        System.out.println("Private Key: " + privStr);
+//        System.out.println("Private Key: " + privStr);
+        System.out.println(Hex.toHexString(ecKey.getPrivKeyBytes()));
         System.out.println(Hex.toHexString(address));
         System.out.println(pubkey);
         System.out.println("01 f8 0c 6145c6b6ebb0a7a87a8ce1ef9ae8f21a7d5b24e7".length());
