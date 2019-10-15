@@ -85,6 +85,18 @@ public class FileUtil {
         return false;
     }
 
+    public static int readData(String filePath, char[] buf) {
+        int len;
+        File file = new File(filePath);
+        try (BufferedReader bufRead = new BufferedReader(new FileReader(file))) {
+            len = bufRead.read(buf, 0, buf.length);
+        } catch (IOException ex) {
+            logger.warn(ex.getMessage());
+            return 0;
+        }
+        return len;
+    }
+
     public static void saveData(String filePath, String data, boolean append) {
         File priFile = new File(filePath);
         try {
@@ -100,18 +112,6 @@ public class FileUtil {
         } catch (IOException e) {
             logger.debug(e.getMessage(), e);
         }
-    }
-
-    public static int readData(String filePath, char[] buf) {
-        int len;
-        File file = new File(filePath);
-        try (BufferedReader bufRead = new BufferedReader(new FileReader(file))) {
-            len = bufRead.read(buf, 0, buf.length);
-        } catch (IOException ex) {
-            logger.warn(ex.getMessage());
-            return 0;
-        }
-        return len;
     }
 
     /**
@@ -131,6 +131,14 @@ public class FileUtil {
         return dir.delete();
     }
 
+    public static boolean createDirIfNotExists(String dirPath) {
+        File dir = new File(dirPath);
+        if (!dir.exists()) {
+            return dir.mkdirs();
+        }
+        return true;
+    }
+
     public static boolean createFileIfNotExists(String filepath) {
         File file = new File(filepath);
         if (!file.exists()) {
@@ -145,11 +153,4 @@ public class FileUtil {
         return true;
     }
 
-    public static boolean createDirIfNotExists(String dirPath) {
-        File dir = new File(dirPath);
-        if (!dir.exists()) {
-            return dir.mkdirs();
-        }
-        return true;
-    }
 }

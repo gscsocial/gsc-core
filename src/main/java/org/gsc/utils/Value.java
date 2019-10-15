@@ -128,7 +128,6 @@ public class Value {
         return ByteUtil.EMPTY_BYTE_ARRAY;
     }
 
-
     public int[] asSlice() {
         return (int[]) value;
     }
@@ -151,8 +150,6 @@ public class Value {
     /* *****************
      *      Utility
      * *****************/
-
-
     public boolean cmp(Value o) {
         return DeepEquals.deepEquals(this, o);
     }

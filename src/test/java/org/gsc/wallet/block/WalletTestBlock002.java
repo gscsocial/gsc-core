@@ -37,10 +37,6 @@ import org.gsc.protos.Protocol.Block;
 import org.gsc.wallet.common.client.Configuration;
 import org.gsc.wallet.common.client.Parameter.CommonConstant;
 
-//import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIConversion;
-
-//import stest.gsc.wallet.common.client.AccountComparator;
-
 @Slf4j
 public class WalletTestBlock002 {
 

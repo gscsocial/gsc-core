@@ -113,7 +113,7 @@ public class KeystoreFactory {
     private void help() {
         System.out.println("You can enter the following command: ");
         System.out.println("GenKeystore");
-        System.out.println("ImportPrivatekey");
+        System.out.println("Import Private key");
         System.out.println("Exit or Quit");
         System.out.println("Input any one of then, you will get more tips.");
     }

@@ -27,15 +27,15 @@ public final class SessionOptional {
         this.value = Optional.empty();
     }
 
+    public synchronized boolean valid() {
+        return value.isPresent();
+    }
+
     public synchronized SessionOptional setValue(ISession value) {
         if (!this.value.isPresent()) {
             this.value = Optional.of(value);
         }
         return this;
-    }
-
-    public synchronized boolean valid() {
-        return value.isPresent();
     }
 
     public synchronized void reset() {

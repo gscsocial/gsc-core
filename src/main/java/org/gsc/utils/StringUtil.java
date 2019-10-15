@@ -35,7 +35,6 @@ public class StringUtil {
         return str.matches(regex);
     }
 
-
     public static byte[] createDbKey(ByteString string) {
         return string.toByteArray();
     }
