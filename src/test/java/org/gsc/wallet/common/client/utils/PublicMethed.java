@@ -1704,24 +1704,24 @@ public class PublicMethed {
      * constructor.
      */
 
-    public static AccountNetMessage getAccountNet(byte[] address, WalletGrpc.WalletBlockingStub
-            blockingStubFull) {
-        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
-        ByteString addressBs = ByteString.copyFrom(address);
-        Account request = Account.newBuilder().setAddress(addressBs).build();
-        return blockingStubFull.getAccountNet(request);
-    }
-
-    /**
-     * constructor.
-     */
-
     public static byte[] getFinalAddress(String priKey) {
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
         WalletClient walletClient;
         walletClient = new WalletClient(priKey);
         //walletClient.init(0);
         return walletClient.getAddress();
+    }
+
+    /**
+     * constructor.
+     */
+
+    public static AccountNetMessage getAccountNet(byte[] address, WalletGrpc.WalletBlockingStub
+            blockingStubFull) {
+        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
+        ByteString addressBs = ByteString.copyFrom(address);
+        Account request = Account.newBuilder().setAddress(addressBs).build();
+        return blockingStubFull.getAccountNet(request);
     }
 
     /**
@@ -1945,18 +1945,6 @@ public class PublicMethed {
      * constructor.
      */
 
-    public static boolean printAddress(String key) {
-        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
-        logger.info(key);
-        logger.info(ByteArray.toHexString(getFinalAddress(key)));
-        logger.info(Base58.encode58Check(getFinalAddress(key)));
-        return true;
-    }
-
-    /**
-     * constructor.
-     */
-
     public static String getAddressString(String key) {
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
         return Base58.encode58Check(getFinalAddress(key));
@@ -1974,6 +1962,29 @@ public class PublicMethed {
         accountList.add(ByteArray.toHexString(getFinalAddress(key)));
         accountList.add(Base58.encode58Check(getFinalAddress(key)));
         return accountList;
+    }
+
+    /**
+     * constructor.
+     */
+
+    public static boolean printAddress(String key) {
+        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
+        logger.info(key);
+        logger.info(ByteArray.toHexString(getFinalAddress(key)));
+        logger.info(Base58.encode58Check(getFinalAddress(key)));
+        return true;
+    }
+
+    /**
+     * constructor.
+     */
+    public static AccountResourceMessage getAccountResource(byte[] address,
+                                                            WalletGrpc.WalletBlockingStub blockingStubFull) {
+        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
+        ByteString addressBs = ByteString.copyFrom(address);
+        Account request = Account.newBuilder().setAddress(addressBs).build();
+        return blockingStubFull.getAccountResource(request);
     }
 
     /**
@@ -2045,17 +2056,6 @@ public class PublicMethed {
         transaction = TransactionUtils.sign(transaction, ecKey);
         GrpcAPI.Return response = broadcastTransaction(transaction, blockingStubFull);
         return response.getResult();
-    }
-
-    /**
-     * constructor.
-     */
-    public static AccountResourceMessage getAccountResource(byte[] address,
-                                                            WalletGrpc.WalletBlockingStub blockingStubFull) {
-        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
-        ByteString addressBs = ByteString.copyFrom(address);
-        Account request = Account.newBuilder().setAddress(addressBs).build();
-        return blockingStubFull.getAccountResource(request);
     }
 
     /**
@@ -2628,25 +2628,6 @@ public class PublicMethed {
      * constructor.
      */
 
-    public static SmartContract.ABI.Entry.EntryType getEntryType(String type) {
-        switch (type) {
-            case "constructor":
-                return SmartContract.ABI.Entry.EntryType.Constructor;
-            case "function":
-                return SmartContract.ABI.Entry.EntryType.Function;
-            case "event":
-                return SmartContract.ABI.Entry.EntryType.Event;
-            case "fallback":
-                return SmartContract.ABI.Entry.EntryType.Fallback;
-            default:
-                return SmartContract.ABI.Entry.EntryType.UNRECOGNIZED;
-        }
-    }
-
-    /**
-     * constructor.
-     */
-
     public static SmartContract.ABI.Entry.StateMutabilityType getStateMutability(
             String stateMutability) {
         switch (stateMutability) {
@@ -2660,6 +2641,25 @@ public class PublicMethed {
                 return SmartContract.ABI.Entry.StateMutabilityType.Payable;
             default:
                 return SmartContract.ABI.Entry.StateMutabilityType.UNRECOGNIZED;
+        }
+    }
+
+    /**
+     * constructor.
+     */
+
+    public static SmartContract.ABI.Entry.EntryType getEntryType(String type) {
+        switch (type) {
+            case "constructor":
+                return SmartContract.ABI.Entry.EntryType.Constructor;
+            case "function":
+                return SmartContract.ABI.Entry.EntryType.Function;
+            case "event":
+                return SmartContract.ABI.Entry.EntryType.Event;
+            case "fallback":
+                return SmartContract.ABI.Entry.EntryType.Fallback;
+            default:
+                return SmartContract.ABI.Entry.EntryType.UNRECOGNIZED;
         }
     }
 
@@ -2875,27 +2875,6 @@ public class PublicMethed {
             }
             return false;
         }
-    /*    transactionExtention = TransactionUtils.setDelaySecondsToExtension(
-    transactionExtention, delaySeconds);
-    if (transactionExtention == null) {
-      return false;
-    }
-    Return ret = transactionExtention.getResult();
-    if (!ret.getResult()) {
-      System.out.println("Code = " + ret.getCode());
-      System.out.println("Message = " + ret.getMessage().toStringUtf8());
-      return false;
-    }
-    Transaction transaction = transactionExtention.getTransaction();
-    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-      System.out.println("Transaction is empty");
-      return false;
-    }
-    System.out.println(
-        "Receive txid = " + ByteArray.toHexString(transactionExtention.getTxid().toByteArray()));
-    transaction = signTransaction(ecKey, transaction);
-    GrpcAPI.Return response = broadcastTransaction(transaction, blockingStubFull);
-    return response.getResult();*/
         return false;
     }
 
@@ -2935,28 +2914,6 @@ public class PublicMethed {
             }
             return null;
         }
-    /*    transactionExtention = TransactionUtils.setDelaySecondsToExtension(
-    transactionExtention, delaySeconds);
-    if (transactionExtention == null) {
-      return null;
-    }
-    Return ret = transactionExtention.getResult();
-    if (!ret.getResult()) {
-      System.out.println("Code = " + ret.getCode());
-      System.out.println("Message = " + ret.getMessage().toStringUtf8());
-      return null;
-    }
-    Transaction transaction = transactionExtention.getTransaction();
-    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-      System.out.println("Transaction is empty");
-      return null;
-    }
-    System.out.println(
-        "Receive txid = " + ByteArray.toHexString(transactionExtention.getTxid().toByteArray()));
-    transaction = signTransaction(ecKey, transaction);
-    GrpcAPI.Return response = broadcastTransaction(transaction, blockingStubFull);
-
-    return ByteArray.toHexString(Sha256Hash.hash(transaction.getRawData().toByteArray()));*/
         return null;
     }
 
@@ -2995,8 +2952,6 @@ public class PublicMethed {
             }
             return null;
         }
-        //transactionExtention = TransactionUtils.setDelaySecondsToExtension(
-        // transactionExtention, delaySeconds);
         if (transactionExtention == null) {
             return null;
         }
@@ -3355,6 +3310,18 @@ public class PublicMethed {
         return Optional.ofNullable(exchangeList);
     }
 
+    /**
+     * constructor.
+     */
+
+    public static Optional<Exchange> getExchange(String id, WalletGrpc.WalletBlockingStub
+            blockingStubFull) {
+        BytesMessage request = BytesMessage.newBuilder().setValue(ByteString.copyFrom(
+                ByteArray.fromLong(Long.parseLong(id))))
+                .build();
+        Exchange exchange = blockingStubFull.getExchangeById(request);
+        return Optional.ofNullable(exchange);
+    }
 
     /**
      * constructor.
@@ -3366,19 +3333,6 @@ public class PublicMethed {
                 ByteArray.fromLong(Long.parseLong(id))))
                 .build();
         Exchange exchange = blockingStubConfirmed.getExchangeById(request);
-        return Optional.ofNullable(exchange);
-    }
-
-    /**
-     * constructor.
-     */
-
-    public static Optional<Exchange> getExchange(String id, WalletGrpc.WalletBlockingStub
-            blockingStubFull) {
-        BytesMessage request = BytesMessage.newBuilder().setValue(ByteString.copyFrom(
-                ByteArray.fromLong(Long.parseLong(id))))
-                .build();
-        Exchange exchange = blockingStubFull.getExchangeById(request);
         return Optional.ofNullable(exchange);
     }
 
