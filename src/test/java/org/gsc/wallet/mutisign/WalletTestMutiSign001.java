@@ -223,12 +223,6 @@ public class WalletTestMutiSign001 {
         long cpuFee = infoById.get().getReceipt().getCpuFee();
         long netFee = infoById.get().getReceipt().getNetFee();
         long fee = infoById.get().getFee();
-
-        logger.info("balanceAfter: " + balanceAfter);
-        logger.info("cpuFee: " + cpuFee);
-        logger.info("netFee: " + netFee);
-        logger.info("fee: " + fee);
-
         Assert.assertEquals(balanceBefore - balanceAfter, fee);
         Assert.assertEquals(fee, cpuFee + netFee + multiSignFee);
     }
@@ -259,11 +253,6 @@ public class WalletTestMutiSign001 {
         long cpuFee = infoById.get().getReceipt().getCpuFee();
         long netFee = infoById.get().getReceipt().getNetFee();
         long fee = infoById.get().getFee();
-
-        logger.info("balanceAfter: " + balanceAfter);
-        logger.info("cpuFee: " + cpuFee);
-        logger.info("netFee: " + netFee);
-        logger.info("fee: " + fee);
 
         Assert.assertEquals(balanceBefore - balanceAfter, fee);
         Assert.assertEquals(fee, cpuFee + netFee + multiSignFee);
@@ -319,11 +308,6 @@ public class WalletTestMutiSign001 {
         long netFee = infoById.get().getReceipt().getNetFee();
         long fee = infoById.get().getFee();
 
-        logger.info("balanceAfter: " + balanceAfter);
-        logger.info("cpuFee: " + cpuFee);
-        logger.info("netFee: " + netFee);
-        logger.info("fee: " + fee);
-
         Assert.assertEquals(balanceBefore - balanceAfter, fee);
         Assert.assertEquals(fee, cpuFee + netFee + updateAccountPermissionFee);
 
@@ -343,11 +327,6 @@ public class WalletTestMutiSign001 {
         cpuFee = infoById.get().getReceipt().getCpuFee();
         netFee = infoById.get().getReceipt().getNetFee();
         fee = infoById.get().getFee();
-
-        logger.info("balanceAfter: " + balanceAfter);
-        logger.info("cpuFee: " + cpuFee);
-        logger.info("netFee: " + netFee);
-        logger.info("fee: " + fee);
 
         Assert.assertEquals(balanceBefore - balanceAfter, fee + 10);
         Assert.assertEquals(fee, cpuFee + netFee + multiSignFee);

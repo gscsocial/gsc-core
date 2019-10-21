@@ -62,11 +62,11 @@ public class FullNodeHttpApiService implements Service {
     @Autowired
     private UnFreezeAssetServlet unFreezeAssetServlet;
     @Autowired
-    private WithdrawBalanceServlet withdrawBalanceServlet;
-    @Autowired
     private UpdateAssetServlet updateAssetServlet;
     @Autowired
     private ListNodesServlet listNodesServlet;
+    @Autowired
+    private WithdrawBalanceServlet withdrawBalanceServlet;
     @Autowired
     private GetAssetIssueByAccountServlet getAssetIssueByAccountServlet;
     @Autowired

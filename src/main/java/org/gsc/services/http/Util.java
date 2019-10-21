@@ -116,6 +116,16 @@ public class Util {
         return jsonObject;
     }
 
+    public static String printTransaction(Transaction transaction, boolean selfType) {
+        return printTransactionToJSON(transaction, selfType).toJSONString();
+    }
+
+    public static String printCreateTransaction(Transaction transaction, boolean selfType) {
+        JSONObject jsonObject = printTransactionToJSON(transaction, selfType);
+        jsonObject.put(VISIBLE, selfType);
+        return jsonObject.toJSONString();
+    }
+
     public static String printTransactionList(TransactionList list, boolean selfType) {
         List<Transaction> transactions = list.getTransactionList();
         JSONObject jsonObject = JSONObject.parseObject(JsonFormat.printToString(list, selfType));
@@ -141,16 +151,6 @@ public class Util {
         JSONObject jsonResponse = JSONObject.parseObject(JsonFormat.printToString(response, selfType));
         jsonResponse.put(TRANSACTION, printTransactionToJSON(response.getTransaction(), selfType));
         return jsonResponse.toJSONString();
-    }
-
-    public static String printTransaction(Transaction transaction, boolean selfType) {
-        return printTransactionToJSON(transaction, selfType).toJSONString();
-    }
-
-    public static String printCreateTransaction(Transaction transaction, boolean selfType) {
-        JSONObject jsonObject = printTransactionToJSON(transaction, selfType);
-        jsonObject.put(VISIBLE, selfType);
-        return jsonObject.toJSONString();
     }
 
     public static String printTransactionExtention(TransactionExtention transactionExtention,
@@ -660,6 +660,19 @@ public class Util {
         }
     }
 
+    public static String getHexString(final String string) {
+        return ByteArray.toHexString(ByteString.copyFromUtf8(string).toByteArray());
+    }
+
+    public static String getHexAddress(final String address) {
+        if (address != null) {
+            byte[] addressByte = Wallet.decodeFromBase58Check(address);
+            return ByteArray.toHexString(addressByte);
+        } else {
+            return null;
+        }
+    }
+
     public static boolean getVisible(final HttpServletRequest request) {
         boolean visible = false;
         if (StringUtil.isNotBlank(request.getParameter(VISIBLE))) {
@@ -678,19 +691,6 @@ public class Util {
         return visible;
     }
 
-    public static String getHexString(final String string) {
-        return ByteArray.toHexString(ByteString.copyFromUtf8(string).toByteArray());
-    }
-
-    public static String getHexAddress(final String address) {
-        if (address != null) {
-            byte[] addressByte = Wallet.decodeFromBase58Check(address);
-            return ByteArray.toHexString(addressByte);
-        } else {
-            return null;
-        }
-    }
-
     public static Transaction setTransactionPermissionId(JSONObject jsonObject,
                                                          Transaction transaction) {
         if (jsonObject.containsKey(PERMISSION_ID)) {
@@ -707,16 +707,6 @@ public class Util {
         return transaction;
     }
 
-    public static boolean getVisibleOnlyForSign(JSONObject jsonObject) {
-        boolean visible = false;
-        if (jsonObject.containsKey(VISIBLE)) {
-            visible = jsonObject.getBoolean(VISIBLE);
-        } else if (jsonObject.getJSONObject(TRANSACTION).containsKey(VISIBLE)) {
-            visible = jsonObject.getJSONObject(TRANSACTION).getBoolean(VISIBLE);
-        }
-        return visible;
-    }
-
     public static String parseMethod(String methodSign, String input) {
         byte[] selector = new byte[4];
         System.arraycopy(Hash.sha3(methodSign.getBytes()), 0, selector, 0, 4);
@@ -725,6 +715,16 @@ public class Util {
         }
 
         return Hex.toHexString(selector) + input;
+    }
+
+    public static boolean getVisibleOnlyForSign(JSONObject jsonObject) {
+        boolean visible = false;
+        if (jsonObject.containsKey(VISIBLE)) {
+            visible = jsonObject.getBoolean(VISIBLE);
+        } else if (jsonObject.getJSONObject(TRANSACTION).containsKey(VISIBLE)) {
+            visible = jsonObject.getJSONObject(TRANSACTION).getBoolean(VISIBLE);
+        }
+        return visible;
     }
 
     public static long getJsonLongValue(final JSONObject jsonObject, final String key) {
