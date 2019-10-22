@@ -163,6 +163,7 @@ public class WalletTestMutiSign003 {
     long netFee = infoById.get().getReceipt().getNetFee();
     long fee = infoById.get().getFee();
 
+    logger.info("balanceBefore: " + balanceBefore);
     logger.info("balanceAfter: " + balanceAfter);
     logger.info("cpuFee: " + cpuFee);
     logger.info("netFee: " + netFee);

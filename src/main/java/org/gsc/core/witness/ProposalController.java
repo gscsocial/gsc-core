@@ -38,6 +38,28 @@ public class ProposalController {
         return instance;
     }
 
+    public void processProposal(ProposalWrapper proposalWrapper) {
+
+        List<ByteString> activeWitnesses = this.manager.getWitnessScheduleStore().getActiveWitnesses();
+        if (proposalWrapper.hasMostApprovals(activeWitnesses)) {
+            logger.info(
+                    "Processing proposal,id:{},it has received most approvals, "
+                            + "begin to set dynamic parameter:{}, "
+                            + "and set proposal state as APPROVED",
+                    proposalWrapper.getID(), proposalWrapper.getParameters());
+            setDynamicParameters(proposalWrapper);
+            proposalWrapper.setState(State.APPROVED);
+            manager.getProposalStore().put(proposalWrapper.createDbKey(), proposalWrapper);
+        } else {
+            logger.info(
+                    "Processing proposal,id:{}, "
+                            + "it has not received enough approvals, set proposal state as DISAPPROVED",
+                    proposalWrapper.getID());
+            proposalWrapper.setState(State.DISAPPROVED);
+            manager.getProposalStore().put(proposalWrapper.createDbKey(), proposalWrapper);
+        }
+
+    }
 
     public void processProposals() {
         long latestProposalNum = manager.getDynamicPropertiesStore().getLatestProposalNum();
@@ -84,29 +106,6 @@ public class ProposalController {
             logger.info("Proposal has not expired，id:[{}],skip it", proposalWrapper.getID());
         }
         logger.info("Processing proposals done, oldest proposal[{}]", proposalNum);
-    }
-
-    public void processProposal(ProposalWrapper proposalWrapper) {
-
-        List<ByteString> activeWitnesses = this.manager.getWitnessScheduleStore().getActiveWitnesses();
-        if (proposalWrapper.hasMostApprovals(activeWitnesses)) {
-            logger.info(
-                    "Processing proposal,id:{},it has received most approvals, "
-                            + "begin to set dynamic parameter:{}, "
-                            + "and set proposal state as APPROVED",
-                    proposalWrapper.getID(), proposalWrapper.getParameters());
-            setDynamicParameters(proposalWrapper);
-            proposalWrapper.setState(State.APPROVED);
-            manager.getProposalStore().put(proposalWrapper.createDbKey(), proposalWrapper);
-        } else {
-            logger.info(
-                    "Processing proposal,id:{}, "
-                            + "it has not received enough approvals, set proposal state as DISAPPROVED",
-                    proposalWrapper.getID());
-            proposalWrapper.setState(State.DISAPPROVED);
-            manager.getProposalStore().put(proposalWrapper.createDbKey(), proposalWrapper);
-        }
-
     }
 
     public void setDynamicParameters(ProposalWrapper proposalWrapper) {

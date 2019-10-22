@@ -53,6 +53,8 @@ public class MessageHandler extends SimpleChannelInboundHandler<UdpEvent>
         eventHandler.handleEvent(udpEvent);
     }
 
+
+
     @Override
     public void accept(UdpEvent udpEvent) {
         logger.debug("send udp msg type {}, len {} to {} ",

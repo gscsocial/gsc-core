@@ -145,7 +145,6 @@ public class WalletTestMutiSign005 {
         blockingStubFull, ownerKeyString);
 
     //Create a proposal
-
     PublicMethed.waitProduceNextBlock(blockingStubFull);
     HashMap<Long, Long> proposalMap = new HashMap<Long, Long>();
     proposalMap.put(0L, 81000L);
@@ -170,6 +169,7 @@ public class WalletTestMutiSign005 {
 
     Long balanceAfter = PublicMethed.queryAccount(witness001Address, blockingStubFull)
         .getBalance();
+    logger.info("balanceBefore: " + balanceBefore);
     logger.info("balanceAfter: " + balanceAfter);
 
     Assert.assertTrue(balanceBefore - balanceAfter >= needcoin);

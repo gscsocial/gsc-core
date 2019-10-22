@@ -438,13 +438,6 @@ public class WitnessController {
         logger.debug(builder.toString());
     }
 
-
-    private void sortWitness(List<ByteString> list) {
-        list.sort(Comparator.comparingLong((ByteString b) -> getWitnesseByAddress(b).getVoteCount())
-                .reversed()
-                .thenComparing(Comparator.comparingInt(ByteString::hashCode).reversed()));
-    }
-
     private void payStandbyWitness(List<ByteString> list) {
         long voteSum = 0;
         long totalPay = manager.getDynamicPropertiesStore().getWitnessStandbyAllowance();
@@ -460,6 +453,12 @@ public class WitnessController {
             }
         }
 
+    }
+
+    private void sortWitness(List<ByteString> list) {
+        list.sort(Comparator.comparingLong((ByteString b) -> getWitnesseByAddress(b).getVoteCount())
+                .reversed()
+                .thenComparing(Comparator.comparingInt(ByteString::hashCode).reversed()));
     }
 
     public boolean isGeneratingBlock() {

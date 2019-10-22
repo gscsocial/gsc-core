@@ -155,6 +155,7 @@ public class WalletTestMutiSign001 {
         long netFee = infoById.get().getReceipt().getNetFee();
         long fee = infoById.get().getFee();
 
+        logger.info("balanceBefore: " + balanceBefore);
         logger.info("balanceAfter: " + balanceAfter);
         logger.info("cpuFee: " + cpuFee);
         logger.info("netFee: " + netFee);
@@ -184,6 +185,7 @@ public class WalletTestMutiSign001 {
         netFee = infoById.get().getReceipt().getNetFee();
         fee = infoById.get().getFee();
 
+        logger.info("balanceBefore: " + balanceBefore);
         logger.info("balanceAfter: " + balanceAfter);
         logger.info("cpuFee: " + cpuFee);
         logger.info("netFee: " + netFee);
@@ -198,7 +200,6 @@ public class WalletTestMutiSign001 {
     /**
      * constructor.
      */
-
     @Test(enabled = true)
     public void testMutiSign2TransferAssetissue() {
         PublicMethed.waitProduceNextBlock(blockingStubFull);
@@ -230,7 +231,6 @@ public class WalletTestMutiSign001 {
     /**
      * constructor.
      */
-
     @Test(enabled = true)
     public void testMutiSign4updateAssetissue() {
         url = "MutiSign001_update_url" + Long.toString(now);
