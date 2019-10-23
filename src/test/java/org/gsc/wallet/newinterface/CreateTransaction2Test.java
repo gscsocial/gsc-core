@@ -52,11 +52,6 @@ public class CreateTransaction2Test {
   private final String testKey003 = Configuration.getByPath("testng.conf")
       .getString("foundationAccount.key2");
 
-  /*  //testng001、testng002、testng003、testng004
-  private static final byte[] fromAddress = Base58
-      .decodeFromBase58Check("THph9K2M2nLvkianrMGswRhz5hjSA9fuH7");
-  private static final byte[] toAddress = Base58
-      .decodeFromBase58Check("TV75jZpdmP2juMe1dRwGrwpV6AMU6mr1EU");*/
   private final byte[] fromAddress = PublicMethed.getFinalAddress(testKey002);
   private final byte[] toAddress = PublicMethed.getFinalAddress(testKey003);
 
@@ -176,20 +171,6 @@ public class CreateTransaction2Test {
    * constructor.
    */
 
-  @AfterClass
-  public void shutdown() throws InterruptedException {
-    if (channelFull != null) {
-      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-    if (searchChannelFull != null) {
-      searchChannelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-  }
-
-  /**
-   * constructor.
-   */
-
   public Boolean freezeBalance(byte[] addRess, long freezeBalance, long freezeDuration,
       String priKey) {
     byte[] address = addRess;
@@ -260,14 +241,11 @@ public class CreateTransaction2Test {
             .toString());
     Assert.assertTrue(afterFrozenBalance - beforeFrozenBalance == freezeBalance);
     return true;
-
-
   }
 
   /**
    * constructor.
    */
-
   public Boolean sendcoin(byte[] to, long amount, byte[] owner, String priKey) {
 
     //String priKey = testKey002;
@@ -305,7 +283,6 @@ public class CreateTransaction2Test {
   /**
    * constructor.
    */
-
   public Account queryAccount(ECKey ecKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
     if (ecKey == null) {
@@ -333,7 +310,6 @@ public class CreateTransaction2Test {
   /**
    * constructor.
    */
-
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
@@ -343,7 +319,6 @@ public class CreateTransaction2Test {
   /**
    * constructor.
    */
-
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();
     builder.setNum(blockNum);
@@ -358,6 +333,16 @@ public class CreateTransaction2Test {
     }
     transaction = TransactionUtils.setTimestamp(transaction);
     return TransactionUtils.sign(transaction, ecKey);
+  }
+
+  @AfterClass
+  public void shutdown() throws InterruptedException {
+    if (channelFull != null) {
+      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+    if (searchChannelFull != null) {
+      searchChannelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
   }
 }
 

@@ -112,9 +112,6 @@ public class WalletTestWitness001 {
     HashMap<String, String> wrongDropMap = new HashMap<String, String>();
     wrongDropMap.put(voteStr, "10000000000000000");
 
-    //Vote failed due to no freeze balance.
-    //Assert.assertFalse(VoteWitness(smallVoteMap, NO_FROZEN_ADDRESS, no_frozen_balance_testKey));
-
     //Freeze balance to get vote ability.
     Assert.assertTrue(PublicMethed.freezeBalance(fromAddress, 1200000L, 5,
         testKey002, blockingStubFull));
@@ -299,8 +296,6 @@ public class WalletTestWitness001 {
             + beforeFrozenBalance + "freezebalance = " + Long.toString(freezeBalance));
     Assert.assertTrue(afterFrozenBalance - beforeFrozenBalance == freezeBalance);
     return true;
-
-
   }
 
   /**

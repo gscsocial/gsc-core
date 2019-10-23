@@ -168,17 +168,6 @@ public class CreateAssetIssue2Test {
    * constructor.
    */
 
-  @AfterClass(enabled = true)
-  public void shutdown() throws InterruptedException {
-    if (channelFull != null) {
-      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-  }
-
-  /**
-   * constructor.
-   */
-
   public Boolean createAssetIssue(byte[] address, String name, Long totalSupply, Integer gscNum,
       Integer icoNum, Long startTime, Long endTime,
       Integer voteScore, String description, String url, String priKey) {
@@ -408,6 +397,13 @@ public class CreateAssetIssue2Test {
       return false;
     } else {
       return true;
+    }
+  }
+
+  @AfterClass(enabled = true)
+  public void shutdown() throws InterruptedException {
+    if (channelFull != null) {
+      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
 }

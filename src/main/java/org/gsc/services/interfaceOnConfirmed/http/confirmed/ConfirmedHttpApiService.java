@@ -32,7 +32,6 @@ public class ConfirmedHttpApiService implements Service {
 
     @Autowired
     private GetAccountOnConfirmedServlet accountOnConfirmedServlet;
-
     @Autowired
     private GetTransactionByIdOnConfirmedServlet getTransactionByIdOnConfirmedServlet;
     @Autowired
@@ -47,10 +46,8 @@ public class ConfirmedHttpApiService implements Service {
     private GetNowBlockOnConfirmedServlet getNowBlockOnConfirmedServlet;
     @Autowired
     private GetBlockByNumOnConfirmedServlet getBlockByNumOnConfirmedServlet;
-
     @Autowired
     private GetNodeInfoOnConfirmedServlet getNodeInfoOnConfirmedServlet;
-
     @Autowired
     private GetDelegatedResourceOnConfirmedServlet getDelegatedResourceOnConfirmedServlet;
     @Autowired
@@ -130,17 +127,14 @@ public class ConfirmedHttpApiService implements Service {
                     "/walletconfirmed/getblockbylimitnext");
             context.addServlet(new ServletHolder(getBlockByLatestNumOnConfirmedServlet),
                     "/walletconfirmed/getblockbylatestnum");
-
             // only for ConfirmedNode
             context.addServlet(new ServletHolder(getTransactionByIdOnConfirmedServlet),
                     "/walletconfirmed/gettransactionbyid");
-            context
-                    .addServlet(new ServletHolder(getTransactionInfoByIdOnConfirmedServlet),
-                            "/walletconfirmed/gettransactioninfobyid");
+            context.addServlet(new ServletHolder(getTransactionInfoByIdOnConfirmedServlet),
+                    "/walletconfirmed/gettransactioninfobyid");
 
-            context
-                    .addServlet(new ServletHolder(getTransactionCountByBlockNumOnConfirmedServlet),
-                            "/walletconfirmed/gettransactioncountbyblocknum");
+            context.addServlet(new ServletHolder(getTransactionCountByBlockNumOnConfirmedServlet),
+                    "/walletconfirmed/gettransactioncountbyblocknum");
 
             context.addServlet(new ServletHolder(getNodeInfoOnConfirmedServlet), "/wallet/getnodeinfo");
             int maxHttpConnectNumber = Args.getInstance().getMaxHttpConnectNumber();

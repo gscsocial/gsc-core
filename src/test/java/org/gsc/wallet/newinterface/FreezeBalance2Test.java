@@ -156,20 +156,6 @@ public class FreezeBalance2Test {
    * constructor.
    */
 
-  @AfterClass
-  public void shutdown() throws InterruptedException {
-    if (channelFull != null) {
-      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-    if (searchChannelFull != null) {
-      searchChannelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-  }
-
-  /**
-   * constructor.
-   */
-
   public Boolean freezeBalance(byte[] addRess, long freezeBalance, long freezeDuration,
       String priKey) {
     byte[] address = addRess;
@@ -476,6 +462,17 @@ public class FreezeBalance2Test {
     return blockingStubFull.getBlockByNum(builder.build());
 
   }
+
+  @AfterClass
+  public void shutdown() throws InterruptedException {
+    if (channelFull != null) {
+      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+    if (searchChannelFull != null) {
+      searchChannelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+  }
+
 }
 
 

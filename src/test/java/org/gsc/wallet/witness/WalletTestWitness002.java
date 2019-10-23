@@ -44,10 +44,6 @@ import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Block;
 import org.gsc.protos.Protocol.Transaction;
 
-//import stest.gsc.wallet.common.client.WitnessComparator;
-
-//import stest.gsc.wallet.common.client.WitnessComparator;
-
 @Slf4j
 public class WalletTestWitness002 {
 
@@ -143,20 +139,6 @@ public class WalletTestWitness002 {
     }
   }
 
-  /**
-   * constructor.
-   */
-
-  @AfterClass
-  public void shutdown() throws InterruptedException {
-    if (channelFull != null) {
-      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-    if (channelConfirmed != null) {
-      channelConfirmed.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-  }
-
   class WitnessComparator implements Comparator {
 
     public int compare(Object o1, Object o2) {
@@ -222,6 +204,21 @@ public class WalletTestWitness002 {
     transaction = TransactionUtils.setTimestamp(transaction);
     return TransactionUtils.sign(transaction, ecKey);
   }
+
+  /**
+   * constructor.
+   */
+
+  @AfterClass
+  public void shutdown() throws InterruptedException {
+    if (channelFull != null) {
+      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+    if (channelConfirmed != null) {
+      channelConfirmed.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+  }
+
 }
 
 

@@ -45,8 +45,6 @@ import org.gsc.protos.Protocol;
 import org.gsc.protos.Protocol.Account;
 import org.gsc.protos.Protocol.Block;
 
-//import stest.gsc.wallet.common.client.AccountComparator;
-
 @Slf4j
 public class CreateaAndUpdateWitness2Test {
 
@@ -159,21 +157,6 @@ public class CreateaAndUpdateWitness2Test {
       logger.info("Update witness case had been test.This time skip it.");
     }
   }
-
-  /**
-   * constructor.
-   */
-
-  @AfterClass
-  public void shutdown() throws InterruptedException {
-    if (channelFull != null) {
-      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-  }
-
-  /**
-   * constructor.
-   */
 
   public Boolean createWitness(byte[] owner, byte[] url, String priKey) {
     ECKey temKey = null;
@@ -442,6 +425,18 @@ public class CreateaAndUpdateWitness2Test {
     transaction = TransactionUtils.setTimestamp(transaction);
     return TransactionUtils.sign(transaction, ecKey);
   }
+
+  /**
+   * constructor.
+   */
+
+  @AfterClass
+  public void shutdown() throws InterruptedException {
+    if (channelFull != null) {
+      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+  }
+
 }
 
 
