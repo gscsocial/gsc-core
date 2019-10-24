@@ -64,13 +64,6 @@ public class CreateAddressServlet extends HttpServlet {
         }
     }
 
-    private String covertStringToHex(String input) {
-        JSONObject jsonObject = JSONObject.parseObject(input);
-        String value = jsonObject.getString("value");
-        jsonObject.put("value", Util.getHexString(value));
-        return jsonObject.toJSONString();
-    }
-
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         try {
             String input = request.getReader().lines()
@@ -97,5 +90,12 @@ public class CreateAddressServlet extends HttpServlet {
                 logger.debug("IOException: {}", ioe.getMessage());
             }
         }
+    }
+
+    private String covertStringToHex(String input) {
+        JSONObject jsonObject = JSONObject.parseObject(input);
+        String value = jsonObject.getString("value");
+        jsonObject.put("value", Util.getHexString(value));
+        return jsonObject.toJSONString();
     }
 }

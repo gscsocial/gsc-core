@@ -429,6 +429,13 @@ public class RpcApiService implements Service {
         }
 
         @Override
+        public void listExchanges(EmptyMessage request,
+                                  StreamObserver<ExchangeList> responseObserver) {
+            responseObserver.onNext(wallet.getExchangeList());
+            responseObserver.onCompleted();
+        }
+
+        @Override
         public void getExchangeById(BytesMessage request,
                                     StreamObserver<Exchange> responseObserver) {
             ByteString exchangeId = request.getValue();
@@ -438,13 +445,6 @@ public class RpcApiService implements Service {
             } else {
                 responseObserver.onNext(null);
             }
-            responseObserver.onCompleted();
-        }
-
-        @Override
-        public void listExchanges(EmptyMessage request,
-                                  StreamObserver<ExchangeList> responseObserver) {
-            responseObserver.onNext(wallet.getExchangeList());
             responseObserver.onCompleted();
         }
 
@@ -826,20 +826,20 @@ public class RpcApiService implements Service {
         }
 
         @Override
-        public void easyTransferAsset(EasyTransferAssetMessage req,
-                                      StreamObserver<EasyTransferResponse> responseObserver) {
-            byte[] privateKey = wallet.pass2Key(req.getPassPhrase().toByteArray());
-            EasyTransferResponse response = easyTransferAsset(privateKey, req.getToAddress(),
-                    req.getAssetId(), req.getAmount());
+        public void easyTransferByPrivate(EasyTransferByPrivateMessage req,
+                                          StreamObserver<EasyTransferResponse> responseObserver) {
+            byte[] privateKey = req.getPrivateKey().toByteArray();
+            EasyTransferResponse response = easyTransfer(privateKey, req.getToAddress(), req.getAmount());
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         }
 
         @Override
-        public void easyTransferByPrivate(EasyTransferByPrivateMessage req,
-                                          StreamObserver<EasyTransferResponse> responseObserver) {
-            byte[] privateKey = req.getPrivateKey().toByteArray();
-            EasyTransferResponse response = easyTransfer(privateKey, req.getToAddress(), req.getAmount());
+        public void easyTransferAsset(EasyTransferAssetMessage req,
+                                      StreamObserver<EasyTransferResponse> responseObserver) {
+            byte[] privateKey = wallet.pass2Key(req.getPassPhrase().toByteArray());
+            EasyTransferResponse response = easyTransferAsset(privateKey, req.getToAddress(),
+                    req.getAssetId(), req.getAmount());
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         }
@@ -1030,11 +1030,11 @@ public class RpcApiService implements Service {
         }
 
         @Override
-        public void updateAccount(Contract.AccountUpdateContract request,
-                                  StreamObserver<Transaction> responseObserver) {
+        public void setAccountId(Contract.SetAccountIdContract request,
+                                 StreamObserver<Transaction> responseObserver) {
             try {
                 responseObserver.onNext(
-                        createTransactionWrapper(request, ContractType.AccountUpdateContract).getInstance());
+                        createTransactionWrapper(request, ContractType.SetAccountIdContract).getInstance());
             } catch (ContractValidateException e) {
                 responseObserver
                         .onNext(null);
@@ -1044,11 +1044,11 @@ public class RpcApiService implements Service {
         }
 
         @Override
-        public void setAccountId(Contract.SetAccountIdContract request,
-                                 StreamObserver<Transaction> responseObserver) {
+        public void updateAccount(Contract.AccountUpdateContract request,
+                                  StreamObserver<Transaction> responseObserver) {
             try {
                 responseObserver.onNext(
-                        createTransactionWrapper(request, ContractType.SetAccountIdContract).getInstance());
+                        createTransactionWrapper(request, ContractType.AccountUpdateContract).getInstance());
             } catch (ContractValidateException e) {
                 responseObserver
                         .onNext(null);
@@ -1197,16 +1197,16 @@ public class RpcApiService implements Service {
         }
 
         @Override
-        public void exchangeWithdraw(Contract.ExchangeWithdrawContract request,
-                                     StreamObserver<TransactionExtention> responseObserver) {
-            createTransactionExtention(request, ContractType.ExchangeWithdrawContract, responseObserver);
-        }
-
-        @Override
         public void exchangeTransaction(Contract.ExchangeTransactionContract request,
                                         StreamObserver<TransactionExtention> responseObserver) {
             createTransactionExtention(request, ContractType.ExchangeTransactionContract,
                     responseObserver);
+        }
+
+        @Override
+        public void exchangeWithdraw(Contract.ExchangeWithdrawContract request,
+                                     StreamObserver<TransactionExtention> responseObserver) {
+            createTransactionExtention(request, ContractType.ExchangeWithdrawContract, responseObserver);
         }
 
         @Override

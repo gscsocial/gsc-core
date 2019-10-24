@@ -158,21 +158,6 @@ public class TransferAsset2Test {
     logger.info("Test not create asset issue, try to unfreeze asset, no exception. Test OK!!!");
   }
 
-  /**
-   * constructor.
-   */
-
-  @AfterClass(enabled = true)
-  public void shutdown() throws InterruptedException {
-    if (channelFull != null) {
-      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-  }
-
-  /**
-   * constructor.
-   */
-
   public Boolean createAssetIssue(byte[] address, String name, Long totalSupply, Integer gscNum,
       Integer icoNum, Long startTime, Long endTime,
       Integer voteScore, String description, String url, String priKey) {
@@ -237,49 +222,6 @@ public class TransferAsset2Test {
     }
     return grpcQueryAccount(ecKey.getAddress(), blockingStubFull);
   }
-
-  public static String loadPubKey() {
-    char[] buf = new char[0x100];
-    return String.valueOf(buf, 32, 130);
-  }
-
-  public byte[] getAddress(ECKey ecKey) {
-    return ecKey.getAddress();
-  }
-
-  /**
-   * constructor.
-   */
-
-  public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
-    ByteString addressBs = ByteString.copyFrom(address);
-    Account request = Account.newBuilder().setAddress(addressBs).build();
-    return blockingStubFull.getAccount(request);
-  }
-
-  /**
-   * constructor.
-   */
-
-  public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
-    NumberMessage.Builder builder = NumberMessage.newBuilder();
-    builder.setNum(blockNum);
-    return blockingStubFull.getBlockByNum(builder.build());
-
-  }
-
-  private Transaction signTransaction(ECKey ecKey, Transaction transaction) {
-    if (ecKey == null || ecKey.getPrivKey() == null) {
-      logger.warn("Warning: Can't sign,there is no private key !!");
-      return null;
-    }
-    transaction = TransactionUtils.setTimestamp(transaction);
-    return TransactionUtils.sign(transaction, ecKey);
-  }
-
-  /**
-   * constructor.
-   */
 
   public boolean transferAsset(byte[] to, byte[] assertName, long amount, byte[] address,
       String priKey) {
@@ -415,6 +357,44 @@ public class TransferAsset2Test {
       return false;
     } else {
       return true;
+    }
+  }
+
+  public static String loadPubKey() {
+    char[] buf = new char[0x100];
+    return String.valueOf(buf, 32, 130);
+  }
+
+  public byte[] getAddress(ECKey ecKey) {
+    return ecKey.getAddress();
+  }
+
+  public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
+    ByteString addressBs = ByteString.copyFrom(address);
+    Account request = Account.newBuilder().setAddress(addressBs).build();
+    return blockingStubFull.getAccount(request);
+  }
+
+  public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
+    NumberMessage.Builder builder = NumberMessage.newBuilder();
+    builder.setNum(blockNum);
+    return blockingStubFull.getBlockByNum(builder.build());
+
+  }
+
+  private Transaction signTransaction(ECKey ecKey, Transaction transaction) {
+    if (ecKey == null || ecKey.getPrivKey() == null) {
+      logger.warn("Warning: Can't sign,there is no private key !!");
+      return null;
+    }
+    transaction = TransactionUtils.setTimestamp(transaction);
+    return TransactionUtils.sign(transaction, ecKey);
+  }
+
+  @AfterClass(enabled = true)
+  public void shutdown() throws InterruptedException {
+    if (channelFull != null) {
+      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
 }

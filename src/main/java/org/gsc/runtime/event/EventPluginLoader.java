@@ -112,6 +112,23 @@ public class EventPluginLoader {
         return true;
     }
 
+    private void setPluginConfig() {
+
+        if (Objects.isNull(eventListeners)) {
+            return;
+        }
+
+        // set server address to plugin
+        eventListeners.forEach(listener -> listener.setServerAddress(this.serverAddress));
+
+        // set dbconfig to plugin
+        eventListeners.forEach(listener -> listener.setDBConfig(this.dbConfig));
+
+        triggerConfigList.forEach(triggerConfig -> {
+            setSingleTriggerConfig(triggerConfig);
+        });
+    }
+
     public boolean start(EventPluginConfig config) {
         boolean success = false;
 
@@ -128,23 +145,6 @@ public class EventPluginLoader {
         }
 
         return launchEventPlugin(config);
-    }
-
-    private void setPluginConfig() {
-
-        if (Objects.isNull(eventListeners)) {
-            return;
-        }
-
-        // set server address to plugin
-        eventListeners.forEach(listener -> listener.setServerAddress(this.serverAddress));
-
-        // set dbconfig to plugin
-        eventListeners.forEach(listener -> listener.setDBConfig(this.dbConfig));
-
-        triggerConfigList.forEach(triggerConfig -> {
-            setSingleTriggerConfig(triggerConfig);
-        });
     }
 
     private void setSingleTriggerConfig(TriggerConfig triggerConfig) {
@@ -305,6 +305,14 @@ public class EventPluginLoader {
         }
     }
 
+    public synchronized void setFilterQuery(FilterQuery filterQuery) {
+        this.filterQuery = filterQuery;
+    }
+
+    public synchronized FilterQuery getFilterQuery() {
+        return filterQuery;
+    }
+
     private String toJsonString(Object data) {
         String jsonData = "";
 
@@ -315,13 +323,5 @@ public class EventPluginLoader {
         }
 
         return jsonData;
-    }
-
-    public synchronized void setFilterQuery(FilterQuery filterQuery) {
-        this.filterQuery = filterQuery;
-    }
-
-    public synchronized FilterQuery getFilterQuery() {
-        return filterQuery;
     }
 }

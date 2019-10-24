@@ -322,14 +322,6 @@ public class WitnessService implements Service {
         return true;
     }
 
-    private void broadcastBlock(BlockWrapper block) {
-        try {
-            gscNetService.broadcast(new BlockMessage(block.getData()));
-        } catch (Exception ex) {
-            throw new RuntimeException("BroadcastBlock error");
-        }
-    }
-
     private BlockWrapper generateBlock(long when, ByteString witnessAddress,
                                        Boolean lastHeadBlockIsMaintenance)
             throws ValidateSignatureException, ContractValidateException, ContractExeException,
@@ -349,6 +341,14 @@ public class WitnessService implements Service {
         }
 
         return true;
+    }
+
+    private void broadcastBlock(BlockWrapper block) {
+        try {
+            gscNetService.broadcast(new BlockMessage(block.getData()));
+        } catch (Exception ex) {
+            throw new RuntimeException("BroadcastBlock error");
+        }
     }
 
     public void checkDupWitness(BlockWrapper block) {

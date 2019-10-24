@@ -400,16 +400,6 @@ public class CreateaAndUpdateWitness2Test {
    * constructor.
    */
 
-  public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
-    ByteString addressBs = ByteString.copyFrom(address);
-    Account request = Account.newBuilder().setAddress(addressBs).build();
-    return blockingStubFull.getAccount(request);
-  }
-
-  /**
-   * constructor.
-   */
-
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();
     builder.setNum(blockNum);
@@ -424,6 +414,12 @@ public class CreateaAndUpdateWitness2Test {
     }
     transaction = TransactionUtils.setTimestamp(transaction);
     return TransactionUtils.sign(transaction, ecKey);
+  }
+
+  public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
+    ByteString addressBs = ByteString.copyFrom(address);
+    Account request = Account.newBuilder().setAddress(addressBs).build();
+    return blockingStubFull.getAccount(request);
   }
 
   /**

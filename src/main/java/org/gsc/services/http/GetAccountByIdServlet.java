@@ -37,19 +37,6 @@ public class GetAccountByIdServlet extends HttpServlet {
     @Autowired
     private Wallet wallet;
 
-    private String convertOutput(Account account) {
-        // convert asset id
-        if (account.getAssetIssuedID().isEmpty()) {
-            return JsonFormat.printToString(account, false);
-        } else {
-            JSONObject accountJson = JSONObject.parseObject(JsonFormat.printToString(account, false));
-            String assetId = accountJson.get("asset_issued_ID").toString();
-            accountJson.put(
-                    "asset_issued_ID", ByteString.copyFrom(ByteArray.fromHexString(assetId)).toStringUtf8());
-            return accountJson.toJSONString();
-        }
-    }
-
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         try {
             boolean visible = Util.getVisible(request);
@@ -107,4 +94,18 @@ public class GetAccountByIdServlet extends HttpServlet {
             }
         }
     }
+
+    private String convertOutput(Account account) {
+        // convert asset id
+        if (account.getAssetIssuedID().isEmpty()) {
+            return JsonFormat.printToString(account, false);
+        } else {
+            JSONObject accountJson = JSONObject.parseObject(JsonFormat.printToString(account, false));
+            String assetId = accountJson.get("asset_issued_ID").toString();
+            accountJson.put(
+                    "asset_issued_ID", ByteString.copyFrom(ByteArray.fromHexString(assetId)).toStringUtf8());
+            return accountJson.toJSONString();
+        }
+    }
+
 }

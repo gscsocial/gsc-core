@@ -108,21 +108,6 @@ public class WithdrawBalance2Test {
    * constructor.
    */
 
-
-  @AfterClass
-  public void shutdown() throws InterruptedException {
-    if (channelFull != null) {
-      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-    if (searchChannelFull != null) {
-      searchChannelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-  }
-
-  /**
-   * constructor.
-   */
-
   public boolean withdrawBalance(byte[] address, String priKey) {
     ECKey temKey = null;
     try {
@@ -292,25 +277,10 @@ public class WithdrawBalance2Test {
     return ecKey.getAddress();
   }
 
-  /**
-   * constructor.
-   */
-
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
-  }
-
-  /**
-   * constructor.
-   */
-
-  public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
-    NumberMessage.Builder builder = NumberMessage.newBuilder();
-    builder.setNum(blockNum);
-    return blockingStubFull.getBlockByNum(builder.build());
-
   }
 
   private Transaction signTransaction(ECKey ecKey, Transaction transaction) {
@@ -320,6 +290,25 @@ public class WithdrawBalance2Test {
     }
     transaction = TransactionUtils.setTimestamp(transaction);
     return TransactionUtils.sign(transaction, ecKey);
+  }
+
+  public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
+    NumberMessage.Builder builder = NumberMessage.newBuilder();
+    builder.setNum(blockNum);
+    return blockingStubFull.getBlockByNum(builder.build());
+
+  }
+
+
+
+  @AfterClass
+  public void shutdown() throws InterruptedException {
+    if (channelFull != null) {
+      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+    if (searchChannelFull != null) {
+      searchChannelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
   }
 }
 

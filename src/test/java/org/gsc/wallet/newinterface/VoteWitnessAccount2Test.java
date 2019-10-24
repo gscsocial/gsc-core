@@ -556,7 +556,6 @@ public class VoteWitnessAccount2Test {
   /**
    * constructor.
    */
-
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
@@ -566,7 +565,6 @@ public class VoteWitnessAccount2Test {
   /**
    * constructor.
    */
-
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();
     builder.setNum(blockNum);
