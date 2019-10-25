@@ -57,7 +57,6 @@ public class ClearAbi001 {
   private ManagedChannel channelFull1 = null;
   private WalletGrpc.WalletBlockingStub blockingStubFull1 = null;
 
-
   private WalletConfirmedGrpc.WalletConfirmedBlockingStub blockingStubConfirmed = null;
 
   private String fullnode = Configuration.getByPath("testng.conf")
@@ -300,8 +299,6 @@ public class ClearAbi001 {
     Assert
         .assertThat(transactionExtention1.getResult().getMessage().toStringUtf8(),
             containsString("contract validate error : Contract not exists"));
-
-
   }
 
   /**
@@ -319,6 +316,5 @@ public class ClearAbi001 {
       channelConfirmed.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
-
 
 }

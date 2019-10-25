@@ -105,16 +105,6 @@ public class Create2Test004 {
 
     PublicMethed.waitProduceNextBlock(blockingStubFull);
 
-    //before deploy, check account resource
-    /*AccountResourceMessage accountResource = PublicMethed.getAccountResource(dev001Address,
-        blockingStubFull);
-    long cpuLimit = accountResource.getCpuLimit();
-    long cpuUsage = accountResource.getCpuUsed();
-    long balanceBefore = PublicMethed.queryAccount(dev001Key, blockingStubFull).getBalance();
-    logger.info("before cpuLimit is " + Long.toString(cpuLimit));
-    logger.info("before cpuUsage is " + Long.toString(cpuUsage));
-    logger.info("before balanceBefore is " + Long.toString(balanceBefore));*/
-
     String filePath = "./src/test/resources/soliditycode_v0.5.4/create2contract.sol";
     String contractName = "Factory";
     HashMap retMap = PublicMethed.getByCodeAbi(filePath, contractName);
@@ -128,15 +118,6 @@ public class Create2Test004 {
             "0", 0, null, dev001Key,
             dev001Address, blockingStubFull);
     PublicMethed.waitProduceNextBlock(blockingStubFull);
-
-    /*accountResource = PublicMethed.getAccountResource(dev001Address, blockingStubFull);
-    cpuLimit = accountResource.getCpuLimit();
-    cpuUsage = accountResource.getCpuUsed();
-    long balanceAfter = PublicMethed.queryAccount(dev001Key, blockingStubFull).getBalance();
-
-    logger.info("after cpuLimit is " + Long.toString(cpuLimit));
-    logger.info("after cpuUsage is " + Long.toString(cpuUsage));
-    logger.info("after balanceAfter is " + Long.toString(balanceAfter));*/
 
     Optional<TransactionInfo> infoById = PublicMethed
         .getTransactionInfoById(transferTokenTxid, blockingStubFull);
@@ -162,26 +143,6 @@ public class Create2Test004 {
             blockingStubFull), 5, 1,
         ByteString.copyFrom(user001Address), testKey002, blockingStubFull));
 
-    /*AccountResourceMessage accountResource = PublicMethed.getAccountResource(dev001Address,
-        blockingStubFull);
-    long devCpuLimitBefore = accountResource.getCpuLimit();
-    long devCpuUsageBefore = accountResource.getCpuUsed();
-    long devBalanceBefore = PublicMethed.queryAccount(dev001Address, blockingStubFull).getBalance();
-
-    logger.info("before trigger, devCpuLimitBefore is " + Long.toString(devCpuLimitBefore));
-    logger.info("before trigger, devCpuUsageBefore is " + Long.toString(devCpuUsageBefore));
-    logger.info("before trigger, devBalanceBefore is " + Long.toString(devBalanceBefore));
-
-    accountResource = PublicMethed.getAccountResource(user001Address, blockingStubFull);
-    long userCpuLimitBefore = accountResource.getCpuLimit();
-    long userCpuUsageBefore = accountResource.getCpuUsed();
-    long userBalanceBefore = PublicMethed.queryAccount(user001Address, blockingStubFull)
-        .getBalance();
-
-    logger.info("before trigger, userCpuLimitBefore is " + Long.toString(userCpuLimitBefore));
-    logger.info("before trigger, userCpuUsageBefore is " + Long.toString(userCpuUsageBefore));
-    logger.info("before trigger, userBalanceBefore is " + Long.toString(userBalanceBefore));*/
-
     Long callValue = Long.valueOf(0);
 
     String filePath = "./src/test/resources/soliditycode_v0.5.4/create2contract.sol";
@@ -199,25 +160,6 @@ public class Create2Test004 {
         1000000000L, "0", 0, user001Address, user001Key,
         blockingStubFull);
     PublicMethed.waitProduceNextBlock(blockingStubFull);
-
-    /*accountResource = PublicMethed.getAccountResource(dev001Address, blockingStubFull);
-    long devCpuLimitAfter = accountResource.getCpuLimit();
-    long devCpuUsageAfter = accountResource.getCpuUsed();
-    long devBalanceAfter = PublicMethed.queryAccount(dev001Address, blockingStubFull).getBalance();
-
-    logger.info("after trigger, devCpuLimitAfter is " + Long.toString(devCpuLimitAfter));
-    logger.info("after trigger, devCpuUsageAfter is " + Long.toString(devCpuUsageAfter));
-    logger.info("after trigger, devBalanceAfter is " + Long.toString(devBalanceAfter));
-
-    accountResource = PublicMethed.getAccountResource(user001Address, blockingStubFull);
-    long userCpuLimitAfter = accountResource.getCpuLimit();
-    long userCpuUsageAfter = accountResource.getCpuUsed();
-    long userBalanceAfter = PublicMethed.queryAccount(user001Address, blockingStubFull)
-        .getBalance();
-
-    logger.info("after trigger, userCpuLimitAfter is " + Long.toString(userCpuLimitAfter));
-    logger.info("after trigger, userCpuUsageAfter is " + Long.toString(userCpuUsageAfter));
-    logger.info("after trigger, userBalanceAfter is " + Long.toString(userBalanceAfter));*/
 
     Optional<TransactionInfo> infoById = PublicMethed
         .getTransactionInfoById(triggerTxid, blockingStubFull);
@@ -275,26 +217,6 @@ public class Create2Test004 {
             blockingStubFull), 5, 1,
         ByteString.copyFrom(user001Address), testKey002, blockingStubFull));
 
-    /*AccountResourceMessage accountResource = PublicMethed.getAccountResource(dev001Address,
-        blockingStubFull);
-    long devCpuLimitBefore = accountResource.getCpuLimit();
-    long devCpuUsageBefore = accountResource.getCpuUsed();
-    long devBalanceBefore = PublicMethed.queryAccount(dev001Address, blockingStubFull).getBalance();
-
-    logger.info("before trigger, devCpuLimitBefore is " + Long.toString(devCpuLimitBefore));
-    logger.info("before trigger, devCpuUsageBefore is " + Long.toString(devCpuUsageBefore));
-    logger.info("before trigger, devBalanceBefore is " + Long.toString(devBalanceBefore));
-
-    accountResource = PublicMethed.getAccountResource(user001Address, blockingStubFull);
-    long userCpuLimitBefore = accountResource.getCpuLimit();
-    long userCpuUsageBefore = accountResource.getCpuUsed();
-    long userBalanceBefore = PublicMethed.queryAccount(user001Address, blockingStubFull)
-        .getBalance();
-
-    logger.info("before trigger, userCpuLimitBefore is " + Long.toString(userCpuLimitBefore));
-    logger.info("before trigger, userCpuUsageBefore is " + Long.toString(userCpuUsageBefore));
-    logger.info("before trigger, userBalanceBefore is " + Long.toString(userBalanceBefore));*/
-
     Long callValue = Long.valueOf(0);
 
     String filePath = "./src/test/resources/soliditycode_v0.5.4/create2contract.sol";
@@ -312,25 +234,6 @@ public class Create2Test004 {
         1000000000L, "0", 0, user001Address, user001Key,
         blockingStubFull);
     PublicMethed.waitProduceNextBlock(blockingStubFull);
-
-    /*accountResource = PublicMethed.getAccountResource(dev001Address, blockingStubFull);
-    long devCpuLimitAfter = accountResource.getCpuLimit();
-    long devCpuUsageAfter = accountResource.getCpuUsed();
-    long devBalanceAfter = PublicMethed.queryAccount(dev001Address, blockingStubFull).getBalance();
-
-    logger.info("after trigger, devCpuLimitAfter is " + Long.toString(devCpuLimitAfter));
-    logger.info("after trigger, devCpuUsageAfter is " + Long.toString(devCpuUsageAfter));
-    logger.info("after trigger, devBalanceAfter is " + Long.toString(devBalanceAfter));
-
-    accountResource = PublicMethed.getAccountResource(user001Address, blockingStubFull);
-    long userCpuLimitAfter = accountResource.getCpuLimit();
-    long userCpuUsageAfter = accountResource.getCpuUsed();
-    long userBalanceAfter = PublicMethed.queryAccount(user001Address, blockingStubFull)
-        .getBalance();
-
-    logger.info("after trigger, userCpuLimitAfter is " + Long.toString(userCpuLimitAfter));
-    logger.info("after trigger, userCpuUsageAfter is " + Long.toString(userCpuUsageAfter));
-    logger.info("after trigger, userBalanceAfter is " + Long.toString(userBalanceAfter));*/
 
     Optional<TransactionInfo> infoById = PublicMethed
         .getTransactionInfoById(triggerTxid, blockingStubFull);
@@ -390,26 +293,6 @@ public class Create2Test004 {
             blockingStubFull), 5, 1,
         ByteString.copyFrom(user001Address), testKey002, blockingStubFull));
 
-    /*AccountResourceMessage accountResource = PublicMethed.getAccountResource(dev001Address,
-        blockingStubFull);
-    long devCpuLimitBefore = accountResource.getCpuLimit();
-    long devCpuUsageBefore = accountResource.getCpuUsed();
-    long devBalanceBefore = PublicMethed.queryAccount(dev001Address, blockingStubFull).getBalance();
-
-    logger.info("before trigger, devCpuLimitBefore is " + Long.toString(devCpuLimitBefore));
-    logger.info("before trigger, devCpuUsageBefore is " + Long.toString(devCpuUsageBefore));
-    logger.info("before trigger, devBalanceBefore is " + Long.toString(devBalanceBefore));
-
-    accountResource = PublicMethed.getAccountResource(user001Address, blockingStubFull);
-    long userCpuLimitBefore = accountResource.getCpuLimit();
-    long userCpuUsageBefore = accountResource.getCpuUsed();
-    long userBalanceBefore = PublicMethed.queryAccount(user001Address, blockingStubFull)
-        .getBalance();
-
-    logger.info("before trigger, userCpuLimitBefore is " + Long.toString(userCpuLimitBefore));
-    logger.info("before trigger, userCpuUsageBefore is " + Long.toString(userCpuUsageBefore));
-    logger.info("before trigger, userBalanceBefore is " + Long.toString(userBalanceBefore));*/
-
     Long callValue = Long.valueOf(0);
 
     String filePath = "./src/test/resources/soliditycode_v0.5.4/create2contract.sol";
@@ -427,25 +310,6 @@ public class Create2Test004 {
         1000000000L, "0", 0, user001Address, user001Key,
         blockingStubFull);
     PublicMethed.waitProduceNextBlock(blockingStubFull);
-
-    /*accountResource = PublicMethed.getAccountResource(dev001Address, blockingStubFull);
-    long devCpuLimitAfter = accountResource.getCpuLimit();
-    long devCpuUsageAfter = accountResource.getCpuUsed();
-    long devBalanceAfter = PublicMethed.queryAccount(dev001Address, blockingStubFull).getBalance();
-
-    logger.info("after trigger, devCpuLimitAfter is " + Long.toString(devCpuLimitAfter));
-    logger.info("after trigger, devCpuUsageAfter is " + Long.toString(devCpuUsageAfter));
-    logger.info("after trigger, devBalanceAfter is " + Long.toString(devBalanceAfter));
-
-    accountResource = PublicMethed.getAccountResource(user001Address, blockingStubFull);
-    long userCpuLimitAfter = accountResource.getCpuLimit();
-    long userCpuUsageAfter = accountResource.getCpuUsed();
-    long userBalanceAfter = PublicMethed.queryAccount(user001Address, blockingStubFull)
-        .getBalance();
-
-    logger.info("after trigger, userCpuLimitAfter is " + Long.toString(userCpuLimitAfter));
-    logger.info("after trigger, userCpuUsageAfter is " + Long.toString(userCpuUsageAfter));
-    logger.info("after trigger, userBalanceAfter is " + Long.toString(userBalanceAfter));*/
 
     Optional<TransactionInfo> infoById = PublicMethed
         .getTransactionInfoById(triggerTxid, blockingStubFull);

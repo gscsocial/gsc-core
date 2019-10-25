@@ -149,7 +149,6 @@ public class ClearAbi002 {
     Assert.assertTrue(smartContract.getName().equalsIgnoreCase(contractName));
     Assert.assertFalse(smartContract.getBytecode().toString().isEmpty());
 
-
   }
 
 
@@ -168,6 +167,5 @@ public class ClearAbi002 {
       channelConfirmed.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
-
 
 }

@@ -1318,50 +1318,6 @@ public class ExchangeTransactionOperatorTest {
       dbManager.getExchangeV2Store().delete(ByteArray.fromLong(2L));
     }
   }
-
-  /**
-   * SameTokenName close,token balance is not enough
-   */
-  @Test
-  public void SameTokenNameCloseTokenBalanceNotEnough() {
-    dbManager.getDynamicPropertiesStore().saveAllowSameTokenName(0);
-    InitExchangeBeforeSameTokenNameActive();
-    long exchangeId = 2;
-    String tokenId = "abc";
-    long quant = 1_000L;
-    String buyTokenId = "def";
-
-    byte[] ownerAddress = ByteArray.fromHexString(OWNER_ADDRESS_SECOND);
-    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
-    accountWrapper.addAssetAmount(tokenId.getBytes(), quant - 1);
-    Map<String, Long> assetMap = accountWrapper.getAssetMap();
-    Assert.assertEquals(20000_000000L, accountWrapper.getBalance());
-    Assert.assertEquals(null, assetMap.get(buyTokenId));
-    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
-
-    ExchangeTransactionOperator operator = new ExchangeTransactionOperator(getContract(
-        OWNER_ADDRESS_SECOND, exchangeId, tokenId, quant, 1),
-        dbManager);
-    TransactionResultWrapper ret = new TransactionResultWrapper();
-
-    try {
-      operator.validate();
-      operator.execute(ret);
-      fail();
-    } catch (ContractValidateException e) {
-      Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("token balance is not enough",
-          e.getMessage());
-    } catch (ContractExeException e) {
-      Assert.assertFalse(e instanceof ContractExeException);
-    } finally {
-      dbManager.getExchangeStore().delete(ByteArray.fromLong(1L));
-      dbManager.getExchangeStore().delete(ByteArray.fromLong(2L));
-      dbManager.getExchangeV2Store().delete(ByteArray.fromLong(1L));
-      dbManager.getExchangeV2Store().delete(ByteArray.fromLong(2L));
-    }
-  }
-
   /**
    * SameTokenName open,token balance is not enough
    */
@@ -1509,6 +1465,45 @@ public class ExchangeTransactionOperatorTest {
     }
   }
 
+  @Test
+  public void SameTokenNameCloseTokenBalanceNotEnough() {
+    dbManager.getDynamicPropertiesStore().saveAllowSameTokenName(0);
+    InitExchangeBeforeSameTokenNameActive();
+    long exchangeId = 2;
+    String tokenId = "abc";
+    long quant = 1_000L;
+    String buyTokenId = "def";
+
+    byte[] ownerAddress = ByteArray.fromHexString(OWNER_ADDRESS_SECOND);
+    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+    accountWrapper.addAssetAmount(tokenId.getBytes(), quant - 1);
+    Map<String, Long> assetMap = accountWrapper.getAssetMap();
+    Assert.assertEquals(20000_000000L, accountWrapper.getBalance());
+    Assert.assertEquals(null, assetMap.get(buyTokenId));
+    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
+
+    ExchangeTransactionOperator operator = new ExchangeTransactionOperator(getContract(
+            OWNER_ADDRESS_SECOND, exchangeId, tokenId, quant, 1),
+            dbManager);
+    TransactionResultWrapper ret = new TransactionResultWrapper();
+
+    try {
+      operator.validate();
+      operator.execute(ret);
+      fail();
+    } catch (ContractValidateException e) {
+      Assert.assertTrue(e instanceof ContractValidateException);
+      Assert.assertEquals("token balance is not enough",
+              e.getMessage());
+    } catch (ContractExeException e) {
+      Assert.assertFalse(e instanceof ContractExeException);
+    } finally {
+      dbManager.getExchangeStore().delete(ByteArray.fromLong(1L));
+      dbManager.getExchangeStore().delete(ByteArray.fromLong(2L));
+      dbManager.getExchangeV2Store().delete(ByteArray.fromLong(1L));
+      dbManager.getExchangeV2Store().delete(ByteArray.fromLong(2L));
+    }
+  }
   /**
    * SameTokenName open,invalid param "token id is not a valid number" "token expected must greater
    * than zero"

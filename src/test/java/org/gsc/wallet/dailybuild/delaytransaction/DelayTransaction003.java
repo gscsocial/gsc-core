@@ -67,7 +67,6 @@ public class DelayTransaction003 {
 
 
   Optional<TransactionInfo> infoById = null;
-  //Optional<DeferredTransaction> deferredTransactionById = null;
   Optional<Transaction> getTransactionById = null;
 
 
@@ -204,17 +203,7 @@ public class DelayTransaction003 {
 
     String txid = PublicMethed.unfreezeAssetDelayGetTxid(assetOwnerAddress,delaySecond,
         assetOwnerKey,blockingStubFull);
-
-
-
   }
-
-
-
-
-  /**
-   * constructor.
-   */
 
   @AfterClass(enabled = false)
   public void shutdown() throws InterruptedException {

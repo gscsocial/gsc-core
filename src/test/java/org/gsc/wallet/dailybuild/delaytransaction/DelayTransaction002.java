@@ -55,12 +55,8 @@ public class DelayTransaction002 {
   private Long cancleDelayTransactionFee = Configuration.getByPath("testng.conf")
       .getLong("defaultParameter.cancleDelayTransactionFee");
 
-
-
   Optional<TransactionInfo> infoById = null;
-  //Optional<DeferredTransaction> deferredTransactionById = null;
   Optional<Transaction> getTransactionById = null;
-
 
   ECKey ecKey = new ECKey(Utils.getRandom());
   byte[] delayAccount1Address = ecKey.getAddress();
@@ -133,11 +129,6 @@ public class DelayTransaction002 {
         delaySecond,delayAccount1Address,
         delayAccount1Key, blockingStubFull);
     PublicMethed.waitProduceNextBlock(blockingStubFull);
-    //deferredTransactionById = PublicMethed.getDeferredTransactionById(txid,blockingStubFull);
-    //DeferredTransaction transaction = deferredTransactionById.get();
-    //String finalTxid = ByteArray.toHexString(Sha256Hash.hash(transaction.getTransaction()
-    //   .getRawData().toByteArray()));
-
     //Assert.assertFalse(PublicMethed.cancelDeferredTransactionById(finalTxid,receiverAccountAddress
     //   ,receiverAccountKey,blockingStubFull));
     Assert.assertFalse(PublicMethed.cancelDeferredTransactionById(txid,receiverAccountAddress,
@@ -172,19 +163,6 @@ public class DelayTransaction002 {
         blockingStubFull).getBalance();
     logger.info("deplayAccountAfterBalance " + deplayAccountAfterBalance);
     logger.info("recevierAccountAfterDelayalance " + recevierAccountAfterDelayalance);
-    //Assert.assertFalse(PublicMethed.cancelDeferredTransactionById(txid,delayAccount1Address,
-    //   delayAccount1Key,blockingStubFull));
-    //PublicMethed.cancelDeferredTransactionById(txid,delayAccount1Address,delayAccount1Key,
-    //   blockingStubFull);
-    //PublicMethed.cancelDeferredTransactionById(txid,delayAccount1Address,delayAccount1Key,
-    // blockingStubFull);
-    //PublicMethed.cancelDeferredTransactionById(txid,delayAccount1Address,delayAccount1Key,
-    // blockingStubFull);
-    //PublicMethed.cancelDeferredTransactionById(txid,delayAccount1Address,delayAccount1Key,
-    // blockingStubFull);
-    //PublicMethed.cancelDeferredTransactionById(txid,delayAccount1Address,delayAccount1Key,
-    // blockingStubFull);
-
 
     Assert.assertTrue(deplayAccountBeforeBalance - deplayAccountAfterBalance
         == delayTransactionFee + cancleDelayTransactionFee);
@@ -247,13 +225,7 @@ public class DelayTransaction002 {
         == delayTransactionFee + cancleDelayTransactionFee);
     Assert.assertTrue(recevierAccountBeforeBalance == recevierAccountAfterDelayalance);
 
-
   }
-
-
-  /**
-   * constructor.
-   */
 
   @AfterClass(enabled = false)
   public void shutdown() throws InterruptedException {

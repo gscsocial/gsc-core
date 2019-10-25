@@ -61,10 +61,6 @@ public class StorageMarketTest {
   public static void init() {
     dbManager = context.getBean(Manager.class);
     storageMarket = new StorageMarket(dbManager);
-    //    Args.setParam(new String[]{"--db-directory", dbPath},
-    //        "config-junit.conf");
-    //    dbManager = new Manager();
-    //    dbManager.init();
   }
 
   /**

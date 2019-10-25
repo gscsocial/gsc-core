@@ -659,48 +659,6 @@ public class ExchangeWithdrawOperatorTest {
   }
 
   /**
-   * SameTokenName open, use Invalid Address, result is failed, exception is "Invalid address".
-   */
-  @Test
-  public void SameTokenNameOpenInvalidAddress() {
-    dbManager.getDynamicPropertiesStore().saveAllowSameTokenName(1);
-    InitExchangeSameTokenNameActive();
-    long exchangeId = 1;
-    String firstTokenId = "123";
-    long firstTokenQuant = 100000000L;
-    String secondTokenId = "456";
-    long secondTokenQuant = 200000000L;
-
-    byte[] ownerAddress = ByteArray.fromHexString(OWNER_ADDRESS_FIRST);
-    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
-    Map<String, Long> assetV2Map = accountWrapper.getAssetMapV2();
-    Assert.assertEquals(10000_000000L, accountWrapper.getBalance());
-    Assert.assertEquals(null, assetV2Map.get(firstTokenId));
-    Assert.assertEquals(null, assetV2Map.get(secondTokenId));
-
-    ExchangeWithdrawOperator operator = new ExchangeWithdrawOperator(getContract(
-        OWNER_ADDRESS_INVALID, exchangeId, firstTokenId, firstTokenQuant),
-        dbManager);
-    TransactionResultWrapper ret = new TransactionResultWrapper();
-
-    try {
-      operator.validate();
-      operator.execute(ret);
-      fail("Invalid address");
-    } catch (ContractValidateException e) {
-      Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("Invalid address", e.getMessage());
-    } catch (ContractExeException e) {
-      Assert.assertFalse(e instanceof ContractExeException);
-    } finally {
-      dbManager.getExchangeStore().delete(ByteArray.fromLong(1L));
-      dbManager.getExchangeStore().delete(ByteArray.fromLong(2L));
-      dbManager.getExchangeV2Store().delete(ByteArray.fromLong(1L));
-      dbManager.getExchangeV2Store().delete(ByteArray.fromLong(2L));
-    }
-  }
-
-  /**
    * SameTokenName close, use AccountStore not exists, result is failed, exception is "account not
    * exists".
    */
@@ -918,6 +876,47 @@ public class ExchangeWithdrawOperatorTest {
     }
   }
 
+  /**
+   * SameTokenName open, use Invalid Address, result is failed, exception is "Invalid address".
+   */
+  @Test
+  public void SameTokenNameOpenInvalidAddress() {
+    dbManager.getDynamicPropertiesStore().saveAllowSameTokenName(1);
+    InitExchangeSameTokenNameActive();
+    long exchangeId = 1;
+    String firstTokenId = "123";
+    long firstTokenQuant = 100000000L;
+    String secondTokenId = "456";
+    long secondTokenQuant = 200000000L;
+
+    byte[] ownerAddress = ByteArray.fromHexString(OWNER_ADDRESS_FIRST);
+    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+    Map<String, Long> assetV2Map = accountWrapper.getAssetMapV2();
+    Assert.assertEquals(10000_000000L, accountWrapper.getBalance());
+    Assert.assertEquals(null, assetV2Map.get(firstTokenId));
+    Assert.assertEquals(null, assetV2Map.get(secondTokenId));
+
+    ExchangeWithdrawOperator operator = new ExchangeWithdrawOperator(getContract(
+            OWNER_ADDRESS_INVALID, exchangeId, firstTokenId, firstTokenQuant),
+            dbManager);
+    TransactionResultWrapper ret = new TransactionResultWrapper();
+
+    try {
+      operator.validate();
+      operator.execute(ret);
+      fail("Invalid address");
+    } catch (ContractValidateException e) {
+      Assert.assertTrue(e instanceof ContractValidateException);
+      Assert.assertEquals("Invalid address", e.getMessage());
+    } catch (ContractExeException e) {
+      Assert.assertFalse(e instanceof ContractExeException);
+    } finally {
+      dbManager.getExchangeStore().delete(ByteArray.fromLong(1L));
+      dbManager.getExchangeStore().delete(ByteArray.fromLong(2L));
+      dbManager.getExchangeV2Store().delete(ByteArray.fromLong(1L));
+      dbManager.getExchangeV2Store().delete(ByteArray.fromLong(2L));
+    }
+  }
   /**
    * SameTokenName open, account is not creator
    */
