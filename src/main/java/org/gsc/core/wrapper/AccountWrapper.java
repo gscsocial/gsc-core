@@ -61,6 +61,17 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
     }
 
     /**
+     * construct account from AccountCreateContract.
+     */
+    public AccountWrapper(final AccountCreateContract contract) {
+        this.account = Account.newBuilder()
+                .setType(contract.getType())
+                .setAddress(contract.getAccountAddress())
+                .setTypeValue(contract.getTypeValue())
+                .build();
+    }
+
+    /**
      * initial account wrapper.
      */
     public AccountWrapper(ByteString accountName, ByteString address, AccountType accountType,
@@ -72,18 +83,6 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
                 .setBalance(balance)
                 .build();
     }
-
-    /**
-     * construct account from AccountCreateContract.
-     */
-    public AccountWrapper(final AccountCreateContract contract) {
-        this.account = Account.newBuilder()
-                .setType(contract.getType())
-                .setAddress(contract.getAccountAddress())
-                .setTypeValue(contract.getTypeValue())
-                .build();
-    }
-
 
     /**
      * construct account from AccountCreateContract and createTime.
@@ -264,6 +263,14 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
         return active.build();
     }
 
+    public byte[] getWitnessPermissionAddress() {
+        if (this.account.getWitnessPermission().getKeysCount() == 0) {
+            return getAddress().toByteArray();
+        } else {
+            return this.account.getWitnessPermission().getKeys(0).getAddress().toByteArray();
+        }
+    }
+
     public void setDefaultWitnessPermission(Manager manager) {
         Account.Builder builder = this.account.toBuilder();
         Permission witness = createDefaultWitnessPermission(this.getAddress());
@@ -276,14 +283,6 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
             builder.addActivePermission(active);
         }
         this.account = builder.setWitnessPermission(witness).build();
-    }
-
-    public byte[] getWitnessPermissionAddress() {
-        if (this.account.getWitnessPermission().getKeysCount() == 0) {
-            return getAddress().toByteArray();
-        } else {
-            return this.account.getWitnessPermission().getKeys(0).getAddress().toByteArray();
-        }
     }
 
     public long getBalance() {
@@ -323,15 +322,13 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
                 this.account.getDelegatedFrozenBalanceForNet() + balance).build();
     }
 
-
-    public long getAcquiredDelegatedFrozenBalanceForNet() {
-        return this.account.getAcquiredDelegatedFrozenBalanceForNet();
-    }
-
-
     public void setAcquiredDelegatedFrozenBalanceForNet(long balance) {
         this.account = this.account.toBuilder().setAcquiredDelegatedFrozenBalanceForNet(balance)
                 .build();
+    }
+
+    public long getAcquiredDelegatedFrozenBalanceForNet() {
+        return this.account.getAcquiredDelegatedFrozenBalanceForNet();
     }
 
     public void addAcquiredDelegatedFrozenBalanceForNet(long balance) {
@@ -377,7 +374,6 @@ public class AccountWrapper implements ProtoWrapper<Account>, Comparable<Account
                 .setAccountResource(newAccountResource)
                 .build();
     }
-
 
     public void setAllowance(long allowance) {
         this.account = this.account.toBuilder().setAllowance(allowance).build();

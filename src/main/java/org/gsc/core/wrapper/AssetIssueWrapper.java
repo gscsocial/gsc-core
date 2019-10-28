@@ -157,13 +157,13 @@ public class AssetIssueWrapper implements ProtoWrapper<AssetIssueContract> {
         return frozenBalance[0];
     }
 
-    public long getFreeAssetNetLimit() {
-        return this.assetIssueContract.getFreeAssetNetLimit();
-    }
-
     public void setFreeAssetNetLimit(long newLimit) {
         this.assetIssueContract = this.assetIssueContract.toBuilder()
                 .setFreeAssetNetLimit(newLimit).build();
+    }
+
+    public long getFreeAssetNetLimit() {
+        return this.assetIssueContract.getFreeAssetNetLimit();
     }
 
     public long getPublicFreeAssetNetLimit() {
@@ -184,13 +184,13 @@ public class AssetIssueWrapper implements ProtoWrapper<AssetIssueContract> {
                 .setPublicFreeAssetNetUsage(value).build();
     }
 
-    public long getPublicLatestFreeNetTime() {
-        return this.assetIssueContract.getPublicLatestFreeNetTime();
-    }
-
     public void setPublicLatestFreeNetTime(long time) {
         this.assetIssueContract = this.assetIssueContract.toBuilder()
                 .setPublicLatestFreeNetTime(time).build();
+    }
+
+    public long getPublicLatestFreeNetTime() {
+        return this.assetIssueContract.getPublicLatestFreeNetTime();
     }
 
     public void setUrl(ByteString newUrl) {

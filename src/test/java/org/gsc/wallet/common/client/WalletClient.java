@@ -88,18 +88,6 @@ public class WalletClient {
 
     private static byte[] addressPreFixByte = CommonConstant.ADD_PRE_FIX_BYTE;
 
-    //  static {
-    //    new Timer().schedule(new TimerTask() {
-    //      @Override
-    //      public void run() {
-    //        String fullnode = selectFullNode();
-    //        if(!"".equals(fullnode)) {
-    //          rpcCli = new GrpcClient(fullnode);
-    //        }
-    //      }
-    //    }, 3 * 60 * 1000, 3 * 60 * 1000);
-    //  }
-
     /**
      * constructor.
      */
@@ -704,10 +692,6 @@ public class WalletClient {
         return String.valueOf(buf, 162, 64);
     }
 
-    /**
-     * Get a Wallet from storage.
-     */
-
     public static WalletClient getWalletByStorageIgnorPrivKey() {
         try {
             String pubKey = loadPubKey(); //04 PubKey[128]
@@ -723,10 +707,6 @@ public class WalletClient {
             return null;
         }
     }
-
-    /**
-     * constructor.
-     */
 
     public static String getAddressByStorage() {
         try {
@@ -744,10 +724,6 @@ public class WalletClient {
         }
     }
 
-    /**
-     * constructor.
-     */
-
     public static byte[] getPassWord(String password) {
         if (!passwordValid(password)) {
             return null;
@@ -759,10 +735,6 @@ public class WalletClient {
         return pwd;
     }
 
-    /**
-     * constructor.
-     */
-
     public static byte[] getEncKey(String password) {
         if (!passwordValid(password)) {
             return null;
@@ -773,10 +745,6 @@ public class WalletClient {
         return encKey;
     }
 
-    /**
-     * constructor.
-     */
-
     public static boolean checkPassWord(String password) {
         byte[] pwd = getPassWord(password);
         if (pwd == null) {
@@ -786,10 +754,6 @@ public class WalletClient {
         String pwdInstore = loadPassword();
         return pwdAsc.equals(pwdInstore);
     }
-
-    /**
-     * constructor.
-     */
 
     public static boolean passwordValid(String password) {
         if (StringUtils.isEmpty(password)) {
@@ -803,10 +767,6 @@ public class WalletClient {
         //Other rule;
         return true;
     }
-
-    /**
-     * constructor.
-     */
 
     public static boolean addressValid(byte[] address) {
         if (address == null || address.length == 0) {
@@ -829,10 +789,6 @@ public class WalletClient {
         //Other rule;
         return true;
     }
-
-    /**
-     * constructor.
-     */
 
     public static String encode58Check(byte[] input) {
         byte[] hash0 = Sha256Hash.hash(input);
@@ -861,10 +817,6 @@ public class WalletClient {
         return null;
     }
 
-    /**
-     * constructor.
-     */
-
     public static byte[] decodeFromBase58Check(String addressBase58) {
         if (StringUtils.isEmpty(addressBase58)) {
             logger.warn("Warning: Address is empty !!");
@@ -876,10 +828,6 @@ public class WalletClient {
         }
         return address;
     }
-
-    /**
-     * constructor.
-     */
 
     public static boolean priKeyValid(String priKey) {
         if (StringUtils.isEmpty(priKey)) {
@@ -894,24 +842,6 @@ public class WalletClient {
         return true;
     }
 
-  /*    public static Optional<AccountList> listAccounts() {
-        Optional<AccountList> result = rpcCli.listAccounts();
-        if (result.isPresent()) {
-            AccountList accountList = result.get();
-            List<Account> list = accountList.getAccountsList();
-            List<Account> newList = new ArrayList();
-            newList.addAll(list);
-            newList.sort(new AccountComparator());
-            AccountList.Builder builder = AccountList.newBuilder();
-            newList.forEach(account -> builder.addAccounts(account));
-            result = Optional.of(builder.build());
-        }
-        return result;
-    }*/
-
-    /**
-     * constructor.
-     */
     public static Optional<WitnessList> listWitnesses() {
         Optional<WitnessList> result = rpcCli.listWitnesses();
         if (result.isPresent()) {
@@ -927,16 +857,6 @@ public class WalletClient {
         return result;
     }
 
-  /*    public static Optional<AssetIssueList> getAssetIssueListByTimestamp(long timestamp) {
-        return rpcCli.getAssetIssueListByTimestamp(timestamp);
-  }*/
-
-  /*    public static Optional<TransactionList> getTransactionsByTimestamp(
-  long start, long end, int offset, int limit) {
-        return rpcCli.getTransactionsByTimestamp(start, end, offset, limit);
-  }*/
-
-
     public static Optional<AssetIssueList> getAssetIssueList() {
         return rpcCli.getAssetIssueList();
     }
@@ -945,18 +865,6 @@ public class WalletClient {
         return rpcCli.listNodes();
     }
 
-  /*    public static Optional<AssetIssueList> getAssetIssueByAccount(byte[] address) {
-        return rpcCli.getAssetIssueByAccount(address);
-  }
-
-    public static AssetIssueContract getAssetIssueByName(String assetName) {
-        return rpcCli.getAssetIssueByName(assetName);
-  }
-
-    public static GrpcAPI.NumberMessage getTotalTransaction() {
-        return rpcCli.getTotalTransaction();
-  }*/
-
     public static Optional<TransactionList> getTransactionsFromThis(byte[] address) {
         return rpcCli.getTransactionsFromThis(address);
     }
@@ -964,14 +872,6 @@ public class WalletClient {
     public static Optional<TransactionList> getTransactionsToThis(byte[] address) {
         return rpcCli.getTransactionsToThis(address);
     }
-
-  /*    public static Optional<Transaction> getTransactionById(String txID) {
-        return rpcCli.getTransactionById(txID);
-  }*/
-
-    /**
-     * constructor.
-     */
 
     public boolean freezeBalance(long frozenBalance, long frozenDuration) {
 
@@ -1000,10 +900,6 @@ public class WalletClient {
         return builder.build();
     }
 
-    /**
-     * constructor.
-     */
-
     public boolean unfreezeBalance() {
         UnfreezeBalanceContract contract = createUnfreezeBalanceContract();
 
@@ -1027,10 +923,6 @@ public class WalletClient {
 
         return builder.build();
     }
-
-    /**
-     * constructor.
-     */
 
     public boolean withdrawBalance() {
         WithdrawBalanceContract contract = createWithdrawBalanceContract();

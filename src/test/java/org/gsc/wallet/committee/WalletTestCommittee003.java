@@ -158,12 +158,6 @@ public class WalletTestCommittee003 {
         true, blockingStubFull));
     Assert.assertTrue(PublicMethed.approveProposal(witness002Address, witnessKey002, proposalId,
         true, blockingStubFull));
-    //Assert.assertTrue(PublicMethed.approveProposal(witness003Address,witnessKey003,proposalId,
-    //    true,blockingStubFull));
-    //Assert.assertTrue(PublicMethed.approveProposal(witness004Address,witnessKey004,proposalId,
-    //    true,blockingStubFull));
-    //Assert.assertTrue(PublicMethed.approveProposal(witness005Address,witnessKey005,proposalId,
-    //    true,blockingStubFull));
     proposalList = blockingStubFull.listProposals(EmptyMessage.newBuilder().build());
     listProposals = Optional.ofNullable(proposalList);
     Assert.assertTrue(listProposals.get().getProposals(0).getApprovalsCount() == 2);

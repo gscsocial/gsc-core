@@ -105,12 +105,12 @@ public class BlockWrapper implements ProtoWrapper<Block> {
         /**
          * Use {@link #wrap(byte[])} instead.
          */
-        public BlockId(Sha256Hash hash, long num) {
+        public BlockId(byte[] hash, long num) {
             super(num, hash);
             this.num = num;
         }
 
-        public BlockId(byte[] hash, long num) {
+        public BlockId(Sha256Hash hash, long num) {
             super(num, hash);
             this.num = num;
         }

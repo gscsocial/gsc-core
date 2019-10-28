@@ -77,16 +77,16 @@ public class DelegatedResourceAccountIndexWrapper implements
         return this.delegatedResourceAccountIndex.getToAccountsList();
     }
 
+    public void addToAccount(ByteString toAccount) {
+        this.delegatedResourceAccountIndex = this.delegatedResourceAccountIndex.toBuilder()
+                .addToAccounts(toAccount)
+                .build();
+    }
+
     public void setAllToAccounts(List<ByteString> toAccounts) {
         this.delegatedResourceAccountIndex = this.delegatedResourceAccountIndex.toBuilder()
                 .clearToAccounts()
                 .addAllToAccounts(toAccounts)
-                .build();
-    }
-
-    public void addToAccount(ByteString toAccount) {
-        this.delegatedResourceAccountIndex = this.delegatedResourceAccountIndex.toBuilder()
-                .addToAccounts(toAccount)
                 .build();
     }
 

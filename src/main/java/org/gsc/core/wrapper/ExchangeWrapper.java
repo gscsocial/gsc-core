@@ -52,14 +52,14 @@ public class ExchangeWrapper implements ProtoWrapper<Exchange> {
                 .build();
     }
 
-    public long getID() {
-        return this.exchange.getExchangeId();
-    }
-
     public void setID(long id) {
         this.exchange = this.exchange.toBuilder()
                 .setExchangeId(id)
                 .build();
+    }
+
+    public long getID() {
+        return this.exchange.getExchangeId();
     }
 
     public ByteString getCreatorAddress() {
