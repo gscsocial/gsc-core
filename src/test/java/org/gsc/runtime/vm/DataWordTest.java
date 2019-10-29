@@ -81,10 +81,6 @@ public class DataWordTest {
     assertEquals(32, x.getData().length);
     System.out.println(Hex.toHexString(x.getData()));
 
-    // FAIL
-//      DataWord y = new DataWord(three);
-//      y.add2(new DataWord(three));
-//      System.out.println(Hex.toHexString(y.getData()));
   }
 
   @Test

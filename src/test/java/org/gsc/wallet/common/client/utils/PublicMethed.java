@@ -84,18 +84,12 @@ import org.gsc.protos.Protocol.Transaction;
 import org.gsc.protos.Protocol.Transaction.Result;
 import org.gsc.protos.Protocol.TransactionInfo;
 
-//import org.gsc.protos.Protocol.DeferredTransaction;
-
-
 public class PublicMethed {
 
     Wallet wallet = new Wallet();
-    //Wallet.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE);
     private static final String FilePath = "Wallet";
     private static List<WalletFile> walletFile = new ArrayList<>();
     private static final Logger logger = LoggerFactory.getLogger("TestLogger");
-    //private WalletGrpc.WalletBlockingStub blockingStubFull = null;
-    //private WalletConfirmedGrpc.WalletConfirmedBlockingStub blockingStubConfirmed = null;
 
     /**
      * constructor.
@@ -345,17 +339,7 @@ public class PublicMethed {
         }
     }
 
-    /**
-     * constructor.
-     */
 
-    public static Account queryAccountByAddress(byte[] address,
-                                                WalletGrpc.WalletBlockingStub blockingStubFull) {
-        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
-        ByteString addressBs = ByteString.copyFrom(address);
-        Account request = Account.newBuilder().setAddress(addressBs).build();
-        return blockingStubFull.getAccount(request);
-    }
 
     /**
      * constructor.
@@ -363,6 +347,14 @@ public class PublicMethed {
 
     public static Account queryAccount(byte[] address, WalletGrpc
             .WalletBlockingStub blockingStubFull) {
+        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
+        ByteString addressBs = ByteString.copyFrom(address);
+        Account request = Account.newBuilder().setAddress(addressBs).build();
+        return blockingStubFull.getAccount(request);
+    }
+
+    public static Account queryAccountByAddress(byte[] address,
+                                                WalletGrpc.WalletBlockingStub blockingStubFull) {
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
         ByteString addressBs = ByteString.copyFrom(address);
         Account request = Account.newBuilder().setAddress(addressBs).build();
@@ -411,24 +403,16 @@ public class PublicMethed {
         return grpcQueryAccount(ecKey.getAddress(), blockingStubFull);
     }
 
-    /**
-     * constructor.
-     */
+    public static byte[] getAddress(ECKey ecKey) {
+        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
+
+        return ecKey.getAddress();
+    }
 
     public static String loadPubKey() {
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
         char[] buf = new char[0x100];
         return String.valueOf(buf, 32, 130);
-    }
-
-    /**
-     * constructor.
-     */
-
-    public static byte[] getAddress(ECKey ecKey) {
-        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
-
-        return ecKey.getAddress();
     }
 
     /**
@@ -611,20 +595,6 @@ public class PublicMethed {
         GrpcAPI.Return response = broadcastTransaction(transaction, blockingStubFull);
 
         return response.getResult();
-    /*    Long afterBlockNum = 0L;
-
-    while (afterBlockNum < beforeBlockNum) {
-      Protocol.Block currentBlock1 = blockingStubFull.getNowBlock(GrpcAPI
-          .EmptyMessage.newBuilder().build());
-      afterBlockNum = currentBlock1.getBlockHeader().getRawData().getNumber();
-    }
-
-    Protocol.Account afterFronzen = queryAccount(priKey, blockingStubFull);
-    Long afterFrozenBalance = afterFronzen.getFrozen(0).getFrozenBalance();
-    logger.info(Long.toString(afterFronzen.getFrozen(0).getFrozenBalance()));
-    logger.info("beforefronen" + beforeFrozenBalance.toString() + "    afterfronzen"
-        + afterFrozenBalance.toString());
-    Assert.assertTrue(afterFrozenBalance - beforeFrozenBalance == freezeBalance);*/
     }
 
     /**
@@ -800,39 +770,6 @@ public class PublicMethed {
             ex.printStackTrace();
         }
         final ECKey ecKey = temKey;
-    /*Contract.CancelDeferredTransactionContract.Builder builder = Contract
-      .CancelDeferredTransactionContract.newBuilder();
-    builder.setTransactionId(ByteString.copyFrom(ByteArray.fromHexString(txid)));
-    builder.setOwnerAddress(ByteString.copyFrom(owner));
-
-    Contract.CancelDeferredTransactionContract contract = builder.build();
-    TransactionExtention transactionExtention = blockingStubFull
-     .createCancelDeferredTransactionContract(contract);
-
-        if (transactionExtention == null) {
-      return false;
-    }
-    Return ret = transactionExtention.getResult();
-    if (!ret.getResult()) {
-      System.out.println("Code = " + ret.getCode());
-      System.out.println("Message = " + ret.getMessage().toStringUtf8());
-      return false;
-    }
-    Transaction transaction = transactionExtention.getTransaction();
-    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-      System.out.println("Transaction is empty");
-      return false;
-    }
-    System.out.println(
-        "Cancel transaction before sign txid = " + ByteArray.toHexString(
-        transactionExtention.getTxid().toByteArray()));
-
-    transaction = signTransaction(ecKey, transaction);
-    System.out.println(
-        "Cancel transaction txid = " + ByteArray.toHexString(transactionExtention
-        .getTxid().toByteArray()));
-    GrpcAPI.Return response = broadcastTransaction(transaction, blockingStubFull);
-    return response.getResult();*/
         return null;
     }
 
@@ -927,55 +864,6 @@ public class PublicMethed {
         GrpcAPI.Return response = broadcastTransaction(transaction, blockingStubFull);
         return response.getResult();
     }
-
-    /**
-     * constructor.
-     */
-
-    public static boolean transferAssetDelay(byte[] to, byte[] assertName, long amount,
-                                             long delaySeconds, byte[] address, String priKey,
-                                             WalletGrpc.WalletBlockingStub blockingStubFull) {
-        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
-        ECKey temKey = null;
-        try {
-            BigInteger priK = new BigInteger(priKey, 16);
-            temKey = ECKey.fromPrivate(priK);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-        final ECKey ecKey = temKey;
-
-        Contract.TransferAssetContract.Builder builder = Contract.TransferAssetContract.newBuilder();
-        ByteString bsTo = ByteString.copyFrom(to);
-        ByteString bsName = ByteString.copyFrom(assertName);
-        ByteString bsOwner = ByteString.copyFrom(address);
-        builder.setToAddress(bsTo);
-        builder.setAssetName(bsName);
-        builder.setOwnerAddress(bsOwner);
-        builder.setAmount(amount);
-
-        Contract.TransferAssetContract contract = builder.build();
-        Protocol.Transaction transaction = blockingStubFull.transferAsset(contract);
-        //transaction = TransactionUtils.setDelaySeconds(transaction, delaySeconds);
-
-        if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-            if (transaction == null) {
-                logger.info("transaction == null");
-            } else {
-                logger.info("transaction.getRawData().getContractCount() == 0");
-            }
-            return false;
-        }
-        transaction = signTransaction(ecKey, transaction);
-        logger.info("Txid is " + ByteArray.toHexString(Sha256Hash.hash(transaction
-                .getRawData().toByteArray())));
-        GrpcAPI.Return response = broadcastTransaction(transaction, blockingStubFull);
-        return response.getResult();
-    }
-
-    /**
-     * constructor.
-     */
 
     public static String createAccountDelayGetTxid(byte[] ownerAddress, byte[] newAddress,
                                                    Long delaySeconds, String priKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
@@ -1082,9 +970,46 @@ public class PublicMethed {
     }
 
 
-    /**
-     * constructor.
-     */
+    public static boolean transferAssetDelay(byte[] to, byte[] assertName, long amount,
+                                             long delaySeconds, byte[] address, String priKey,
+                                             WalletGrpc.WalletBlockingStub blockingStubFull) {
+        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
+        ECKey temKey = null;
+        try {
+            BigInteger priK = new BigInteger(priKey, 16);
+            temKey = ECKey.fromPrivate(priK);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        final ECKey ecKey = temKey;
+
+        Contract.TransferAssetContract.Builder builder = Contract.TransferAssetContract.newBuilder();
+        ByteString bsTo = ByteString.copyFrom(to);
+        ByteString bsName = ByteString.copyFrom(assertName);
+        ByteString bsOwner = ByteString.copyFrom(address);
+        builder.setToAddress(bsTo);
+        builder.setAssetName(bsName);
+        builder.setOwnerAddress(bsOwner);
+        builder.setAmount(amount);
+
+        Contract.TransferAssetContract contract = builder.build();
+        Protocol.Transaction transaction = blockingStubFull.transferAsset(contract);
+        //transaction = TransactionUtils.setDelaySeconds(transaction, delaySeconds);
+
+        if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+            if (transaction == null) {
+                logger.info("transaction == null");
+            } else {
+                logger.info("transaction.getRawData().getContractCount() == 0");
+            }
+            return false;
+        }
+        transaction = signTransaction(ecKey, transaction);
+        logger.info("Txid is " + ByteArray.toHexString(Sha256Hash.hash(transaction
+                .getRawData().toByteArray())));
+        GrpcAPI.Return response = broadcastTransaction(transaction, blockingStubFull);
+        return response.getResult();
+    }
 
     public static String transferAssetDelayGetTxid(byte[] to, byte[] assertName, long amount,
                                                    long delaySeconds, byte[] address, String priKey,
@@ -1391,24 +1316,6 @@ public class PublicMethed {
         logger.info("asset balance is " + assetOwnerAssetBalance);
         return assetOwnerAssetBalance;
     }
-
-
-    /**
-     * constructor.
-     */
-  /*
-  public static Optional<DeferredTransaction> getDeferredTransactionById(String txId,
-      WalletGrpc.WalletBlockingStub blockingStubFull) {
-    ByteString bsTxid = ByteString.copyFrom(ByteArray.fromHexString(txId));
-    BytesMessage request = BytesMessage.newBuilder().setValue(bsTxid).build();
-    DeferredTransaction transaction = blockingStubFull.getDeferredTransactionById(request);
-    if (Objects.isNull(transaction)) {
-      transaction = blockingStubFull.getDeferredTransactionById(request);
-    }
-    return Optional.ofNullable(transaction);
-  }
-  */
-
 
     /**
      * constructor.

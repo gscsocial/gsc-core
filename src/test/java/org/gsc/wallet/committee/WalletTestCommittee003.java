@@ -62,10 +62,6 @@ public class WalletTestCommittee003 {
 
   private final byte[] witness001Address = PublicMethed.getFinalAddress(witnessKey001);
   private final byte[] witness002Address = PublicMethed.getFinalAddress(witnessKey002);
-  //private final byte[] witness003Address = PublicMethed.getFinalAddress(witnessKey003);
-  //private final byte[] witness004Address = PublicMethed.getFinalAddress(witnessKey004);
-  //private final byte[] witness005Address = PublicMethed.getFinalAddress(witnessKey005);
-
 
   private ManagedChannel channelFull = null;
   private ManagedChannel channelConfirmed = null;

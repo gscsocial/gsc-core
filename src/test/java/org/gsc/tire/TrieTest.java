@@ -137,16 +137,15 @@ public class TrieTest {
     Assert.assertTrue(java.util.Arrays.equals(rootHash1, rootHash2));
   }
 
-  private void assertTrue(byte[] key, TrieImpl trieCopy) {
-    Assert.assertTrue(trieCopy.verifyProof(trieCopy.getRootHash(), key, trieCopy.prove(key)));
-  }
-
   private void assertTrue(byte[] key1, byte[] key2, TrieImpl trieCopy) {
     Assert.assertTrue(trieCopy.verifyProof(trieCopy.getRootHash(), key2, trieCopy.prove(key1)));
+  }
+
+  private void assertTrue(byte[] key, TrieImpl trieCopy) {
+    Assert.assertTrue(trieCopy.verifyProof(trieCopy.getRootHash(), key, trieCopy.prove(key)));
   }
 
   private void assertFalse(byte[] key1, byte[] key2, TrieImpl trieCopy) {
     Assert.assertFalse(trieCopy.verifyProof(trieCopy.getRootHash(), key2, trieCopy.prove(key1)));
   }
-
 }

@@ -177,7 +177,6 @@ public class ChargeTest {
     Assert.assertEquals(dbManager.getAccountStore().get(address).getBalance(),
         totalBalance - (expectCpuUsageTotal + expectCpuUsageTotal2) * 10);
 
-
     /* ======================================CALL testNegative() with -100 callvalue ================================ */
     triggerData = GVMTestUtils.parseAbi("testNegative()", "");
     result = GVMTestUtils

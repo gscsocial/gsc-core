@@ -439,14 +439,6 @@ public class CpuWhenRequireStyleTest {
 
   }
 
-  @Test
-  @Ignore
-  public void transferTest()
-      throws ContractExeException, ReceiptCheckErrException, ContractValidateException {
-    // done in CpuWhenSendAndTransferTest
-
-  }
-
   // pragma confirmed ^0.4.16;
   //
   // contract TestRevertContract {

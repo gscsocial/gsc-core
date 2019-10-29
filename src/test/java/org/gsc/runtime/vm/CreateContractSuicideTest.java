@@ -123,10 +123,6 @@ contract D {
     VMConfig.initAllowGvmTransferGrc10(1);
     byte[] address = Hex.decode(OWNER_ADDRESS);
 
-//    this.manager.getDynamicPropertiesStore()
-//        .statsByVersion(ForkBlockVersionEnum.VERSION_3_2_2.getValue(), stats);
-//    this.manager.getDynamicPropertiesStore()
-//        .statsByVersion(ForkBlockVersionEnum.VERSION_3_5.getValue(), stats);
     VMConfig.initAllowMultiSign(1);
 
     Transaction aTrx = GVMTestUtils.generateDeploySmartContractAndGetTransaction(
