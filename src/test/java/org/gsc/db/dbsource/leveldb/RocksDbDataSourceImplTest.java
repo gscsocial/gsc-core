@@ -122,20 +122,6 @@ public class RocksDbDataSourceImplTest {
   }
 
   @Test
-  public void testdeleteData() {
-    RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
-        Args.getInstance().getOutputDirectory(), "test_delete");
-    dataSource.initDB();
-    String key1 = "431cd8c8d5abe5cb5944b0889b32482d85772fbb98987b10fbb7f17110757350";
-    byte[] key = key1.getBytes();
-    dataSource.deleteData(key);
-    byte[] value = dataSource.getData(key);
-    String s = ByteArray.toStr(value);
-    assertNull(s);
-    dataSource.closeDB();
-  }
-
-  @Test
   public void testallKeys() {
     RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
         Args.getInstance().getOutputDirectory(), "test_find_key");
@@ -195,6 +181,21 @@ public class RocksDbDataSourceImplTest {
     dataSource.resetDb();
     dataSource.closeDB();
   }
+
+  @Test
+  public void testdeleteData() {
+    RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
+            Args.getInstance().getOutputDirectory(), "test_delete");
+    dataSource.initDB();
+    String key1 = "431cd8c8d5abe5cb5944b0889b32482d85772fbb98987b10fbb7f17110757350";
+    byte[] key = key1.getBytes();
+    dataSource.deleteData(key);
+    byte[] value = dataSource.getData(key);
+    String s = ByteArray.toStr(value);
+    assertNull(s);
+    dataSource.closeDB();
+  }
+
 
   private void putSomeKeyValue(RocksDbDataSourceImpl dataSource) {
     value1 = "10000".getBytes();

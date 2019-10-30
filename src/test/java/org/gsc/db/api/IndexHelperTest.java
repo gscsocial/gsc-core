@@ -118,26 +118,6 @@ public class IndexHelperTest {
 
   @Ignore
   @Test
-  public void initTest() {
-
-    int sizeOfAccount = getIndexSizeOfAccount();
-    Assert.assertEquals("account index num", 1, sizeOfAccount);
-
-    int sizeOfBlock = getIndexSizeOfBlock();
-    Assert.assertEquals("block index num", 2, sizeOfBlock);
-
-    int sizeOfWitness = getIndexSizeOfWitness();
-    Assert.assertEquals("witness index num", 1, sizeOfWitness);
-
-    int sizeOfTransaction = getIndexSizeOfTransaction();
-    Assert.assertEquals("transaction index num", 1, sizeOfTransaction);
-
-    int sizeOfAssetIssue = getIndexSizeOfAssetIssue();
-    Assert.assertEquals("assetIssue index num", 1, sizeOfAssetIssue);
-  }
-
-  @Ignore
-  @Test
   public void addAndRemoveAccount() {
     AccountWrapper accountWrapper =
         new AccountWrapper(
@@ -183,6 +163,26 @@ public class IndexHelperTest {
     Index.Iface<Block> blockIndex = indexHelper.getBlockIndex();
     ImmutableList<Block> accountImmutableList = ImmutableList.copyOf(blockIndex);
     return accountImmutableList.size();
+  }
+
+  @Ignore
+  @Test
+  public void initTest() {
+
+    int sizeOfAccount = getIndexSizeOfAccount();
+    Assert.assertEquals("account index num", 1, sizeOfAccount);
+
+    int sizeOfBlock = getIndexSizeOfBlock();
+    Assert.assertEquals("block index num", 2, sizeOfBlock);
+
+    int sizeOfWitness = getIndexSizeOfWitness();
+    Assert.assertEquals("witness index num", 1, sizeOfWitness);
+
+    int sizeOfTransaction = getIndexSizeOfTransaction();
+    Assert.assertEquals("transaction index num", 1, sizeOfTransaction);
+
+    int sizeOfAssetIssue = getIndexSizeOfAssetIssue();
+    Assert.assertEquals("assetIssue index num", 1, sizeOfAssetIssue);
   }
 
   @Ignore

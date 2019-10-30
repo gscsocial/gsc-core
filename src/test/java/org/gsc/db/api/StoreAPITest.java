@@ -196,6 +196,13 @@ public class StoreAPITest {
         .build();
   }
 
+  private static void addTransactionToStore(Transaction transaction) {
+    TransactionWrapper transactionWrapper = new TransactionWrapper(transaction);
+    dbManager
+            .getTransactionStore()
+            .put(transactionWrapper.getTransactionId().getBytes(), transactionWrapper);
+  }
+
   /**
    * initTransaction.
    */
@@ -210,13 +217,6 @@ public class StoreAPITest {
             getBuildTransferContract(ACCOUNT_ADDRESS_TWO, ACCOUNT_ADDRESS_THREE),
             TRANSACTION_TIMESTAMP_TWO);
     addTransactionToStore(transaction2);
-  }
-
-  private static void addTransactionToStore(Transaction transaction) {
-    TransactionWrapper transactionWrapper = new TransactionWrapper(transaction);
-    dbManager
-        .getTransactionStore()
-        .put(transactionWrapper.getTransactionId().getBytes(), transactionWrapper);
   }
 
   private static Transaction getBuildTransaction(
@@ -335,16 +335,16 @@ public class StoreAPITest {
     addAccountToStore(account2);
   }
 
-  private static void addAccountToStore(Account account) {
-    AccountWrapper accountWrapper = new AccountWrapper(account);
-    dbManager.getAccountStore().put(account.getAddress().toByteArray(), accountWrapper);
-  }
-
   private static Account getBuildAccount(String address, String name) {
     return Account.newBuilder()
         .setAddress(ByteString.copyFrom(ByteArray.fromHexString(address)))
         .setAccountName(ByteString.copyFrom(name.getBytes()))
         .build();
+  }
+
+  private static void addAccountToStore(Account account) {
+    AccountWrapper accountWrapper = new AccountWrapper(account);
+    dbManager.getAccountStore().put(account.getAddress().toByteArray(), accountWrapper);
   }
 
   @Test

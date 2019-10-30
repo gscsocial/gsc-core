@@ -105,17 +105,6 @@ public class TransactionStoreTest {
   }
 
   /**
-   * get TransferContract.
-   */
-  private TransferContract getContract(long count, String owneraddress, String toaddress) {
-    return TransferContract.newBuilder()
-        .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(owneraddress)))
-        .setToAddress(ByteString.copyFrom(ByteArray.fromHexString(toaddress)))
-        .setAmount(count)
-        .build();
-  }
-
-  /**
    * get WitnessCreateContract.
    */
   private WitnessCreateContract getWitnessContract(String address, String url) {
@@ -123,6 +112,17 @@ public class TransactionStoreTest {
         .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(address)))
         .setUrl(ByteString.copyFrom(ByteArray.fromString(url)))
         .build();
+  }
+
+  /**
+   * get TransferContract.
+   */
+  private TransferContract getContract(long count, String owneraddress, String toaddress) {
+    return TransferContract.newBuilder()
+            .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(owneraddress)))
+            .setToAddress(ByteString.copyFrom(ByteArray.fromHexString(toaddress)))
+            .setAmount(count)
+            .build();
   }
 
   /**

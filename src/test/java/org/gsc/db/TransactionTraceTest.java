@@ -60,17 +60,8 @@ public class TransactionTraceTest {
   private static ByteString ownerAddress = ByteString.copyFrom(ByteArray.fromInt(1));
   private static ByteString contractAddress = ByteString.copyFrom(ByteArray.fromInt(2));
 
-  /*
-   * DeployContract tracetestContract [{"constant":false,"inputs":[{"name":"accountId","type":"uint256"}],"name":"getVoters","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"voters","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"vote","type":"uint256"}],"name":"addVoters","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}] 608060405234801561001057600080fd5b5060015b620186a0811015610038576000818152602081905260409020819055600a01610014565b5061010b806100486000396000f30060806040526004361060525763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166386b646f281146057578063da58c7d914607e578063eb91a5ff146093575b600080fd5b348015606257600080fd5b50606c60043560aa565b60408051918252519081900360200190f35b348015608957600080fd5b50606c60043560bc565b348015609e57600080fd5b5060a860043560ce565b005b60009081526020819052604090205490565b60006020819052908152604090205481565b6000818152602081905260409020555600a165627a7a72305820f9935f89890e51bcf3ea98fa4841c91ac5957a197d99eeb7879a775b30ee9a2d0029   1000000000 100
-   * */
-  /*
-   * DeployContract tracetestContract [{"constant":false,"inputs":[{"name":"accountId","type":"uint256"}],"name":"getVoters","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"","type":"uint256"}],"name":"voters","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"vote","type":"uint256"}],"name":"addVoters","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"}] 608060405234801561001057600080fd5b5060015b620186a0811015610038576000818152602081905260409020819055600a01610014565b5061010b806100486000396000f30060806040526004361060525763ffffffff7c010000000000000000000000000000000000000000000000000000000060003504166386b646f281146057578063da58c7d914607e578063eb91a5ff146093575b600080fd5b348015606257600080fd5b50606c60043560aa565b60408051918252519081900360200190f35b348015608957600080fd5b50606c60043560bc565b348015609e57600080fd5b5060a860043560ce565b005b60009081526020819052604090205490565b60006020819052908152604090205481565b6000818152602081905260409020555600a165627a7a72305820f9935f89890e51bcf3ea98fa4841c91ac5957a197d99eeb7879a775b30ee9a2d0029   1000000000 40
-   * */
   private static String OwnerAddress = "GSCmtiNVfUJybdYRbfV98uytyD6DCCFn63ta";
   private static String TriggerOwnerAddress = "GSCbuT1GT3zpz9pYULLBfXgFBaZtF5MhxEkQ";
-  /*
-   * triggercontract TPMBUANrTwwQAPwShn7ZZjTJz1f3F8jknj addVoters(uint256) 113 false 1000000000 0
-   * */
 
   static {
     Args.setParam(
@@ -113,44 +104,6 @@ public class TransactionTraceTest {
             .setType(ContractType.CreateSmartContract)).setFeeLimit(1000000000)).build();
 
     deployInit(transaction);
-  }
-
-  @Test
-  public void testUseUsage()
-      throws VMIllegalException, BalanceInsufficientException, ContractValidateException, ContractExeException {
-
-    AccountWrapper accountWrapper = new AccountWrapper(ByteString.copyFrom("owner".getBytes()),
-        ByteString.copyFrom(Wallet.decodeFromBase58Check(OwnerAddress)), AccountType.Normal,
-        totalBalance);
-
-    accountWrapper.setFrozenForCpu(5_000_000_000L, 0L);
-    dbManager.getAccountStore()
-        .put(Wallet.decodeFromBase58Check(OwnerAddress), accountWrapper);
-    String contractName = "tracetestContract";
-    String code = "608060405234801561001057600080fd5b5060005b6103e8811015610037576000818152602081905260409020819055600a01610014565b5061010f806100476000396000f30060806040526004361060525763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416634903b0d181146057578063da31158814607e578063fe4ba936146093575b600080fd5b348015606257600080fd5b50606c60043560ad565b60408051918252519081900360200190f35b348015608957600080fd5b50606c60043560bf565b348015609e57600080fd5b5060ab60043560243560d1565b005b60006020819052908152604090205481565b60009081526020819052604090205490565b600091825260208290526040909120555600a165627a7a723058200596e6c0a5371c2c533eb97ba4c1c19b0521750a5624cb5d2e93249c8b7219d20029";
-    String abi = "[{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"balances\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"account\",\"type\":\"uint256\"}],\"name\":\"getCoin\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"receiver\",\"type\":\"uint256\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"setCoin\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}]";
-    CreateSmartContract smartContract = GVMTestUtils.createSmartContract(
-        Wallet.decodeFromBase58Check(OwnerAddress), contractName, abi, code, 0, 100);
-    Transaction transaction = Transaction.newBuilder().setRawData(raw.newBuilder().addContract(
-        Contract.newBuilder().setParameter(Any.pack(smartContract))
-            .setType(ContractType.CreateSmartContract)).setFeeLimit(1000000000)
-        .setTimestamp(System.currentTimeMillis()))
-        .build();
-
-    TransactionWrapper transactionWrapper = new TransactionWrapper(transaction);
-    TransactionTrace trace = new TransactionTrace(transactionWrapper, dbManager);
-
-    trace.init(null);
-    trace.exec();
-    trace.pay();
-    Assert.assertEquals(2050831L, trace.getReceipt().getCpuUsage());
-    Assert.assertEquals(0L, trace.getReceipt().getCpuFee());
-    Assert.assertEquals(205083100L,
-        trace.getReceipt().getCpuUsage() * 100 + trace.getReceipt().getCpuFee());
-    accountWrapper = dbManager.getAccountStore().get(accountWrapper.getAddress().toByteArray());
-    Assert.assertEquals(totalBalance,
-        accountWrapper.getBalance() + trace.getReceipt().getCpuFee());
-
   }
 
   @Test
@@ -266,6 +219,44 @@ public class TransactionTraceTest {
         trace.getReceipt().getCpuFee() + accountWrapper
             .getBalance());
     return trace.getRuntime().getResult().getContractAddress();
+
+  }
+
+  @Test
+  public void testUseUsage()
+          throws VMIllegalException, BalanceInsufficientException, ContractValidateException, ContractExeException {
+
+    AccountWrapper accountWrapper = new AccountWrapper(ByteString.copyFrom("owner".getBytes()),
+            ByteString.copyFrom(Wallet.decodeFromBase58Check(OwnerAddress)), AccountType.Normal,
+            totalBalance);
+
+    accountWrapper.setFrozenForCpu(5_000_000_000L, 0L);
+    dbManager.getAccountStore()
+            .put(Wallet.decodeFromBase58Check(OwnerAddress), accountWrapper);
+    String contractName = "tracetestContract";
+    String code = "608060405234801561001057600080fd5b5060005b6103e8811015610037576000818152602081905260409020819055600a01610014565b5061010f806100476000396000f30060806040526004361060525763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416634903b0d181146057578063da31158814607e578063fe4ba936146093575b600080fd5b348015606257600080fd5b50606c60043560ad565b60408051918252519081900360200190f35b348015608957600080fd5b50606c60043560bf565b348015609e57600080fd5b5060ab60043560243560d1565b005b60006020819052908152604090205481565b60009081526020819052604090205490565b600091825260208290526040909120555600a165627a7a723058200596e6c0a5371c2c533eb97ba4c1c19b0521750a5624cb5d2e93249c8b7219d20029";
+    String abi = "[{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"balances\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"account\",\"type\":\"uint256\"}],\"name\":\"getCoin\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"receiver\",\"type\":\"uint256\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"setCoin\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}]";
+    CreateSmartContract smartContract = GVMTestUtils.createSmartContract(
+            Wallet.decodeFromBase58Check(OwnerAddress), contractName, abi, code, 0, 100);
+    Transaction transaction = Transaction.newBuilder().setRawData(raw.newBuilder().addContract(
+            Contract.newBuilder().setParameter(Any.pack(smartContract))
+                    .setType(ContractType.CreateSmartContract)).setFeeLimit(1000000000)
+            .setTimestamp(System.currentTimeMillis()))
+            .build();
+
+    TransactionWrapper transactionWrapper = new TransactionWrapper(transaction);
+    TransactionTrace trace = new TransactionTrace(transactionWrapper, dbManager);
+
+    trace.init(null);
+    trace.exec();
+    trace.pay();
+    Assert.assertEquals(2050831L, trace.getReceipt().getCpuUsage());
+    Assert.assertEquals(0L, trace.getReceipt().getCpuFee());
+    Assert.assertEquals(205083100L,
+            trace.getReceipt().getCpuUsage() * 100 + trace.getReceipt().getCpuFee());
+    accountWrapper = dbManager.getAccountStore().get(accountWrapper.getAddress().toByteArray());
+    Assert.assertEquals(totalBalance,
+            accountWrapper.getBalance() + trace.getReceipt().getCpuFee());
 
   }
 

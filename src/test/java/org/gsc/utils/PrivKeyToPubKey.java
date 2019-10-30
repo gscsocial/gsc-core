@@ -331,6 +331,11 @@ public class PrivKeyToPubKey {
     }
 
     @Test
+    public void add(){
+
+        System.out.println(Wallet.encode58Check(Hex.decode("01f80c992fb573850cd88e7cc80cde58dcaf1afb1e9dde")));
+    }
+    @Test
     public void triggerContract2() {
         String priKey = "374f8288a296d5267bc8157b2eead62fb7a882bfbd2fa132bebe0dd5e9332925";
         BigInteger key = new BigInteger(priKey, 16);

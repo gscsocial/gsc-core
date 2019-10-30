@@ -64,20 +64,6 @@ public class ManagerForTest {
     return witnessController.getScheduledWitness(witnessController.getSlotAtTime(time));
   }
 
-  public BlockWrapper createTestBlockWrapper(long time,
-                                             long number, ByteString hash) {
-
-    Map<ByteString, String> addressToProvateKeys = addTestWitnessAndAccount();
-    ByteString witnessAddress = getWitnessAddress(time);
-
-    BlockWrapper blockWrapper = new BlockWrapper(number, Sha256Hash.wrap(hash), time,ByteString.EMPTY,
-            witnessAddress);
-    blockWrapper.generatedByMyself = true;
-    blockWrapper.setMerkleRoot();
-    blockWrapper.sign(ByteArray.fromHexString(addressToProvateKeys.get(witnessAddress)));
-    return blockWrapper;
-  }
-
   public boolean pushNTestBlock(int count) {
     try {
       for (int i = 1; i <= count; i++) {
@@ -93,4 +79,18 @@ public class ManagerForTest {
     }
     return true;
   }
+
+    public BlockWrapper createTestBlockWrapper(long time,
+                                               long number, ByteString hash) {
+
+        Map<ByteString, String> addressToProvateKeys = addTestWitnessAndAccount();
+        ByteString witnessAddress = getWitnessAddress(time);
+
+        BlockWrapper blockWrapper = new BlockWrapper(number, Sha256Hash.wrap(hash), time,ByteString.EMPTY,
+                witnessAddress);
+        blockWrapper.generatedByMyself = true;
+        blockWrapper.setMerkleRoot();
+        blockWrapper.sign(ByteArray.fromHexString(addressToProvateKeys.get(witnessAddress)));
+        return blockWrapper;
+    }
 }

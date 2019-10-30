@@ -125,20 +125,6 @@ public class LevelDbDataSourceImplTest {
   }
 
   @Test
-  public void testdeleteData() {
-    LevelDbDataSourceImpl dataSource = new LevelDbDataSourceImpl(
-        Args.getInstance().getOutputDirectory(), "test_delete");
-    dataSource.initDB();
-    String key1 = "431cd8c8d5abe5cb5944b0889b32482d85772fbb98987b10fbb7f17110757350";
-    byte[] key = key1.getBytes();
-    dataSource.deleteData(key);
-    byte[] value = dataSource.getData(key);
-    String s = ByteArray.toStr(value);
-    assertNull(s);
-    dataSource.closeDB();
-  }
-
-  @Test
   public void testallKeys() {
     LevelDbDataSourceImpl dataSource = new LevelDbDataSourceImpl(
         Args.getInstance().getOutputDirectory(), "test_find_key");
@@ -175,6 +161,20 @@ public class LevelDbDataSourceImplTest {
     dataSourceTest.closeDB();
 
     assertFalse("Database is still alive after closing.", dataSourceTest.isAlive());
+  }
+
+  @Test
+  public void testdeleteData() {
+    LevelDbDataSourceImpl dataSource = new LevelDbDataSourceImpl(
+            Args.getInstance().getOutputDirectory(), "test_delete");
+    dataSource.initDB();
+    String key1 = "431cd8c8d5abe5cb5944b0889b32482d85772fbb98987b10fbb7f17110757350";
+    byte[] key = key1.getBytes();
+    dataSource.deleteData(key);
+    byte[] value = dataSource.getData(key);
+    String s = ByteArray.toStr(value);
+    assertNull(s);
+    dataSource.closeDB();
   }
 
   @Test
@@ -234,23 +234,6 @@ public class LevelDbDataSourceImplTest {
   }
 
   @Test
-  public void getValuesNext() {
-    LevelDbDataSourceImpl dataSource = new LevelDbDataSourceImpl(
-        Args.getInstance().getOutputDirectory(), "test_getValuesNext_key");
-    dataSource.initDB();
-    dataSource.resetDb();
-
-    putSomeKeyValue(dataSource);
-    Set<byte[]> seekKeyLimitNext = dataSource.getValuesNext("0000000300".getBytes(), 2);
-    HashSet<String> hashSet = Sets.newHashSet(ByteArray.toStr(value3), ByteArray.toStr(value4));
-    seekKeyLimitNext.forEach(valeu -> {
-      Assert.assertTrue("getValuesNext", hashSet.contains(ByteArray.toStr(valeu)));
-    });
-    dataSource.resetDb();
-    dataSource.closeDB();
-  }
-
-  @Test
   public void getValuesPrev() {
     LevelDbDataSourceImpl dataSource = new LevelDbDataSourceImpl(
         Args.getInstance().getOutputDirectory(), "test_getValuesPrev_key");
@@ -265,6 +248,23 @@ public class LevelDbDataSourceImplTest {
     });
     seekKeyLimitNext = dataSource.getValuesPrev("0000000100".getBytes(), 2);
     Assert.assertEquals("getValuesPrev2", 0, seekKeyLimitNext.size());
+    dataSource.resetDb();
+    dataSource.closeDB();
+  }
+
+  @Test
+  public void getValuesNext() {
+    LevelDbDataSourceImpl dataSource = new LevelDbDataSourceImpl(
+            Args.getInstance().getOutputDirectory(), "test_getValuesNext_key");
+    dataSource.initDB();
+    dataSource.resetDb();
+
+    putSomeKeyValue(dataSource);
+    Set<byte[]> seekKeyLimitNext = dataSource.getValuesNext("0000000300".getBytes(), 2);
+    HashSet<String> hashSet = Sets.newHashSet(ByteArray.toStr(value3), ByteArray.toStr(value4));
+    seekKeyLimitNext.forEach(valeu -> {
+      Assert.assertTrue("getValuesNext", hashSet.contains(ByteArray.toStr(valeu)));
+    });
     dataSource.resetDb();
     dataSource.closeDB();
   }

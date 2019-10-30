@@ -26,12 +26,7 @@ import static org.iq80.leveldb.impl.Iq80DBFactory.factory;
 @Slf4j
 public class SelectLevelDBData {
 
-    // public static String path = "/home/kay/workspace/ethereum/source/ethereumj/database/";
     public static String path = "/home/kay/workspace/gsc/source/java-gsc/db-directory/database/";
-    // public static String path = "/home/kay/Desktop/gsc-full1/db-directory/database/";
-    // account  contract  block gsc-confirmed full properties vote votes witness proposal peers
-    // "/home/kay/workspace/mico/gsc-core/db-directory/database/";
-    // "/home/kay/Desktop/gsc-full1/db-directory/database/";
 
     public static void main(String[] args) {
 

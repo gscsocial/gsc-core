@@ -23,12 +23,7 @@ import org.rocksdb.*;
 @Slf4j
 public class SelectRocksDBData {
 
-    // public static String path = "/home/kay/workspace/ethereum/source/ethereumj/database/";
     public static String path = "/home/kay/workspace/gsc/source/gsc-core/gsc-db/database/";
-    // public static String path = "/home/kay/Desktop/gsc-full1/db-directory/database/";
-    // account  contract  block gsc-confirmed full properties vote votes witness proposal peers
-    // "/home/kay/workspace/mico/gsc-core/db-directory/database/";
-    // "/home/kay/Desktop/gsc-full1/db-directory/database/";
 
     public static void main(String[] args) throws BadItemException {
 
