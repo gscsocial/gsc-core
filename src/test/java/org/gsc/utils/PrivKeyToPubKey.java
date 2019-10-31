@@ -110,6 +110,7 @@ public class PrivKeyToPubKey {
         blockingStub = WalletGrpc.newBlockingStub(channel);
 
         GrpcAPI.AssetIssueList block1 = blockingStub.getAssetIssueByAccount(Protocol.Account.newBuilder().build());
+        blockingStub.getTransactionInfoById(GrpcAPI.BytesMessage.newBuilder().setValue(ByteString.copyFrom(Hex.decode(""))).build());
     }
 
     @Test
