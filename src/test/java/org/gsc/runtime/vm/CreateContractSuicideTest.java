@@ -161,8 +161,7 @@ contract D {
     Runtime aRuntime = GVMTestUtils
         .processTransactionAndReturnRuntime(aTrx, DepositImpl.createRoot(manager), null);
     Assert.assertEquals(aRuntime.getRuntimeError(), "Unknown Exception");
-//
-//
+
     Transaction bTrx = GVMTestUtils.generateDeploySmartContractAndGetTransaction(
         "testB", address, abi, bCode, value, fee, consumeUserResourcePercent, null, engeryLimit);
     Runtime bRuntime = GVMTestUtils

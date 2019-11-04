@@ -54,18 +54,18 @@ public class ByteArrayTest {
   }
 
   @Test
-  public void testToLong() {
-    //logger.info("Byte: byte 13 to long = {}", ByteArray.toLong(new byte[]{13}));
-    assertEquals("byte to long is wrong", 13L, ByteArray.toLong(new byte[]{13}));
-
-  }
-
-  @Test
   public void testFromLong() {
     //logger.info("Byte: long 127L to byte = {}", ByteArray.fromLong(127L));
     byte[] expected = new byte[]{0, 0, 0, 0, 0, 0, 0, 127};
     byte[] actual = ByteArray.fromLong(127L);
     assertArrayEquals(expected, actual);
+
+  }
+
+  @Test
+  public void testToLong() {
+    //logger.info("Byte: byte 13 to long = {}", ByteArray.toLong(new byte[]{13}));
+    assertEquals("byte to long is wrong", 13L, ByteArray.toLong(new byte[]{13}));
 
   }
 

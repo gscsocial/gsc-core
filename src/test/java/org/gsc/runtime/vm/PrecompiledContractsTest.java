@@ -150,16 +150,6 @@ public class PrecompiledContractsTest {
     dbManager.getDynamicPropertiesStore().saveNextMaintenanceTime(2000000);
   }
 
-
-  private Any getFreezeContract(String ownerAddress, long frozenBalance, long duration) {
-    return Any.pack(
-        Contract.FreezeBalanceContract.newBuilder()
-            .setOwnerAddress(StringUtil.hexString2ByteString(ownerAddress))
-            .setFrozenBalance(frozenBalance)
-            .setFrozenDuration(duration)
-            .build());
-  }
-
   private PrecompiledContract createPrecompiledContract(DataWord addr, String ownerAddress) {
     PrecompiledContract contract = PrecompiledContracts.getContractForAddress(addr);
     contract.setCallerAddress(convertToGSCAddress(Hex.decode(ownerAddress)));
@@ -169,6 +159,14 @@ public class PrecompiledContractsTest {
     return contract;
   }
 
+  private Any getFreezeContract(String ownerAddress, long frozenBalance, long duration) {
+    return Any.pack(
+            Contract.FreezeBalanceContract.newBuilder()
+                    .setOwnerAddress(StringUtil.hexString2ByteString(ownerAddress))
+                    .setFrozenBalance(frozenBalance)
+                    .setFrozenDuration(duration)
+                    .build());
+  }
   //@Test
   public void voteWitnessNativeTest()
       throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException, ContractValidateException, ContractExeException {
@@ -316,14 +314,6 @@ public class PrecompiledContractsTest {
     }
   }
 
-
-  @Test
-  public void convertFromGSCBytesAddressNativeTest() {
-//    PrecompiledContract contract = createPrecompiledContract(convertFromGSCBytesAddressAddr, WITNESS_ADDRESS);
-//    byte[] solidityAddress = contract.execute(new DataWord(WITNESS_ADDRESS).getData()).getRight();
-//    Assert.assertArrayEquals(solidityAddress,new DataWord(Hex.decode(WITNESS_ADDRESS_BASE)).getData());
-  }
-
   //@Test
   public void convertFromGSCBase58AddressNative() {
     // 27WnTihwXsqCqpiNedWvtKCZHsLjDt4Hfmf  TestNet address
@@ -341,6 +331,13 @@ public class PrecompiledContractsTest {
     byte[] solidityAddress = contract.execute(data).getRight();
     Assert.assertArrayEquals(solidityAddress,
         new DataWord(Hex.decode(WITNESS_ADDRESS_BASE)).getData());
+  }
+
+  @Test
+  public void convertFromGSCBytesAddressNativeTest() {
+//    PrecompiledContract contract = createPrecompiledContract(convertFromGSCBytesAddressAddr, WITNESS_ADDRESS);
+//    byte[] solidityAddress = contract.execute(new DataWord(WITNESS_ADDRESS).getData()).getRight();
+//    Assert.assertArrayEquals(solidityAddress,new DataWord(Hex.decode(WITNESS_ADDRESS_BASE)).getData());
   }
 
   /**

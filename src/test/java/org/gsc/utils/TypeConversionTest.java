@@ -32,18 +32,18 @@ public class TypeConversionTest {
   }
 
   @Test
+  public void testBytesToHexString() {
+    String result = TypeConversion.bytesToHexString(new byte[]{0, 0, 0, 0, 0, 0, 0, 125});
+    //logger.info("bytes 125 to hex string is: {}", result);
+    assertEquals("000000000000007d", result);
+  }
+
+  @Test
   public void testBytesToLong() {
     long result = TypeConversion.bytesToLong(new byte[]{0, 0, 0, 0, 0, 0, 0, 124});
     //logger.info("bytes 124 to long is: {}", result);
     assertEquals(124L, result);
 
-  }
-
-  @Test
-  public void testBytesToHexString() {
-    String result = TypeConversion.bytesToHexString(new byte[]{0, 0, 0, 0, 0, 0, 0, 125});
-    //logger.info("bytes 125 to hex string is: {}", result);
-    assertEquals("000000000000007d", result);
   }
 
   @Test

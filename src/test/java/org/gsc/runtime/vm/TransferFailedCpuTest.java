@@ -180,8 +180,6 @@ contract CpuOfTransferFailedTest {
     }
 }
 
-
-
 contract Caller {
     constructor() payable public {}
     function test() payable public {}

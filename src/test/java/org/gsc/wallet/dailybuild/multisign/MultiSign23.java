@@ -294,84 +294,6 @@ public class MultiSign23 {
     Assert.assertEquals(balanceBefore - balanceAfter, needCoin);
   }
 
-  @Test(enabled = true, description = "Add sign for single sign normal transaction")
-  public void test03SingleSignNormalTransaction() {
-    ECKey ecKey1 = new ECKey(Utils.getRandom());
-    final byte[] ownerAddress = ecKey1.getAddress();
-    final String ownerKey = ByteArray.toHexString(ecKey1.getPrivKeyBytes());
-    long needCoin = updateAccountPermissionFee;
-
-    Assert.assertTrue(PublicMethed.sendcoin(ownerAddress, needCoin + 1_000_000, fromAddress,
-        testKey002, blockingStubFull));
-    PublicMethed.waitProduceNextBlock(blockingStubFull);
-    PublicMethed.waitProduceNextBlock(blockingStubFull);
-    Long balanceBefore = PublicMethed.queryAccount(ownerAddress, blockingStubFull)
-        .getBalance();
-    logger.info("balanceBefore: " + balanceBefore);
-    List<String> ownerPermissionKeys = new ArrayList<>();
-    List<String> activePermissionKeys = new ArrayList<>();
-
-    PublicMethed.printAddress(ownerKey);
-
-    ownerPermissionKeys.add(ownerKey);
-    activePermissionKeys.add(ownerKey);
-
-    Integer[] ints = {ContractType.TransferContract_VALUE};
-    String operations = PublicMethedForMutiSign.getOperations(ints);
-
-    String accountPermissionJson =
-        "{\"owner_permission\":{\"type\":0,\"permission_name\":\"owner1\","
-            + "\"threshold\":5,\"keys\":["
-            + "{\"address\":\"" + PublicMethed.getAddressString(ownerKey) + "\",\"weight\":2},"
-            + "{\"address\":\"" + PublicMethed.getAddressString(testKey002) + "\",\"weight\":3}]},"
-            + "\"active_permissions\":[{\"type\":2,\"permission_name\":\"active0\",\"threshold\":1,"
-            + "\"operations\":\"" + operations + "\",\"keys\":["
-            + "{\"address\":\"" + PublicMethed.getAddressString(ownerKey) + "\",\"weight\":2},"
-            + "{\"address\":\"" + PublicMethed.getAddressString(tmpKey02) + "\",\"weight\":1}"
-            + "]}]}";
-
-    Assert.assertTrue(PublicMethedForMutiSign.accountPermissionUpdate(accountPermissionJson,
-        ownerAddress, ownerKey, blockingStubFull,
-        ownerPermissionKeys.toArray(new String[ownerPermissionKeys.size()])));
-
-    PublicMethed.waitProduceNextBlock(blockingStubFull);
-
-    ownerPermissionKeys.add(testKey002);
-    activePermissionKeys.add(tmpKey02);
-
-    Assert.assertEquals(2, PublicMethedForMutiSign.getActivePermissionKeyCount(
-        PublicMethed.queryAccount(ownerAddress,
-            blockingStubFull).getActivePermissionList()));
-
-    Assert.assertEquals(2, PublicMethed.queryAccount(ownerAddress,
-        blockingStubFull).getOwnerPermission().getKeysCount());
-
-    PublicMethedForMutiSign.printPermissionList(PublicMethed.queryAccount(ownerAddress,
-        blockingStubFull).getActivePermissionList());
-
-    PublicMethedForMutiSign.printPermission(PublicMethed.queryAccount(ownerAddress,
-        blockingStubFull).getOwnerPermission());
-
-    logger.info("** trigger a normal transaction");
-    Transaction transaction = PublicMethedForMutiSign
-        .sendcoin2(fromAddress, 1000_000, ownerAddress, ownerKey, blockingStubFull);
-
-    Transaction transaction1 = PublicMethedForMutiSign
-        .addTransactionSignWithPermissionId(transaction, tmpKey02, 2, blockingStubFull);
-
-    TransactionSignWeight txWeight = PublicMethedForMutiSign
-        .getTransactionSignWeight(transaction1, blockingStubFull);
-    logger.info("TransactionSignWeight info : " + txWeight);
-
-    Assert.assertTrue(PublicMethedForMutiSign.broadcastTransaction(transaction1, blockingStubFull));
-
-    Long balanceAfter = PublicMethed.queryAccount(ownerAddress, blockingStubFull)
-        .getBalance();
-    logger.info("balanceAfter: " + balanceAfter);
-    Assert.assertEquals(balanceBefore - balanceAfter, needCoin + 1000000);
-
-  }
-
   @Test(enabled = true, description = "Add sign for not complete multi sign normal transaction")
   public void test05MultiSignNotCompletePermissionTransaction() {
     ECKey ecKey1 = new ECKey(Utils.getRandom());
@@ -456,6 +378,84 @@ public class MultiSign23 {
         .getBalance();
     logger.info("balanceAfter: " + balanceAfter);
     Assert.assertEquals(balanceBefore - balanceAfter, needCoin);
+
+  }
+
+  @Test(enabled = true, description = "Add sign for single sign normal transaction")
+  public void test03SingleSignNormalTransaction() {
+    ECKey ecKey1 = new ECKey(Utils.getRandom());
+    final byte[] ownerAddress = ecKey1.getAddress();
+    final String ownerKey = ByteArray.toHexString(ecKey1.getPrivKeyBytes());
+    long needCoin = updateAccountPermissionFee;
+
+    Assert.assertTrue(PublicMethed.sendcoin(ownerAddress, needCoin + 1_000_000, fromAddress,
+            testKey002, blockingStubFull));
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+    Long balanceBefore = PublicMethed.queryAccount(ownerAddress, blockingStubFull)
+            .getBalance();
+    logger.info("balanceBefore: " + balanceBefore);
+    List<String> ownerPermissionKeys = new ArrayList<>();
+    List<String> activePermissionKeys = new ArrayList<>();
+
+    PublicMethed.printAddress(ownerKey);
+
+    ownerPermissionKeys.add(ownerKey);
+    activePermissionKeys.add(ownerKey);
+
+    Integer[] ints = {ContractType.TransferContract_VALUE};
+    String operations = PublicMethedForMutiSign.getOperations(ints);
+
+    String accountPermissionJson =
+            "{\"owner_permission\":{\"type\":0,\"permission_name\":\"owner1\","
+                    + "\"threshold\":5,\"keys\":["
+                    + "{\"address\":\"" + PublicMethed.getAddressString(ownerKey) + "\",\"weight\":2},"
+                    + "{\"address\":\"" + PublicMethed.getAddressString(testKey002) + "\",\"weight\":3}]},"
+                    + "\"active_permissions\":[{\"type\":2,\"permission_name\":\"active0\",\"threshold\":1,"
+                    + "\"operations\":\"" + operations + "\",\"keys\":["
+                    + "{\"address\":\"" + PublicMethed.getAddressString(ownerKey) + "\",\"weight\":2},"
+                    + "{\"address\":\"" + PublicMethed.getAddressString(tmpKey02) + "\",\"weight\":1}"
+                    + "]}]}";
+
+    Assert.assertTrue(PublicMethedForMutiSign.accountPermissionUpdate(accountPermissionJson,
+            ownerAddress, ownerKey, blockingStubFull,
+            ownerPermissionKeys.toArray(new String[ownerPermissionKeys.size()])));
+
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+
+    ownerPermissionKeys.add(testKey002);
+    activePermissionKeys.add(tmpKey02);
+
+    Assert.assertEquals(2, PublicMethedForMutiSign.getActivePermissionKeyCount(
+            PublicMethed.queryAccount(ownerAddress,
+                    blockingStubFull).getActivePermissionList()));
+
+    Assert.assertEquals(2, PublicMethed.queryAccount(ownerAddress,
+            blockingStubFull).getOwnerPermission().getKeysCount());
+
+    PublicMethedForMutiSign.printPermissionList(PublicMethed.queryAccount(ownerAddress,
+            blockingStubFull).getActivePermissionList());
+
+    PublicMethedForMutiSign.printPermission(PublicMethed.queryAccount(ownerAddress,
+            blockingStubFull).getOwnerPermission());
+
+    logger.info("** trigger a normal transaction");
+    Transaction transaction = PublicMethedForMutiSign
+            .sendcoin2(fromAddress, 1000_000, ownerAddress, ownerKey, blockingStubFull);
+
+    Transaction transaction1 = PublicMethedForMutiSign
+            .addTransactionSignWithPermissionId(transaction, tmpKey02, 2, blockingStubFull);
+
+    TransactionSignWeight txWeight = PublicMethedForMutiSign
+            .getTransactionSignWeight(transaction1, blockingStubFull);
+    logger.info("TransactionSignWeight info : " + txWeight);
+
+    Assert.assertTrue(PublicMethedForMutiSign.broadcastTransaction(transaction1, blockingStubFull));
+
+    Long balanceAfter = PublicMethed.queryAccount(ownerAddress, blockingStubFull)
+            .getBalance();
+    logger.info("balanceAfter: " + balanceAfter);
+    Assert.assertEquals(balanceBefore - balanceAfter, needCoin + 1000000);
 
   }
 
