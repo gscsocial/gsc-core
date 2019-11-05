@@ -52,16 +52,6 @@ public class RevokingDbWithCacheNewValueTest {
     appT = ApplicationFactory.create(context);
   }
 
-  @After
-  public void removeDb() {
-    Args.clearParam();
-    appT.shutdownServices();
-    appT.shutdown();
-    context.destroy();
-    gscDatabase.close();
-    FileUtil.deleteDir(new File("db_revokingStore_test"));
-  }
-
   @Test
   public synchronized void testPop() throws RevokingStoreIllegalStateException {
     revokingDatabase = new TestSnapshotManager();
@@ -256,5 +246,15 @@ public class RevokingDbWithCacheNewValueTest {
 
   public static class TestSnapshotManager extends SnapshotManager {
 
+  }
+
+  @After
+  public void removeDb() {
+    Args.clearParam();
+    appT.shutdownServices();
+    appT.shutdown();
+    context.destroy();
+    gscDatabase.close();
+    FileUtil.deleteDir(new File("db_revokingStore_test"));
   }
 }

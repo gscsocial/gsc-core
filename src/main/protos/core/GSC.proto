@@ -183,11 +183,6 @@ message authority {
   bytes permission_name = 2;
 }
 
-message Key {
-  bytes address = 1;
-  int64 weight = 2;
-}
-
 message Permission {
   enum PermissionType {
     Owner = 0;

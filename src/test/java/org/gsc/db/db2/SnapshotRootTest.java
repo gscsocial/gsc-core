@@ -54,15 +54,6 @@ public class SnapshotRootTest {
     appT = ApplicationFactory.create(context);
   }
 
-  @After
-  public void removeDb() {
-    Args.clearParam();
-    appT.shutdownServices();
-    appT.shutdown();
-    context.destroy();
-    FileUtil.deleteDir(new File("db_revokingStore_test"));
-  }
-
   @Test
   public synchronized void testRemove() {
     ProtoWrapperTest testProtoWrapper = new ProtoWrapperTest("test".getBytes());
@@ -154,5 +145,14 @@ public class SnapshotRootTest {
           + ", string=" + (value == null ? "" : new String(value))
           + '}';
     }
+  }
+
+  @After
+  public void removeDb() {
+    Args.clearParam();
+    appT.shutdownServices();
+    appT.shutdown();
+    context.destroy();
+    FileUtil.deleteDir(new File("db_revokingStore_test"));
   }
 }

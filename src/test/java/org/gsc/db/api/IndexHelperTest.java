@@ -107,15 +107,6 @@ public class IndexHelperTest {
     indexHelper = context.getBean(IndexHelper.class);
   }
 
-  @AfterClass
-  public static void removeDb() {
-    Args.clearParam();
-    AppT.shutdownServices();
-    AppT.shutdown();
-    context.destroy();
-    FileUtil.deleteDir(new File(dbPath));
-  }
-
   @Ignore
   @Test
   public void addAndRemoveAccount() {
@@ -315,5 +306,14 @@ public class IndexHelperTest {
 
     // del account
     indexHelper.remove(account3);
+  }
+
+  @AfterClass
+  public static void removeDb() {
+    Args.clearParam();
+    AppT.shutdownServices();
+    AppT.shutdown();
+    context.destroy();
+    FileUtil.deleteDir(new File(dbPath));
   }
 }

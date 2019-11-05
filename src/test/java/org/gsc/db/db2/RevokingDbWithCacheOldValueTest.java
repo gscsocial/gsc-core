@@ -55,15 +55,6 @@ public class RevokingDbWithCacheOldValueTest {
     revokingDatabase.enable();
   }
 
-  @After
-  public void removeDb() {
-    Args.clearParam();
-    appT.shutdownServices();
-    appT.shutdown();
-    context.destroy();
-    FileUtil.deleteDir(new File("db_revokingStore_test"));
-  }
-
   @Test
   public synchronized void testReset() {
     revokingDatabase.getStack().clear();
@@ -267,5 +258,14 @@ public class RevokingDbWithCacheOldValueTest {
 
   private static class TestRevokingGSCDatabase extends AbstractRevokingStore {
 
+  }
+
+  @After
+  public void removeDb() {
+    Args.clearParam();
+    appT.shutdownServices();
+    appT.shutdown();
+    context.destroy();
+    FileUtil.deleteDir(new File("db_revokingStore_test"));
   }
 }

@@ -134,15 +134,6 @@ public class StoreAPITest {
     storeAPI = context.getBean(StoreAPI.class);
   }
 
-  @AfterClass
-  public static void removeDb() {
-    Args.clearParam();
-    AppT.shutdownServices();
-    AppT.shutdown();
-    context.destroy();
-    FileUtil.deleteDir(new File(dbPath));
-  }
-
   /**
    * initAssetIssue.
    */
@@ -409,5 +400,14 @@ public class StoreAPITest {
     } catch (NonUniqueObjectException e) {
       Assert.fail("Exception " + e);
     }
+  }
+
+  @AfterClass
+  public static void removeDb() {
+    Args.clearParam();
+    AppT.shutdownServices();
+    AppT.shutdown();
+    context.destroy();
+    FileUtil.deleteDir(new File(dbPath));
   }
 }

@@ -94,15 +94,6 @@ public class AssetUpdateHelperTest {
     dbManager.getAccountStore().put(ByteArray.fromHexString("121212abc"), accountWrapper);
   }
 
-  @AfterClass
-  public static void removeDb() {
-    Args.clearParam();
-    AppT.shutdownServices();
-    AppT.shutdown();
-    context.destroy();
-    FileUtil.deleteDir(new File(dbPath));
-  }
-
   @Test
   public void test() {
 
@@ -167,5 +158,14 @@ public class AssetUpdateHelperTest {
     }
 
     removeDb();
+  }
+
+  @AfterClass
+  public static void removeDb() {
+    Args.clearParam();
+    AppT.shutdownServices();
+    AppT.shutdown();
+    context.destroy();
+    FileUtil.deleteDir(new File(dbPath));
   }
 }

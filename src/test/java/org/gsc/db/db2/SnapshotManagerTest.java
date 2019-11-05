@@ -56,18 +56,6 @@ public class SnapshotManagerTest {
     revokingDatabase.setCheckTmpStore(context.getBean(CheckTmpStore.class));
   }
 
-  @After
-  public void removeDb() {
-    Args.clearParam();
-    appT.shutdownServices();
-    appT.shutdown();
-    context.destroy();
-    gscDatabase.close();
-    FileUtil.deleteDir(new File("db_revokingStore_test"));
-    revokingDatabase.getCheckTmpStore().getDbSource().closeDB();
-    gscDatabase.close();
-  }
-
   @Test
   public synchronized void testRefresh()
       throws BadItemException, ItemNotFoundException {
@@ -111,5 +99,17 @@ public class SnapshotManagerTest {
     Assert.assertEquals(null,
         gscDatabase.get(protoWrapper.getData()));
 
+  }
+
+  @After
+  public void removeDb() {
+    Args.clearParam();
+    appT.shutdownServices();
+    appT.shutdown();
+    context.destroy();
+    gscDatabase.close();
+    FileUtil.deleteDir(new File("db_revokingStore_test"));
+    revokingDatabase.getCheckTmpStore().getDbSource().closeDB();
+    gscDatabase.close();
   }
 }
