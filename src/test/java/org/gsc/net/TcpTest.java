@@ -128,15 +128,6 @@ public class TcpTest {
     validResultCloseConnect(channel);
   }
 
-  public void errorGenesisBlockIdTest() throws InterruptedException {
-    Channel channel = BaseNet.connect(new HandshakeHandler(TestType.errorGenesisBlock));
-    BlockId genesisBlockId = new BlockId();
-    HelloMessage message = new HelloMessage(node, System.currentTimeMillis(), genesisBlockId,
-        manager.getConfirmedBlockId(), manager.getHeadBlockId());
-    sendMessage(channel, message);
-    validResultCloseConnect(channel);
-  }
-
   public void errorVersionTest() throws InterruptedException {
     Channel channel = BaseNet.connect(new HandshakeHandler(TestType.errorVersion));
     Args.getInstance().setNodeP2pVersion(1);
@@ -165,6 +156,15 @@ public class TcpTest {
     sendMessage(repeatChannel, message);
     validResultCloseConnect(repeatChannel);
     clearConnect(channel);
+  }
+
+  public void errorGenesisBlockIdTest() throws InterruptedException {
+    Channel channel = BaseNet.connect(new HandshakeHandler(TestType.errorGenesisBlock));
+    BlockId genesisBlockId = new BlockId();
+    HelloMessage message = new HelloMessage(node, System.currentTimeMillis(), genesisBlockId,
+            manager.getConfirmedBlockId(), manager.getHeadBlockId());
+    sendMessage(channel, message);
+    validResultCloseConnect(channel);
   }
 
   public void unHandshakeTest() throws InterruptedException {
@@ -204,17 +204,6 @@ public class TcpTest {
     clearConnect(channel);
   }
 
-  private void sendMessage(Channel channel, Message message) {
-    channel.writeAndFlush(message.getSendData())
-        .addListener((ChannelFutureListener) future -> {
-          if (future.isSuccess()) {
-            logger.info("send msg success");
-          } else {
-            logger.error("send msg fail", future.cause());
-          }
-        });
-  }
-
   private void validResultCloseConnect(Channel channel) throws InterruptedException {
     int trys = 0;
     while (!finish && ++trys < tryTimes) {
@@ -232,6 +221,17 @@ public class TcpTest {
     ReflectUtils.setFieldValue(channelManager, "recentlyDisconnected",
         CacheBuilder.newBuilder().maximumSize(1000)
             .expireAfterWrite(30, TimeUnit.SECONDS).recordStats().build());
+  }
+
+  private void sendMessage(Channel channel, Message message) {
+    channel.writeAndFlush(message.getSendData())
+            .addListener((ChannelFutureListener) future -> {
+              if (future.isSuccess()) {
+                logger.info("send msg success");
+              } else {
+                logger.error("send msg fail", future.cause());
+              }
+            });
   }
 
   private void validResultUnCloseConnect() throws InterruptedException {

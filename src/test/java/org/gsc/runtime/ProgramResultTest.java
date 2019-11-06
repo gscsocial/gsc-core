@@ -337,24 +337,6 @@ public class ProgramResultTest {
   }
 
 
-  private byte[] deployC()
-      throws ContractExeException, ReceiptCheckErrException, ContractValidateException, VMIllegalException {
-    String contractName = "C";
-    byte[] address = Hex.decode(OWNER_ADDRESS);
-    String ABI =
-        "[{\"inputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\""
-            + ":\"payable\",\"type\":\"fallback\"}]";
-    String code = "608060405260328060116000396000f30060806040520000a165627a7a72305820193b446e66e78aa74e45a3201095c5af56be9ee839ab815fe492202803cb71a30029";
-    long value = 0;
-    long feeLimit = 1000000000;
-    long consumeUserResourcePercent = 0;
-
-    return GVMTestUtils
-        .deployContractWholeProcessReturnContractAddress(contractName, address, ABI, code, value,
-            feeLimit, consumeUserResourcePercent, null,
-            deposit, null);
-  }
-
   private byte[] deployA()
       throws ContractExeException, ReceiptCheckErrException, ContractValidateException, VMIllegalException {
     String contractName = "A";
@@ -396,6 +378,23 @@ public class ProgramResultTest {
             deposit, null);
   }
 
+  private byte[] deployC()
+          throws ContractExeException, ReceiptCheckErrException, ContractValidateException, VMIllegalException {
+    String contractName = "C";
+    byte[] address = Hex.decode(OWNER_ADDRESS);
+    String ABI =
+            "[{\"inputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\""
+                    + ":\"payable\",\"type\":\"fallback\"}]";
+    String code = "608060405260328060116000396000f30060806040520000a165627a7a72305820193b446e66e78aa74e45a3201095c5af56be9ee839ab815fe492202803cb71a30029";
+    long value = 0;
+    long feeLimit = 1000000000;
+    long consumeUserResourcePercent = 0;
+
+    return GVMTestUtils
+            .deployContractWholeProcessReturnContractAddress(contractName, address, ABI, code, value,
+                    feeLimit, consumeUserResourcePercent, null,
+                    deposit, null);
+  }
 
   /**
    * pragma confirmed ^0.4.24;

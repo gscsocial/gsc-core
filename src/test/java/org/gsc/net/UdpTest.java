@@ -37,33 +37,9 @@ public class UdpTest {
 
   private NodeManager nodeManager;
   private int port = Args.getInstance().getNodeListenPort();
-//  private volatile boolean finishFlag = false;
-//  private long timeOut = 30_000;
 
   public UdpTest(GSCApplicationContext context) {
     nodeManager = context.getBean(NodeManager.class);
-  }
-
-  public void test() throws Exception {
-    /*
-    Thread thread = new Thread(() -> {
-      try {
-        discover();
-      } catch (Exception e) {
-        logger.info("Discover test failed.", e);
-      }
-    });
-    thread.start();
-
-    long time = System.currentTimeMillis();
-    while (!finishFlag && System.currentTimeMillis() - time < timeOut) {
-      Thread.sleep(1000);
-    }
-    if (!finishFlag) {
-      thread.interrupt();
-      Assert.assertTrue(false);
-    }
-    */
   }
 
   public void discover() throws Exception {
@@ -135,7 +111,6 @@ public class UdpTest {
 
     socket.close();
 
-//    finishFlag = true;
   }
 }
 

@@ -102,15 +102,6 @@ public class GVMTestUtils {
         libraryAddressPair, 100000);
   }
 
-  public static Transaction generateDeploySmartContractAndGetTransaction(String contractName,
-      byte[] callerAddress,
-      String abi, String code, long value, long feeLimit, long consumeUserResourcePercent,
-      long tokenValue, long tokenId, String libraryAddressPair) {
-    return generateDeploySmartContractAndGetTransaction(contractName, callerAddress, abi, code,
-        value, feeLimit, consumeUserResourcePercent,
-        libraryAddressPair, 100000, tokenValue, tokenId);
-  }
-
   /**
    * return generated smart contract Transaction, just before we use it to broadcast and push
    * transaction.
@@ -132,6 +123,15 @@ public class GVMTestUtils {
     transactionBuilder.setRawData(rawBuilder);
     Transaction trx = transactionBuilder.build();
     return trx;
+  }
+
+  public static Transaction generateDeploySmartContractAndGetTransaction(String contractName,
+                                                                         byte[] callerAddress,
+                                                                         String abi, String code, long value, long feeLimit, long consumeUserResourcePercent,
+                                                                         long tokenValue, long tokenId, String libraryAddressPair) {
+    return generateDeploySmartContractAndGetTransaction(contractName, callerAddress, abi, code,
+            value, feeLimit, consumeUserResourcePercent,
+            libraryAddressPair, 100000, tokenValue, tokenId);
   }
 
   public static Transaction generateDeploySmartContractAndGetTransaction(String contractName,

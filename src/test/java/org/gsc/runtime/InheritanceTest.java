@@ -105,7 +105,6 @@ public class InheritanceTest {
         contractName, callerAddress, ABI, code, value, fee, consumeUserResourcePercent, null,
         deposit, null);
 
-
     /* =================================== CALL getName() return child value =================================== */
     byte[] triggerData1 = GVMTestUtils.parseAbi("getName()", "");
     runtime = GVMTestUtils

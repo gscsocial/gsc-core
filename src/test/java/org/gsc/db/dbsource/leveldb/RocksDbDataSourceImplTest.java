@@ -161,28 +161,6 @@ public class RocksDbDataSourceImplTest {
   }
 
   @Test
-  public void allKeysTest() {
-    RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
-        Args.getInstance().getOutputDirectory(), "test_allKeysTest_key");
-    dataSource.initDB();
-    dataSource.resetDb();
-
-    byte[] key = "0000000987b10fbb7f17110757321".getBytes();
-    byte[] value = "50000".getBytes();
-    byte[] key2 = "000000431cd8c8d5a".getBytes();
-    byte[] value2 = "30000".getBytes();
-
-    dataSource.putData(key, value);
-    dataSource.putData(key2, value2);
-    dataSource.allKeys().forEach(keyOne -> {
-      logger.info(ByteArray.toStr(keyOne));
-    });
-    assertEquals(2, dataSource.allKeys().size());
-    dataSource.resetDb();
-    dataSource.closeDB();
-  }
-
-  @Test
   public void testdeleteData() {
     RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
             Args.getInstance().getOutputDirectory(), "test_delete");
@@ -232,6 +210,28 @@ public class RocksDbDataSourceImplTest {
   }
 
   @Test
+  public void allKeysTest() {
+    RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
+            Args.getInstance().getOutputDirectory(), "test_allKeysTest_key");
+    dataSource.initDB();
+    dataSource.resetDb();
+
+    byte[] key = "0000000987b10fbb7f17110757321".getBytes();
+    byte[] value = "50000".getBytes();
+    byte[] key2 = "000000431cd8c8d5a".getBytes();
+    byte[] value2 = "30000".getBytes();
+
+    dataSource.putData(key, value);
+    dataSource.putData(key2, value2);
+    dataSource.allKeys().forEach(keyOne -> {
+      logger.info(ByteArray.toStr(keyOne));
+    });
+    assertEquals(2, dataSource.allKeys().size());
+    dataSource.resetDb();
+    dataSource.closeDB();
+  }
+
+  @Test
   public void getValuesNext() {
     RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
         Args.getInstance().getOutputDirectory(), "test_getValuesNext_key");
@@ -242,25 +242,6 @@ public class RocksDbDataSourceImplTest {
     HashSet<String> hashSet = Sets.newHashSet(ByteArray.toStr(value3), ByteArray.toStr(value4));
     seekKeyLimitNext.forEach(
         value -> Assert.assertTrue("getValuesNext", hashSet.contains(ByteArray.toStr(value))));
-    dataSource.resetDb();
-    dataSource.closeDB();
-  }
-
-  @Test
-  public void getValuesPrev() {
-    RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
-        Args.getInstance().getOutputDirectory(), "test_getValuesPrev_key");
-    dataSource.initDB();
-    dataSource.resetDb();
-
-    putSomeKeyValue(dataSource);
-    Set<byte[]> seekKeyLimitNext = dataSource.getValuesPrev("0000000300".getBytes(), 2);
-    HashSet<String> hashSet = Sets.newHashSet(ByteArray.toStr(value1), ByteArray.toStr(value2));
-    seekKeyLimitNext.forEach(value -> {
-      Assert.assertTrue("getValuesPrev1", hashSet.contains(ByteArray.toStr(value)));
-    });
-    seekKeyLimitNext = dataSource.getValuesPrev("0000000100".getBytes(), 2);
-    Assert.assertEquals("getValuesPrev2", 0, seekKeyLimitNext.size());
     dataSource.resetDb();
     dataSource.closeDB();
   }
@@ -296,4 +277,24 @@ public class RocksDbDataSourceImplTest {
     Assert.assertNull(dataSource.getDatabase());
     PropUtil.writeProperty(enginePath, "ENGINE", "ROCKSDB");
   }
+
+  @Test
+  public void getValuesPrev() {
+    RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
+            Args.getInstance().getOutputDirectory(), "test_getValuesPrev_key");
+    dataSource.initDB();
+    dataSource.resetDb();
+
+    putSomeKeyValue(dataSource);
+    Set<byte[]> seekKeyLimitNext = dataSource.getValuesPrev("0000000300".getBytes(), 2);
+    HashSet<String> hashSet = Sets.newHashSet(ByteArray.toStr(value1), ByteArray.toStr(value2));
+    seekKeyLimitNext.forEach(value -> {
+      Assert.assertTrue("getValuesPrev1", hashSet.contains(ByteArray.toStr(value)));
+    });
+    seekKeyLimitNext = dataSource.getValuesPrev("0000000100".getBytes(), 2);
+    Assert.assertEquals("getValuesPrev2", 0, seekKeyLimitNext.size());
+    dataSource.resetDb();
+    dataSource.closeDB();
+  }
+
 }
