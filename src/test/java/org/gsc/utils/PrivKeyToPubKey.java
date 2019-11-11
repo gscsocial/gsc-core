@@ -21,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.gsc.api.DatabaseGrpc;
 import org.gsc.api.GrpcAPI;
 import org.gsc.api.WalletGrpc;
-import org.gsc.core.Constant;
 import org.gsc.crypto.ECKey;
 import org.gsc.core.Wallet;
 import org.gsc.protos.Contract;
@@ -33,8 +32,6 @@ import org.gsc.wallet.common.client.utils.PublicMethed;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -84,7 +81,8 @@ public class PrivKeyToPubKey {
 
     @Test
     public void testss(){
-         String   address = Hex.toHexString(Wallet.decodeFromBase58Check("TVmJb5LJFKewXhXEpMZ89FZPSNKusVC45p"));
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger("374f8288a296d5267bc8157b2eead62fb7a882bfbd2fa132bebe0dd5e9332925",16));
+         String   address = Hex.toHexString(ecKey.getAddress());
         System.out.println(address);
     }
 

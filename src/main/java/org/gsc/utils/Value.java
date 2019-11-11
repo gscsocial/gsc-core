@@ -158,12 +158,6 @@ public class Value {
      *      Checks
      * *****************/
 
-    public boolean isList() {
-//        decode();
-        return value != null && value.getClass().isArray() && !value.getClass().getComponentType()
-                .isPrimitive();
-    }
-
     public boolean isString() {
 //        decode();
         return value instanceof String;
@@ -182,6 +176,12 @@ public class Value {
     public boolean isBigInt() {
         // decode();
         return value instanceof BigInteger;
+    }
+
+    public boolean isList() {
+//        decode();
+        return value != null && value.getClass().isArray() && !value.getClass().getComponentType()
+                .isPrimitive();
     }
 
     public boolean isBytes() {
