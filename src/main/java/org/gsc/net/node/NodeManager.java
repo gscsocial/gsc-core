@@ -42,8 +42,6 @@ import org.gsc.net.discover.message.discover.FindNodeMessage;
 import org.gsc.net.discover.message.discover.NeighborsMessage;
 import org.gsc.net.discover.message.discover.PingMessage;
 import org.gsc.net.discover.message.discover.PongMessage;
-import org.gsc.net.discover.DiscoverListener;
-import org.gsc.net.discover.RefreshTask;
 import org.gsc.utils.CollectionUtils;
 import org.gsc.config.args.Args;
 import org.gsc.db.Manager;
