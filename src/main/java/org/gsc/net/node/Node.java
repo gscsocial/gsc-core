@@ -69,7 +69,7 @@ public class Node implements Serializable {
         return node;
     }
 
-    public String getEnodeURL() {
+    public String getEncodeURL() {
         return new StringBuilder("enode://")
                 .append(ByteArray.toHexString(id)).append("@")
                 .append(host).append(":")
