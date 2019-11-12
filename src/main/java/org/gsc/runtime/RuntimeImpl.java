@@ -709,9 +709,9 @@ public class RuntimeImpl implements Runtime {
             }
             logger.info("runtime result is :{}", result.getException().getMessage());
         }
-        //if (!isStaticCall) {
+        if (!isStaticCall) {
             trace.setBill(result.getCpuUsed());
-       // }
+        }
     }
 
     private static long getCpuFee(long callerCpuUsage, long callerCpuFrozen,

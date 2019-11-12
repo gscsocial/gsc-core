@@ -15,6 +15,8 @@ package org.gsc.services;
 
 import static org.gsc.core.witness.BlockProductionCondition.NOT_MY_TURN;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import com.google.protobuf.ByteString;
 
@@ -92,6 +94,7 @@ public class WitnessService implements Service {
     private AtomicLong dupBlockTime = new AtomicLong(0);
     private long blockCycle =
             ChainConstant.BLOCK_PRODUCED_INTERVAL * ChainConstant.MAX_ACTIVE_WITNESS_NUM;
+    private Cache<ByteString, Long> blocks = CacheBuilder.newBuilder().maximumSize(10).build();
 
     /**
      * Construction method.
@@ -353,6 +356,11 @@ public class WitnessService implements Service {
 
     public void checkDupWitness(BlockWrapper block) {
         if (block.generatedByMyself) {
+            blocks.put(block.getBlockId().getByteString(), System.currentTimeMillis());
+            return;
+        }
+
+        if (blocks.getIfPresent(block.getBlockId().getByteString()) != null){
             return;
         }
 
