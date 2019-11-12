@@ -26,6 +26,7 @@ import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
+import org.gsc.net.node.NodeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -138,9 +139,11 @@ public class Channel {
      * Set node and register it in NodeManager if it is not registered yet.
      */
     public void initNode(byte[] nodeId, int remotePort) {
-        node = new Node(nodeId, inetSocketAddress.getHostString(), remotePort);
-        nodeStatistics = nodeManager.getNodeStatistics(node);
-        nodeManager.getNodeHandler(node).setNode(node);
+        Node n = new Node(nodeId, inetSocketAddress.getHostString(), remotePort);
+        NodeHandler handler = nodeManager.getNodeHandler(n);
+        node = handler.getNode();
+        nodeStatistics = handler.getNodeStatistics();
+        handler.getNode().setId(nodeId);
     }
 
     public void disconnect(ReasonCode reason) {

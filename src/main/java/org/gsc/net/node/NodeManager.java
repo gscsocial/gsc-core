@@ -56,9 +56,9 @@ public class NodeManager implements EventHandler {
 
     private Manager dbManager;
 
-    private static final long LISTENER_REFRESH_RATE = 1000L;
     private static final long DB_COMMIT_RATE = 1 * 60 * 1000L;
     private static final int MAX_NODES = 2000;
+    private static final int MAX_NODES_WRITE_TO_DB = 30;
     private static final int NODES_TRIM_THRESHOLD = 3000;
 
     private Consumer<UdpEvent> messageSender;
@@ -68,14 +68,10 @@ public class NodeManager implements EventHandler {
     private Map<String, NodeHandler> nodeHandlerMap = new ConcurrentHashMap<>();
     private List<Node> bootNodes = new ArrayList<>();
 
-    // option to handle inbounds only from known peers (i.e. which were discovered by ourselves)
-    private boolean inboundOnlyFromKnownNodes = false;
-
     private boolean discoveryEnabled;
 
-    private Map<DiscoverListener, ListenerHandler> listeners = new IdentityHashMap<>();
-
     private boolean inited = false;
+
     private Timer nodeManagerTasksTimer = new Timer("NodeManagerTasks");
     private ScheduledExecutorService pongTimer;
 
@@ -84,7 +80,7 @@ public class NodeManager implements EventHandler {
         this.dbManager = dbManager;
         discoveryEnabled = args.isNodeDiscoveryEnable();
 
-        homeNode = new Node(RefreshTask.getNodeId(), args.getNodeExternalIp(),
+        homeNode = new Node(Node.getNodeId(), args.getNodeExternalIp(),
                 args.getNodeListenPort());
 
         for (String boot : args.getBootNodes()) {
@@ -107,12 +103,6 @@ public class NodeManager implements EventHandler {
     public void channelActivated() {
         if (!inited) {
             inited = true;
-            nodeManagerTasksTimer.scheduleAtFixedRate(new TimerTask() {
-                @Override
-                public void run() {
-                    processListeners();
-                }
-            }, LISTENER_REFRESH_RATE, LISTENER_REFRESH_RATE);
 
             if (args.isNodeDiscoveryPersist()) {
                 dbRead();
@@ -144,16 +134,23 @@ public class NodeManager implements EventHandler {
     }
 
     private void dbWrite() {
-        Set<Node> batch = new HashSet<>();
-        synchronized (this) {
-            for (NodeHandler nodeHandler : nodeHandlerMap.values()) {
-                int reputation = nodeHandler.getNodeStatistics().getReputation();
-                nodeHandler.getNode().setReputation(reputation);
+        List<Node> batch = new ArrayList<>();
+        for (NodeHandler nodeHandler : nodeHandlerMap.values()) {
+            if (nodeHandler.getNode().isConnectible()){
+                nodeHandler.getNode().setReputation(nodeHandler.getNodeStatistics().getReputation());
                 batch.add(nodeHandler.getNode());
             }
         }
-        logger.info("Write Node statistics to PeersStore: " + batch.size() + " nodes.");
-        dbManager.clearAndWriteNeighbours(batch);
+        int size = batch.size();
+        batch.sort(Comparator.comparingInt(value -> -value.getReputation()));
+        if (batch.size() > MAX_NODES_WRITE_TO_DB){
+            batch = batch.subList(0, MAX_NODES_WRITE_TO_DB);
+        }
+        Set<Node> nodes = new HashSet<>();
+        nodes.addAll(batch);
+        logger.info("Write Node statistics to PeersStore after: m:{}/t:{}/{}/{} nodes.",
+                nodeHandlerMap.size(), getTable().getAllNodes().size(), size, nodes.size());
+        dbManager.clearAndWriteNeighbours(nodes);
     }
 
     public void setMessageSender(Consumer<UdpEvent> messageSender) {
@@ -170,7 +167,7 @@ public class NodeManager implements EventHandler {
                 .getPort();
     }
 
-    public synchronized NodeHandler getNodeHandler(Node n) {
+    public NodeHandler getNodeHandler(Node n) {
         String key = getKey(n);
         NodeHandler ret = nodeHandlerMap.get(key);
         if (ret == null) {
@@ -184,9 +181,15 @@ public class NodeManager implements EventHandler {
     }
 
     private void trimTable() {
+        if (nodeHandlerMap.size() > NODES_TRIM_THRESHOLD){
+            nodeHandlerMap.values().forEach(handler -> {
+                if (!handler.getNode().isConnectible()){
+                    nodeHandlerMap.remove(handler);
+                }
+            });
+        }
         if (nodeHandlerMap.size() > NODES_TRIM_THRESHOLD) {
             List<NodeHandler> sorted = new ArrayList<>(nodeHandlerMap.values());
-            // reverse sort by reputation
             sorted.sort(Comparator.comparingInt(o -> o.getNodeStatistics().getReputation()));
             for (NodeHandler handler : sorted) {
                 nodeHandlerMap.values().remove(handler);
@@ -214,11 +217,8 @@ public class NodeManager implements EventHandler {
         Message m = udpEvent.getMessage();
         InetSocketAddress sender = udpEvent.getAddress();
 
-        Node n = new Node(m.getFrom().getId(), sender.getHostString(), sender.getPort());
-        if (inboundOnlyFromKnownNodes && !hasNodeHandler(n)) {
-            logger.warn("Receive packet from unknown node {}.", sender.getAddress());
-            return;
-        }
+        Node n = new Node(m.getFrom().getId(), sender.getHostString(), sender.getPort(),
+                m.getFrom().getPort());
 
         NodeHandler nodeHandler = getNodeHandler(n);
         nodeHandler.getNodeStatistics().messageStatistics.addUdpInMessage(m.getType());
@@ -247,61 +247,25 @@ public class NodeManager implements EventHandler {
         }
     }
 
-    public synchronized List<NodeHandler> getNodes(int minReputation) {
-        List<NodeHandler> ret = new ArrayList<>();
-        for (NodeHandler nodeHandler : nodeHandlerMap.values()) {
-            if (nodeHandler.getNodeStatistics().getReputation() >= minReputation) {
-                ret.add(nodeHandler);
-            }
-        }
-        return ret;
-    }
-
     public List<NodeHandler> getNodes(Predicate<NodeHandler> predicate, int limit) {
-        ArrayList<NodeHandler> filtered = new ArrayList<>();
-        synchronized (this) {
-            for (NodeHandler handler : nodeHandlerMap.values()) {
-                if (predicate.test(handler)) {
-                    filtered.add(handler);
-                }
+        List<NodeHandler> filtered = new ArrayList<>();
+        for (NodeHandler nodeHandler : nodeHandlerMap.values()) {
+            if (nodeHandler.getNode().isConnectible() && predicate.test(nodeHandler)) {
+                filtered.add(nodeHandler);
             }
         }
-
-        logger.debug("nodeHandlerMap size {} filter peer  size {}", nodeHandlerMap.size(),
-                filtered.size());
-
-        //TODO: here can use head num sort.
-        filtered.sort(Comparator.comparingInt((NodeHandler o) -> o.getNodeStatistics().getReputation())
-                .reversed());
-
+        filtered.sort(Comparator.comparingInt(handler -> -handler.getNodeStatistics().getReputation()));
         return CollectionUtils.truncate(filtered, limit);
     }
 
     public List<NodeHandler> dumpActiveNodes() {
         List<NodeHandler> handlers = new ArrayList<>();
-        for (NodeHandler handler :
-                this.nodeHandlerMap.values()) {
+        for (NodeHandler handler: this.nodeHandlerMap.values()) {
             if (isNodeAlive(handler)) {
                 handlers.add(handler);
             }
         }
-
         return handlers;
-    }
-
-    private synchronized void processListeners() {
-        for (ListenerHandler handler : listeners.values()) {
-            try {
-                handler.checkAll();
-            } catch (Exception e) {
-                logger.error("Exception processing listener: " + handler, e);
-            }
-        }
-    }
-
-    public synchronized void addDiscoverListener(DiscoverListener listener,
-                                                 Predicate<NodeStatistics> filter) {
-        listeners.put(listener, new ListenerHandler(listener, filter));
     }
 
     public Node getPublicHomeNode() {
@@ -314,32 +278,6 @@ public class NodeManager implements EventHandler {
             pongTimer.shutdownNow();
         } catch (Exception e) {
             logger.warn("close failed.", e);
-        }
-    }
-
-    private class ListenerHandler {
-
-        private Map<NodeHandler, Object> discoveredNodes = new IdentityHashMap<>();
-        private DiscoverListener listener;
-        private Predicate<NodeStatistics> filter;
-
-        ListenerHandler(DiscoverListener listener, Predicate<NodeStatistics> filter) {
-            this.listener = listener;
-            this.filter = filter;
-        }
-
-        void checkAll() {
-            for (NodeHandler handler : nodeHandlerMap.values()) {
-                boolean has = discoveredNodes.containsKey(handler);
-                boolean test = filter.test(handler.getNodeStatistics());
-                if (!has && test) {
-                    listener.nodeAppeared(handler);
-                    discoveredNodes.put(handler, null);
-                } else if (has && !test) {
-                    listener.nodeDisappeared(handler);
-                    discoveredNodes.remove(handler);
-                }
-            }
         }
     }
 

@@ -27,15 +27,8 @@ public class RefreshTask extends DiscoverTask {
         super(nodeManager);
     }
 
-    public static byte[] getNodeId() {
-        Random gen = new Random();
-        byte[] id = new byte[64];
-        gen.nextBytes(id);
-        return id;
-    }
-
     @Override
     public void run() {
-        discover(getNodeId(), 0, new ArrayList<Node>());
+        discover(Node.getNodeId(), 0, new ArrayList<>());
     }
 }

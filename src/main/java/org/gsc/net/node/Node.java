@@ -13,18 +13,18 @@
 
 package org.gsc.net.node;
 
-import static org.gsc.crypto.Hash.sha3;
-
 import java.io.Serializable;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Random;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.gsc.config.args.Args;
 import org.spongycastle.util.encoders.Hex;
-import org.gsc.crypto.ECKey;
 import org.gsc.utils.ByteArray;
 import org.gsc.utils.Utils;
-import org.gsc.crypto.Hash;
 
 public class Node implements Serializable {
 
@@ -36,6 +36,14 @@ public class Node implements Serializable {
 
     private int port;
 
+    @Getter
+    private int bindPort;
+
+    @Setter
+    private int p2pVersion;
+
+    private int reputation = 0;
+
     private boolean isFakeNodeId = false;
 
     public int getReputation() {
@@ -45,8 +53,6 @@ public class Node implements Serializable {
     public void setReputation(int reputation) {
         this.reputation = reputation;
     }
-
-    private int reputation = 0;
 
     public static Node instanceOf(String addressOrEnode) {
         try {
@@ -58,10 +64,8 @@ public class Node implements Serializable {
             // continue
         }
 
-        final ECKey generatedNodeKey = ECKey.fromPrivate(Hash.sha3(addressOrEnode.getBytes()));
-        final String generatedNodeId = Hex.toHexString(generatedNodeKey.getNodeId());
+        final String generatedNodeId = Hex.toHexString(getNodeId());
         final Node node = new Node("enode://" + generatedNodeId + "@" + addressOrEnode);
-        node.isFakeNodeId = true;
         return node;
     }
 
@@ -81,6 +85,8 @@ public class Node implements Serializable {
             this.id = Hex.decode(uri.getUserInfo());
             this.host = uri.getHost();
             this.port = uri.getPort();
+            this.bindPort = uri.getPort();
+            this.isFakeNodeId = true;
         } catch (URISyntaxException e) {
             throw new RuntimeException("expecting URL in the format enode://PUBKEY@HOST:PORT", e);
         }
@@ -92,6 +98,20 @@ public class Node implements Serializable {
         }
         this.host = host;
         this.port = port;
+        this.isFakeNodeId = true;
+    }
+
+    public Node(byte[] id, String host, int port, int bindPort) {
+        if (id != null) {
+            this.id = id.clone();
+        }
+        this.host = host;
+        this.port = port;
+        this.bindPort = bindPort;
+    }
+
+    public boolean isConnectible(){
+        return port == bindPort && p2pVersion == Args.getInstance().getNodeP2pVersion();
     }
 
     public String getHexId() {
@@ -107,11 +127,11 @@ public class Node implements Serializable {
     }
 
     public byte[] getId() {
-        return id == null ? id : id.clone();
+        return id;
     }
 
     public void setId(byte[] id) {
-        this.id = id == null ? null : id.clone();
+        this.id = id;
     }
 
     public String getHost() {
@@ -131,6 +151,13 @@ public class Node implements Serializable {
             return null;
         }
         return new String(id);
+    }
+
+    public static byte[] getNodeId() {
+        Random gen = new Random();
+        byte[] id = new byte[64];
+        gen.nextBytes(id);
+        return id;
     }
 
     @Override

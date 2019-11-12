@@ -58,7 +58,7 @@ public class UdpTest {
     DatagramPacket pingPacket = new DatagramPacket(pingMessage.getSendData(),
         pingMessage.getSendData().length, server, port);
 
-    FindNodeMessage findNodeMessage = new FindNodeMessage(from, RefreshTask.getNodeId());
+    FindNodeMessage findNodeMessage = new FindNodeMessage(from, Node.getNodeId());
     DatagramPacket findNodePacket = new DatagramPacket(findNodeMessage.getSendData(),
         findNodeMessage.getSendData().length, server, port);
 

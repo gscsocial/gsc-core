@@ -68,7 +68,7 @@ public class SyncPool {
 
     private int maxActiveNodes = args.getNodeMaxActiveNodes();
 
-    private int getMaxActivePeersWithSameIp = args.getNodeMaxActiveNodesWithSameIp();
+    private int maxActivePeersWithSameIp = args.getNodeMaxActiveNodesWithSameIp();
 
     private ScheduledExecutorService poolLoopExecutor = Executors.newSingleThreadScheduledExecutor();
 
@@ -208,36 +208,14 @@ public class SyncPool {
 
         @Override
         public boolean test(NodeHandler handler) {
-
-            if (handler.getNode().getHost().equals(nodeManager.getPublicHomeNode().getHost()) &&
-                    handler.getNode().getPort() == nodeManager.getPublicHomeNode().getPort()) {
-                return false;
-            }
-
-            if (nodesInUse != null && nodesInUse.contains(handler.getNode().getHexId())) {
-                return false;
-            }
-
             InetAddress inetAddress = handler.getInetSocketAddress().getAddress();
-            if (channelManager.getRecentlyDisconnected().getIfPresent(inetAddress) != null) {
-                return false;
-            }
-            if (channelManager.getBadPeers().getIfPresent(inetAddress) != null) {
-                return false;
-            }
-            if (channelManager.getConnectionNum(inetAddress) >= getMaxActivePeersWithSameIp) {
-                return false;
-            }
-
-            if (nodeHandlerCache.getIfPresent(handler) != null) {
-                return false;
-            }
-
-            if (handler.getNodeStatistics().getReputation() < 100) {
-                return false;
-            }
-
-            return true;
+            return !((handler.getNode().getHost().equals(nodeManager.getPublicHomeNode().getHost())
+                    && handler.getNode().getPort() == nodeManager.getPublicHomeNode().getPort())
+                    || (channelManager.getRecentlyDisconnected().getIfPresent(inetAddress) != null)
+                    || (channelManager.getBadPeers().getIfPresent(inetAddress) != null)
+                    || (channelManager.getConnectionNum(inetAddress) > maxActivePeersWithSameIp)
+                    || nodesInUse.contains(handler.getNode().getHexId())
+                    || nodeHandlerCache.getIfPresent(handler) != null);
         }
     }
 

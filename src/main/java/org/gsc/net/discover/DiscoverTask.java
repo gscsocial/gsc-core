@@ -25,13 +25,13 @@ import org.gsc.net.node.table.NodeEntry;
 @Slf4j(topic = "discover")
 public class DiscoverTask implements Runnable {
 
-    NodeManager nodeManager;
+    private NodeManager nodeManager;
 
-    byte[] nodeId;
+    private byte[] nodeId;
 
     public DiscoverTask(NodeManager nodeManager) {
         this.nodeManager = nodeManager;
-        nodeId = nodeManager.getPublicHomeNode().getId();
+        this.nodeId = nodeManager.getPublicHomeNode().getId();
     }
 
     @Override
