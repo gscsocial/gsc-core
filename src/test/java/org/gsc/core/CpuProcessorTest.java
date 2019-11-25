@@ -63,20 +63,6 @@ public class CpuProcessorTest {
   }
 
   /**
-   * Release resources.
-   */
-  @AfterClass
-  public static void destroy() {
-    Args.clearParam();
-    context.destroy();
-    if (FileUtil.deleteDir(new File(dbPath))) {
-      logger.info("Release resources successful.");
-    } else {
-      logger.info("Release resources failure.");
-    }
-  }
-
-  /**
    * create temp Wrapper test need.
    */
   @Before
@@ -190,6 +176,18 @@ public class CpuProcessorTest {
     Assert.assertEquals(20000L * ratio * 1000 / 999L,
         dbManager.getDynamicPropertiesStore().getTotalCpuCurrentLimit());
   }
-
+/**
+   * remove resources.
+   */
+  @AfterClass
+  public static void destroy() {
+    Args.clearParam();
+    context.destroy();
+    if (FileUtil.deleteDir(new File(dbPath))) {
+      logger.info("Release resources successful.");
+    } else {
+      logger.info("Release resources failure.");
+    }
+  }
 
 }
