@@ -44,12 +44,13 @@ public class NodeInfoServiceTest {
         100, ByteString.EMPTY, ByteString.EMPTY);
     BlockWrapper blockWrapper2 = new BlockWrapper(1, Sha256Hash.ZERO_HASH,
         200, ByteString.EMPTY, ByteString.EMPTY);
-    witnessProductBlockService.validWitnessProductTwoBlock(blockWrapper1);
     witnessProductBlockService.validWitnessProductTwoBlock(blockWrapper2);
+    witnessProductBlockService.validWitnessProductTwoBlock(blockWrapper1);
+    
     NodeInfo nodeInfo = nodeInfoService.getNodeInfo();
     Assert.assertEquals(nodeInfo.getConfigNodeInfo().getCodeVersion(), Version.getVersion());
     Assert.assertEquals(nodeInfo.getCheatWitnessInfoMap().size(), 1);
-    logger.info("{}", JSON.toJSONString(nodeInfo));
+    logger.info("node info: {}", JSON.toJSONString(nodeInfo));
   }
 
   private String fullnode = Configuration.getByPath("testng.conf").getStringList("fullnode.ip.list")
