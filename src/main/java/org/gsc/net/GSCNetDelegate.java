@@ -155,10 +155,6 @@ public class GSCNetDelegate {
         }
     }
 
-    public boolean canChainRevoke(long num) {
-        return num >= dbManager.getSyncBeginNumber();
-    }
-
     public boolean contain(Sha256Hash hash, MessageTypes type) {
         if (type.equals(MessageTypes.BLOCK)) {
             return dbManager.containBlock(hash);
@@ -166,6 +162,10 @@ public class GSCNetDelegate {
             return dbManager.getTransactionStore().has(hash.getBytes());
         }
         return false;
+    }
+
+    public boolean canChainRevoke(long num) {
+        return num >= dbManager.getSyncBeginNumber();
     }
 
     public Message getData(Sha256Hash hash, InventoryType type) throws P2pException {

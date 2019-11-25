@@ -96,21 +96,21 @@ public class NodeInfo {
                 return this;
             }
 
-            public long getMaxSize() {
-                return maxSize;
-            }
-
-            public MemoryDescInfo setMaxSize(long maxSize) {
-                this.maxSize = maxSize;
-                return this;
-            }
-
             public double getUseRate() {
                 return useRate;
             }
 
             public MemoryDescInfo setUseRate(double useRate) {
                 this.useRate = useRate;
+                return this;
+            }
+
+            public long getMaxSize() {
+                return maxSize;
+            }
+
+            public MemoryDescInfo setMaxSize(long maxSize) {
+                this.maxSize = maxSize;
                 return this;
             }
         }
