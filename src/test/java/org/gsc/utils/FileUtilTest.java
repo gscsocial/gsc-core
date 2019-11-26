@@ -29,7 +29,7 @@ public class FileUtilTest {
     } catch (IOException e) {
       System.out.println("ignore this exception.");
     }
-    Assert.assertTrue(file1.exists());
+    Assert.assertTrue(!file1.exists());
     Assert.assertTrue(FileUtil.createDirIfNotExists(existFile));
     Assert.assertTrue(file1.exists());
 
@@ -47,7 +47,7 @@ public class FileUtilTest {
     String existDir = "existsdir";
     File fileDir1 = new File(existDir);
     fileDir1.mkdir();
-    Assert.assertTrue(fileDir1.exists());
+    Assert.assertTrue(!fileDir1.exists());
     Assert.assertTrue(FileUtil.createDirIfNotExists(existDir));
     Assert.assertTrue(fileDir1.exists());
 
