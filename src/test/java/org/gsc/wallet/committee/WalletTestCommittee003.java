@@ -81,10 +81,6 @@ public class WalletTestCommittee003 {
     Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass
   public void beforeClass() {
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
@@ -124,8 +120,6 @@ public class WalletTestCommittee003 {
     listProposals = Optional.ofNullable(proposalList);
     logger.info(Integer.toString(listProposals.get().getProposals(0).getApprovalsCount()));
     Assert.assertTrue(listProposals.get().getProposals(0).getApprovalsCount() == 1);
-    //logger.info(Base58.encode58Check(witness002Address));
-    //logger.info(Base58.encode58Check(listProposals.get().getProposals(0).
     // getApprovalsList().get(0).toByteArray()));
     Assert.assertTrue(Base58.encode58Check(witness002Address).equals(Base58.encode58Check(
         listProposals.get().getProposals(0).getApprovalsList().get(0).toByteArray())));
@@ -160,10 +154,6 @@ public class WalletTestCommittee003 {
 
 
   }
-
-  /**
-   * constructor.
-   */
 
   @AfterClass
   public void shutdown() throws InterruptedException {

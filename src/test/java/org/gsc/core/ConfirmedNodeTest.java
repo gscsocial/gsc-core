@@ -54,22 +54,6 @@ public class ConfirmedNodeTest {
     rpcApiService.start();
   }
 
-  /**
-   * remo db when after test.
-   */
-  @AfterClass
-  public static void removeDb() {
-    Args.clearParam();
-    rpcApiService.stop();
-    context.destroy();
-    File dbFolder = new File(dbPath);
-    if (deleteFolder(dbFolder)) {
-      logger.info("Release resources successful.");
-    } else {
-      logger.info("Release resources failure.");
-    }
-  }
-
   private static Boolean deleteFolder(File index) {
     if (!index.isDirectory() || index.listFiles().length <= 0) {
       return index.delete();
@@ -106,5 +90,19 @@ public class ConfirmedNodeTest {
     Assert.assertNotNull(genisisBlock);
     Assert.assertFalse(genisisBlock.getTransactionsList().isEmpty());
   }
-
+ /**
+   * remove db when after test.
+   */
+  @AfterClass
+  public static void removeDb() {
+    Args.clearParam();
+    rpcApiService.stop();
+    context.destroy();
+    File dbFolder = new File(dbPath);
+    if (deleteFolder(dbFolder)) {
+      logger.info("Release resources successful.");
+    } else {
+      logger.info("Release resources failure.");
+    }
+  }
 }

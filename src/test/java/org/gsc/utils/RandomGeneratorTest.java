@@ -41,11 +41,11 @@ public class RandomGeneratorTest {
     final WitnessWrapper witnessGSC = new WitnessWrapper(
         ByteString.copyFrom("00000000001".getBytes()), 0, "");
     final WitnessWrapper witnessOlivier = new WitnessWrapper(
-        ByteString.copyFrom("00000000003".getBytes()), 100, "");
+        ByteString.copyFrom("00000000002".getBytes()), 100, "");
     final WitnessWrapper witnessVivider = new WitnessWrapper(
-        ByteString.copyFrom("00000000005".getBytes()), 200, "");
+        ByteString.copyFrom("00000000003".getBytes()), 200, "");
     final WitnessWrapper witnessSenaLiu = new WitnessWrapper(
-        ByteString.copyFrom("00000000006".getBytes()), 300, "");
+        ByteString.copyFrom("00000000004".getBytes()), 300, "");
     witnessWrapperList.add(witnessGSC);
     witnessWrapperList.add(witnessOlivier);
     witnessWrapperList.add(witnessVivider);

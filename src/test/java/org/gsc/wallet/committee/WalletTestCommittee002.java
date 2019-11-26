@@ -122,15 +122,16 @@ public class WalletTestCommittee002 {
     Assert.assertFalse(PublicMethed.createProposal(witness001Address, witnessKey001,
         proposalMap, blockingStubFull));
 
-    //Maximum + 1 interval
-    proposalMap.put(0L, 86401000L);
-    Assert.assertFalse(PublicMethed.createProposal(witness001Address, witnessKey001,
-        proposalMap, blockingStubFull));
-
     //Non witness account
     proposalMap.put(0L, 86400000L);
     Assert.assertFalse(PublicMethed.createProposal(toAddress, testKey003, proposalMap,
         blockingStubFull));
+    
+    //Maximum + 1 interval
+    proposalMap.put(0L, 86400000L);
+    Assert.assertFalse(PublicMethed.createProposal(witness001Address, witnessKey001,
+        proposalMap, blockingStubFull));
+
   }
 
   @Test(enabled = true)
@@ -341,7 +342,7 @@ public class WalletTestCommittee002 {
 
   @Test(enabled = true)
   public void testCreateNewAccountFeeInSystemControl() {
-    //7:CREATE_NEW_ACCOUNT_FEE_IN_SYSTEM_CONTRACT,0 or 1
+
     HashMap<Long, Long> proposalMap = new HashMap<Long, Long>();
     proposalMap.put(7L, 1L);
     Assert.assertTrue(PublicMethed.createProposal(witness001Address, witnessKey001,
@@ -368,10 +369,6 @@ public class WalletTestCommittee002 {
         proposalMap, blockingStubFull));
 
   }
-
-  /**
-   * constructor.
-   */
 
   @AfterClass
   public void shutdown() throws InterruptedException {

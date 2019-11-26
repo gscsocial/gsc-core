@@ -31,16 +31,16 @@ public class ReflectUtils {
     return (T) ReflectionUtils.getField(field, target);
   }
 
-  public static void setFieldValue(Object target, String fieldName, Object value) {
-    Field field = ReflectionUtils.findField(target.getClass(), fieldName);
-    ReflectionUtils.makeAccessible(field);
-    ReflectionUtils.setField(field, target, value);
-  }
-
   public static <T> T invokeMethod(Object target, String methodName) {
     Method method = ReflectionUtils.findMethod(target.getClass(), methodName);
     ReflectionUtils.makeAccessible(method);
     return (T) ReflectionUtils.invokeMethod(method, target);
+  }
+  
+  public static void setFieldValue(Object target, String fieldName, Object value) {
+    Field field = ReflectionUtils.findField(target.getClass(), fieldName);
+    ReflectionUtils.makeAccessible(field);
+    ReflectionUtils.setField(field, target, value);
   }
 
   public static void invokeMethod(Object target, String methodName, Class[] param, Object... args) {

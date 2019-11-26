@@ -73,7 +73,6 @@ public class ByteArrayTest {
   public void test2ToHexString() {
     //byte[] bs = new byte[]{};
     //logger.info("utils.ByteArray.toHexString: {}", ByteArray.toHexString(bs));
-    //logger.info("Hex.toHexString: {}", Hex.toHexString(bs));
     byte[] bss = new byte[]{8, 9, 12, 13, 14, 15, 16};
     assertEquals("ByteArray.toHexString is not equals Hex.toHexString", ByteArray.toHexString(bss),
         Hex.toHexString(bss));
