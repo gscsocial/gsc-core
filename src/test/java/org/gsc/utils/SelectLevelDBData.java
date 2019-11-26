@@ -56,6 +56,9 @@ public class SelectLevelDBData {
                     case "peers":
                         peers(iterator.peekNext().getKey(), iterator.peekNext().getValue());
                         break;
+                    case "nodes":
+                        peers(iterator.peekNext().getKey(), iterator.peekNext().getValue());
+                        break;
                     default:
                         break;
                 }
