@@ -125,6 +125,8 @@ public class ContractScenario009 {
     cpuUsage = accountResource.getCpuUsed();
     Assert.assertTrue(cpuLimit > 0);
     Assert.assertTrue(cpuUsage > 0);
+    logger.info("before cpu limit is " + Long.toString(cpuLimit));
+    logger.info("before cpu usage is " + Long.toString(cpuUsage));
 
     logger.info("after cpu limit is " + Long.toString(cpuLimit));
     logger.info("after cpu usage is " + Long.toString(cpuUsage));

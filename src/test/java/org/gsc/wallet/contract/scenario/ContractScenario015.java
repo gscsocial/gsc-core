@@ -147,6 +147,54 @@ public class ContractScenario015 {
             .toHexString(result))));
   }
 
+  @Test(enabled = true, description = "TriggerConstantContract a constant function ")
+  public void testTriggerContract() {
+    Assert.assertTrue(PublicMethed
+            .sendcoin(contractExcAddress, 10000000000L, testNetAccountAddress, testNetAccountKey,
+                    blockingStubFull));
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+    String filePath = "src/test/resources/soliditycode_v0.5.4/ClearAbi001.sol";
+    String contractName = "testConstantContract";
+    HashMap retMap = PublicMethed.getByCodeAbi(filePath, contractName);
+    String code = retMap.get("byteCode").toString();
+    String abi = retMap.get("abi").toString();
+    logger.info("code: " , code);
+    logger.info("abi: " , abi);
+
+    contractAddress = PublicMethed.deployContract(contractName, abi, code, "", maxFeeLimit,
+            0L, 100, null, contractExcKey,
+            contractExcAddress, blockingStubFull);
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+    Account info;
+
+    AccountResourceMessage resourceInfo = PublicMethed.getAccountResource(contractExcAddress,
+            blockingStubFull);
+    info = PublicMethed.queryAccount(contractExcKey, blockingStubFull);
+    Long beforeBalance = info.getBalance();
+    Long beforeCpuUsed = resourceInfo.getCpuUsed();
+    Long beforeNetUsed = resourceInfo.getNetUsed();
+    Long beforeFreeNetUsed = resourceInfo.getFreeNetUsed();
+    logger.info("beforeBalance:" + beforeBalance);
+    logger.info("beforeCpuUsed:" + beforeCpuUsed);
+    logger.info("beforeNetUsed:" + beforeNetUsed);
+    logger.info("beforeFreeNetUsed:" + beforeFreeNetUsed);
+    TransactionExtention transactionExtention = PublicMethed
+            .triggerConstantContractForExtention(contractAddress,
+                    "testPayable()", "#", false,
+                    0, 0, "0", 0, contractExcAddress, contractExcKey, blockingStubFull);
+    Transaction transaction = transactionExtention.getTransaction();
+
+    byte[] result = transactionExtention.getConstantResult(0).toByteArray();
+    logger.info("message:" + transaction.getRet(0).getRet());
+    logger.info(":" + ByteArray
+            .toStr(transactionExtention.getResult().getMessage().toByteArray()));
+    logger.info("Result:" + Hex.toHexString(result));
+    logger.info("getCode" + transactionExtention.getResult().getCode().getNumber());
+    Assert.assertEquals("SUCESS",transaction.getRet(0).getRet().toString());
+    Assert.assertEquals(1, ByteArray.toLong(ByteArray
+            .fromHexString(Hex
+                    .toHexString(result))));
+  }
 
   /**
    * constructor.

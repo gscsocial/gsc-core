@@ -163,6 +163,35 @@ public class ContractScenario014 {
 
   }
 
+  @Test(enabled = true)
+  public void deployGSCAndDotContract() {
+    Assert.assertTrue(PublicMethed.sendcoin(contractAddress, 20000000000L, contractExcAddress,
+            contractExcKey, blockingStubFull));
+    AccountResourceMessage accountResource = PublicMethed.getAccountResource(contractExcAddress,
+            blockingStubFull);
+    Long cpuLimit = accountResource.getCpuLimit();
+    Long cpuUsage = accountResource.getCpuUsed();
+
+    logger.info("before cpu limit is " + Long.toString(cpuLimit));
+    logger.info("before cpu usage is " + Long.toString(cpuUsage));
+
+    String filePath = "./src/test/resources/soliditycode_v0.5.4/contractScenario013.sol";
+    String contractName = "timetest";
+    HashMap retMap = PublicMethed.getByCodeAbi(filePath, contractName);
+
+    String code = retMap.get("byteCode").toString();
+    String abi = retMap.get("abi").toString();
+
+    String txid = PublicMethed.deployContractAndGetTransactionInfoById(contractName, abi, code, "",
+            maxFeeLimit, 0L, 100, null, contractExcKey, contractExcAddress, blockingStubFull);
+    logger.info(txid);
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+    Optional<TransactionInfo> infoById = PublicMethed.getTransactionInfoById(txid, blockingStubFull);
+    logger.info("cputotal is " + infoById.get().getReceipt().getCpuUsageTotal());
+    Assert.assertTrue(infoById.get().getResultValue() == 0);
+    Assert.assertTrue(infoById.get().getReceipt().getCpuUsageTotal() > 0);
+    Assert.assertFalse(infoById.get().getContractAddress().isEmpty());
+  }
 
   /**
    * constructor.

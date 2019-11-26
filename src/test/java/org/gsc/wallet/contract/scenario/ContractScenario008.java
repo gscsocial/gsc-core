@@ -108,6 +108,10 @@ public class ContractScenario008 {
     cpuLimit = accountResource.getCpuLimit();
     cpuUsage = accountResource.getCpuUsed();
     account = PublicMethed.queryAccount(contract008Key, blockingStubFull);
+    logger.info("before balance is " + Long.toString(account.getBalance()));
+    logger.info("before cpu limit is " + Long.toString(cpuLimit));
+    logger.info("before cpu usage is " + Long.toString(cpuUsage));
+
     logger.info("after balance is " + Long.toString(account.getBalance()));
     logger.info("after cpu limit is " + Long.toString(cpuLimit));
     logger.info("after cpu usage is " + Long.toString(cpuUsage));

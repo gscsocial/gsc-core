@@ -54,9 +54,6 @@ public class ContractLinkage001 {
   private Long maxFeeLimit = Configuration.getByPath("testng.conf")
       .getLong("defaultParameter.maxFeeLimit");
 
-  String contractName;
-  String code;
-  String abi;
   byte[] contractAddress;
 
   ECKey ecKey1 = new ECKey(Utils.getRandom());
@@ -65,7 +62,6 @@ public class ContractLinkage001 {
 
   @BeforeSuite
   public void beforeSuite() {
-    Wallet wallet = new Wallet();
     Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
@@ -73,7 +69,7 @@ public class ContractLinkage001 {
    * constructor.
    */
 
-  @BeforeClass(enabled = true)
+  @BeforeClass
   public void beforeClass() {
     PublicMethed.printAddress(linkage007Key);
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
@@ -181,6 +177,14 @@ public class ContractLinkage001 {
     Long afterNetLimit1 = resourceInfoafter1.getNetLimit();
     Long afterNetUsed1 = resourceInfoafter1.getNetUsed();
     Long afterFreeNetUsed1 = resourceInfoafter1.getFreeNetUsed();
+    logger.info("beforeBalance1:" + beforeBalance1);
+    logger.info("beforeCpuLimit1:" + beforeCpuLimit1);
+    logger.info("beforeCpuUsed1:" + beforeCpuUsed1);
+    logger.info("beforeFreeNetLimit1:" + beforeFreeNetLimit1);
+    logger.info("beforeNetLimit1:" + beforeNetLimit1);
+    logger.info("beforeNetUsed1:" + beforeNetUsed1);
+    logger.info("beforeFreeNetUsed1:" + beforeFreeNetUsed1);
+    logger.info("---------------------------------------------");
     logger.info("afterBalance1:" + afterBalance1);
     logger.info("afterCpuLimit1:" + afterCpuLimit1);
     logger.info("afterCpuUsed1:" + afterCpuUsed1);
@@ -244,6 +248,13 @@ public class ContractLinkage001 {
     Long afterNetLimit2 = resourceInfoafter2.getNetLimit();
     Long afterNetUsed2 = resourceInfoafter2.getNetUsed();
     Long afterFreeNetUsed2 = resourceInfoafter2.getFreeNetUsed();
+    logger.info("cpuUsageTotal2:" + cpuUsageTotal2);
+    logger.info("fee2:" + fee2);
+    logger.info("cpuFee2:" + cpuFee2);
+    logger.info("netUsed2:" + netUsed2);
+    logger.info("cpuUsed2:" + cpuUsed2);
+    logger.info("netFee2:" + netFee2);
+    logger.info("------------------------------------");
     logger.info("afterBalance2:" + afterBalance2);
     logger.info("afterCpuLimit2:" + afterCpuLimit2);
     logger.info("afterCpuUsed2:" + afterCpuUsed2);
@@ -276,7 +287,6 @@ public class ContractLinkage001 {
     logger.info("beforeNetLimit3:" + beforeNetLimit3);
     logger.info("beforeNetUsed3:" + beforeNetUsed3);
     logger.info("beforeFreeNetUsed3:" + beforeFreeNetUsed3);
-    //String initParmes = "\"" + Base58.encode58Check(fromAddress) + "\",\"63\"";
     String num = "4" + "," + "2";
     txid = PublicMethed.triggerContract(contractAddress,
         "divideIHaveArgsReturn(int256,int256)", num, false,
@@ -292,6 +302,14 @@ public class ContractLinkage001 {
     Long afterNetLimit3 = resourceInfoafter3.getNetLimit();
     Long afterNetUsed3 = resourceInfoafter3.getNetUsed();
     Long afterFreeNetUsed3 = resourceInfoafter3.getFreeNetUsed();
+    logger.info("beforeBalance3:" + beforeBalance3);
+    logger.info("beforeCpuLimit3:" + beforeCpuLimit3);
+    logger.info("beforeCpuUsed3:" + beforeCpuUsed3);
+    logger.info("beforeFreeNetLimit3:" + beforeFreeNetLimit3);
+    logger.info("beforeNetLimit3:" + beforeNetLimit3);
+    logger.info("beforeNetUsed3:" + beforeNetUsed3);
+    logger.info("beforeFreeNetUsed3:" + beforeFreeNetUsed3);
+    logger.info("-------------------------------------------");
     logger.info("afterBalance3:" + afterBalance3);
     logger.info("afterCpuLimit3:" + afterCpuLimit3);
     logger.info("afterCpuUsed3:" + afterCpuUsed3);
@@ -336,6 +354,14 @@ public class ContractLinkage001 {
     Long afterNetLimit4 = resourceInfoafter4.getNetLimit();
     Long afterNetUsed4 = resourceInfoafter4.getNetUsed();
     Long afterFreeNetUsed4 = resourceInfoafter4.getFreeNetUsed();
+    logger.info("beforeBalance4:" + beforeBalance4);
+    logger.info("beforeCpuLimit4:" + beforeCpuLimit4);
+    logger.info("beforeCpuUsed4:" + beforeCpuUsed4);
+    logger.info("beforeFreeNetLimit4:" + beforeFreeNetLimit4);
+    logger.info("beforeNetLimit4:" + beforeNetLimit4);
+    logger.info("beforeNetUsed4:" + beforeNetUsed4);
+    logger.info("beforeFreeNetUsed4:" + beforeFreeNetUsed4);
+    logger.info("----------------------------------------------");
     logger.info("afterBalance4:" + afterBalance4);
     logger.info("afterCpuLimit4:" + afterCpuLimit4);
     logger.info("afterCpuUsed4:" + afterCpuUsed4);
@@ -343,7 +369,7 @@ public class ContractLinkage001 {
     logger.info("afterNetLimit4:" + afterNetLimit4);
     logger.info("afterNetUsed4:" + afterNetUsed4);
     logger.info("afterFreeNetUsed4:" + afterFreeNetUsed4);
-    logger.info("---------------:");
+    logger.info("----------------------------------------------");
     Assert.assertEquals(beforeBalance4, afterBalance4);
     Assert.assertTrue(afterFreeNetUsed4 > beforeNetUsed4);
     Assert.assertTrue(afterNetUsed4 == 0);
@@ -351,6 +377,7 @@ public class ContractLinkage001 {
     infoById = PublicMethed.getTransactionInfoById(txid, blockingStubFull);
     logger.info(Integer.toString(infoById.get().getResultValue()));
     Assert.assertTrue(infoById.get().getFee() == 0);
+
   }
 
   /**

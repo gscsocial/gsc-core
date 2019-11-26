@@ -94,9 +94,6 @@ public class ContractScenario006 {
     Long cpuLimit = accountResource.getCpuLimit();
     Long cpuUsage = accountResource.getCpuUsed();
 
-    logger.info("before cpu limit is " + Long.toString(cpuLimit));
-    logger.info("before cpu usage is " + Long.toString(cpuUsage));
-
     String filePath = "./src/test/resources/soliditycode_v0.5.4/contractScenario006.sol";
     String contractName = "FoMo3Dlong";
     HashMap retMap = PublicMethed.getByCodeAbi(filePath, contractName);
@@ -123,6 +120,9 @@ public class ContractScenario006 {
     cpuUsage = accountResource.getCpuUsed();
     Assert.assertTrue(cpuLimit > 0);
     Assert.assertTrue(cpuUsage > 0);
+    logger.info("before cpu limit is " + Long.toString(cpuLimit));
+    logger.info("before cpu usage is " + Long.toString(cpuUsage));
+
     logger.info("after cpu limit is " + Long.toString(cpuLimit));
     logger.info("after cpu usage is " + Long.toString(cpuUsage));
   }

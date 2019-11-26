@@ -87,9 +87,6 @@ public class ContractScenario005 {
     Long cpuLimit = accountResource.getCpuLimit();
     Long cpuUsage = accountResource.getCpuUsed();
 
-    logger.info("before cpu limit is " + Long.toString(cpuLimit));
-    logger.info("before cpu usage is " + Long.toString(cpuUsage));
-
     String filePath = "./src/test/resources/soliditycode_v0.5.4/contractScenario005.sol";
     String contractName = "Crowdsale";
     HashMap retMap = PublicMethed.getByCodeAbi(filePath, contractName);
@@ -103,8 +100,6 @@ public class ContractScenario005 {
     PublicMethed.waitProduceNextBlock(blockingStubFull);
     Optional<TransactionInfo> infoById = PublicMethed
         .getTransactionInfoById(txid, blockingStubFull);
-    logger.info("Txid is " + txid);
-    logger.info("Deploy cputotal is " + infoById.get().getReceipt().getCpuUsageTotal());
     byte[] contractAddress = null;
     contractAddress = infoById.get().getContractAddress().toByteArray();
     SmartContract smartContract = PublicMethed.getContract(contractAddress, blockingStubFull);
@@ -117,9 +112,14 @@ public class ContractScenario005 {
     cpuUsage = accountResource.getCpuUsed();
     Assert.assertTrue(cpuLimit > 0);
     Assert.assertTrue(cpuUsage > 0);
+    logger.info("before cpu limit is " + Long.toString(cpuLimit));
+    logger.info("before cpu usage is " + Long.toString(cpuUsage));
 
     logger.info("after cpu limit is " + Long.toString(cpuLimit));
     logger.info("after cpu usage is " + Long.toString(cpuUsage));
+
+    logger.info("Txid is " + txid);
+    logger.info("Deploy cputotal is " + infoById.get().getReceipt().getCpuUsageTotal());
   }
 
   /**

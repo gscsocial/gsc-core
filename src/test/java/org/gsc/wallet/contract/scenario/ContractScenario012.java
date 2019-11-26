@@ -123,29 +123,6 @@ public class ContractScenario012 {
     Assert.assertTrue(smartContract.getAbi() != null);
   }
 
-
-  @Test(enabled = true)
-  public void test2TriggerTransactionCoin() {
-    Account account = PublicMethed.queryAccount(contractAddress, blockingStubFull);
-    logger.info("contract Balance : -- " + account.getBalance());
-    receiveAddressParam = "\"" + Base58.encode58Check(fromAddress)
-        + "\"";
-    //When the contract has no money,transaction coin failed.
-    txid = PublicMethed.triggerContract(contractAddress,
-        "sendToAddress2(address)", receiveAddressParam, false,
-        0, 100000000L, contract012Address, contract012Key, blockingStubFull);
-    PublicMethed.waitProduceNextBlock(blockingStubFull);
-    logger.info(txid);
-    infoById = PublicMethed.getTransactionInfoById(txid, blockingStubFull);
-    logger.info("infobyid : --- " + infoById);
-    Assert.assertTrue(infoById.get().getResultValue() == 1);
-    logger.info("cputotal is " + infoById.get().getReceipt().getCpuUsageTotal());
-    Assert.assertTrue(infoById.get().getReceipt().getCpuUsageTotal() > 0);
-    Assert.assertTrue(infoById.get().getFee() == infoById.get().getReceipt().getCpuFee());
-    Assert.assertFalse(infoById.get().getContractAddress().isEmpty());
-  }
-
-
   @Test(enabled = true)
   public void test3TriggerTransactionCanNotCreateAccount() {
     ecKey2 = new ECKey(Utils.getRandom());
@@ -202,6 +179,26 @@ public class ContractScenario012 {
 
   }
 
+  @Test(enabled = true)
+  public void test2TriggerTransactionCoin() {
+    Account account = PublicMethed.queryAccount(contractAddress, blockingStubFull);
+    logger.info("contract Balance : -- " + account.getBalance());
+    receiveAddressParam = "\"" + Base58.encode58Check(fromAddress)
+            + "\"";
+    //When the contract has no money,transaction coin failed.
+    txid = PublicMethed.triggerContract(contractAddress,
+            "sendToAddress2(address)", receiveAddressParam, false,
+            0, 100000000L, contract012Address, contract012Key, blockingStubFull);
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+    logger.info(txid);
+    infoById = PublicMethed.getTransactionInfoById(txid, blockingStubFull);
+    logger.info("infobyid : --- " + infoById);
+    Assert.assertTrue(infoById.get().getResultValue() == 1);
+    logger.info("cputotal is " + infoById.get().getReceipt().getCpuUsageTotal());
+    Assert.assertTrue(infoById.get().getReceipt().getCpuUsageTotal() > 0);
+    Assert.assertTrue(infoById.get().getFee() == infoById.get().getReceipt().getCpuFee());
+    Assert.assertFalse(infoById.get().getContractAddress().isEmpty());
+  }
 
   /**
    * constructor.

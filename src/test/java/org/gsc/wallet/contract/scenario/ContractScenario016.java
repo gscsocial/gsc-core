@@ -176,7 +176,6 @@ public class ContractScenario016 {
     Optional<TransactionInfo> infoById = null;
     PublicMethed.waitProduceNextBlock(blockingStubFull);
     infoById = PublicMethed.getTransactionInfoById(txid, blockingStubFull);
-    logger.info("Txid is " + txid);
     logger.info("Trigger cputotal is " + infoById.get().getReceipt().getCpuUsageTotal());
 
     Optional<Transaction> byId = PublicMethed.getTransactionById(txid, blockingStubFull);
@@ -184,7 +183,7 @@ public class ContractScenario016 {
     logger.info("getNumber：" + byId.get().getRet(0).getContractRet().getNumber());
     logger.info("getContractRetValue：" + byId.get().getRet(0).getContractRetValue());
     logger.info("getContractRet：" + byId.get().getRet(0).getContractRet());
-    logger.info("ById：" + byId);
+    logger.info("ById：" + byId.toString());
 
     logger.info("infoById：" + infoById);
 
