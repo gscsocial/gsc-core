@@ -128,11 +128,12 @@ public class WalletTestMutiSign004 {
         PublicMethed.sendcoin(ownerAddress, needcoin + 100000000L, fromAddress, testKey002,
             blockingStubFull));
     Assert.assertTrue(PublicMethed
+            .freezeBalanceForReceiver(fromAddress, 1000000000, 0, 1, ByteString.copyFrom(ownerAddress),
+                    testKey002, blockingStubFull));
+    Assert.assertTrue(PublicMethed
         .freezeBalanceForReceiver(fromAddress, 1000000000, 0, 0, ByteString.copyFrom(ownerAddress),
             testKey002, blockingStubFull));
-    Assert.assertTrue(PublicMethed
-        .freezeBalanceForReceiver(fromAddress, 1000000000, 0, 1, ByteString.copyFrom(ownerAddress),
-            testKey002, blockingStubFull));
+
 
     PublicMethed.waitProduceNextBlock(blockingStubFull);
 

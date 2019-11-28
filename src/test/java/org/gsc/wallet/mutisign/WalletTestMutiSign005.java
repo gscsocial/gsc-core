@@ -120,6 +120,7 @@ public class WalletTestMutiSign005 {
 
     Long balanceBefore = PublicMethed.queryAccount(witness001Address, blockingStubFull)
         .getBalance();
+
     logger.info("balanceBefore: " + balanceBefore);
 
     permissionKeyString[0] = manager1Key;
@@ -170,6 +171,7 @@ public class WalletTestMutiSign005 {
     Long balanceAfter = PublicMethed.queryAccount(witness001Address, blockingStubFull)
         .getBalance();
     logger.info("balanceBefore: " + balanceBefore);
+
     logger.info("balanceAfter: " + balanceAfter);
 
     Assert.assertTrue(balanceBefore - balanceAfter >= needcoin);
