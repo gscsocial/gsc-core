@@ -71,10 +71,6 @@ public class FreezeBalance2Test {
     Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass
   public void beforeClass() {
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
@@ -152,10 +148,6 @@ public class FreezeBalance2Test {
         "contract validate error : no frozenBalance");
   }
 
-  /**
-   * constructor.
-   */
-
   public Boolean freezeBalance(byte[] addRess, long freezeBalance, long freezeDuration,
       String priKey) {
     byte[] address = addRess;
@@ -226,10 +218,6 @@ public class FreezeBalance2Test {
 
 
   }
-
-  /**
-   * constructor.
-   */
 
   public Return freezeBalance2(byte[] addRess, long freezeBalance, long freezeDuration,
       String priKey) {
@@ -318,10 +306,6 @@ public class FreezeBalance2Test {
 
   }
 
-  /**
-   * constructor.
-   */
-
   public boolean unFreezeBalance(byte[] addRess, String priKey) {
     byte[] address = addRess;
 
@@ -358,10 +342,6 @@ public class FreezeBalance2Test {
       return true;
     }
   }
-
-  /**
-   * constructor.
-   */
 
   public Return unFreezeBalance2(byte[] addRess, String priKey) {
     byte[] address = addRess;
@@ -414,10 +394,6 @@ public class FreezeBalance2Test {
     return ret;
   }
 
-  /**
-   * constructor.
-   */
-
   public Account queryAccount(ECKey ecKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
     if (ecKey == null) {
@@ -438,23 +414,15 @@ public class FreezeBalance2Test {
     return String.valueOf(buf, 32, 130);
   }
 
-  public byte[] getAddress(ECKey ecKey) {
-    return ecKey.getAddress();
-  }
-
-  /**
-   * constructor.
-   */
-
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
   }
 
-  /**
-   * constructor.
-   */
+  public byte[] getAddress(ECKey ecKey) {
+    return ecKey.getAddress();
+  }
 
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();

@@ -55,10 +55,6 @@ public class GetBlockByNum2Test {
     Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass
   public void beforeClass() {
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
@@ -83,13 +79,6 @@ public class GetBlockByNum2Test {
       logger.info("Now has very little block, Please test this case by manual");
       Assert.assertTrue(currentBlockNum == 1);
     }
-
-    //The number is large than the currently number, there is no exception when query this number.
-    /*    Long outOfCurrentBlockNum = currentBlockNum + 10000L;
-    NumberMessage.Builder builder1 = NumberMessage.newBuilder();
-    builder1.setNum(outOfCurrentBlockNum);
-    Block outOfCurrentBlock = blockingStubFull.getBlockByNum(builder1.build());
-    Assert.assertFalse(outOfCurrentBlock.hasBlockHeader());*/
 
     //Query the first block
     NumberMessage.Builder builder2 = NumberMessage.newBuilder();
@@ -207,24 +196,6 @@ public class GetBlockByNum2Test {
     logger.info("By ID test succesfully");
   }
 
-  /**
-   * constructor.
-   */
-
-  @AfterClass
-  public void shutdown() throws InterruptedException {
-    if (channelFull != null) {
-      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-    if (channelConfirmed != null) {
-      channelConfirmed.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-  }
-
-  /**
-   * constructor.
-   */
-
   public Account queryAccount(String priKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
     ECKey temKey = null;
@@ -258,19 +229,11 @@ public class GetBlockByNum2Test {
     return ecKey.getAddress();
   }
 
-  /**
-   * constructor.
-   */
-
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
   }
-
-  /**
-   * constructor.
-   */
 
   public GrpcAPI.BlockExtention getBlock2(long blockNum,
       WalletGrpc.WalletBlockingStub blockingStubFull) {
@@ -278,6 +241,16 @@ public class GetBlockByNum2Test {
     builder.setNum(blockNum);
     return blockingStubFull.getBlockByNum2(builder.build());
 
+  }
+
+  @AfterClass
+  public void shutdown() throws InterruptedException {
+    if (channelFull != null) {
+      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
+    if (channelConfirmed != null) {
+      channelConfirmed.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
   }
 }
 

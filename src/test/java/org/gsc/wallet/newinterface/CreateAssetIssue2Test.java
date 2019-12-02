@@ -233,33 +233,19 @@ public class CreateAssetIssue2Test {
     return grpcQueryAccount(ecKey.getAddress(), blockingStubFull);
   }
 
+  public byte[] getAddress(ECKey ecKey) {
+    return ecKey.getAddress();
+  }
+
   public static String loadPubKey() {
     char[] buf = new char[0x100];
     return String.valueOf(buf, 32, 130);
   }
 
-  public byte[] getAddress(ECKey ecKey) {
-    return ecKey.getAddress();
-  }
-
-  /**
-   * constructor.
-   */
-
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
-  }
-
-  /**
-   * constructor.
-   */
-
-  public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
-    NumberMessage.Builder builder = NumberMessage.newBuilder();
-    builder.setNum(blockNum);
-    return blockingStubFull.getBlockByNum(builder.build());
   }
 
   private Transaction signTransaction(ECKey ecKey, Transaction transaction) {
@@ -271,9 +257,11 @@ public class CreateAssetIssue2Test {
     return TransactionUtils.sign(transaction, ecKey);
   }
 
-  /**
-   * constructor.
-   */
+  public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
+    NumberMessage.Builder builder = NumberMessage.newBuilder();
+    builder.setNum(blockNum);
+    return blockingStubFull.getBlockByNum(builder.build());
+  }
 
   public boolean transferAsset(byte[] to, byte[] assertName, long amount, byte[] address,
       String priKey) {
@@ -311,12 +299,38 @@ public class CreateAssetIssue2Test {
 
   }
 
-  /**
-   * constructor.
-   */
+  public boolean unFreezeAsset(byte[] addRess, String priKey) {
+    byte[] address = addRess;
+    ECKey temKey = null;
+    try {
+      BigInteger priK = new BigInteger(priKey, 16);
+      temKey = ECKey.fromPrivate(priK);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    final ECKey ecKey = temKey;
+    Contract.UnfreezeAssetContract.Builder builder = Contract.UnfreezeAssetContract
+        .newBuilder();
+    ByteString byteAddreess = ByteString.copyFrom(address);
+    builder.setOwnerAddress(byteAddreess);
+    Contract.UnfreezeAssetContract contract = builder.build();
+    Transaction transaction = blockingStubFull.unfreezeAsset(contract);
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+      return false;
+    }
+    transaction = TransactionUtils.setTimestamp(transaction);
+    transaction = TransactionUtils.sign(transaction, ecKey);
+    Return response = blockingStubFull.broadcastTransaction(transaction);
+    if (response.getResult() == false) {
+      logger.info(ByteArray.toStr(response.getMessage().toByteArray()));
+      return false;
+    } else {
+      return true;
+    }
+  }
 
   public Return transferAsset2(byte[] to, byte[] assertName, long amount, byte[] address,
-      String priKey) {
+                               String priKey) {
     ECKey temKey = null;
     try {
       BigInteger priK = new BigInteger(priKey, 16);
@@ -353,7 +367,7 @@ public class CreateAssetIssue2Test {
       return transactionExtention.getResult();
     }
     System.out.println(
-        "Receive txid = " + ByteArray.toHexString(transactionExtention.getTxid().toByteArray()));
+            "Receive txid = " + ByteArray.toHexString(transactionExtention.getTxid().toByteArray()));
     transaction = signTransaction(ecKey, transaction);
     Return response = blockingStubFull.broadcastTransaction(transaction);
     if (response.getResult() == false) {
@@ -364,40 +378,6 @@ public class CreateAssetIssue2Test {
       //return true;
     }
     return ret;
-  }
-
-  /**
-   * constructor.
-   */
-
-  public boolean unFreezeAsset(byte[] addRess, String priKey) {
-    byte[] address = addRess;
-    ECKey temKey = null;
-    try {
-      BigInteger priK = new BigInteger(priKey, 16);
-      temKey = ECKey.fromPrivate(priK);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    final ECKey ecKey = temKey;
-    Contract.UnfreezeAssetContract.Builder builder = Contract.UnfreezeAssetContract
-        .newBuilder();
-    ByteString byteAddreess = ByteString.copyFrom(address);
-    builder.setOwnerAddress(byteAddreess);
-    Contract.UnfreezeAssetContract contract = builder.build();
-    Transaction transaction = blockingStubFull.unfreezeAsset(contract);
-    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-      return false;
-    }
-    transaction = TransactionUtils.setTimestamp(transaction);
-    transaction = TransactionUtils.sign(transaction, ecKey);
-    Return response = blockingStubFull.broadcastTransaction(transaction);
-    if (response.getResult() == false) {
-      logger.info(ByteArray.toStr(response.getMessage().toByteArray()));
-      return false;
-    } else {
-      return true;
-    }
   }
 
   @AfterClass(enabled = true)

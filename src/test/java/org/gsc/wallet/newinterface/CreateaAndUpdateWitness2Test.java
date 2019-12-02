@@ -80,10 +80,6 @@ public class CreateaAndUpdateWitness2Test {
     Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass
   public void beforeClass() {
     logger.info(lowBalTest);
@@ -187,10 +183,6 @@ public class CreateaAndUpdateWitness2Test {
 
   }
 
-  /**
-   * constructor.
-   */
-
   public GrpcAPI.Return createWitness2(byte[] owner, byte[] url, String priKey) {
     ECKey temKey = null;
     try {
@@ -237,10 +229,6 @@ public class CreateaAndUpdateWitness2Test {
 
   }
 
-  /**
-   * constructor.
-   */
-
   public Boolean updateWitness(byte[] owner, byte[] url, String priKey) {
     ECKey temKey = null;
     try {
@@ -271,60 +259,6 @@ public class CreateaAndUpdateWitness2Test {
     }
 
   }
-
-  /**
-   * constructor.
-   */
-
-  public GrpcAPI.Return updateWitness2(byte[] owner, byte[] url, String priKey) {
-    ECKey temKey = null;
-    try {
-      BigInteger priK = new BigInteger(priKey, 16);
-      temKey = ECKey.fromPrivate(priK);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    final ECKey ecKey = temKey;
-
-    Contract.WitnessUpdateContract.Builder builder = Contract.WitnessUpdateContract.newBuilder();
-    builder.setOwnerAddress(ByteString.copyFrom(owner));
-    builder.setUpdateUrl(ByteString.copyFrom(url));
-    Contract.WitnessUpdateContract contract = builder.build();
-
-    GrpcAPI.TransactionExtention transactionExtention = blockingStubFull.updateWitness2(contract);
-    if (transactionExtention == null) {
-      return transactionExtention.getResult();
-    }
-    GrpcAPI.Return ret = transactionExtention.getResult();
-    if (!ret.getResult()) {
-      System.out.println("Code = " + ret.getCode());
-      System.out.println("Message = " + ret.getMessage().toStringUtf8());
-      return ret;
-    } else {
-      System.out.println("Code = " + ret.getCode());
-      System.out.println("Message = " + ret.getMessage().toStringUtf8());
-    }
-    Protocol.Transaction transaction = transactionExtention.getTransaction();
-    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-      System.out.println("Transaction is empty");
-      return transactionExtention.getResult();
-    }
-    System.out.println(
-        "Receive txid = " + ByteArray.toHexString(transactionExtention.getTxid().toByteArray()));
-
-    transaction = signTransaction(ecKey, transaction);
-    GrpcAPI.Return response = blockingStubFull.broadcastTransaction(transaction);
-    if (response.getResult() == false) {
-      logger.info(ByteArray.toStr(response.getMessage().toByteArray()));
-      logger.info("response.getRestult() == false");
-      return response;
-    }
-    return ret;
-  }
-
-  /**
-   * constructor.
-   */
 
   public Boolean sendcoin(byte[] to, long amount, byte[] owner, String priKey) {
 
@@ -360,9 +294,51 @@ public class CreateaAndUpdateWitness2Test {
     }
   }
 
-  /**
-   * constructor.
-   */
+  public GrpcAPI.Return updateWitness2(byte[] owner, byte[] url, String priKey) {
+    ECKey temKey = null;
+    try {
+      BigInteger priK = new BigInteger(priKey, 16);
+      temKey = ECKey.fromPrivate(priK);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    final ECKey ecKey = temKey;
+
+    Contract.WitnessUpdateContract.Builder builder = Contract.WitnessUpdateContract.newBuilder();
+    builder.setOwnerAddress(ByteString.copyFrom(owner));
+    builder.setUpdateUrl(ByteString.copyFrom(url));
+    Contract.WitnessUpdateContract contract = builder.build();
+
+    GrpcAPI.TransactionExtention transactionExtention = blockingStubFull.updateWitness2(contract);
+    if (transactionExtention == null) {
+      return transactionExtention.getResult();
+    }
+    GrpcAPI.Return ret = transactionExtention.getResult();
+    if (!ret.getResult()) {
+      System.out.println("Code = " + ret.getCode());
+      System.out.println("Message = " + ret.getMessage().toStringUtf8());
+      return ret;
+    } else {
+      System.out.println("Code = " + ret.getCode());
+      System.out.println("Message = " + ret.getMessage().toStringUtf8());
+    }
+    Protocol.Transaction transaction = transactionExtention.getTransaction();
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+      System.out.println("Transaction is empty");
+      return transactionExtention.getResult();
+    }
+    System.out.println(
+            "Receive txid = " + ByteArray.toHexString(transactionExtention.getTxid().toByteArray()));
+
+    transaction = signTransaction(ecKey, transaction);
+    GrpcAPI.Return response = blockingStubFull.broadcastTransaction(transaction);
+    if (response.getResult() == false) {
+      logger.info(ByteArray.toStr(response.getMessage().toByteArray()));
+      logger.info("response.getRestult() == false");
+      return response;
+    }
+    return ret;
+  }
 
   public Account queryAccount(String priKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
@@ -396,15 +372,17 @@ public class CreateaAndUpdateWitness2Test {
     return ecKey.getAddress();
   }
 
-  /**
-   * constructor.
-   */
-
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();
     builder.setNum(blockNum);
     return blockingStubFull.getBlockByNum(builder.build());
 
+  }
+
+  public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
+    ByteString addressBs = ByteString.copyFrom(address);
+    Account request = Account.newBuilder().setAddress(addressBs).build();
+    return blockingStubFull.getAccount(request);
   }
 
   private Protocol.Transaction signTransaction(ECKey ecKey, Protocol.Transaction transaction) {
@@ -415,16 +393,6 @@ public class CreateaAndUpdateWitness2Test {
     transaction = TransactionUtils.setTimestamp(transaction);
     return TransactionUtils.sign(transaction, ecKey);
   }
-
-  public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
-    ByteString addressBs = ByteString.copyFrom(address);
-    Account request = Account.newBuilder().setAddress(addressBs).build();
-    return blockingStubFull.getAccount(request);
-  }
-
-  /**
-   * constructor.
-   */
 
   @AfterClass
   public void shutdown() throws InterruptedException {

@@ -105,15 +105,6 @@ public class WalletTestMutiSign003 {
     manager2Address = ecKey2.getAddress();
     manager2Key = ByteArray.toHexString(ecKey2.getPrivKeyBytes());
 
-//    ecKey3 = new ECKey(Utils.getRandom());
-//    ownerAddress = ecKey3.getAddress();
-//    ownerKey = ByteArray.toHexString(ecKey3.getPrivKeyBytes());
-//    PublicMethed.printAddress(ownerKey);
-//
-//    ecKey4 = new ECKey(Utils.getRandom());
-//    newAddress = ecKey4.getAddress();
-//    newKey = ByteArray.toHexString(ecKey4.getPrivKeyBytes());
-
     long needCoin = updateAccountPermissionFee * 1 + multiSignFee * 9;
 
     Assert.assertTrue(

@@ -66,10 +66,6 @@ public class CreateAccount2Test {
     Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass(enabled = true)
   public void beforeClass() {
     logger.info(account007Key);
@@ -79,6 +75,24 @@ public class CreateAccount2Test {
     blockingStubFull = WalletGrpc.newBlockingStub(channelFull);
     Assert.assertTrue(PublicMethed.sendcoin(account007Address, 10000000,
         fromAddress, testKey002, blockingStubFull));
+  }
+
+  @Test(enabled = true)
+  public void testExceptionCreateAccount2() {
+    //Try to create an exist account
+    GrpcAPI.Return ret1 = PublicMethed
+            .createAccount2(account007Address, account007Address, account007Key,
+                    blockingStubFull);
+    Assert.assertEquals(ret1.getCode(), GrpcAPI.Return.response_code.CONTRACT_VALIDATE_ERROR);
+    Assert.assertEquals(ret1.getMessage().toStringUtf8(),
+            "contract validate error : Account has existed");
+    //Try to create an invalid account
+    byte[] wrongAddress = "wrongAddress".getBytes();
+    ret1 = PublicMethed.createAccount2(account007Address, wrongAddress, account007Key,
+            blockingStubFull);
+    Assert.assertEquals(ret1.getCode(), GrpcAPI.Return.response_code.CONTRACT_VALIDATE_ERROR);
+    Assert.assertEquals(ret1.getMessage().toStringUtf8(),
+            "contract validate error : Invalid account address");
   }
 
   @Test(enabled = true)
@@ -102,28 +116,6 @@ public class CreateAccount2Test {
     Assert.assertTrue(afterFreeNet == beforeFreeNet);
     Assert.assertTrue(beforeBalance - afterBalance == 100000);
   }
-
-  @Test(enabled = true)
-  public void testExceptionCreateAccount2() {
-    //Try to create an exist account
-    GrpcAPI.Return ret1 = PublicMethed
-        .createAccount2(account007Address, account007Address, account007Key,
-            blockingStubFull);
-    Assert.assertEquals(ret1.getCode(), GrpcAPI.Return.response_code.CONTRACT_VALIDATE_ERROR);
-    Assert.assertEquals(ret1.getMessage().toStringUtf8(),
-        "contract validate error : Account has existed");
-    //Try to create an invalid account
-    byte[] wrongAddress = "wrongAddress".getBytes();
-    ret1 = PublicMethed.createAccount2(account007Address, wrongAddress, account007Key,
-        blockingStubFull);
-    Assert.assertEquals(ret1.getCode(), GrpcAPI.Return.response_code.CONTRACT_VALIDATE_ERROR);
-    Assert.assertEquals(ret1.getMessage().toStringUtf8(),
-        "contract validate error : Invalid account address");
-  }
-
-  /**
-   * constructor.
-   */
 
   @AfterClass(enabled = true)
   public void shutdown() throws InterruptedException {

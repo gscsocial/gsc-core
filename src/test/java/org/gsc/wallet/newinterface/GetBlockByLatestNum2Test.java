@@ -51,10 +51,6 @@ public class GetBlockByLatestNum2Test {
     Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass
   public void beforeClass() {
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
@@ -123,21 +119,6 @@ public class GetBlockByLatestNum2Test {
 
   }
 
-  /**
-   * constructor.
-   */
-
-  @AfterClass
-  public void shutdown() throws InterruptedException {
-    if (channelFull != null) {
-      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-  }
-
-  /**
-   * constructor.
-   */
-
   public Account queryAccount(String priKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
     ECKey temKey = null;
@@ -171,9 +152,12 @@ public class GetBlockByLatestNum2Test {
     return ecKey.getAddress();
   }
 
-  /**
-   * constructor.
-   */
+  public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
+    NumberMessage.Builder builder = NumberMessage.newBuilder();
+    builder.setNum(blockNum);
+    return blockingStubFull.getBlockByNum(builder.build());
+
+  }
 
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
@@ -181,15 +165,11 @@ public class GetBlockByLatestNum2Test {
     return blockingStubFull.getAccount(request);
   }
 
-  /**
-   * constructor.
-   */
-
-  public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
-    NumberMessage.Builder builder = NumberMessage.newBuilder();
-    builder.setNum(blockNum);
-    return blockingStubFull.getBlockByNum(builder.build());
-
+  @AfterClass
+  public void shutdown() throws InterruptedException {
+    if (channelFull != null) {
+      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
   }
 }
 

@@ -51,10 +51,6 @@ public class GetBlockByLimitNext2 {
     Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass
   public void beforeClass() {
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
@@ -149,21 +145,6 @@ public class GetBlockByLimitNext2 {
     //Assert.assertTrue(getBlockByLimitNext.get().getBlock(999999990).getBlockid().isEmpty());
   }
 
-  /**
-   * constructor.
-   */
-
-  @AfterClass
-  public void shutdown() throws InterruptedException {
-    if (channelFull != null) {
-      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-  }
-
-  /**
-   * constructor.
-   */
-
   public Account queryAccount(String priKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
     ECKey temKey = null;
@@ -197,9 +178,6 @@ public class GetBlockByLimitNext2 {
     return ecKey.getAddress();
   }
 
-  /**
-   * constructor.
-   */
 
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
@@ -207,15 +185,18 @@ public class GetBlockByLimitNext2 {
     return blockingStubFull.getAccount(request);
   }
 
-  /**
-   * constructor.
-   */
-
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();
     builder.setNum(blockNum);
     return blockingStubFull.getBlockByNum(builder.build());
 
+  }
+
+  @AfterClass
+  public void shutdown() throws InterruptedException {
+    if (channelFull != null) {
+      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+    }
   }
 }
 

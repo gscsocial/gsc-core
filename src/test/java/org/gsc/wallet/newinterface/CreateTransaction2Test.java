@@ -167,85 +167,6 @@ public class CreateTransaction2Test {
     Assert.assertTrue(receiptAccountAfterBalance1 == 49880000000L + 40119900000L);
   }
 
-  /**
-   * constructor.
-   */
-
-  public Boolean freezeBalance(byte[] addRess, long freezeBalance, long freezeDuration,
-      String priKey) {
-    byte[] address = addRess;
-    long frozenBalance = freezeBalance;
-    long frozenDuration = freezeDuration;
-
-    //String priKey = testKey002;
-    ECKey temKey = null;
-    try {
-      BigInteger priK = new BigInteger(priKey, 16);
-      temKey = ECKey.fromPrivate(priK);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    ECKey ecKey = temKey;
-    Block currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
-    final Long beforeBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
-    Account beforeFronzen = queryAccount(ecKey, blockingStubFull);
-    Long beforeFrozenBalance = 0L;
-    if (beforeFronzen.getFrozenCount() != 0) {
-      beforeFrozenBalance = beforeFronzen.getFrozen(0).getFrozenBalance();
-      logger.info(Long.toString(beforeFronzen.getFrozen(0).getFrozenBalance()));
-    }
-
-    FreezeBalanceContract.Builder builder = FreezeBalanceContract.newBuilder();
-    ByteString byteAddreess = ByteString.copyFrom(address);
-
-    builder.setOwnerAddress(byteAddreess).setFrozenBalance(frozenBalance)
-        .setFrozenDuration(frozenDuration);
-
-    FreezeBalanceContract contract = builder.build();
-    Transaction transaction = blockingStubFull.freezeBalance(contract);
-
-    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-      logger.info("transaction = null");
-      return false;
-    }
-
-    transaction = TransactionUtils.setTimestamp(transaction);
-    transaction = TransactionUtils.sign(transaction, ecKey);
-    Return response = blockingStubFull.broadcastTransaction(transaction);
-
-    if (response.getResult() == false) {
-      logger.info(ByteArray.toStr(response.getMessage().toByteArray()));
-      return false;
-    }
-
-    Long afterBlockNum = 0L;
-    Integer wait = 0;
-    while (afterBlockNum < beforeBlockNum + 1 && wait < 10) {
-      Block currentBlock1 = searchBlockingStubFull
-          .getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
-      afterBlockNum = currentBlock1.getBlockHeader().getRawData().getNumber();
-      wait++;
-      try {
-        Thread.sleep(2000);
-        logger.info("wait 2 second");
-      } catch (InterruptedException e) {
-        e.printStackTrace();
-      }
-    }
-
-    Account afterFronzen = queryAccount(ecKey, searchBlockingStubFull);
-    Long afterFrozenBalance = afterFronzen.getFrozen(0).getFrozenBalance();
-    logger.info(Long.toString(afterFronzen.getFrozen(0).getFrozenBalance()));
-    logger.info(
-        "beforefronen" + beforeFrozenBalance.toString() + "    afterfronzen" + afterFrozenBalance
-            .toString());
-    Assert.assertTrue(afterFrozenBalance - beforeFrozenBalance == freezeBalance);
-    return true;
-  }
-
-  /**
-   * constructor.
-   */
   public Boolean sendcoin(byte[] to, long amount, byte[] owner, String priKey) {
 
     //String priKey = testKey002;
@@ -279,10 +200,78 @@ public class CreateTransaction2Test {
       return true;
     }
   }
+  public Boolean freezeBalance(byte[] addRess, long freezeBalance, long freezeDuration,
+                               String priKey) {
+    byte[] address = addRess;
+    long frozenBalance = freezeBalance;
+    long frozenDuration = freezeDuration;
 
-  /**
-   * constructor.
-   */
+    //String priKey = testKey002;
+    ECKey temKey = null;
+    try {
+      BigInteger priK = new BigInteger(priKey, 16);
+      temKey = ECKey.fromPrivate(priK);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    ECKey ecKey = temKey;
+    Block currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
+    final Long beforeBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
+    Account beforeFronzen = queryAccount(ecKey, blockingStubFull);
+    Long beforeFrozenBalance = 0L;
+    if (beforeFronzen.getFrozenCount() != 0) {
+      beforeFrozenBalance = beforeFronzen.getFrozen(0).getFrozenBalance();
+      logger.info(Long.toString(beforeFronzen.getFrozen(0).getFrozenBalance()));
+    }
+
+    FreezeBalanceContract.Builder builder = FreezeBalanceContract.newBuilder();
+    ByteString byteAddreess = ByteString.copyFrom(address);
+
+    builder.setOwnerAddress(byteAddreess).setFrozenBalance(frozenBalance)
+            .setFrozenDuration(frozenDuration);
+
+    FreezeBalanceContract contract = builder.build();
+    Transaction transaction = blockingStubFull.freezeBalance(contract);
+
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+      logger.info("transaction = null");
+      return false;
+    }
+
+    transaction = TransactionUtils.setTimestamp(transaction);
+    transaction = TransactionUtils.sign(transaction, ecKey);
+    Return response = blockingStubFull.broadcastTransaction(transaction);
+
+    if (response.getResult() == false) {
+      logger.info(ByteArray.toStr(response.getMessage().toByteArray()));
+      return false;
+    }
+
+    Long afterBlockNum = 0L;
+    Integer wait = 0;
+    while (afterBlockNum < beforeBlockNum + 1 && wait < 10) {
+      Block currentBlock1 = searchBlockingStubFull
+              .getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
+      afterBlockNum = currentBlock1.getBlockHeader().getRawData().getNumber();
+      wait++;
+      try {
+        Thread.sleep(2000);
+        logger.info("wait 2 second");
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+
+    Account afterFronzen = queryAccount(ecKey, searchBlockingStubFull);
+    Long afterFrozenBalance = afterFronzen.getFrozen(0).getFrozenBalance();
+    logger.info(Long.toString(afterFronzen.getFrozen(0).getFrozenBalance()));
+    logger.info(
+            "beforefronen" + beforeFrozenBalance.toString() + "    afterfronzen" + afterFrozenBalance
+                    .toString());
+    Assert.assertTrue(afterFrozenBalance - beforeFrozenBalance == freezeBalance);
+    return true;
+  }
+
   public Account queryAccount(ECKey ecKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
     if (ecKey == null) {
