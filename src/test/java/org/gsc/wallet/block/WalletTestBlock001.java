@@ -99,10 +99,6 @@ public class WalletTestBlock001 {
     }
   }
 
-  /**
-   * constructor.
-   */
-
   public Account queryAccount(ECKey ecKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
     if (ecKey == null) {
@@ -126,10 +122,6 @@ public class WalletTestBlock001 {
   public byte[] getAddress(ECKey ecKey) {
     return ecKey.getAddress();
   }
-
-  /**
-   * constructor.
-   */
 
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);

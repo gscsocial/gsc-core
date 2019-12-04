@@ -64,33 +64,6 @@ public class WalletTestBlock003 {
   }
 
   @Test(enabled = true)
-  public void testGetBlockByLatestNum() {
-    //
-    Block currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
-    Long currentBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
-    Assert.assertFalse(currentBlockNum < 0);
-    while (currentBlockNum <= 5) {
-      logger.info("Now the block num is " + Long.toString(currentBlockNum) + " Please wait");
-      currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
-      currentBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
-    }
-
-    NumberMessage numberMessage = NumberMessage.newBuilder().setNum(3).build();
-    GrpcAPI.BlockList blockList = blockingStubFull.getBlockByLatestNum(numberMessage);
-    Optional<GrpcAPI.BlockList> getBlockByLatestNum = Optional.ofNullable(blockList);
-    Assert.assertTrue(getBlockByLatestNum.isPresent());
-    Assert.assertTrue(getBlockByLatestNum.get().getBlockCount() == 3);
-    Assert.assertTrue(getBlockByLatestNum.get().getBlock(0).hasBlockHeader());
-    Assert.assertTrue(
-        getBlockByLatestNum.get().getBlock(1).getBlockHeader().getRawData().getNumber() > 0);
-    Assert.assertFalse(
-        getBlockByLatestNum.get().getBlock(2).getBlockHeader().getRawData().getParentHash()
-            .isEmpty());
-    logger.info("TestGetBlockByLatestNum ok!!!");
-
-  }
-
-  @Test(enabled = true)
   public void testGetBlockByExceptionNum() {
     Block currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
     Long currentBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
@@ -118,9 +91,32 @@ public class WalletTestBlock003 {
 
   }
 
-  /**
-   * constructor.
-   */
+  @Test(enabled = true)
+  public void testGetBlockByLatestNum() {
+    //
+    Block currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
+    Long currentBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
+    Assert.assertFalse(currentBlockNum < 0);
+    while (currentBlockNum <= 5) {
+      logger.info("Now the block num is " + Long.toString(currentBlockNum) + " Please wait");
+      currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
+      currentBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
+    }
+
+    NumberMessage numberMessage = NumberMessage.newBuilder().setNum(3).build();
+    GrpcAPI.BlockList blockList = blockingStubFull.getBlockByLatestNum(numberMessage);
+    Optional<GrpcAPI.BlockList> getBlockByLatestNum = Optional.ofNullable(blockList);
+    Assert.assertTrue(getBlockByLatestNum.isPresent());
+    Assert.assertTrue(getBlockByLatestNum.get().getBlockCount() == 3);
+    Assert.assertTrue(getBlockByLatestNum.get().getBlock(0).hasBlockHeader());
+    Assert.assertTrue(
+            getBlockByLatestNum.get().getBlock(1).getBlockHeader().getRawData().getNumber() > 0);
+    Assert.assertFalse(
+            getBlockByLatestNum.get().getBlock(2).getBlockHeader().getRawData().getParentHash()
+                    .isEmpty());
+    logger.info("TestGetBlockByLatestNum ok!!!");
+
+  }
 
   @AfterClass
   public void shutdown() throws InterruptedException {
@@ -166,9 +162,12 @@ public class WalletTestBlock003 {
     return ecKey.getAddress();
   }
 
-  /**
-   * constructor.
-   */
+  public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
+    NumberMessage.Builder builder = NumberMessage.newBuilder();
+    builder.setNum(blockNum);
+    return blockingStubFull.getBlockByNum(builder.build());
+
+  }
 
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
@@ -176,16 +175,6 @@ public class WalletTestBlock003 {
     return blockingStubFull.getAccount(request);
   }
 
-  /**
-   * constructor.
-   */
-
-  public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
-    NumberMessage.Builder builder = NumberMessage.newBuilder();
-    builder.setNum(blockNum);
-    return blockingStubFull.getBlockByNum(builder.build());
-
-  }
 }
 
 

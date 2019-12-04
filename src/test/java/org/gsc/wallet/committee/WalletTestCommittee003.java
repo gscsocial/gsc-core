@@ -151,8 +151,6 @@ public class WalletTestCommittee003 {
     proposalList = blockingStubFull.listProposals(EmptyMessage.newBuilder().build());
     listProposals = Optional.ofNullable(proposalList);
     Assert.assertTrue(listProposals.get().getProposals(0).getApprovalsCount() == 2);
-
-
   }
 
   @AfterClass

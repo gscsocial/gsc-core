@@ -51,54 +51,12 @@ public class WalletTestBlock002 {
     Wallet.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass
   public void beforeClass() {
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
         .usePlaintext(true)
         .build();
     blockingStubFull = WalletGrpc.newBlockingStub(channelFull);
-  }
-
-
-  @Test(enabled = true)
-  public void testGetBlockByLimitNext() {
-    //
-    Block currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
-    Long currentBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
-    Assert.assertFalse(currentBlockNum < 0);
-    while (currentBlockNum <= 5) {
-      logger.info("Now has very little block, Please wait");
-      currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
-      currentBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
-    }
-
-    GrpcAPI.BlockLimit.Builder builder = GrpcAPI.BlockLimit.newBuilder();
-    builder.setStartNum(2);
-    builder.setEndNum(4);
-    GrpcAPI.BlockList blockList = blockingStubFull.getBlockByLimitNext(builder.build());
-    Optional<GrpcAPI.BlockList> getBlockByLimitNext = Optional.ofNullable(blockList);
-    Assert.assertTrue(getBlockByLimitNext.isPresent());
-    Assert.assertTrue(getBlockByLimitNext.get().getBlockCount() == 2);
-    logger.info(Long.toString(
-        getBlockByLimitNext.get().getBlock(0).getBlockHeader().getRawData().getNumber()));
-    logger.info(Long.toString(
-        getBlockByLimitNext.get().getBlock(1).getBlockHeader().getRawData().getNumber()));
-    Assert.assertTrue(
-        getBlockByLimitNext.get().getBlock(0).getBlockHeader().getRawData().getNumber() < 4);
-    Assert.assertTrue(
-        getBlockByLimitNext.get().getBlock(1).getBlockHeader().getRawData().getNumber() < 4);
-    Assert.assertTrue(getBlockByLimitNext.get().getBlock(0).hasBlockHeader());
-    Assert.assertTrue(getBlockByLimitNext.get().getBlock(1).hasBlockHeader());
-    Assert.assertFalse(
-        getBlockByLimitNext.get().getBlock(0).getBlockHeader().getRawData().getParentHash()
-            .isEmpty());
-    Assert.assertFalse(
-        getBlockByLimitNext.get().getBlock(1).getBlockHeader().getRawData().getParentHash()
-            .isEmpty());
   }
 
   @Test(enabled = true)
@@ -145,9 +103,42 @@ public class WalletTestBlock002 {
     Assert.assertTrue(getBlockByLimitNext.get().getBlockCount() == 0);
   }
 
-  /**
-   * constructor.
-   */
+  @Test(enabled = true)
+  public void testGetBlockByLimitNext() {
+    //
+    Block currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
+    Long currentBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
+    Assert.assertFalse(currentBlockNum < 0);
+    while (currentBlockNum <= 5) {
+      logger.info("Now has very little block, Please wait");
+      currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
+      currentBlockNum = currentBlock.getBlockHeader().getRawData().getNumber();
+    }
+
+    GrpcAPI.BlockLimit.Builder builder = GrpcAPI.BlockLimit.newBuilder();
+    builder.setStartNum(2);
+    builder.setEndNum(4);
+    GrpcAPI.BlockList blockList = blockingStubFull.getBlockByLimitNext(builder.build());
+    Optional<GrpcAPI.BlockList> getBlockByLimitNext = Optional.ofNullable(blockList);
+    Assert.assertTrue(getBlockByLimitNext.isPresent());
+    Assert.assertTrue(getBlockByLimitNext.get().getBlockCount() == 2);
+    logger.info(Long.toString(
+            getBlockByLimitNext.get().getBlock(0).getBlockHeader().getRawData().getNumber()));
+    logger.info(Long.toString(
+            getBlockByLimitNext.get().getBlock(1).getBlockHeader().getRawData().getNumber()));
+    Assert.assertTrue(
+            getBlockByLimitNext.get().getBlock(0).getBlockHeader().getRawData().getNumber() < 4);
+    Assert.assertTrue(
+            getBlockByLimitNext.get().getBlock(1).getBlockHeader().getRawData().getNumber() < 4);
+    Assert.assertTrue(getBlockByLimitNext.get().getBlock(0).hasBlockHeader());
+    Assert.assertTrue(getBlockByLimitNext.get().getBlock(1).hasBlockHeader());
+    Assert.assertFalse(
+            getBlockByLimitNext.get().getBlock(0).getBlockHeader().getRawData().getParentHash()
+                    .isEmpty());
+    Assert.assertFalse(
+            getBlockByLimitNext.get().getBlock(1).getBlockHeader().getRawData().getParentHash()
+                    .isEmpty());
+  }
 
   @AfterClass
   public void shutdown() throws InterruptedException {
@@ -155,10 +146,6 @@ public class WalletTestBlock002 {
       channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
-
-  /**
-   * constructor.
-   */
 
   public Account queryAccount(String priKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;

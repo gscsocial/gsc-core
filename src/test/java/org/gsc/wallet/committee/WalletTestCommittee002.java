@@ -55,14 +55,8 @@ public class WalletTestCommittee002 {
   private final String witnessKey005 = Configuration.getByPath("testng.conf")
       .getString("witness.key5");
 
-
   private final byte[] toAddress = PublicMethed.getFinalAddress(testKey003);
   private final byte[] witness001Address = PublicMethed.getFinalAddress(witnessKey001);
-  private final byte[] witness002Address = PublicMethed.getFinalAddress(witnessKey002);
-  private final byte[] witness003Address = PublicMethed.getFinalAddress(witnessKey003);
-  private final byte[] witness004Address = PublicMethed.getFinalAddress(witnessKey004);
-  private final byte[] witness005Address = PublicMethed.getFinalAddress(witnessKey005);
-
 
   private ManagedChannel channelFull = null;
   private ManagedChannel channelConfirmed = null;
@@ -294,22 +288,6 @@ public class WalletTestCommittee002 {
   }
 
   @Test(enabled = true)
-  public void testInvalidProposals() {
-    // The index isn't from 0-9
-    HashMap<Long, Long> proposalMap = new HashMap<Long, Long>();
-    proposalMap.put(10L, 60L);
-    Assert.assertFalse(PublicMethed.createProposal(witness001Address, witnessKey001,
-            proposalMap, blockingStubFull));
-
-    //The index is -1
-    proposalMap.put(-1L, 6L);
-    Assert.assertFalse(PublicMethed.createProposal(witness001Address, witnessKey001,
-            proposalMap, blockingStubFull));
-
-
-  }
-
-  @Test(enabled = true)
   public void testWitnessStandbyAllowance() {
     //6:WITNESS_STANDBY_ALLOWANCE,[0,100 000 000 000 000 000]//drop
     //Minimum WitnessStandbyAllowance
@@ -338,6 +316,20 @@ public class WalletTestCommittee002 {
     Assert.assertFalse(PublicMethed.createProposal(toAddress, testKey003,
         proposalMap, blockingStubFull));
 
+  }
+
+  @Test(enabled = true)
+  public void testInvalidProposals() {
+    // The index isn't from 0-9
+    HashMap<Long, Long> proposalMap = new HashMap<Long, Long>();
+    proposalMap.put(10L, 60L);
+    Assert.assertFalse(PublicMethed.createProposal(witness001Address, witnessKey001,
+            proposalMap, blockingStubFull));
+
+    //The index is -1
+    proposalMap.put(-1L, 6L);
+    Assert.assertFalse(PublicMethed.createProposal(witness001Address, witnessKey001,
+            proposalMap, blockingStubFull));
   }
 
   @Test(enabled = true)
