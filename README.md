@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img width="40%" src="https://i.loli.net/2018/06/19/5b290aa0885f1.png">
+  <img src="https://i.loli.net/2019/12/05/5FkrxA2PGeBjaS8.png">
   <br>
   GSC Core
   <br>
