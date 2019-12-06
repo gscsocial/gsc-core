@@ -21,11 +21,6 @@ public class DisconnectMessage extends P2pMessage {
 
     private Protocol.DisconnectMessage disconnectMessage;
 
-    public DisconnectMessage(byte type, byte[] rawData) throws Exception {
-        super(type, rawData);
-        this.disconnectMessage = Protocol.DisconnectMessage.parseFrom(this.data);
-    }
-
     public DisconnectMessage(ReasonCode reasonCode) {
         this.disconnectMessage = Protocol.DisconnectMessage
                 .newBuilder()
@@ -33,6 +28,11 @@ public class DisconnectMessage extends P2pMessage {
                 .build();
         this.type = MessageTypes.P2P_DISCONNECT.asByte();
         this.data = this.disconnectMessage.toByteArray();
+    }
+
+    public DisconnectMessage(byte type, byte[] rawData) throws Exception {
+        super(type, rawData);
+        this.disconnectMessage = Protocol.DisconnectMessage.parseFrom(this.data);
     }
 
     public int getReason() {

@@ -97,14 +97,14 @@ public class HandshakeHandler extends ByteToMessageDecoder {
         }
     }
 
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        channel.processException(cause);
-    }
-
     public void setChannel(Channel channel, String remoteId) {
         this.channel = channel;
         this.remoteId = Hex.decode(remoteId);
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        channel.processException(cause);
     }
 
     protected void sendHelloMsg(ChannelHandlerContext ctx, long time) {

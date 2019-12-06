@@ -89,14 +89,14 @@ public class HelloMessage extends P2pMessage {
                 this.helloMessage.getGenesisBlockId().getNumber());
     }
 
-    public BlockWrapper.BlockId getSolidBlockId() {
-        return new BlockWrapper.BlockId(this.helloMessage.getSolidBlockId().getHash(),
-                this.helloMessage.getSolidBlockId().getNumber());
-    }
-
     public BlockWrapper.BlockId getHeadBlockId() {
         return new BlockWrapper.BlockId(this.helloMessage.getHeadBlockId().getHash(),
                 this.helloMessage.getHeadBlockId().getNumber());
+    }
+
+    public BlockWrapper.BlockId getSolidBlockId() {
+        return new BlockWrapper.BlockId(this.helloMessage.getSolidBlockId().getHash(),
+                this.helloMessage.getSolidBlockId().getNumber());
     }
 
     @Override

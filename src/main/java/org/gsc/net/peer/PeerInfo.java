@@ -204,21 +204,21 @@ public class PeerInfo {
         return this;
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public PeerInfo setActive(boolean active) {
-        isActive = active;
-        return this;
-    }
-
     public int getScore() {
         return score;
     }
 
     public PeerInfo setScore(int score) {
         this.score = score;
+        return this;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public PeerInfo setActive(boolean active) {
+        isActive = active;
         return this;
     }
 

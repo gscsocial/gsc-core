@@ -149,6 +149,10 @@ public class SyncPool {
         return peers;
     }
 
+    public boolean isCanConnect() {
+        return passivePeersCount.get() < maxActiveNodes * (1 - activeFactor);
+    }
+
     public synchronized void onConnect(Channel peer) {
         PeerConnection peerConnection = (PeerConnection) peer;
         if (!activePeers.contains(peerConnection)) {
@@ -175,10 +179,6 @@ public class SyncPool {
             activePeers.remove(peerConnection);
             peerConnection.onDisconnect();
         }
-    }
-
-    public boolean isCanConnect() {
-        return passivePeersCount.get() < maxActiveNodes * (1 - activeFactor);
     }
 
     public void close() {

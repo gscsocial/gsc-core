@@ -102,12 +102,12 @@ public class P2pHandler extends SimpleChannelInboundHandler<P2pMessage> {
         channel.processException(cause);
     }
 
-    public void setMsgQueue(MessageQueue msgQueue) {
-        this.msgQueue = msgQueue;
-    }
-
     public void setChannel(Channel channel) {
         this.channel = channel;
+    }
+
+    public void setMsgQueue(MessageQueue msgQueue) {
+        this.msgQueue = msgQueue;
     }
 
     public void close() {
