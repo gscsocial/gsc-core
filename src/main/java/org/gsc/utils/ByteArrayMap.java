@@ -177,17 +177,17 @@ public class ByteArrayMap<V> implements Map<byte[], V> {
         }
 
         @Override
+        public boolean addAll(Collection<? extends Entry<byte[], V>> c) {
+            throw new RuntimeException(RUNTIME_EXCEPTION_MSG);
+        }
+
+        @Override
         public boolean remove(Object o) {
             throw new RuntimeException(RUNTIME_EXCEPTION_MSG);
         }
 
         @Override
         public boolean containsAll(Collection<?> c) {
-            throw new RuntimeException(RUNTIME_EXCEPTION_MSG);
-        }
-
-        @Override
-        public boolean addAll(Collection<? extends Entry<byte[], V>> c) {
             throw new RuntimeException(RUNTIME_EXCEPTION_MSG);
         }
 

@@ -35,12 +35,12 @@ public class DisconnectMessage extends P2pMessage {
         this.disconnectMessage = Protocol.DisconnectMessage.parseFrom(this.data);
     }
 
-    public int getReason() {
-        return this.disconnectMessage.getReason().getNumber();
-    }
-
     public ReasonCode getReasonCode() {
         return disconnectMessage.getReason();
+    }
+
+    public int getReason() {
+        return this.disconnectMessage.getReason().getNumber();
     }
 
     @Override

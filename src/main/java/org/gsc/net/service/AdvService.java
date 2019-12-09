@@ -71,9 +71,9 @@ public class AdvService {
     private Cache<Item, Message> blockCache = CacheBuilder.newBuilder()
             .maximumSize(10).expireAfterWrite(1, TimeUnit.MINUTES).recordStats().build();
 
-    private ScheduledExecutorService spreadExecutor = Executors.newSingleThreadScheduledExecutor();
-
     private ScheduledExecutorService fetchExecutor = Executors.newSingleThreadScheduledExecutor();
+
+    private ScheduledExecutorService spreadExecutor = Executors.newSingleThreadScheduledExecutor();
 
     @Getter
     private MessageCount trxCount = new MessageCount();
