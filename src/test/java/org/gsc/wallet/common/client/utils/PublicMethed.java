@@ -1353,23 +1353,14 @@ public class PublicMethed {
             result += "}";
             result += "\n";
         }
-
         return result;
     }
-
-    /**
-     * constructor.
-     */
 
     public static long printTransactionRow(Transaction.raw raw) {
         long timestamp = raw.getTimestamp();
 
         return timestamp;
     }
-
-    /**
-     * constructor.
-     */
 
     public static boolean updateAsset(byte[] address, byte[] description, byte[] url, long newLimit,
                                       long newPublicLimit, String priKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
@@ -1503,11 +1494,6 @@ public class PublicMethed {
         return response.getResult();
     }
 
-
-    /**
-     * constructor.
-     */
-
     public static boolean updateAccount(byte[] addressBytes, byte[] accountNameBytes, String priKey,
                                         WalletGrpc.WalletBlockingStub blockingStubFull) {
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
@@ -1538,43 +1524,6 @@ public class PublicMethed {
         GrpcAPI.Return response = broadcastTransaction(transaction, blockingStubFull);
         return response.getResult();
     }
-
-    /**
-     * constructor.
-     */
-
-    public static boolean waitConfirmedNodeSynFullNodeData(WalletGrpc.WalletBlockingStub
-                                                                   blockingStubFull, WalletConfirmedGrpc.WalletConfirmedBlockingStub blockingStubConfirmed) {
-        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
-        Block currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
-        Block confirmedCurrentBlock = blockingStubConfirmed.getNowBlock(GrpcAPI.EmptyMessage
-                .newBuilder().build());
-        Integer wait = 0;
-        logger.info("Fullnode block num is " + Long.toString(currentBlock
-                .getBlockHeader().getRawData().getNumber()));
-        while (confirmedCurrentBlock.getBlockHeader().getRawData().getNumber()
-                < currentBlock.getBlockHeader().getRawData().getNumber() + 1 && wait <= 10) {
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            logger.info("Confirmednode num is " + Long.toString(confirmedCurrentBlock
-                    .getBlockHeader().getRawData().getNumber()));
-            confirmedCurrentBlock = blockingStubConfirmed.getNowBlock(GrpcAPI.EmptyMessage.newBuilder()
-                    .build());
-            if (wait == 10) {
-                logger.info("Didn't syn,skip to next case.");
-                return false;
-            }
-            wait++;
-        }
-        return true;
-    }
-
-    /**
-     * constructor.
-     */
 
     public static boolean waitProduceNextBlock(WalletGrpc.WalletBlockingStub
                                                        blockingStubFull) {
@@ -1607,9 +1556,34 @@ public class PublicMethed {
         return true;
     }
 
-    /**
-     * constructor.
-     */
+    public static boolean waitConfirmedNodeSynFullNodeData(WalletGrpc.WalletBlockingStub
+                                                                   blockingStubFull, WalletConfirmedGrpc.WalletConfirmedBlockingStub blockingStubConfirmed) {
+        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
+        Block currentBlock = blockingStubFull.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
+        Block confirmedCurrentBlock = blockingStubConfirmed.getNowBlock(GrpcAPI.EmptyMessage
+                .newBuilder().build());
+        Integer wait = 0;
+        logger.info("Fullnode block num is " + Long.toString(currentBlock
+                .getBlockHeader().getRawData().getNumber()));
+        while (confirmedCurrentBlock.getBlockHeader().getRawData().getNumber()
+                < currentBlock.getBlockHeader().getRawData().getNumber() + 1 && wait <= 10) {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            logger.info("Confirmednode num is " + Long.toString(confirmedCurrentBlock
+                    .getBlockHeader().getRawData().getNumber()));
+            confirmedCurrentBlock = blockingStubConfirmed.getNowBlock(GrpcAPI.EmptyMessage.newBuilder()
+                    .build());
+            if (wait == 10) {
+                logger.info("Didn't syn,skip to next case.");
+                return false;
+            }
+            wait++;
+        }
+        return true;
+    }
 
     public static byte[] getFinalAddress(String priKey) {
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
@@ -1619,10 +1593,6 @@ public class PublicMethed {
         return walletClient.getAddress();
     }
 
-    /**
-     * constructor.
-     */
-
     public static AccountNetMessage getAccountNet(byte[] address, WalletGrpc.WalletBlockingStub
             blockingStubFull) {
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
@@ -1630,10 +1600,6 @@ public class PublicMethed {
         Account request = Account.newBuilder().setAddress(addressBs).build();
         return blockingStubFull.getAccountNet(request);
     }
-
-    /**
-     * constructor.
-     */
 
     public static boolean createAccount(byte[] ownerAddress, byte[] newAddress, String priKey,
                                         WalletGrpc.WalletBlockingStub blockingStubFull) {
@@ -1660,10 +1626,6 @@ public class PublicMethed {
         GrpcAPI.Return response = broadcastTransaction(transaction, blockingStubFull);
         return response.getResult();
     }
-
-    /**
-     * constructor.
-     */
 
     public static Return createAccount2(byte[] ownerAddress, byte[] newAddress, String priKey,
                                         WalletGrpc.WalletBlockingStub blockingStubFull) {
@@ -1714,10 +1676,6 @@ public class PublicMethed {
         return ret;
     }
 
-    /**
-     * constructor.
-     */
-
     public static boolean createProposal(byte[] ownerAddress, String priKey,
                                          HashMap<Long, Long> parametersMap, WalletGrpc.WalletBlockingStub blockingStubFull) {
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
@@ -1758,10 +1716,6 @@ public class PublicMethed {
 
         return response.getResult();
     }
-
-    /**
-     * constructor.
-     */
 
     public static boolean approveProposal(byte[] ownerAddress, String priKey, long id,
                                           boolean isAddApproval, WalletGrpc.WalletBlockingStub blockingStubFull) {
@@ -1804,10 +1758,6 @@ public class PublicMethed {
         return response.getResult();
     }
 
-    /**
-     * constructor.
-     */
-
     public static boolean deleteProposal(byte[] ownerAddress, String priKey, long id,
                                          WalletGrpc.WalletBlockingStub blockingStubFull) {
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
@@ -1848,19 +1798,18 @@ public class PublicMethed {
         return response.getResult();
     }
 
-    /**
-     * constructor.
-     */
-
     public static String getAddressString(String key) {
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
         return Base58.encode58Check(getFinalAddress(key));
     }
 
-    /**
-     * constructor.
-     */
-
+    public static boolean printAddress(String key) {
+        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
+        logger.info(key);
+        logger.info(ByteArray.toHexString(getFinalAddress(key)));
+        logger.info(Base58.encode58Check(getFinalAddress(key)));
+        return true;
+    }
 
     public static ArrayList<String> getAddressInfo(String key) {
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
@@ -1871,21 +1820,6 @@ public class PublicMethed {
         return accountList;
     }
 
-    /**
-     * constructor.
-     */
-
-    public static boolean printAddress(String key) {
-        Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
-        logger.info(key);
-        logger.info(ByteArray.toHexString(getFinalAddress(key)));
-        logger.info(Base58.encode58Check(getFinalAddress(key)));
-        return true;
-    }
-
-    /**
-     * constructor.
-     */
     public static AccountResourceMessage getAccountResource(byte[] address,
                                                             WalletGrpc.WalletBlockingStub blockingStubFull) {
         Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);

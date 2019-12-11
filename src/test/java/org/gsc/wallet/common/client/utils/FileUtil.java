@@ -68,9 +68,25 @@ public class FileUtil {
     return files;
   }
 
-  /**
-   * constructor.
-   */
+  public static void saveData(String filePath, byte[] data) {
+    FileOutputStream fos = null;
+    try {
+      File file = new File(filePath);
+      file.createNewFile();
+      fos = new FileOutputStream(file);
+      fos.write(data);
+    } catch (IOException e) {
+      e.printStackTrace();
+    } finally {
+      if (fos != null) {
+        try {
+          fos.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    }
+  }
 
   public static boolean recursiveDelete(String fileName) {
     File file = new File(fileName);
@@ -92,34 +108,6 @@ public class FileUtil {
       return false;
     }
   }
-
-  /**
-   * constructor.
-   */
-
-  public static void saveData(String filePath, byte[] data) {
-    FileOutputStream fos = null;
-    try {
-      File file = new File(filePath);
-      file.createNewFile();
-      fos = new FileOutputStream(file);
-      fos.write(data);
-    } catch (IOException e) {
-      e.printStackTrace();
-    } finally {
-      if (fos != null) {
-        try {
-          fos.close();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-      }
-    }
-  }
-
-  /**
-   * constructor.
-   */
 
   public static byte[] readData(String filePath) {
     FileInputStream fi = null;

@@ -193,10 +193,14 @@ public class PublicMethedForMutiSign {
     return response.getResult();
   }
 
+  public static Account queryAccount(byte[] address, WalletConfirmedGrpc
+          .WalletConfirmedBlockingStub blockingStubFull) {
+    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
+    ByteString addressBs = ByteString.copyFrom(address);
+    Account request = Account.newBuilder().setAddress(addressBs).build();
+    return blockingStubFull.getAccount(request);
+  }
 
-  /**
-   * constructor.
-   */
   public static Account queryAccount(byte[] address, WalletGrpc
       .WalletBlockingStub blockingStubFull) {
     Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
@@ -204,23 +208,6 @@ public class PublicMethedForMutiSign {
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
   }
-
-  /**
-   * constructor.
-   */
-
-  public static Account queryAccount(byte[] address, WalletConfirmedGrpc
-      .WalletConfirmedBlockingStub blockingStubFull) {
-    Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
-    ByteString addressBs = ByteString.copyFrom(address);
-    Account request = Account.newBuilder().setAddress(addressBs).build();
-    return blockingStubFull.getAccount(request);
-  }
-
-
-  /**
-   * constructor.
-   */
 
   public static Account queryAccount(String priKey,
       WalletGrpc.WalletBlockingStub blockingStubFull) {

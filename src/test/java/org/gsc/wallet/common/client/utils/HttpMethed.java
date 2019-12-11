@@ -1123,24 +1123,6 @@ public class HttpMethed {
         return response;
     }
 
-    /**
-     * constructor.
-     */
-    public static HttpResponse listExchangesFromConfirmed(String httpConfirmedNode) {
-        try {
-            String requestUrl = "http://" + httpConfirmedNode + "/walletconfirmed/listexchanges";
-            response = createConnect(requestUrl);
-        } catch (Exception e) {
-            e.printStackTrace();
-            httppost.releaseConnection();
-            return null;
-        }
-        return response;
-    }
-
-    /**
-     * constructor.
-     */
     public static HttpResponse listNodes(String httpNode) {
         try {
             String requestUrl = "http://" + httpNode + "/wallet/listnodes";
@@ -1153,9 +1135,18 @@ public class HttpMethed {
         return response;
     }
 
-    /**
-     * constructor.
-     */
+    public static HttpResponse listExchangesFromConfirmed(String httpConfirmedNode) {
+        try {
+            String requestUrl = "http://" + httpConfirmedNode + "/walletconfirmed/listexchanges";
+            response = createConnect(requestUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+            httppost.releaseConnection();
+            return null;
+        }
+        return response;
+    }
+
     public static HttpResponse getNextmaintenanceTime(String httpNode) {
         try {
             String requestUrl = "http://" + httpNode + "/wallet/getnextmaintenancetime";
@@ -1168,9 +1159,6 @@ public class HttpMethed {
         return response;
     }
 
-    /**
-     * constructor.
-     */
     public static HttpResponse getChainParameter(String httpNode) {
         try {
             String requestUrl = "http://" + httpNode + "/wallet/getchainparameters";
@@ -1183,9 +1171,6 @@ public class HttpMethed {
         return response;
     }
 
-    /**
-     * constructor.
-     */
     public static HttpResponse getNodeInfo(String httpNode) {
         try {
             String requestUrl = "http://" + httpNode + "/wallet/getnodeinfo";

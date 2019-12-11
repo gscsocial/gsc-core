@@ -51,19 +51,18 @@ public class DailyBuildReport extends TestListenerAdapter {
   }
 
   @Override
+  public void onTestSkipped(ITestResult result) {
+    skippedDescriptionList.append(result.getMethod().getRealClass() + ": "
+            + result.getMethod().getDescription() + "\n");
+    skippedNum++;
+  }
+
+  @Override
   public void onTestFailure(ITestResult result) {
     failedDescriptionList.append(result.getMethod().getRealClass() + ": "
         + result.getMethod().getDescription() + "\n");
     failedNum++;
   }
-
-  @Override
-  public void onTestSkipped(ITestResult result) {
-    skippedDescriptionList.append(result.getMethod().getRealClass() + ": "
-        + result.getMethod().getDescription() + "\n");
-    skippedNum++;
-  }
-
 
   @Override
   public void onFinish(ITestContext testContext) {

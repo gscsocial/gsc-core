@@ -138,10 +138,6 @@ public class TransactionUtils {
    * 4. check balance
    */
 
-  /**
-   * constructor.
-   */
-
   public static boolean validTransaction(Transaction signedTransaction) {
     assert (signedTransaction.getSignatureCount()
         == signedTransaction.getRawData().getContractCount());
@@ -203,18 +199,6 @@ public class TransactionUtils {
     return builder.build();
   }
 
-  /**
-   * constructor.
-   */
-  /*  public static Transaction setDelaySeconds(Transaction transaction, long delaySeconds) {
-    DeferredStage deferredStage = transaction.getRawData().toBuilder()
-        .getDeferredStage().toBuilder().setDelaySeconds(delaySeconds)
-        .setStage(UNEXECUTEDDEFERREDTRANSACTION).build();
-    Transaction.raw rawData = transaction.toBuilder().getRawData()
-        .toBuilder().setDeferredStage(deferredStage).build();
-    return transaction.toBuilder().setRawData(rawData).build();
-  }*/
-
   /*  *//**
    * constructor.
    *//*
@@ -230,4 +214,18 @@ public class TransactionUtils {
 
     return builder.build();
   }*/
+
+  /**
+   * constructor.
+   */
+  /*  public static Transaction setDelaySeconds(Transaction transaction, long delaySeconds) {
+    DeferredStage deferredStage = transaction.getRawData().toBuilder()
+        .getDeferredStage().toBuilder().setDelaySeconds(delaySeconds)
+        .setStage(UNEXECUTEDDEFERREDTRANSACTION).build();
+    Transaction.raw rawData = transaction.toBuilder().getRawData()
+        .toBuilder().setDeferredStage(deferredStage).build();
+    return transaction.toBuilder().setRawData(rawData).build();
+  }*/
+
+
 }
