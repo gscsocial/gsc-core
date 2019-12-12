@@ -82,10 +82,6 @@ public class WalletTestAssetIssue016 {
     Wallet.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass(enabled = true)
   public void beforeClass() {
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
@@ -166,10 +162,6 @@ public class WalletTestAssetIssue016 {
 
 
   }
-
-  /**
-   * constructor.
-   */
 
   @AfterClass(enabled = true)
   public void shutdown() throws InterruptedException {

@@ -78,10 +78,6 @@ public class WalletTestAssetIssue012 {
     Wallet.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass(enabled = true)
   public void beforeClass() {
     logger.info(testKeyForAssetIssue012);
@@ -160,10 +156,6 @@ public class WalletTestAssetIssue012 {
     Assert.assertTrue(creatorAfterNetUsed - creatorBeforeNetUsed > netCostMeasure);
     Assert.assertTrue(transferAfterFreeNetUsed - transferBeforeFreeNetUsed < netCostMeasure);
   }
-
-  /**
-   * constructor.
-   */
 
   @AfterClass(enabled = true)
   public void shutdown() throws InterruptedException {

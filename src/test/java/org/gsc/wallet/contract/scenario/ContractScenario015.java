@@ -78,10 +78,6 @@ public class ContractScenario015 {
     Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass(enabled = true)
   public void beforeClass() {
     PublicMethed.printAddress(contractExcKey);
@@ -196,9 +192,6 @@ public class ContractScenario015 {
                     .toHexString(result))));
   }
 
-  /**
-   * constructor.
-   */
   @AfterClass
   public void shutdown() throws InterruptedException {
     if (channelFull != null) {

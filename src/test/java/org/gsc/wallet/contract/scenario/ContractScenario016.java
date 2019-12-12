@@ -80,10 +80,6 @@ public class ContractScenario016 {
     Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass(enabled = true)
   public void beforeClass() {
     PublicMethed.printAddress(testKeyForGrammarAddress);
@@ -156,10 +152,7 @@ public class ContractScenario016 {
 
     Assert.assertEquals(byId.get().getRet(0).getRet().getNumber(), 0);
     Assert.assertEquals(byId.get().getRet(0).getRetValue(), 0);
-
-
   }
-
 
   @Test(enabled = true, description = "ContractResult is OUT_OF_CPU")
   public void test2Grammar002() {
@@ -200,11 +193,6 @@ public class ContractScenario016 {
 
   }
 
-
-
-  /**
-   * constructor.
-   */
   @AfterClass
   public void shutdown() throws InterruptedException {
     if (channelFull != null) {

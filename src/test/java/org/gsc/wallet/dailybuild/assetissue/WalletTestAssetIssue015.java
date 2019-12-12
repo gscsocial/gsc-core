@@ -84,10 +84,6 @@ public class WalletTestAssetIssue015 {
     Wallet.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass(enabled = true)
   public void beforeClass() {
     logger.info(testKeyForAssetIssue015);
@@ -225,10 +221,6 @@ public class WalletTestAssetIssue015 {
 
 
   }
-
-  /**
-   * constructor.
-   */
 
   @AfterClass(enabled = true)
   public void shutdown() throws InterruptedException {

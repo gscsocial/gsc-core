@@ -203,21 +203,6 @@ public class WalletTestAssetIssue010 {
             publicFreeAssetNetLimit, testKeyForAssetIssue010, blockingStubFull));
   }
 
-  /**
-   * constructor.
-   */
-
-  @AfterClass(enabled = true)
-  public void shutdown() throws InterruptedException {
-    if (channelFull != null) {
-      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-    }
-  }
-
-  /**
-   * constructor.
-   */
-
   public Boolean createAssetIssue(byte[] address, String name, Long totalSupply, Integer gscNum,
       Integer icoNum, Long startTime, Long endTime,
       Integer voteScore, String description, String url, Long fronzenAmount, Long frozenDay,
@@ -445,6 +430,13 @@ public class WalletTestAssetIssue010 {
     } else {
       logger.info(name);
       return true;
+    }
+  }
+
+  @AfterClass(enabled = true)
+  public void shutdown() throws InterruptedException {
+    if (channelFull != null) {
+      channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
 

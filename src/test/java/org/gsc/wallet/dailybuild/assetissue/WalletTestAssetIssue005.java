@@ -77,10 +77,6 @@ public class WalletTestAssetIssue005 {
     Wallet.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass(enabled = true)
   public void beforeClass() {
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
@@ -144,10 +140,6 @@ public class WalletTestAssetIssue005 {
     Assert.assertTrue(assetIssueByName.getDescription().isEmpty());
   }
 
-  /**
-   * constructor.
-   */
-
   @AfterClass(enabled = true)
   public void shutdown() throws InterruptedException {
     if (channelFull != null) {
@@ -157,10 +149,6 @@ public class WalletTestAssetIssue005 {
       channelConfirmed.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
-
-  /**
-   * constructor.
-   */
 
   public Boolean createAssetIssue(byte[] address, String name, Long totalSupply, Integer gscNum,
       Integer icoNum, Long startTime, Long endTime,
@@ -214,10 +202,6 @@ public class WalletTestAssetIssue005 {
     }
   }
 
-  /**
-   * constructor.
-   */
-
   public Account queryAccount(ECKey ecKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
     if (ecKey == null) {
@@ -242,19 +226,11 @@ public class WalletTestAssetIssue005 {
     return ecKey.getAddress();
   }
 
-  /**
-   * constructor.
-   */
-
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
   }
-
-  /**
-   * constructor.
-   */
 
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();
@@ -271,10 +247,6 @@ public class WalletTestAssetIssue005 {
     transaction = TransactionUtils.setTimestamp(transaction);
     return TransactionUtils.sign(transaction, ecKey);
   }
-
-  /**
-   * constructor.
-   */
 
   public boolean transferAsset(byte[] to, byte[] assertName, long amount, byte[] address,
       String priKey) {

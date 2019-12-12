@@ -92,10 +92,6 @@ public class WalletTestAssetIssue003 {
     Wallet.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass(enabled = true)
   public void beforeClass() {
     channelFull = ManagedChannelBuilder.forTarget(fullnode)
@@ -237,20 +233,12 @@ public class WalletTestAssetIssue003 {
 
   }
 
-  /**
-   * constructor.
-   */
-
   @AfterClass(enabled = true)
   public void shutdown() throws InterruptedException {
     if (channelFull != null) {
       channelFull.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
-
-  /**
-   * constructor.
-   */
 
   public Account queryAccount(ECKey ecKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
@@ -272,23 +260,15 @@ public class WalletTestAssetIssue003 {
     return String.valueOf(buf, 32, 130);
   }
 
-  public byte[] getAddress(ECKey ecKey) {
-    return ecKey.getAddress();
-  }
-
-  /**
-   * constructor.
-   */
-
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
   }
 
-  /**
-   * constructor.
-   */
+  public byte[] getAddress(ECKey ecKey) {
+    return ecKey.getAddress();
+  }
 
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();
@@ -305,10 +285,6 @@ public class WalletTestAssetIssue003 {
     transaction = TransactionUtils.setTimestamp(transaction);
     return TransactionUtils.sign(transaction, ecKey);
   }
-
-  /**
-   * constructor.
-   */
 
   public boolean transferAsset(byte[] to, byte[] assertName, long amount, byte[] address,
       String priKey) {
@@ -346,10 +322,6 @@ public class WalletTestAssetIssue003 {
 
   }
 
-  /**
-   * constructor.
-   */
-
   public boolean unFreezeAsset(byte[] addRess, String priKey) {
     byte[] address = addRess;
 
@@ -386,10 +358,6 @@ public class WalletTestAssetIssue003 {
       return true;
     }
   }
-
-  /**
-   * constructor.
-   */
 
   public boolean participateAssetIssue(byte[] to, byte[] assertName, long amount, byte[] from,
       String priKey) {

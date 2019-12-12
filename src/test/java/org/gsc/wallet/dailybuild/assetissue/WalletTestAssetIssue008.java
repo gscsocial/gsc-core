@@ -139,10 +139,6 @@ public class WalletTestAssetIssue008 {
 
   }
 
-  /**
-   * constructor.
-   */
-
   @AfterClass(enabled = true)
   public void shutdown() throws InterruptedException {
     if (channelFull != null) {
@@ -153,9 +149,14 @@ public class WalletTestAssetIssue008 {
     }
   }
 
-  /**
-   * constructor.
-   */
+  public static String loadPubKey() {
+    char[] buf = new char[0x100];
+    return String.valueOf(buf, 32, 130);
+  }
+
+  public byte[] getAddress(ECKey ecKey) {
+    return ecKey.getAddress();
+  }
 
   public Account queryAccount(ECKey ecKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
@@ -172,28 +173,11 @@ public class WalletTestAssetIssue008 {
     return grpcQueryAccount(ecKey.getAddress(), blockingStubFull);
   }
 
-  public static String loadPubKey() {
-    char[] buf = new char[0x100];
-    return String.valueOf(buf, 32, 130);
-  }
-
-  public byte[] getAddress(ECKey ecKey) {
-    return ecKey.getAddress();
-  }
-
-  /**
-   * constructor.
-   */
-
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
   }
-
-  /**
-   * constructor.
-   */
 
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();
@@ -210,10 +194,6 @@ public class WalletTestAssetIssue008 {
     transaction = TransactionUtils.setTimestamp(transaction);
     return TransactionUtils.sign(transaction, ecKey);
   }
-
-  /**
-   * constructor.
-   */
 
   public boolean transferAsset(byte[] to, byte[] assertName, long amount, byte[] address,
       String priKey) {
@@ -250,10 +230,6 @@ public class WalletTestAssetIssue008 {
     }
 
   }
-
-  /**
-   * constructor.
-   */
 
   public boolean unFreezeAsset(byte[] addRess, String priKey) {
     byte[] address = addRess;

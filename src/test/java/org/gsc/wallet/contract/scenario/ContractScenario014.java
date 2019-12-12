@@ -193,9 +193,6 @@ public class ContractScenario014 {
     Assert.assertFalse(infoById.get().getContractAddress().isEmpty());
   }
 
-  /**
-   * constructor.
-   */
   @AfterClass
   public void shutdown() throws InterruptedException {
     if (channelFull != null) {

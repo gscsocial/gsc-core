@@ -155,31 +155,6 @@ public class ContractScenario012 {
 
 
   @Test(enabled = true)
-  public void test4TriggerTransactionCoin() {
-    receiveAddressParam = "\"" + Base58.encode58Check(receiverAddress)
-        + "\"";
-    Account account = PublicMethed.queryAccount(contractAddress, blockingStubFull);
-    logger.info("contract Balance : -- " + account.getBalance());
-    //This time, trigger the methed sendToAddress2 is OK.
-    Assert.assertTrue(PublicMethed.sendcoin(receiverAddress, 10000000L, toAddress,
-        testKey003, blockingStubFull));
-    txid = PublicMethed.triggerContract(contractAddress,
-        "sendToAddress2(address)", receiveAddressParam, false,
-        0, 100000000L, contract012Address, contract012Key, blockingStubFull);
-    PublicMethed.waitProduceNextBlock(blockingStubFull);
-    logger.info(txid);
-    infoById = PublicMethed.getTransactionInfoById(txid, blockingStubFull);
-    logger.info("infobyid : --- " + infoById);
-    logger.info("result is " + infoById.get().getResultValue());
-    logger.info("cputotal is " + infoById.get().getReceipt().getCpuUsageTotal());
-    Assert.assertTrue(infoById.get().getResultValue() == 0);
-    Assert.assertTrue(infoById.get().getReceipt().getCpuUsageTotal() > 0);
-    Assert.assertTrue(infoById.get().getFee() == infoById.get().getReceipt().getCpuFee());
-    Assert.assertFalse(infoById.get().getContractAddress().isEmpty());
-
-  }
-
-  @Test(enabled = true)
   public void test2TriggerTransactionCoin() {
     Account account = PublicMethed.queryAccount(contractAddress, blockingStubFull);
     logger.info("contract Balance : -- " + account.getBalance());
@@ -200,9 +175,31 @@ public class ContractScenario012 {
     Assert.assertFalse(infoById.get().getContractAddress().isEmpty());
   }
 
-  /**
-   * constructor.
-   */
+  @Test(enabled = true)
+  public void test4TriggerTransactionCoin() {
+    receiveAddressParam = "\"" + Base58.encode58Check(receiverAddress)
+            + "\"";
+    Account account = PublicMethed.queryAccount(contractAddress, blockingStubFull);
+    logger.info("contract Balance : -- " + account.getBalance());
+    //This time, trigger the methed sendToAddress2 is OK.
+    Assert.assertTrue(PublicMethed.sendcoin(receiverAddress, 10000000L, toAddress,
+            testKey003, blockingStubFull));
+    txid = PublicMethed.triggerContract(contractAddress,
+            "sendToAddress2(address)", receiveAddressParam, false,
+            0, 100000000L, contract012Address, contract012Key, blockingStubFull);
+    PublicMethed.waitProduceNextBlock(blockingStubFull);
+    logger.info(txid);
+    infoById = PublicMethed.getTransactionInfoById(txid, blockingStubFull);
+    logger.info("infobyid : --- " + infoById);
+    logger.info("result is " + infoById.get().getResultValue());
+    logger.info("cputotal is " + infoById.get().getReceipt().getCpuUsageTotal());
+    Assert.assertTrue(infoById.get().getResultValue() == 0);
+    Assert.assertTrue(infoById.get().getReceipt().getCpuUsageTotal() > 0);
+    Assert.assertTrue(infoById.get().getFee() == infoById.get().getReceipt().getCpuFee());
+    Assert.assertFalse(infoById.get().getContractAddress().isEmpty());
+
+  }
+
 
   @AfterClass
   public void shutdown() throws InterruptedException {

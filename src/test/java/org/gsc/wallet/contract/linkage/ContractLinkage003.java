@@ -143,14 +143,6 @@ public class ContractLinkage003 {
     Long afterNetLimit = resourceInfoafter.getNetLimit();
     Long afterNetUsed = resourceInfoafter.getNetUsed();
     Long afterFreeNetUsed = resourceInfoafter.getFreeNetUsed();
-    logger.info("beforeBalance:" + beforeBalance);
-    logger.info("beforeCpuLimit:" + beforeCpuLimit);
-    logger.info("beforeCpuUsed:" + beforeCpuUsed);
-    logger.info("beforeFreeNetLimit:" + beforeFreeNetLimit);
-    logger.info("beforeNetLimit:" + beforeNetLimit);
-    logger.info("beforeNetUsed:" + beforeNetUsed);
-    logger.info("beforeFreeNetUsed:" + beforeFreeNetUsed);
-    logger.info("----------------------------------");
     logger.info("afterBalance:" + afterBalance);
     logger.info("afterCpuLimit:" + afterCpuLimit);
     logger.info("afterCpuUsed:" + afterCpuUsed);

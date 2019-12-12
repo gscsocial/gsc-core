@@ -131,6 +131,10 @@ public class ContractScenario003 {
     Long balanceAfter = PublicMethed.queryAccount(contract003Address, blockingStubFull1)
         .getBalance();
 
+    logger.info("before cpu limit is " + Long.toString(cpuLimit));
+    logger.info("before cpu usage is " + Long.toString(cpuUsage));
+    logger.info("before balance is " + Long.toString(balanceBefore));
+
     logger.info("after cpu limit is " + Long.toString(cpuLimit));
     logger.info("after cpu usage is " + Long.toString(cpuUsage));
     logger.info("after balance is " + Long.toString(balanceAfter));

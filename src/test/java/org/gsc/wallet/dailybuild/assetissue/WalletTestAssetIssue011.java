@@ -76,10 +76,6 @@ public class WalletTestAssetIssue011 {
     Wallet.setAddressPreFixByte(CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass(enabled = true)
   public void beforeClass() {
     PublicMethed.printAddress(testKeyForAssetIssue011);
@@ -137,10 +133,6 @@ public class WalletTestAssetIssue011 {
     Assert.assertFalse(queryTransferAssetAccount.getAccountName().isEmpty());
 
   }
-
-  /**
-   * constructor.
-   */
 
   @AfterClass(enabled = true)
   public void shutdown() throws InterruptedException {

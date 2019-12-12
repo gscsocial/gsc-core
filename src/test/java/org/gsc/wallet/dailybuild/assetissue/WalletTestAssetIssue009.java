@@ -79,43 +79,6 @@ public class WalletTestAssetIssue009 {
     blockingStubConfirmed = WalletConfirmedGrpc.newBlockingStub(channelConfirmed);
   }
 
-
-  /*  @Test(enabled = true)
-  public void testGetAssetIssueByAccountOrNameFromConfirmed() {
-    //By name
-    ByteString addressBs = ByteString.copyFrom(fromAddress);
-    Account request = Account.newBuilder().setAddress(addressBs).build();
-    GrpcAPI.AssetIssueList assetIssueList = blockingStubConfirmed
-        .getAssetIssueByAccount(request);
-    Optional<GrpcAPI.AssetIssueList> queryAssetIssueByAccount = Optional.ofNullable(assetIssueList);
-    logger.info(Integer.toString(queryAssetIssueByAccount.get().getAssetIssueCount()));
-    Assert.assertTrue(queryAssetIssueByAccount.get().getAssetIssueCount() >= 1);
-    for (Integer j = 0; j < queryAssetIssueByAccount.get().getAssetIssueCount(); j++) {
-      Assert.assertTrue(queryAssetIssueByAccount.get().getAssetIssue(j).getTotalSupply() > 0);
-      Assert.assertFalse(queryAssetIssueByAccount.get().getAssetIssue(j).getName().isEmpty());
-      logger.info("TestGetAssetIssueByAccount in confirmednode ok!!!");
-
-    }
-
-    //By ID
-    ByteString assetName = queryAssetIssueByAccount.get().getAssetIssue(0).getName();
-    GrpcAPI.BytesMessage requestAsset = GrpcAPI.BytesMessage.newBuilder().setValue(assetName)
-        .build();
-    Contract.AssetIssueContract assetIssueByName = blockingStubConfirmed
-        .getAssetIssueByName(requestAsset);
-
-    Assert.assertFalse(assetIssueByName.getUrl().isEmpty());
-    Assert.assertFalse(assetIssueByName.getDescription().isEmpty());
-    Assert.assertTrue(assetIssueByName.getTotalSupply() > 0);
-    Assert.assertTrue(assetIssueByName.getGscNum() > 0);
-
-    logger.info("TestGetAssetIssueByNameFromConfirmed");
-  }*/
-
-  /**
-   * constructor.
-   */
-
   @AfterClass(enabled = false)
   public void shutdown() throws InterruptedException {
     if (channelFull != null) {
@@ -125,10 +88,6 @@ public class WalletTestAssetIssue009 {
       channelConfirmed.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
   }
-
-  /**
-   * constructor.
-   */
 
   public Account queryAccount(ECKey ecKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;
@@ -154,19 +113,11 @@ public class WalletTestAssetIssue009 {
     return ecKey.getAddress();
   }
 
-  /**
-   * constructor.
-   */
-
   public Account grpcQueryAccount(byte[] address, WalletGrpc.WalletBlockingStub blockingStubFull) {
     ByteString addressBs = ByteString.copyFrom(address);
     Account request = Account.newBuilder().setAddress(addressBs).build();
     return blockingStubFull.getAccount(request);
   }
-
-  /**
-   * constructor.
-   */
 
   public Block getBlock(long blockNum, WalletGrpc.WalletBlockingStub blockingStubFull) {
     NumberMessage.Builder builder = NumberMessage.newBuilder();
