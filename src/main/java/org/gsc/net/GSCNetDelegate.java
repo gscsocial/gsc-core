@@ -111,16 +111,12 @@ public class GSCNetDelegate {
         }
     }
 
-    public BlockId getHeadBlockId() {
-        return dbManager.getHeadBlockId();
-    }
-
     public BlockId getSolidBlockId() {
         return dbManager.getConfirmedBlockId();
     }
 
-    public BlockId getGenesisBlockId() {
-        return dbManager.getGenesisBlockId();
+    public BlockId getHeadBlockId() {
+        return dbManager.getHeadBlockId();
     }
 
     public BlockId getBlockIdByNum(long num) throws P2pException {
@@ -129,6 +125,10 @@ public class GSCNetDelegate {
         } catch (ItemNotFoundException e) {
             throw new P2pException(TypeEnum.DB_ITEM_NOT_FOUND, "num: " + num);
         }
+    }
+
+    public BlockId getGenesisBlockId() {
+        return dbManager.getGenesisBlockId();
     }
 
     public BlockWrapper getGenesisBlock() {

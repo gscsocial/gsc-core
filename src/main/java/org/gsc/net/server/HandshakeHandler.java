@@ -108,7 +108,6 @@ public class HandshakeHandler extends ByteToMessageDecoder {
     }
 
     protected void sendHelloMsg(ChannelHandlerContext ctx, long time) {
-
         HelloMessage message = new HelloMessage(nodeManager.getPublicHomeNode(), time,
                 manager.getGenesisBlockId(), manager.getConfirmedBlockId(), manager.getHeadBlockId());
         ctx.writeAndFlush(message.getSendData());
@@ -117,7 +116,6 @@ public class HandshakeHandler extends ByteToMessageDecoder {
     }
 
     private void handleHelloMsg(ChannelHandlerContext ctx, HelloMessage msg) {
-
         channel.initNode(msg.getFrom().getId(), msg.getFrom().getPort());
 
         if (remoteId.length != 64) {
@@ -153,7 +151,6 @@ public class HandshakeHandler extends ByteToMessageDecoder {
         }
 
         ((PeerConnection) channel).setHelloMessage(msg);
-
         channel.getNodeStatistics().messageStatistics.addTcpInMessage(msg);
 
         channel.publicHandshakeFinished(ctx, msg);

@@ -60,7 +60,6 @@ public class GSCNetService {
     @Autowired
     private InventoryMsgHandler inventoryMsgHandler;
 
-
     @Autowired
     private FetchInvDataMsgHandler fetchInvDataMsgHandler;
 
@@ -92,12 +91,12 @@ public class GSCNetService {
         logger.info("gscNetService closed successfully.");
     }
 
-    public void broadcast(Message msg) {
-        advService.broadcast(msg);
-    }
-
     public void fastForward(BlockMessage msg) {
         advService.fastForward(msg);
+    }
+
+    public void broadcast(Message msg) {
+        advService.broadcast(msg);
     }
 
     protected void onMessage(PeerConnection peer, GSCMessage msg) {

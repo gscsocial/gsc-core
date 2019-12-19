@@ -186,7 +186,6 @@ public class SyncService {
         }
 
         long realHigh = high + blockIds.size();
-
         logger.info("Get block chain summary, low: {}, highNoFork: {}, high: {}, realHigh: {}",
                 low, highNoFork, high, realHigh);
 

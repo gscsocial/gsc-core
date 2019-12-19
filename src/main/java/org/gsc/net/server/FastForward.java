@@ -39,9 +39,9 @@ public class FastForward {
     @Autowired
     private ApplicationContext ctx;
 
-    private ChannelManager channelManager;
-
     private BackupManager backupManager;
+
+    private ChannelManager channelManager;
 
     private ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 

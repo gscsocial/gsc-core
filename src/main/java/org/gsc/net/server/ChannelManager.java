@@ -84,6 +84,12 @@ public class ChannelManager {
         }
 
         InetAddress address;
+        for (Node node : args.getFastForwardNodes()) {
+            address = new InetSocketAddress(node.getHost(), node.getPort()).getAddress();
+            trustNodes.put(address, node);
+            fastForwardNodes.put(address, node);
+        }
+
         for (Node node : args.getPassiveNodes()) {
             address = new InetSocketAddress(node.getHost(), node.getPort()).getAddress();
             trustNodes.put(address, node);
@@ -93,12 +99,6 @@ public class ChannelManager {
             address = new InetSocketAddress(node.getHost(), node.getPort()).getAddress();
             trustNodes.put(address, node);
             activeNodes.put(address, node);
-        }
-
-        for (Node node : args.getFastForwardNodes()) {
-            address = new InetSocketAddress(node.getHost(), node.getPort()).getAddress();
-            trustNodes.put(address, node);
-            fastForwardNodes.put(address, node);
         }
 
         logger.info("Node config, trust {}, active {}, forward {}.",
