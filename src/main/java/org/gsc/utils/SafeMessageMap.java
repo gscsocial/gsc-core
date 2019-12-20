@@ -46,15 +46,17 @@ public class SafeMessageMap {
         put(Sha256Hash.of(msg.getData()), msg);
     }
 
+    public void delete(Sha256Hash msgId) {
+        try (ALock l = writeLock.lock()) {
+            storage.remove(msgId);
+        }
+    }
+
     public Message get(Sha256Hash msgId) {
         try (ALock l = readLock.lock()) {
             return storage.get(msgId);
         }
     }
 
-    public void delete(Sha256Hash msgId) {
-        try (ALock l = writeLock.lock()) {
-            storage.remove(msgId);
-        }
-    }
+
 }

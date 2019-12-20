@@ -346,7 +346,6 @@ message Transaction {
   }
 
   raw raw_data = 1;
-  // only support size = 1,  repeated list here for muti-sig extension
   repeated bytes signature = 2;
   repeated Result ret = 5;
 }

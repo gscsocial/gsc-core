@@ -77,7 +77,6 @@ public class DiscoverTask implements Runnable {
                         dumpNodes());
                 return;
             }
-
             tried.addAll(prevTried);
 
             discover(nodeId, round + 1, tried);

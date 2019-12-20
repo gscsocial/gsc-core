@@ -42,16 +42,6 @@ public class PrivKeyToPubKey {
 
     @Test
     public void common(){
-//        System.out.println(System.nanoTime());
-
-//        System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GSCgH5ZAQZqFgE9dnoFxRLHjwx6u7uWxkavN")));
-//        // 01f80c
-//        System.out.println("GSCgH5ZAQZqFgE9dnoFxRLHjwx6u7uWxkavN".length());
-//        String add = Wallet.encode58Check(Hex.decode("41aae518abfa1c4bcf4705e69a4fcbecb62a49ca"));
-//        System.out.println(add);
-//        System.out.println(add.length());
-
-
         int[] blockFilledSlots = new int[]{1,0,3,0,1,0};
         double[] sum = IntStream.of(blockFilledSlots).asDoubleStream().toArray();
     }
@@ -61,22 +51,17 @@ public class PrivKeyToPubKey {
         String privStr = "FD5BB82CBCB378740082FD9E8DC3CC3A959FCD8176CFD829D403D1AF3ED0DDA8";
         BigInteger privKey = new BigInteger(privStr, 16);
 
-        // Wallet.setAddressPreFixByte((byte) 0x26);
-       // final ECKey ecKey = ECKey.fromPrivate(privKey);
         ECKey ecKey = new ECKey(new SecureRandom());
         byte[] address = ecKey.getAddress();
         String pubkey = Wallet.encode58Check(address);
 
         logger.info("------------ kayfhan ---------------------------------");
         System.out.println();
-//        System.out.println("Private Key: " + privStr);
         System.out.println(Hex.toHexString(ecKey.getPrivKeyBytes()));
         System.out.println(Hex.toHexString(address));
         System.out.println(pubkey);
         System.out.println("01f80c6145c6b6ebb0a7a87a8ce1ef9ae8f21a7d5b24e7".length());
-        // GSCd6iDrNvqg1kiorwwhoVvarXeucpfbrPYe
         logger.info("------------------------------------------------------");
-        //System.out.println(Wallet.encode58Check(Hex.decode("4119edb1b352e40c855eb28681c2b488b7ed8fb5aa")));
     }
 
     @Test
@@ -89,22 +74,13 @@ public class PrivKeyToPubKey {
     @Test
     public void testGSCAddress() {
         System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check("GSCTwspG3R4rDpArUu29WBNP6AqrAkZfP3yt")));
-//        System.out.println(Hex.toHexString(
-//                Wallet.decodeFromBase58Check("GSCfPVfutRDeB5T3xaDsxYxASH6P8u7Ydsc3")));
-//        System.out.println("GSCd6iDrNvqg1kiorwwhoVvarXeucpfbrPYe".length());
         for (int i = 0; i < 1; i++) {
             ECKey ecKey = new ECKey(new SecureRandom());
 
             System.out.println(Hex.toHexString(ecKey.getPrivKeyBytes()));
-//            System.out.println(Hex.toHexString(ecKey.getAddress()));
             String address = Wallet.encode58Check(ecKey.getAddress());
             System.out.println(address);
-//            System.out.println(Hex.toHexString(Wallet.decodeFromBase58Check(address)));
         }
-
-//        ECKey ecKey = new ECKey(new SecureRandom());
-//        System.out.println(Hex.toHexString(ecKey.getPrivKeyBytes()));
-//        System.out.println(Wallet.encode58Check(ecKey.getAddress()));
     }
 
     @Test
@@ -133,13 +109,6 @@ public class PrivKeyToPubKey {
         Protocol.Block block2 = blockingStub.getNowBlock(GrpcAPI.EmptyMessage.newBuilder().build());
         System.out.println(block2.toString());
 
-
-
-//        byte[] numBytes = Longs.toByteArray(Long.MAX_VALUE);
-//        System.out.println("numBytes: " + Hex.toHexString(numBytes));
-//        System.out.println(Long.MAX_VALUE);
-
-
         // 92233 7203 6854 775 807
         GrpcAPI.BlockExtention block = blockingStub.getBlockByNum2(GrpcAPI.NumberMessage.newBuilder().setNum(91692L).build());
         System.out.println(Hex.toHexString(block.getBlockid().toByteArray()));
@@ -155,10 +124,7 @@ public class PrivKeyToPubKey {
     public void freezeBalanceForReceiver() {
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub blockingStub = null;
-
-//        String startNode = "101.200.39.156:50051";
         String startNode = "39.105.194.199:5021";
-//          String startNode = "127.0.0.1:5021";
         channel = ManagedChannelBuilder.forTarget(startNode).usePlaintext(true).build();
         blockingStub = WalletGrpc.newBlockingStub(channel);
 
@@ -211,8 +177,6 @@ public class PrivKeyToPubKey {
         String ownerPriKey = "a284c5935e33ec2c363913b6cf628da5c81defc2f96afb64690ae7a2f5535620";
         byte[] ownerAddress = Hex.decode("01f80cf6b1ed20174eb4de7202a34bf1975935c1a50432");
 
-        // 26f740d0a396a324b15d68aa8ffeaf2057d937d745
-        // 26f740d0a396a324b15d68aa8ffeaf2057d937d745
         byte[] toAddress = Hex.decode("01f80c96cc8cd2dc6f60f6551728b8204ee65a4f31b39b");
 
         BigInteger privKey = new BigInteger(ownerPriKey, 16);
@@ -223,13 +187,9 @@ public class PrivKeyToPubKey {
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub blockingStub = null;
 
-//        String startNode = "101.200.39.156:50051";
         String startNode = "39.105.194.199:5021";
-//          String startNode = "127.0.0.1:5021";
         channel = ManagedChannelBuilder.forTarget(startNode).usePlaintext(true).build();
         blockingStub = WalletGrpc.newBlockingStub(channel);
-
-//        for (int k = 0; k < 1; k++) {
 
             ECKey toEcKey = new ECKey(new SecureRandom());
             System.out.println(Hex.toHexString(toEcKey.getPrivKeyBytes()));
@@ -237,7 +197,6 @@ public class PrivKeyToPubKey {
             Contract.TransferContract.Builder transferContract = Contract.TransferContract.newBuilder();
             transferContract.setOwnerAddress(ByteString.copyFrom(ownerAddress));
             transferContract.setToAddress(ByteString.copyFrom(toAddress));
-//            transferContract.setToAddress(ByteString.copyFrom(toEcKey.getAddress()));
             transferContract.setAmount(10000_000_000L);
 
             Protocol.Transaction transaction = blockingStub.createTransaction(transferContract.build());
@@ -252,10 +211,8 @@ public class PrivKeyToPubKey {
                 ByteString byteString = ByteString.copyFrom(signature.toByteArray());
                 txSigned.addSignature(byteString);
             }
-//        System.out.println(txSigned.build().toString());
             Message message = blockingStub.broadcastTransaction(txSigned.build());
             logger.info("---------------" + message.toString());
-//        }
     }
 
     @Test
@@ -276,15 +233,6 @@ public class PrivKeyToPubKey {
 
     @Test
     public void voteStatistics() {
-        /**
-         * 7.22 20.26
-         * Witness: 2603fd0fd06b10768f120cc5911194e35ed4d60195 vote count: 3000
-         * Witness: 26ebcd9b60d930b603a4fec7d188275c61e1676602 vote count: 1000
-         * Witness: 2663ab67ead97e4f48de58f76e3d32a72d5b774251 vote count: 2000
-         * Witness: 26458beb1e3e46c0574c1eba16b4f7081e8bafe98b vote count: 4000
-         * 103025
-         * 200000
-         */
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub blockingStub = null;
 
@@ -309,7 +257,6 @@ public class PrivKeyToPubKey {
 
         System.out.println(Hex.toHexString(address));
 
-//        String node = "39.105.135.130:5021";
         String node = "47.74.14.144:5021";
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub blockingStubFull = null;

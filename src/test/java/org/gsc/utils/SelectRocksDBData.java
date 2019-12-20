@@ -57,11 +57,10 @@ public class SelectRocksDBData {
                     case "dynamic_parameter":
                         properties(iterator.key(), iterator.value());
                         break;
+
                     case "peers":
                         peers(iterator.key(), iterator.value());
                         break;
-                    case "":
-                        block(iterator.key(), iterator.value());
                     default:
                         break;
                 }
