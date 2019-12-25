@@ -41,8 +41,8 @@ import static org.apache.commons.codec.digest.DigestUtils.sha256;
 public class PrivKeyToPubKey {
 
     @Test
-    public void common(){
-        int[] blockFilledSlots = new int[]{1,0,3,0,1,0};
+    public void common() {
+        int[] blockFilledSlots = new int[]{1, 0, 3, 0, 1, 0};
         double[] sum = IntStream.of(blockFilledSlots).asDoubleStream().toArray();
     }
 
@@ -65,9 +65,9 @@ public class PrivKeyToPubKey {
     }
 
     @Test
-    public void testss(){
-        ECKey ecKey = ECKey.fromPrivate(new BigInteger("374f8288a296d5267bc8157b2eead62fb7a882bfbd2fa132bebe0dd5e9332925",16));
-         String   address = Hex.toHexString(ecKey.getAddress());
+    public void testss() {
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger("374f8288a296d5267bc8157b2eead62fb7a882bfbd2fa132bebe0dd5e9332925", 16));
+        String address = Hex.toHexString(ecKey.getAddress());
         System.out.println(address);
     }
 
@@ -96,7 +96,7 @@ public class PrivKeyToPubKey {
     }
 
     @Test
-    public void nowBlock(){
+    public void nowBlock() {
         ManagedChannel channel = null;
         WalletGrpc.WalletBlockingStub blockingStub = null;
 
@@ -156,7 +156,7 @@ public class PrivKeyToPubKey {
 
         if (transaction == null || transaction.getRawData().getContractCount() == 0) {
             logger.info("transaction = null");
-            return ;
+            return;
         }
         Protocol.Transaction.Builder txSigned = transaction.toBuilder();
 
@@ -191,28 +191,30 @@ public class PrivKeyToPubKey {
         channel = ManagedChannelBuilder.forTarget(startNode).usePlaintext(true).build();
         blockingStub = WalletGrpc.newBlockingStub(channel);
 
-            ECKey toEcKey = new ECKey(new SecureRandom());
-            System.out.println(Hex.toHexString(toEcKey.getPrivKeyBytes()));
+        ECKey toEcKey = new ECKey(new SecureRandom());
+        System.out.println(Hex.toHexString(toEcKey.getPrivKeyBytes()));
 
-            Contract.TransferContract.Builder transferContract = Contract.TransferContract.newBuilder();
-            transferContract.setOwnerAddress(ByteString.copyFrom(ownerAddress));
-            transferContract.setToAddress(ByteString.copyFrom(toAddress));
-            transferContract.setAmount(10000_000_000L);
+        Contract.TransferContract.Builder transferContract = Contract.TransferContract.newBuilder();
+        transferContract.setOwnerAddress(ByteString.copyFrom(ownerAddress));
+        transferContract.setToAddress(ByteString.copyFrom(toAddress));
+        transferContract.setAmount(1L);
 
-            Protocol.Transaction transaction = blockingStub.createTransaction(transferContract.build());
+        Protocol.Transaction transaction = blockingStub.createTransaction(transferContract.build());
 
-            Protocol.Transaction.Builder txSigned = transaction.toBuilder();
+        System.out.println(transaction.toString());
 
-            byte[] rawData = transaction.getRawData().toByteArray();
-            byte[] hash = sha256(rawData);
-            List<Protocol.Transaction.Contract> contractList = transaction.getRawData().getContractList();
-            for (int i = 0; i < contractList.size(); i++) {
-                ECKey.ECDSASignature signature = ecKey.sign(hash);
-                ByteString byteString = ByteString.copyFrom(signature.toByteArray());
-                txSigned.addSignature(byteString);
-            }
-            Message message = blockingStub.broadcastTransaction(txSigned.build());
-            logger.info("---------------" + message.toString());
+        Protocol.Transaction.Builder txSigned = transaction.toBuilder();
+
+        byte[] rawData = transaction.getRawData().toByteArray();
+        byte[] hash = sha256(rawData);
+        List<Protocol.Transaction.Contract> contractList = transaction.getRawData().getContractList();
+        for (int i = 0; i < contractList.size(); i++) {
+            ECKey.ECDSASignature signature = ecKey.sign(hash);
+            ByteString byteString = ByteString.copyFrom(signature.toByteArray());
+            txSigned.addSignature(byteString);
+        }
+        Message message = blockingStub.broadcastTransaction(txSigned.build());
+        logger.info("---------------" + message.toString());
     }
 
     @Test
@@ -226,7 +228,6 @@ public class PrivKeyToPubKey {
         //  String startNode = "127.0.0.1:5021";
         channel = ManagedChannelBuilder.forTarget(startNode).usePlaintext(true).build();
         databaseStub = DatabaseGrpc.newBlockingStub(channel);
-
 
 
     }
@@ -280,15 +281,16 @@ public class PrivKeyToPubKey {
         byte[] ownerAddress = address;
         String tokenId = "1000001";
         long tokenValue = 8;
-        String trxId = PublicMethed.triggerContract(contractAddress, method, argsStr, isHex, callValue, feeLimit, tokenId, tokenValue,ownerAddress, priKey, blockingStubFull);
+        String trxId = PublicMethed.triggerContract(contractAddress, method, argsStr, isHex, callValue, feeLimit, tokenId, tokenValue, ownerAddress, priKey, blockingStubFull);
         System.out.println(trxId);
     }
 
     @Test
-    public void add(){
+    public void add() {
 
         System.out.println(Wallet.encode58Check(Hex.decode("01f80c992fb573850cd88e7cc80cde58dcaf1afb1e9dde")));
     }
+
     @Test
     public void triggerContract2() {
         String priKey = "374f8288a296d5267bc8157b2eead62fb7a882bfbd2fa132bebe0dd5e9332925";
@@ -314,7 +316,7 @@ public class PrivKeyToPubKey {
         byte[] ownerAddress = address;
         String tokenId = "0";
         long tokenValue = 0;
-        String trxId = PublicMethed.triggerContract(contractAddress, method, argsStr, isHex, callValue, feeLimit, tokenId, tokenValue,ownerAddress, priKey, blockingStubFull);
+        String trxId = PublicMethed.triggerContract(contractAddress, method, argsStr, isHex, callValue, feeLimit, tokenId, tokenValue, ownerAddress, priKey, blockingStubFull);
         System.out.println(trxId);
     }
 
@@ -649,7 +651,7 @@ public class PrivKeyToPubKey {
         long consumeUserResourcePercent = 0;
 
         byte[] contractAddress = PublicMethed.deployContract(name, abi, code, "",
-                feeLimit, callValue, consumeUserResourcePercent, 100000L ,"0", 0,null, priKey, address, blockingStubFull);
+                feeLimit, callValue, consumeUserResourcePercent, 100000L, "0", 0, null, priKey, address, blockingStubFull);
         logger.info("Contract address: " + Hex.toHexString(contractAddress));
 
         GrpcAPI.AccountResourceMessage accountResource = PublicMethed.getAccountResource(address, blockingStubFull);

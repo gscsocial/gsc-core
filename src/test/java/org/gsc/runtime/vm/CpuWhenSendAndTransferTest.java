@@ -82,7 +82,6 @@ public class CpuWhenSendAndTransferTest {
   //       map[i] = i;
   //     }
   //   }
-  //
   // }
   //
   // contract TestForValueGasFunction {
@@ -171,7 +170,6 @@ public class CpuWhenSendAndTransferTest {
   //   function getBalance() public view returns(uint256 balance){
   //     balance = address(this).balance;
   //   }
-  //
   // }
 
 

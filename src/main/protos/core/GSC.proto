@@ -332,7 +332,7 @@ message Transaction {
   message raw {
     bytes ref_block_bytes = 1;
     int64 ref_block_num = 3;
-    bytes ref_block_hash = 4;
+    bytes ref_block_hash = 4; // ref_block_hash
     int64 expiration = 8;
     repeated authority auths = 9;
     // data not used

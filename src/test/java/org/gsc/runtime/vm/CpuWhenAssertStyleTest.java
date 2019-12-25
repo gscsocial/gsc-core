@@ -93,7 +93,6 @@ public class CpuWhenAssertStyleTest {
   //     uint256[] memory a = new uint256[](10);
   //     a[10] = 10;
   //   }
-  //
   // }
 
   @Test
@@ -397,7 +396,6 @@ public class CpuWhenAssertStyleTest {
   //   function testAssert(){
   //     assert(1==2);
   //   }
-  //
   // }
 
   @Test
@@ -452,8 +450,6 @@ public class CpuWhenAssertStyleTest {
   //       revert();
   //     }
   //   }
-  //
-  //
   // }
 
   //@Test

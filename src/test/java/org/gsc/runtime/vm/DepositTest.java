@@ -82,11 +82,9 @@ public class DepositTest {
       addr.call(methodId, address(this), _n2);
     }
 
-
     function changeN(uint256 _n2) {
       n2 = _n2;
     }
-
   }
 
   contract B {

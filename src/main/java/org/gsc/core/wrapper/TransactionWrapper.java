@@ -643,11 +643,11 @@ public class TransactionWrapper implements ProtoWrapper<Transaction> {
         try {
             Any contractParameter = contract.getParameter();
             switch (contract.getType()) {
-                case TransferContract:
-                    to = contractParameter.unpack(TransferContract.class).getToAddress();
-                    break;
                 case TransferAssetContract:
                     to = contractParameter.unpack(TransferAssetContract.class).getToAddress();
+                    break;
+                case TransferContract:
+                    to = contractParameter.unpack(TransferContract.class).getToAddress();
                     break;
                 case ParticipateAssetIssueContract:
                     to = contractParameter.unpack(ParticipateAssetIssueContract.class).getToAddress();

@@ -87,7 +87,6 @@ public class CpuWhenRequireStyleTest {
   //   function testThrow(){
   //     throw;
   //   }
-  //
   // }
 
   @Test
@@ -194,7 +193,6 @@ public class CpuWhenRequireStyleTest {
   //   function testThisFunctionViaMessageCall() {
   //     this.testAssert.gas(5000)();
   //   }
-  //
   // }
 
   @Test
@@ -381,7 +379,6 @@ public class CpuWhenRequireStyleTest {
   //       revert();
   //     }
   //   }
-  //
   // }
 
   @Test
@@ -450,7 +447,6 @@ public class CpuWhenRequireStyleTest {
   //   function getBalance() public view returns(uint256 balance){
   //     balance = address(this).balance;
   //   }
-  //
   // }
 
   @Test

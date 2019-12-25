@@ -198,22 +198,7 @@ public class ChargeTest {
   @Ignore
   public void testFallback()
       throws ContractExeException, ContractValidateException, ReceiptCheckErrException {
-    // done in CpuWhenSendAndTransferTest.java
-
   }
-
-  // contract TestCallDepth {
-  //
-  //   function CallstackExploit(int256 counter) external {
-  //     if (counter > 0) {
-  //       this.CallstackExploit.gas(msg.gas - 2000)(counter - 1);
-  //     } else {}
-  //   }
-  //
-  //   function Call(int256 counter) {
-  //     this.CallstackExploit(counter);
-  //   }
-  // }
 
   @Test
   public void testCallDepth()

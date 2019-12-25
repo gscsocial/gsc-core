@@ -25,7 +25,6 @@ public class TypeConversionTest {
   @Test
   public void testLongToBytes() {
     byte[] result = TypeConversion.longToBytes(123L);
-    //logger.info("long 123 to bytes is: {}", result);
     byte[] expected = new byte[]{0, 0, 0, 0, 0, 0, 0, 123};
     assertArrayEquals(expected, result);
 
@@ -34,14 +33,12 @@ public class TypeConversionTest {
   @Test
   public void testBytesToHexString() {
     String result = TypeConversion.bytesToHexString(new byte[]{0, 0, 0, 0, 0, 0, 0, 125});
-    //logger.info("bytes 125 to hex string is: {}", result);
     assertEquals("000000000000007d", result);
   }
 
   @Test
   public void testBytesToLong() {
     long result = TypeConversion.bytesToLong(new byte[]{0, 0, 0, 0, 0, 0, 0, 124});
-    //logger.info("bytes 124 to long is: {}", result);
     assertEquals(124L, result);
 
   }
@@ -49,7 +46,6 @@ public class TypeConversionTest {
   @Test
   public void testHexStringToBytes() {
     byte[] result = TypeConversion.hexStringToBytes("7f");
-    //logger.info("hex string 7f to bytes is: {}", result);
     byte[] expected = new byte[]{127};
     assertArrayEquals(expected, result);
 
