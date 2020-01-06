@@ -229,37 +229,6 @@ public class CreateaAndUpdateWitness2Test {
 
   }
 
-  public Boolean updateWitness(byte[] owner, byte[] url, String priKey) {
-    ECKey temKey = null;
-    try {
-      BigInteger priK = new BigInteger(priKey, 16);
-      temKey = ECKey.fromPrivate(priK);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-    final ECKey ecKey = temKey;
-
-    Contract.WitnessUpdateContract.Builder builder = Contract.WitnessUpdateContract.newBuilder();
-    builder.setOwnerAddress(ByteString.copyFrom(owner));
-    builder.setUpdateUrl(ByteString.copyFrom(url));
-    Contract.WitnessUpdateContract contract = builder.build();
-    Protocol.Transaction transaction = blockingStubFull.updateWitness(contract);
-    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
-      logger.info("transaction == null");
-      return false;
-    }
-    transaction = signTransaction(ecKey, transaction);
-    GrpcAPI.Return response = blockingStubFull.broadcastTransaction(transaction);
-    if (response.getResult() == false) {
-      logger.info(ByteArray.toStr(response.getMessage().toByteArray()));
-      logger.info("response.getRestult() == false");
-      return false;
-    } else {
-      return true;
-    }
-
-  }
-
   public Boolean sendcoin(byte[] to, long amount, byte[] owner, String priKey) {
 
     //String priKey = testKey002;
@@ -292,6 +261,37 @@ public class CreateaAndUpdateWitness2Test {
     } else {
       return true;
     }
+  }
+
+  public Boolean updateWitness(byte[] owner, byte[] url, String priKey) {
+    ECKey temKey = null;
+    try {
+      BigInteger priK = new BigInteger(priKey, 16);
+      temKey = ECKey.fromPrivate(priK);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    final ECKey ecKey = temKey;
+
+    Contract.WitnessUpdateContract.Builder builder = Contract.WitnessUpdateContract.newBuilder();
+    builder.setOwnerAddress(ByteString.copyFrom(owner));
+    builder.setUpdateUrl(ByteString.copyFrom(url));
+    Contract.WitnessUpdateContract contract = builder.build();
+    Protocol.Transaction transaction = blockingStubFull.updateWitness(contract);
+    if (transaction == null || transaction.getRawData().getContractCount() == 0) {
+      logger.info("transaction == null");
+      return false;
+    }
+    transaction = signTransaction(ecKey, transaction);
+    GrpcAPI.Return response = blockingStubFull.broadcastTransaction(transaction);
+    if (response.getResult() == false) {
+      logger.info(ByteArray.toStr(response.getMessage().toByteArray()));
+      logger.info("response.getRestult() == false");
+      return false;
+    } else {
+      return true;
+    }
+
   }
 
   public GrpcAPI.Return updateWitness2(byte[] owner, byte[] url, String priKey) {

@@ -243,6 +243,10 @@ public class RevokingDbWithCacheOldValueTest {
 
   }
 
+  private static class TestRevokingGSCDatabase extends AbstractRevokingStore {
+
+  }
+
   private static class TestRevokingGSCStore extends GSCStoreWithRevoking<SnapshotRootTest.ProtoWrapperTest> {
 
     protected TestRevokingGSCStore(String dbName, RevokingDatabase revokingDatabase) {
@@ -254,10 +258,6 @@ public class RevokingDbWithCacheOldValueTest {
       byte[] value = this.revokingDB.getUnchecked(key);
       return ArrayUtils.isEmpty(value) ? null : new SnapshotRootTest.ProtoWrapperTest(value);
     }
-  }
-
-  private static class TestRevokingGSCDatabase extends AbstractRevokingStore {
-
   }
 
   @After

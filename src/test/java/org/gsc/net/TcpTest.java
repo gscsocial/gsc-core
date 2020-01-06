@@ -128,20 +128,20 @@ public class TcpTest {
     validResultCloseConnect(channel);
   }
 
-  public void errorVersionTest() throws InterruptedException {
-    Channel channel = BaseNet.connect(new HandshakeHandler(TestType.errorVersion));
-    Args.getInstance().setNodeP2pVersion(1);
-    HelloMessage message = new HelloMessage(node, System.currentTimeMillis(),
-        manager.getGenesisBlockId(), manager.getConfirmedBlockId(), manager.getHeadBlockId());
-    Args.getInstance().setNodeP2pVersion(2);
-    sendMessage(channel, message);
-    validResultCloseConnect(channel);
-  }
-
   public void errorSolidBlockIdTest() throws InterruptedException {
     Channel channel = BaseNet.connect(new HandshakeHandler(TestType.errorSolid));
     HelloMessage message = new HelloMessage(node, System.currentTimeMillis(),
         manager.getGenesisBlockId(), new BlockId(), manager.getHeadBlockId());
+    sendMessage(channel, message);
+    validResultCloseConnect(channel);
+  }
+
+  public void errorVersionTest() throws InterruptedException {
+    Channel channel = BaseNet.connect(new HandshakeHandler(TestType.errorVersion));
+    Args.getInstance().setNodeP2pVersion(1);
+    HelloMessage message = new HelloMessage(node, System.currentTimeMillis(),
+            manager.getGenesisBlockId(), manager.getConfirmedBlockId(), manager.getHeadBlockId());
+    Args.getInstance().setNodeP2pVersion(2);
     sendMessage(channel, message);
     validResultCloseConnect(channel);
   }
@@ -158,15 +158,6 @@ public class TcpTest {
     clearConnect(channel);
   }
 
-  public void errorGenesisBlockIdTest() throws InterruptedException {
-    Channel channel = BaseNet.connect(new HandshakeHandler(TestType.errorGenesisBlock));
-    BlockId genesisBlockId = new BlockId();
-    HelloMessage message = new HelloMessage(node, System.currentTimeMillis(), genesisBlockId,
-            manager.getConfirmedBlockId(), manager.getHeadBlockId());
-    sendMessage(channel, message);
-    validResultCloseConnect(channel);
-  }
-
   public void unHandshakeTest() throws InterruptedException {
     List<PeerConnection> beforeActivePeers = ReflectUtils.getFieldValue(pool, "activePeers");
     int beforeSize = beforeActivePeers.size();
@@ -177,6 +168,15 @@ public class TcpTest {
     int afterSize = afterActivePeers.size();
     Assert.assertEquals(beforeSize, afterSize);
     clearConnect(channel);
+  }
+
+  public void errorGenesisBlockIdTest() throws InterruptedException {
+    Channel channel = BaseNet.connect(new HandshakeHandler(TestType.errorGenesisBlock));
+    BlockId genesisBlockId = new BlockId();
+    HelloMessage message = new HelloMessage(node, System.currentTimeMillis(), genesisBlockId,
+            manager.getConfirmedBlockId(), manager.getHeadBlockId());
+    sendMessage(channel, message);
+    validResultCloseConnect(channel);
   }
 
   public void errorMsgTest() throws InterruptedException {
@@ -234,15 +234,6 @@ public class TcpTest {
             });
   }
 
-  private void validResultUnCloseConnect() throws InterruptedException {
-    int n = 0;
-    while (!finish && ++n < tryTimes) {
-      Thread.sleep(sleepTime);
-    }
-    Assert.assertEquals(finish, true);
-    finish = false;
-  }
-
   private void clearConnect(Channel channel) throws InterruptedException {
     channel.close();
     Thread.sleep(sleepTime);
@@ -254,6 +245,15 @@ public class TcpTest {
     ReflectUtils.setFieldValue(channelManager, "recentlyDisconnected",
         CacheBuilder.newBuilder().maximumSize(1000)
             .expireAfterWrite(30, TimeUnit.SECONDS).recordStats().build());
+  }
+
+  private void validResultUnCloseConnect() throws InterruptedException {
+    int n = 0;
+    while (!finish && ++n < tryTimes) {
+      Thread.sleep(sleepTime);
+    }
+    Assert.assertEquals(finish, true);
+    finish = false;
   }
 
   public void test() throws InterruptedException {

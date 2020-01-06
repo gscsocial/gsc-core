@@ -78,10 +78,6 @@ public class CreateAssetIssue2Test {
     Wallet.setAddressPreFixByte(Parameter.CommonConstant.ADD_PRE_FIX_BYTE);
   }
 
-  /**
-   * constructor.
-   */
-
   @BeforeClass(enabled = true)
   public void beforeClass() {
     logger.info(ByteArray.toHexString(ecKey.getPrivKeyBytes()));
@@ -213,10 +209,6 @@ public class CreateAssetIssue2Test {
       return false;
     }
   }
-
-  /**
-   * constructor.
-   */
 
   public Account queryAccount(ECKey ecKey, WalletGrpc.WalletBlockingStub blockingStubFull) {
     byte[] address;

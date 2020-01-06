@@ -30,7 +30,7 @@ public class SyncBlockChainMsgHandlerTest {
     try {
       handler.processMessage(peer, new SyncBlockChainMessage(new ArrayList<>()));
     } catch (P2pException e) {
-      Assert.assertTrue(e.getMessage().equals("SyncBlockChain blockIds is empty"));
+      Assert.assertTrue(e.getMessage().equals("Sync BlockChain blockIds is empty"));
     }
   }
 

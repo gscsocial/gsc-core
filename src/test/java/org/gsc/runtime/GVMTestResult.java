@@ -41,13 +41,13 @@ public class GVMTestResult {
     return this;
   }
 
-  public ReceiptWrapper getReceipt() {
-    return receipt;
-  }
-
   public GVMTestResult setReceipt(ReceiptWrapper receipt) {
     this.receipt = receipt;
     return this;
+  }
+
+  public ReceiptWrapper getReceipt() {
+    return receipt;
   }
 
   public GVMTestResult(Runtime runtime, ReceiptWrapper receipt, byte[] contractAddress) {

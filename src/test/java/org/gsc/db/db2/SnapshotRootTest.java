@@ -67,23 +67,6 @@ public class SnapshotRootTest {
   }
 
   @Test
-  public synchronized void testMerge() {
-    gscDatabase = new TestRevokingGSCStore("testSnapshotRoot-testMerge");
-    revokingDatabase = new TestSnapshotManager();
-    revokingDatabase.enable();
-    revokingDatabase.add(gscDatabase.getRevokingDB());
-
-    SessionOptional dialog = SessionOptional.instance().setValue(revokingDatabase.buildSession());
-    ProtoWrapperTest testProtoWrapper = new ProtoWrapperTest("merge".getBytes());
-    gscDatabase.put(testProtoWrapper.getData(), testProtoWrapper);
-    revokingDatabase.getDbs().forEach(db -> db.getHead().getRoot().merge(db.getHead()));
-    dialog.reset();
-    Assert.assertEquals(gscDatabase.get(testProtoWrapper.getData()), testProtoWrapper);
-
-    gscDatabase.close();
-  }
-
-  @Test
   public synchronized void testMergeList() {
     gscDatabase = new TestRevokingGSCStore("testSnapshotRoot-testMergeList");
     revokingDatabase = new TestSnapshotManager();
@@ -118,6 +101,23 @@ public class SnapshotRootTest {
 
     });
     revokingDatabase.updateConfirmed(10);
+    gscDatabase.close();
+  }
+
+  @Test
+  public synchronized void testMerge() {
+    gscDatabase = new TestRevokingGSCStore("testSnapshotRoot-testMerge");
+    revokingDatabase = new TestSnapshotManager();
+    revokingDatabase.enable();
+    revokingDatabase.add(gscDatabase.getRevokingDB());
+
+    SessionOptional dialog = SessionOptional.instance().setValue(revokingDatabase.buildSession());
+    ProtoWrapperTest testProtoWrapper = new ProtoWrapperTest("merge".getBytes());
+    gscDatabase.put(testProtoWrapper.getData(), testProtoWrapper);
+    revokingDatabase.getDbs().forEach(db -> db.getHead().getRoot().merge(db.getHead()));
+    dialog.reset();
+    Assert.assertEquals(gscDatabase.get(testProtoWrapper.getData()), testProtoWrapper);
+
     gscDatabase.close();
   }
 

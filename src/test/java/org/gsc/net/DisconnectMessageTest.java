@@ -173,15 +173,14 @@ public class DisconnectMessageTest extends
   }
 
   @Override
-  public Message.Builder newBuilderForType() {
-    return null;
-  }
-
-  @Override
   public Message.Builder toBuilder() {
     return null;
   }
 
+  @Override
+  public Message.Builder newBuilderForType() {
+    return null;
+  }
 
   // @@protoc_insertion_point(class_scope:protocol.DisconnectMessage)
   private static final DisconnectMessageTest DEFAULT_INSTANCE;

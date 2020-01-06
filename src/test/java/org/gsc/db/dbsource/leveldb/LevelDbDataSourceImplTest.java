@@ -93,15 +93,6 @@ public class LevelDbDataSourceImplTest {
   }
 
   @Test
-  public void testReset() {
-    LevelDbDataSourceImpl dataSource = new LevelDbDataSourceImpl(
-        Args.getInstance().getOutputDirectory(), "test_reset");
-    dataSource.resetDb();
-    assertEquals(0, dataSource.allKeys().size());
-    dataSource.closeDB();
-  }
-
-  @Test
   public void testupdateByBatchInner() {
     LevelDbDataSourceImpl dataSource = new LevelDbDataSourceImpl(
         Args.getInstance().getOutputDirectory(), "test_updateByBatch");
@@ -121,6 +112,15 @@ public class LevelDbDataSourceImplTest {
     assertEquals("50000", ByteArray.toStr(dataSource.getData(key1.getBytes())));
     assertEquals("10000", ByteArray.toStr(dataSource.getData(key2.getBytes())));
     assertEquals(2, dataSource.allKeys().size());
+    dataSource.closeDB();
+  }
+
+  @Test
+  public void testReset() {
+    LevelDbDataSourceImpl dataSource = new LevelDbDataSourceImpl(
+            Args.getInstance().getOutputDirectory(), "test_reset");
+    dataSource.resetDb();
+    assertEquals(0, dataSource.allKeys().size());
     dataSource.closeDB();
   }
 
@@ -150,19 +150,6 @@ public class LevelDbDataSourceImplTest {
     dataSource.closeDB();
   }
 
-  @Test(timeout = 1000)
-  public void testLockReleased() {
-    dataSourceTest.initDB();
-    // normal close
-    dataSourceTest.closeDB();
-    // closing already closed db.
-    dataSourceTest.closeDB();
-    // closing again to make sure the lock is free. If not test will hang.
-    dataSourceTest.closeDB();
-
-    assertFalse("Database is still alive after closing.", dataSourceTest.isAlive());
-  }
-
   @Test
   public void testdeleteData() {
     LevelDbDataSourceImpl dataSource = new LevelDbDataSourceImpl(
@@ -175,6 +162,19 @@ public class LevelDbDataSourceImplTest {
     String s = ByteArray.toStr(value);
     assertNull(s);
     dataSource.closeDB();
+  }
+
+  @Test(timeout = 1000)
+  public void testLockReleased() {
+    dataSourceTest.initDB();
+    // normal close
+    dataSourceTest.closeDB();
+    // closing already closed db.
+    dataSourceTest.closeDB();
+    // closing again to make sure the lock is free. If not test will hang.
+    dataSourceTest.closeDB();
+
+    assertFalse("Database is still alive after closing.", dataSourceTest.isAlive());
   }
 
   @Test

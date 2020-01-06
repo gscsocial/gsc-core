@@ -24,6 +24,17 @@ public class MessageTest {
 
   private DisconnectMessage disconnectMessage;
 
+  public void test2() throws Exception {
+    DisconnectMessageTest disconnectMessageTest = new DisconnectMessageTest();
+    try {
+      disconnectMessage = new DisconnectMessage(MessageTypes.P2P_DISCONNECT.asByte(),
+              disconnectMessageTest.toByteArray());
+    } catch (Exception e) {
+      System.out.println(e.getMessage());
+      Assert.assertTrue(e instanceof P2pException);
+    }
+  }
+
   @Test
   public void test1() throws Exception {
     DisconnectMessageTest disconnectMessageTest = new DisconnectMessageTest();
@@ -35,17 +46,6 @@ public class MessageTest {
     long endTime = System.currentTimeMillis();
     System.out.println("spend time : " + (endTime - startTime));
     byte[] bytes = new DisconnectMessage(ReasonCode.TOO_MANY_PEERS).getData();
-  }
-
-  public void test2() throws Exception {
-    DisconnectMessageTest disconnectMessageTest = new DisconnectMessageTest();
-    try {
-      disconnectMessage = new DisconnectMessage(MessageTypes.P2P_DISCONNECT.asByte(),
-              disconnectMessageTest.toByteArray());
-    } catch (Exception e) {
-      System.out.println(e.getMessage());
-      Assert.assertTrue(e instanceof P2pException);
-    }
   }
 
 }

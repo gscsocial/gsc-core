@@ -174,34 +174,6 @@ public class RevokingDbWithCacheNewValueTest {
   }
 
   @Test
-  public synchronized void testGetlatestValues() {
-    revokingDatabase = new TestSnapshotManager();
-    revokingDatabase.enable();
-    gscDatabase = new TestRevokingGSCStore("testSnapshotManager-testGetlatestValues");
-    revokingDatabase.add(gscDatabase.getRevokingDB());
-    while (revokingDatabase.size() != 0) {
-      revokingDatabase.pop();
-    }
-
-    for (int i = 1; i < 10; i++) {
-      ProtoWrapperTest testProtoWrapper = new ProtoWrapperTest(("getLastestValues" + i).getBytes());
-      try (ISession tmpSession = revokingDatabase.buildSession()) {
-        gscDatabase.put(testProtoWrapper.getData(), testProtoWrapper);
-        tmpSession.commit();
-      }
-    }
-
-    Set<ProtoWrapperTest> result = gscDatabase.getRevokingDB().getlatestValues(5).stream()
-        .map(ProtoWrapperTest::new)
-        .collect(Collectors.toSet());
-
-    for (int i = 9; i >= 5; i--) {
-      Assert.assertEquals(true,
-          result.contains(new ProtoWrapperTest(("getLastestValues" + i).getBytes())));
-    }
-  }
-
-  @Test
   public synchronized void testGetValuesNext() {
     revokingDatabase = new TestSnapshotManager();
     revokingDatabase.enable();
@@ -230,6 +202,33 @@ public class RevokingDbWithCacheNewValueTest {
     }
   }
 
+  @Test
+  public synchronized void testGetlatestValues() {
+    revokingDatabase = new TestSnapshotManager();
+    revokingDatabase.enable();
+    gscDatabase = new TestRevokingGSCStore("testSnapshotManager-testGetlatestValues");
+    revokingDatabase.add(gscDatabase.getRevokingDB());
+    while (revokingDatabase.size() != 0) {
+      revokingDatabase.pop();
+    }
+
+    for (int i = 1; i < 10; i++) {
+      ProtoWrapperTest testProtoWrapper = new ProtoWrapperTest(("getLastestValues" + i).getBytes());
+      try (ISession tmpSession = revokingDatabase.buildSession()) {
+        gscDatabase.put(testProtoWrapper.getData(), testProtoWrapper);
+        tmpSession.commit();
+      }
+    }
+
+    Set<ProtoWrapperTest> result = gscDatabase.getRevokingDB().getlatestValues(5).stream()
+            .map(ProtoWrapperTest::new)
+            .collect(Collectors.toSet());
+
+    for (int i = 9; i >= 5; i--) {
+      Assert.assertEquals(true,
+              result.contains(new ProtoWrapperTest(("getLastestValues" + i).getBytes())));
+    }
+  }
 
   public static class TestRevokingGSCStore extends GSCStoreWithRevoking<ProtoWrapperTest> {
 

@@ -123,9 +123,7 @@ public class Base58 {
         return new BigInteger(1, decode(input));
     }
 
-    //
     // number -> number / 58, returns number % 58
-    //
     private static byte divmod58(byte[] number, int startAt) {
         int remainder = 0;
         for (int i = startAt; i < number.length; i++) {
@@ -140,9 +138,14 @@ public class Base58 {
         return (byte) remainder;
     }
 
-    //
+    private static byte[] copyOfRange(byte[] source, int from, int to) {
+        byte[] range = new byte[to - from];
+        System.arraycopy(source, from, range, 0, range.length);
+
+        return range;
+    }
+
     // number -> number / 256, returns number % 256
-    //
     private static byte divmod256(byte[] number58, int startAt) {
         int remainder = 0;
         for (int i = startAt; i < number58.length; i++) {
@@ -155,13 +158,6 @@ public class Base58 {
         }
 
         return (byte) remainder;
-    }
-
-    private static byte[] copyOfRange(byte[] source, int from, int to) {
-        byte[] range = new byte[to - from];
-        System.arraycopy(source, from, range, 0, range.length);
-
-        return range;
     }
 
 }

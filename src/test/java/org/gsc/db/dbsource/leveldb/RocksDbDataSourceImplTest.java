@@ -90,15 +90,6 @@ public class RocksDbDataSourceImplTest {
   }
 
   @Test
-  public void testReset() {
-    RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
-        Args.getInstance().getOutputDirectory(), "test_reset");
-    dataSource.resetDb();
-    assertEquals(0, dataSource.allKeys().size());
-    dataSource.closeDB();
-  }
-
-  @Test
   public void testupdateByBatchInner() {
     RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
         Args.getInstance().getOutputDirectory(), "test_updateByBatch");
@@ -118,6 +109,15 @@ public class RocksDbDataSourceImplTest {
     assertEquals("50000", ByteArray.toStr(dataSource.getData(key1.getBytes())));
     assertEquals("10000", ByteArray.toStr(dataSource.getData(key2.getBytes())));
     assertEquals(2, dataSource.allKeys().size());
+    dataSource.closeDB();
+  }
+
+  @Test
+  public void testReset() {
+    RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
+            Args.getInstance().getOutputDirectory(), "test_reset");
+    dataSource.resetDb();
+    assertEquals(0, dataSource.allKeys().size());
     dataSource.closeDB();
   }
 
@@ -147,19 +147,6 @@ public class RocksDbDataSourceImplTest {
     dataSource.closeDB();
   }
 
-  @Test(timeout = 1000)
-  public void testLockReleased() {
-    dataSourceTest.initDB();
-    // normal close
-    dataSourceTest.closeDB();
-    // closing already closed db.
-    dataSourceTest.closeDB();
-    // closing again to make sure the lock is free. If not test will hang.
-    dataSourceTest.closeDB();
-
-    assertFalse("Database is still alive after closing.", dataSourceTest.isAlive());
-  }
-
   @Test
   public void testdeleteData() {
     RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
@@ -172,6 +159,19 @@ public class RocksDbDataSourceImplTest {
     String s = ByteArray.toStr(value);
     assertNull(s);
     dataSource.closeDB();
+  }
+
+  @Test(timeout = 1000)
+  public void testLockReleased() {
+    dataSourceTest.initDB();
+    // normal close
+    dataSourceTest.closeDB();
+    // closing already closed db.
+    dataSourceTest.closeDB();
+    // closing again to make sure the lock is free. If not test will hang.
+    dataSourceTest.closeDB();
+
+    assertFalse("Database is still alive after closing.", dataSourceTest.isAlive());
   }
 
 
@@ -232,21 +232,6 @@ public class RocksDbDataSourceImplTest {
   }
 
   @Test
-  public void getValuesNext() {
-    RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
-        Args.getInstance().getOutputDirectory(), "test_getValuesNext_key");
-    dataSource.initDB();
-    dataSource.resetDb();
-    putSomeKeyValue(dataSource);
-    Set<byte[]> seekKeyLimitNext = dataSource.getValuesNext("0000000300".getBytes(), 2);
-    HashSet<String> hashSet = Sets.newHashSet(ByteArray.toStr(value3), ByteArray.toStr(value4));
-    seekKeyLimitNext.forEach(
-        value -> Assert.assertTrue("getValuesNext", hashSet.contains(ByteArray.toStr(value))));
-    dataSource.resetDb();
-    dataSource.closeDB();
-  }
-
-  @Test
   public void testCheckOrInitEngine() {
     String dir =
         Args.getInstance().getOutputDirectory() + Args.getInstance().getStorage().getDbDirectory();
@@ -276,6 +261,21 @@ public class RocksDbDataSourceImplTest {
     }
     Assert.assertNull(dataSource.getDatabase());
     PropUtil.writeProperty(enginePath, "ENGINE", "ROCKSDB");
+  }
+
+  @Test
+  public void getValuesNext() {
+    RocksDbDataSourceImpl dataSource = new RocksDbDataSourceImpl(
+            Args.getInstance().getOutputDirectory(), "test_getValuesNext_key");
+    dataSource.initDB();
+    dataSource.resetDb();
+    putSomeKeyValue(dataSource);
+    Set<byte[]> seekKeyLimitNext = dataSource.getValuesNext("0000000300".getBytes(), 2);
+    HashSet<String> hashSet = Sets.newHashSet(ByteArray.toStr(value3), ByteArray.toStr(value4));
+    seekKeyLimitNext.forEach(
+            value -> Assert.assertTrue("getValuesNext", hashSet.contains(ByteArray.toStr(value))));
+    dataSource.resetDb();
+    dataSource.closeDB();
   }
 
   @Test

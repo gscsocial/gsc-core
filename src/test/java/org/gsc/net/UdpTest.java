@@ -27,7 +27,6 @@ import org.gsc.net.discover.message.discover.FindNodeMessage;
 import org.gsc.net.discover.message.discover.NeighborsMessage;
 import org.gsc.net.discover.message.discover.PingMessage;
 import org.gsc.net.discover.message.discover.PongMessage;
-import org.gsc.net.discover.RefreshTask;
 import org.gsc.net.node.Node;
 import org.gsc.net.node.NodeManager;
 import org.gsc.config.args.Args;
@@ -106,7 +105,9 @@ public class UdpTest {
     }
 
     Assert.assertTrue(nodeManager.hasNodeHandler(peer1));
+
     Assert.assertTrue(nodeManager.hasNodeHandler(peer2));
+
     Assert.assertTrue(nodeManager.getTable().getAllNodes().size() == 1);
 
     socket.close();
