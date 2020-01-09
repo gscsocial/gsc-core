@@ -37,27 +37,6 @@ public class GetTransactionByIdServlet extends HttpServlet {
     @Autowired
     private Wallet wallet;
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            boolean visible = Util.getVisible(request);
-            String input = request.getParameter("value");
-            Transaction reply = wallet
-                    .getTransactionById(ByteString.copyFrom(ByteArray.fromHexString(input)));
-            if (reply != null) {
-                response.getWriter().println(Util.printTransaction(reply, visible));
-            } else {
-                response.getWriter().println("{}");
-            }
-        } catch (Exception e) {
-            logger.debug("Exception: {}", e.getMessage());
-            try {
-                response.getWriter().println(Util.printErrorMsg(e));
-            } catch (IOException ioe) {
-                logger.debug("IOException: {}", ioe.getMessage());
-            }
-        }
-    }
-
     protected void doPost(HttpServletRequest request, HttpServletResponse response) {
         try {
             String input = request.getReader().lines()
@@ -81,4 +60,26 @@ public class GetTransactionByIdServlet extends HttpServlet {
             }
         }
     }
+
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            boolean visible = Util.getVisible(request);
+            String input = request.getParameter("value");
+            Transaction reply = wallet
+                    .getTransactionById(ByteString.copyFrom(ByteArray.fromHexString(input)));
+            if (reply != null) {
+                response.getWriter().println(Util.printTransaction(reply, visible));
+            } else {
+                response.getWriter().println("{}");
+            }
+        } catch (Exception e) {
+            logger.debug("Exception: {}", e.getMessage());
+            try {
+                response.getWriter().println(Util.printErrorMsg(e));
+            } catch (IOException ioe) {
+                logger.debug("IOException: {}", ioe.getMessage());
+            }
+        }
+    }
+
 }

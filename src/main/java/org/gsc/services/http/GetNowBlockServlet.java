@@ -32,6 +32,10 @@ public class GetNowBlockServlet extends HttpServlet {
     @Autowired
     private Wallet wallet;
 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        doGet(request, response);
+    }
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         try {
             boolean visible = Util.getVisible(request);
@@ -51,7 +55,4 @@ public class GetNowBlockServlet extends HttpServlet {
         }
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        doGet(request, response);
-    }
 }

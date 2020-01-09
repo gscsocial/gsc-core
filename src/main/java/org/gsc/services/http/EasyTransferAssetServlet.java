@@ -101,6 +101,7 @@ public class EasyTransferAssetServlet extends HttpServlet {
             returnBuilder.setResult(false).setCode(response_code.CONTRACT_VALIDATE_ERROR)
                     .setMessage(ByteString.copyFromUtf8(e.getMessage()));
             responseBuild.setResult(returnBuilder.build());
+
             try {
                 response.getWriter().println(JsonFormat.printToString(responseBuild.build(), visible));
             } catch (IOException ioe) {

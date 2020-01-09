@@ -34,6 +34,20 @@ public class GetNodeInfoServlet extends HttpServlet {
     @Autowired
     private NodeInfoService nodeInfoService;
 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            NodeInfo nodeInfo = nodeInfoService.getNodeInfo();
+            response.getWriter().println(JSON.toJSONString(nodeInfo));
+        } catch (Exception e) {
+            logger.error("", e);
+            try {
+                response.getWriter().println(Util.printErrorMsg(e));
+            } catch (IOException ioe) {
+                logger.debug("IOException: {}", ioe.getMessage());
+            }
+        }
+    }
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         try {
             NodeInfo nodeInfo = nodeInfoService.getNodeInfo();
@@ -48,17 +62,4 @@ public class GetNodeInfoServlet extends HttpServlet {
         }
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            NodeInfo nodeInfo = nodeInfoService.getNodeInfo();
-            response.getWriter().println(JSON.toJSONString(nodeInfo));
-        } catch (Exception e) {
-            logger.error("", e);
-            try {
-                response.getWriter().println(Util.printErrorMsg(e));
-            } catch (IOException ioe) {
-                logger.debug("IOException: {}", ioe.getMessage());
-            }
-        }
-    }
 }

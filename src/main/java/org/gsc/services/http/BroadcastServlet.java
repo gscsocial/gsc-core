@@ -41,8 +41,8 @@ public class BroadcastServlet extends HttpServlet {
             Util.checkBodySize(input);
             boolean visible = Util.getVisiblePost(input);
             Transaction transaction = Util.packTransaction(input, visible);
-            GrpcAPI.Return retur = wallet.broadcastTransaction(transaction);
-            response.getWriter().println(JsonFormat.printToString(retur, visible));
+            GrpcAPI.Return returns = wallet.broadcastTransaction(transaction);
+            response.getWriter().println(JsonFormat.printToString(returns, visible));
         } catch (Exception e) {
             logger.debug("Exception: {}", e.getMessage());
             try {

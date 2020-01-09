@@ -89,6 +89,7 @@ public class EasyTransferServlet extends HttpServlet {
                 logger.debug("IOException: {}", ioe.getMessage());
             }
             return;
+
         } catch (Exception e) {
             logger.debug("Exception: {}", e.getMessage());
         }

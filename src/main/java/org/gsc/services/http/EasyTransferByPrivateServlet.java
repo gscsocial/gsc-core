@@ -73,6 +73,7 @@ public class EasyTransferByPrivateServlet extends HttpServlet {
             responseBuild.setTransaction(transactionWrapper.getInstance());
             responseBuild.setResult(retur);
             response.getWriter().println(Util.printEasyTransferResponse(responseBuild.build(), visible));
+
         } catch (Exception e) {
             returnBuilder.setResult(false).setCode(response_code.CONTRACT_VALIDATE_ERROR)
                     .setMessage(ByteString.copyFromUtf8(e.getMessage()));

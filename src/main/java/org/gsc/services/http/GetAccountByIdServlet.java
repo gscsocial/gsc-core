@@ -50,6 +50,7 @@ public class GetAccountByIdServlet extends HttpServlet {
             if (reply != null) {
                 if (visible) {
                     response.getWriter().println(JsonFormat.printToString(reply, true));
+
                 } else {
                     response.getWriter().println(convertOutput(reply));
                 }

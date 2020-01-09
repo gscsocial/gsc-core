@@ -223,15 +223,15 @@ public class Util {
                         contractJson = JSONObject.parseObject(JsonFormat.printToString(transferContract,
                                 selfType));
                         break;
+                    case VoteAssetContract:
+                        VoteAssetContract voteAssetContract = contractParameter.unpack(VoteAssetContract.class);
+                        contractJson = JSONObject.parseObject(JsonFormat.printToString(voteAssetContract,
+                                selfType));
+                        break;
                     case TransferAssetContract:
                         TransferAssetContract transferAssetContract = contractParameter
                                 .unpack(TransferAssetContract.class);
                         contractJson = JSONObject.parseObject(JsonFormat.printToString(transferAssetContract,
-                                selfType));
-                        break;
-                    case VoteAssetContract:
-                        VoteAssetContract voteAssetContract = contractParameter.unpack(VoteAssetContract.class);
-                        contractJson = JSONObject.parseObject(JsonFormat.printToString(voteAssetContract,
                                 selfType));
                         break;
                     case VoteWitnessContract:
@@ -240,16 +240,16 @@ public class Util {
                         contractJson = JSONObject.parseObject(JsonFormat.printToString(voteWitnessContract,
                                 selfType));
                         break;
-                    case WitnessCreateContract:
-                        WitnessCreateContract witnessCreateContract = contractParameter
-                                .unpack(WitnessCreateContract.class);
-                        contractJson = JSONObject.parseObject(JsonFormat.printToString(witnessCreateContract,
-                                selfType));
-                        break;
                     case AssetIssueContract:
                         AssetIssueContract assetIssueContract = contractParameter
                                 .unpack(AssetIssueContract.class);
                         contractJson = JSONObject.parseObject(JsonFormat.printToString(assetIssueContract,
+                                selfType));
+                        break;
+                    case WitnessCreateContract:
+                        WitnessCreateContract witnessCreateContract = contractParameter
+                                .unpack(WitnessCreateContract.class);
+                        contractJson = JSONObject.parseObject(JsonFormat.printToString(witnessCreateContract,
                                 selfType));
                         break;
                     case WitnessUpdateContract:
@@ -282,12 +282,6 @@ public class Util {
                         contractJson = JSONObject
                                 .parseObject(JsonFormat.printToString(unfreezeBalanceContract, selfType));
                         break;
-                    case WithdrawBalanceContract:
-                        WithdrawBalanceContract withdrawBalanceContract = contractParameter
-                                .unpack(WithdrawBalanceContract.class);
-                        contractJson = JSONObject
-                                .parseObject(JsonFormat.printToString(withdrawBalanceContract, selfType));
-                        break;
                     case UnfreezeAssetContract:
                         UnfreezeAssetContract unfreezeAssetContract = contractParameter
                                 .unpack(UnfreezeAssetContract.class);
@@ -305,6 +299,12 @@ public class Util {
                                 .unpack(ProposalCreateContract.class);
                         contractJson = JSONObject.parseObject(JsonFormat.printToString(proposalCreateContract,
                                 selfType));
+                        break;
+                    case WithdrawBalanceContract:
+                        WithdrawBalanceContract withdrawBalanceContract = contractParameter
+                                .unpack(WithdrawBalanceContract.class);
+                        contractJson = JSONObject
+                                .parseObject(JsonFormat.printToString(withdrawBalanceContract, selfType));
                         break;
                     case ProposalApproveContract:
                         ProposalApproveContract proposalApproveContract = contractParameter
@@ -345,16 +345,16 @@ public class Util {
                         contractJson = JSONObject.parseObject(JsonFormat.printToString(updateSettingContract,
                                 selfType));
                         break;
-                    case ExchangeCreateContract:
-                        ExchangeCreateContract exchangeCreateContract = contractParameter
-                                .unpack(ExchangeCreateContract.class);
-                        contractJson = JSONObject.parseObject(JsonFormat.printToString(exchangeCreateContract,
-                                selfType));
-                        break;
                     case ExchangeInjectContract:
                         ExchangeInjectContract exchangeInjectContract = contractParameter
                                 .unpack(ExchangeInjectContract.class);
                         contractJson = JSONObject.parseObject(JsonFormat.printToString(exchangeInjectContract,
+                                selfType));
+                        break;
+                    case ExchangeCreateContract:
+                        ExchangeCreateContract exchangeCreateContract = contractParameter
+                                .unpack(ExchangeCreateContract.class);
+                        contractJson = JSONObject.parseObject(JsonFormat.printToString(exchangeCreateContract,
                                 selfType));
                         break;
                     case ExchangeWithdrawContract:

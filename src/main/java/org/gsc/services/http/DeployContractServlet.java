@@ -111,6 +111,7 @@ public class DeployContractServlet extends HttpServlet {
             txBuilder.setRawData(rawBuilder);
             tx = setTransactionPermissionId(jsonObject, txBuilder.build());
             response.getWriter().println(Util.printCreateTransaction(tx, visible));
+
         } catch (Exception e) {
             logger.debug("Exception: {}", e.getMessage());
             try {

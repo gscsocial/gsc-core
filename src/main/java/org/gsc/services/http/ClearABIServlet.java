@@ -52,6 +52,7 @@ public class ClearABIServlet extends HttpServlet {
             Transaction tx = wallet
                     .createTransactionWrapper(build.build(), ContractType.ClearABIContract)
                     .getInstance();
+
             JSONObject jsonObject = JSONObject.parseObject(contract);
             tx = Util.setTransactionPermissionId(jsonObject, tx);
             response.getWriter().println(Util.printCreateTransaction(tx, visible));
