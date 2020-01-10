@@ -687,7 +687,6 @@ public class Util {
         if (jsonObject.containsKey(VISIBLE)) {
             visible = jsonObject.getBoolean(VISIBLE);
         }
-
         return visible;
     }
 

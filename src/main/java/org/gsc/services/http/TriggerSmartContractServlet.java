@@ -91,6 +91,7 @@ public class TriggerSmartContractServlet extends HttpServlet {
             build.setTokenId(Util.getJsonLongValue(jsonObject, "token_id"));
             build.setCallValue(Util.getJsonLongValue(jsonObject, "call_value"));
             long feeLimit = Util.getJsonLongValue(jsonObject, "fee_limit");
+
             TransactionWrapper trxCap = wallet
                     .createTransactionWrapper(build.build(), ContractType.TriggerSmartContract);
 
@@ -105,6 +106,7 @@ public class TriggerSmartContractServlet extends HttpServlet {
             trx = Util.setTransactionPermissionId(jsonObject, trx);
             trxExtBuilder.setTransaction(trx);
             retBuilder.setResult(true).setCode(response_code.SUCCESS);
+
         } catch (ContractValidateException e) {
             retBuilder.setResult(false).setCode(response_code.CONTRACT_VALIDATE_ERROR)
                     .setMessage(ByteString.copyFromUtf8(e.getMessage()));

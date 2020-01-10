@@ -81,7 +81,6 @@ public class Start {
             ConfirmedHttpApiService confirmedHttpApiService = context.getBean(ConfirmedHttpApiService.class);
             application.addService(confirmedHttpApiService);
         }
-
         application.initServices(cfgArgs);
         application.startServices();
         application.startup();

@@ -97,7 +97,6 @@ public class DiscoverServer {
                 channel = b.bind(port).sync().channel();
 
                 logger.info("Discovery server started, bind port {}", port);
-
                 channel.closeFuture().sync();
                 if (shutdown) {
                     logger.info("Shutdown discovery server");

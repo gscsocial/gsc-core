@@ -47,6 +47,7 @@ public class SetAccountIdServlet extends HttpServlet {
             boolean visible = Util.getVisiblePost(contract);
             Contract.SetAccountIdContract.Builder build = Contract.SetAccountIdContract.newBuilder();
             JsonFormat.merge(contract, build, visible);
+
             Protocol.Transaction tx = wallet.createTransactionWrapper(build.build(),
                     Protocol.Transaction.Contract.ContractType.SetAccountIdContract).getInstance();
             JSONObject jsonObject = JSONObject.parseObject(contract);

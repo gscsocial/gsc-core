@@ -51,6 +51,7 @@ public class GetTransactionInfoByIdConfirmedServlet extends HttpServlet {
             } else {
                 response.getWriter().println(JsonFormat.printToString(transInfo, visible));
             }
+
         } catch (Exception e) {
             logger.debug("Exception: {}", e.getMessage());
             try {
@@ -76,6 +77,7 @@ public class GetTransactionInfoByIdConfirmedServlet extends HttpServlet {
             } else {
                 response.getWriter().println(JsonFormat.printToString(transInfo, visible));
             }
+
         } catch (Exception e) {
             logger.debug("Exception: {}", e.getMessage());
             try {

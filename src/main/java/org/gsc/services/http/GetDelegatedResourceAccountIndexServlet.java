@@ -42,9 +42,8 @@ public class GetDelegatedResourceAccountIndexServlet extends HttpServlet {
         try {
             boolean visible = Util.getVisible(request);
             String address = request.getParameter("value");
-            if (visible) {
+            if (visible)
                 address = Util.getHexAddress(address);
-            }
             DelegatedResourceAccountIndex reply =
                     wallet.getDelegatedResourceAccountIndex(
                             ByteString.copyFrom(ByteArray.fromHexString(address)));

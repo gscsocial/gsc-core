@@ -102,9 +102,11 @@ public class TriggerConstantContractServlet extends HttpServlet {
             trx = Util.setTransactionPermissionId(jsonObject, trx);
             trxExtBuilder.setTransaction(trx);
             retBuilder.setResult(true).setCode(response_code.SUCCESS);
+
         } catch (ContractValidateException e) {
             retBuilder.setResult(false).setCode(response_code.CONTRACT_VALIDATE_ERROR)
                     .setMessage(ByteString.copyFromUtf8(e.getMessage()));
+
         } catch (Exception e) {
             String errString = null;
             if (e.getMessage() != null) {

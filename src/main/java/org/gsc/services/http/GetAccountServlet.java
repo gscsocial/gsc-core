@@ -102,7 +102,6 @@ public class GetAccountServlet extends HttpServlet {
             } else {
                 response.getWriter().println("{}");
             }
-
         } catch (Exception e) {
             logger.debug("Exception: {}", e.getMessage());
             try {

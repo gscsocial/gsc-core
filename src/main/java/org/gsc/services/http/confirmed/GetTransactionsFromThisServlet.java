@@ -56,6 +56,7 @@ public class GetTransactionsFromThisServlet extends HttpServlet {
             } else {
                 resp.getWriter().print("{}");
             }
+
         } catch (Exception e) {
             logger.debug("Exception: {}", e.getMessage());
             try {

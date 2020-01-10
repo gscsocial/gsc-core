@@ -39,7 +39,7 @@ public class GetNodeInfoServlet extends HttpServlet {
             NodeInfo nodeInfo = nodeInfoService.getNodeInfo();
             response.getWriter().println(JSON.toJSONString(nodeInfo));
         } catch (Exception e) {
-            logger.error("", e);
+            logger.error("node info error.", e);
             try {
                 response.getWriter().println(Util.printErrorMsg(e));
             } catch (IOException ioe) {
@@ -53,7 +53,7 @@ public class GetNodeInfoServlet extends HttpServlet {
             NodeInfo nodeInfo = nodeInfoService.getNodeInfo();
             response.getWriter().println(JSON.toJSONString(nodeInfo));
         } catch (Exception e) {
-            logger.error("", e);
+            logger.error("node info error.", e);
             try {
                 response.getWriter().println(Util.printErrorMsg(e));
             } catch (IOException ioe) {

@@ -34,6 +34,27 @@ import org.gsc.core.Wallet;
 @Slf4j(topic = "API")
 public class ValidateAddressServlet extends HttpServlet {
 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+        String input = request.getParameter("address");
+        try {
+            response.getWriter().println(validAddress(input));
+        } catch (IOException e) {
+            logger.debug("IOException: {}", e.getMessage());
+        }
+    }
+
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            String input = request.getReader().lines()
+                    .collect(Collectors.joining(System.lineSeparator()));
+            Util.checkBodySize(input);
+            JSONObject jsonAddress = JSON.parseObject(input);
+            response.getWriter().println(validAddress(jsonAddress.getString("address")));
+        } catch (Exception e) {
+            logger.debug("Exception: {}", e.getMessage());
+        }
+    }
+
     private String validAddress(String input) {
         byte[] address = null;
         boolean result = true;
@@ -71,26 +92,5 @@ public class ValidateAddressServlet extends HttpServlet {
         jsonAddress.put("message", msg);
 
         return jsonAddress.toJSONString();
-    }
-
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
-        String input = request.getParameter("address");
-        try {
-            response.getWriter().println(validAddress(input));
-        } catch (IOException e) {
-            logger.debug("IOException: {}", e.getMessage());
-        }
-    }
-
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            String input = request.getReader().lines()
-                    .collect(Collectors.joining(System.lineSeparator()));
-            Util.checkBodySize(input);
-            JSONObject jsonAddress = JSON.parseObject(input);
-            response.getWriter().println(validAddress(jsonAddress.getString("address")));
-        } catch (Exception e) {
-            logger.debug("Exception: {}", e.getMessage());
-        }
     }
 }

@@ -42,9 +42,9 @@ public class GenerateAddressServlet extends HttpServlet {
             String base58check = Wallet.encode58Check(address);
             String hexString = ByteArray.toHexString(address);
             JSONObject jsonAddress = new JSONObject();
+            jsonAddress.put("privateKey", priKeyStr);
             jsonAddress.put("address", base58check);
             jsonAddress.put("hexAddress", hexString);
-            jsonAddress.put("privateKey", priKeyStr);
 
             response.getWriter().println(jsonAddress.toJSONString());
         } catch (Exception e) {

@@ -74,6 +74,9 @@ public class Base58 {
         }
     }
 
+    /**
+     * Decodes the given bytes in base58. No checksum is appended.
+     */
     public static byte[] decode(String input) throws IllegalArgumentException {
         if (input.length() == 0) {
             return new byte[0];
