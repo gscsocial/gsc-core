@@ -20,7 +20,7 @@ import org.zeromq.ZMQ;
 import java.util.Objects;
 
 public class NativeMessageQueue {
-    ZContext context = null;
+    private ZContext context = null;
     private ZMQ.Socket publisher = null;
     private static NativeMessageQueue instance;
     private static final int DEFAULT_BIND_PORT = 5555;

@@ -79,7 +79,7 @@ public class GSCNetDelegate {
     @Getter
     private Object blockLock = new Object();
 
-    private int blockIdCacheSize = 100;
+    private final static int blockIdCacheSize = 100;
 
     private Queue<BlockId> freshBlockId = new ConcurrentLinkedQueue<BlockId>() {
         @Override

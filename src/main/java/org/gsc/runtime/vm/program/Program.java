@@ -111,7 +111,7 @@ public class Program {
     private byte[] returnDataBuffer;
 
     private ProgramResult result = new ProgramResult();
-    private ProgramTrace trace = new ProgramTrace();
+    private ProgramTrace trace;
 
     private byte[] ops;
     private int pc;

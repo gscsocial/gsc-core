@@ -106,7 +106,7 @@ public class ContractEventParserAbi extends ContractEventParser {
                 map.put("0", Hex.toHexString(data));
             }
         } catch (UnsupportedOperationException e) {
-            logger.debug("UnsupportedOperationException", e);
+            logger.debug("Unsupported Operation Exception", e);
             map.clear();
             map.put(startIndex.toString(), Hex.toHexString(data));
         }

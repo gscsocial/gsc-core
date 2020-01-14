@@ -130,10 +130,8 @@ public class EventPluginLoader {
     }
 
     public boolean start(EventPluginConfig config) {
-        boolean success = false;
-
         if (Objects.isNull(config)) {
-            return success;
+            return false;
         }
 
         this.triggerConfigList = config.getTriggerConfigList();
@@ -218,13 +216,12 @@ public class EventPluginLoader {
     }
 
     private boolean startPlugin(String path) {
-        boolean loaded = false;
         logger.info("start loading '{}'", path);
 
         File pluginPath = new File(path);
         if (!pluginPath.exists()) {
             logger.error("'{}' doesn't exist", path);
-            return loaded;
+            return false;
         }
 
         if (Objects.isNull(pluginManager)) {
@@ -241,7 +238,7 @@ public class EventPluginLoader {
         String pluginId = pluginManager.loadPlugin(pluginPath.toPath());
         if (StringUtils.isEmpty(pluginId)) {
             logger.error("invalid pluginID");
-            return loaded;
+            return false;
         }
 
         pluginManager.startPlugins();
@@ -250,14 +247,12 @@ public class EventPluginLoader {
 
         if (Objects.isNull(eventListeners) || eventListeners.isEmpty()) {
             logger.error("No eventListener is registered");
-            return loaded;
+            return false;
         }
-
-        loaded = true;
 
         logger.info("'{}' loaded", path);
 
-        return loaded;
+        return true;
     }
 
     public void stopPlugin() {

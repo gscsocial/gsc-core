@@ -124,7 +124,7 @@ public class TransactionTrace {
         txStartTimeInMs = System.currentTimeMillis();
         DepositImpl deposit = DepositImpl.createRoot(dbManager);
         runtime = new RuntimeImpl(this, blockCap, deposit, new ProgramInvokeFactoryImpl());
-        runtime.setEnableEventLinstener(eventPluginLoaded);
+        runtime.setEnableEventListener(eventPluginLoaded);
     }
 
     public void checkIsConstant() throws ContractValidateException, VMIllegalException {

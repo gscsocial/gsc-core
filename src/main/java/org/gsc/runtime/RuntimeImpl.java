@@ -102,7 +102,7 @@ public class RuntimeImpl implements Runtime {
     private boolean isStaticCall = false;
 
     @Setter
-    private boolean enableEventLinstener;
+    private boolean enableEventListener;
 
     private LogInfoTriggerParser logInfoTriggerParser;
 
@@ -458,7 +458,7 @@ public class RuntimeImpl implements Runtime {
                     this.blockCap);
             byte[] txId = new TransactionWrapper(trx).getTransactionId().getBytes();
             this.program.setRootTransactionId(txId);
-            if (enableEventLinstener &&
+            if (enableEventListener &&
                     (EventPluginLoader.getInstance().isContractEventTriggerEnable()
                             || EventPluginLoader.getInstance().isContractLogTriggerEnable())
                     && isCheckTransaction()) {
@@ -581,7 +581,7 @@ public class RuntimeImpl implements Runtime {
             byte[] txId = new TransactionWrapper(trx).getTransactionId().getBytes();
             this.program.setRootTransactionId(txId);
 
-            if (enableEventLinstener &&
+            if (enableEventListener &&
                     (EventPluginLoader.getInstance().isContractEventTriggerEnable()
                             || EventPluginLoader.getInstance().isContractLogTriggerEnable())
                     && isCheckTransaction()) {

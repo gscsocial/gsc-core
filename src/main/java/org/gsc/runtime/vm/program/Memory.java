@@ -81,7 +81,7 @@ public class Memory implements ProgramListenerAware {
         int chunkIndex = address / CHUNK_SIZE;
         int chunkOffset = address % CHUNK_SIZE;
 
-        int toCapture = 0;
+        int toCapture;
         if (limited) {
             toCapture = (address + dataSize > softSize) ? softSize - address : dataSize;
         } else {

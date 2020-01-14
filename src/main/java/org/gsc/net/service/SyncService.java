@@ -160,8 +160,8 @@ public class SyncService {
         LinkedList<BlockId> summary = new LinkedList<>();
         long syncBeginNumber = gscNetDelegate.getSyncBeginNumber();
         long low = syncBeginNumber < 0 ? 0 : syncBeginNumber;
-        long highNoFork;
         long high;
+        long highNoFork;
 
         if (beginBlockId.getNum() == 0) {
             highNoFork = high = gscNetDelegate.getHeadBlockId().getNum();
@@ -243,7 +243,6 @@ public class SyncService {
         while (isProcessed[0]) {
 
             isProcessed[0] = false;
-
             synchronized (gscNetDelegate.getBlockLock()) {
                 blockWaitToProcess.forEach((msg, peerConnection) -> {
                     if (peerConnection.isDisconnect()) {
