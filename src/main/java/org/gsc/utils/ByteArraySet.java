@@ -63,14 +63,15 @@ public class ByteArraySet implements Set<byte[]> {
             }
 
             @Override
+            public void remove() {
+                it.remove();
+            }
+
+            @Override
             public byte[] next() {
                 return it.next().getData();
             }
 
-            @Override
-            public void remove() {
-                it.remove();
-            }
         };
     }
 

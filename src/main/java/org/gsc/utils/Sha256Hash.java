@@ -76,13 +76,13 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
         return hash;
     }
 
-    public Sha256Hash(long num, Sha256Hash hash) {
+    public Sha256Hash(long num, byte[] hash) {
         byte[] rawHashBytes = this.generateBlockId(num, hash);
         checkArgument(rawHashBytes.length == LENGTH);
         this.bytes = rawHashBytes;
     }
 
-    public Sha256Hash(long num, byte[] hash) {
+    public Sha256Hash(long num, Sha256Hash hash) {
         byte[] rawHashBytes = this.generateBlockId(num, hash);
         checkArgument(rawHashBytes.length == LENGTH);
         this.bytes = rawHashBytes;

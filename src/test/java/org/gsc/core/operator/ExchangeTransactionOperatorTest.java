@@ -83,20 +83,6 @@ public class ExchangeTransactionOperatorTest {
   }
 
   /**
-   * Release resources.
-   */
-  @AfterClass
-  public static void destroy() {
-    Args.clearParam();
-    context.destroy();
-    if (FileUtil.deleteDir(new File(dbPath))) {
-      logger.info("Release resources successful.");
-    } else {
-      logger.info("Release resources failure.");
-    }
-  }
-
-  /**
    * create temp Wrapper test need.
    */
   @Before
@@ -1553,4 +1539,19 @@ public class ExchangeTransactionOperatorTest {
       dbManager.getExchangeV2Store().delete(ByteArray.fromLong(2L));
     }
   }
+
+  /**
+   * Release resources.
+   */
+  @AfterClass
+  public static void destroy() {
+    Args.clearParam();
+    context.destroy();
+    if (FileUtil.deleteDir(new File(dbPath))) {
+      logger.info("Release resources successful.");
+    } else {
+      logger.info("Release resources failure.");
+    }
+  }
+
 }

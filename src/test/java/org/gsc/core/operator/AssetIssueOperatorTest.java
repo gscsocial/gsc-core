@@ -2054,7 +2054,6 @@ public class AssetIssueOperatorTest {
     }
   }
 
-
   /**
    * SameTokenName close, account not good "Account not exists" "No enough balance for fee!"
    */

@@ -821,7 +821,7 @@ public class Program {
     }
 
     public void spendCpu(long cpuValue, String opName) {
-        if (getCpulimitLeftLong() < cpuValue) {
+        if (getCpuLimitLeftLong() < cpuValue) {
             throw new OutOfCpuException(
                     "Not enough cpu for '%s' operation executing: curInvokeCpuLimit[%d],"
                             + " curOpCpu[%d], usedCpu[%d]",
@@ -945,7 +945,7 @@ public class Program {
         return new DataWord(1);
     }
 
-    public long getCpulimitLeftLong() {
+    public long getCpuLimitLeftLong() {
         return invoke.getCpuLimit() - getResult().getCpuUsed();
     }
 

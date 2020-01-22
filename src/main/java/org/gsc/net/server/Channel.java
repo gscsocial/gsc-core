@@ -57,9 +57,6 @@ public class Channel {
     private NodeManager nodeManager;
 
     @Autowired
-    private StaticMessages staticMessages;
-
-    @Autowired
     private WireTrafficStats stats;
 
     @Autowired
@@ -146,18 +143,6 @@ public class Channel {
         handler.getNode().setId(nodeId);
     }
 
-    public void disconnect(ReasonCode reason) {
-        this.isDisconnect = true;
-        channelManager.processDisconnect(this, reason);
-        DisconnectMessage msg = new DisconnectMessage(reason);
-        logger.info("Send to {} online-time {}s, {}",
-                ctx.channel().remoteAddress(),
-                (System.currentTimeMillis() - startTime) / 1000,
-                msg);
-        getNodeStatistics().nodeDisconnectedLocal(reason);
-        ctx.writeAndFlush(msg.getSendData()).addListener(future -> close());
-    }
-
     public void processException(Throwable throwable) {
         Throwable baseThrowable = throwable;
         while (baseThrowable.getCause() != null) {
@@ -174,6 +159,18 @@ public class Channel {
             logger.error("Close peer {}, exception caught", address, throwable);
         }
         close();
+    }
+
+    public void disconnect(ReasonCode reason) {
+        this.isDisconnect = true;
+        channelManager.processDisconnect(this, reason);
+        DisconnectMessage msg = new DisconnectMessage(reason);
+        logger.info("Send to {} online-time {}s, {}",
+                ctx.channel().remoteAddress(),
+                (System.currentTimeMillis() - startTime) / 1000,
+                msg);
+        getNodeStatistics().nodeDisconnectedLocal(reason);
+        ctx.writeAndFlush(msg.getSendData()).addListener(future -> close());
     }
 
     public void close() {
