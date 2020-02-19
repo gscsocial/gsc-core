@@ -539,9 +539,6 @@ public class VoteWitnessOperatorTest {
     }
   }
 
-  /**
-   * Release resources.
-   */
   @AfterClass
   public static void destroy() {
     Args.clearParam();

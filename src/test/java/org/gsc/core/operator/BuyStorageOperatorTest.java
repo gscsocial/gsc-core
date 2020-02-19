@@ -325,9 +325,6 @@ public class BuyStorageOperatorTest {
     }
   }
 
-  /**
-   * Release resources.
-   */
   @AfterClass
   public static void destroy() {
     Args.clearParam();

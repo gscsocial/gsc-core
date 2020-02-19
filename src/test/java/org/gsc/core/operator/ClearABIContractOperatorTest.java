@@ -105,7 +105,6 @@ public class ClearABIContractOperatorTest {
         ByteArray.fromHexString(CONTRACT_ADDRESS),
         new ContractWrapper(builder.build()));
 
-    // address in accountStore not the owner of contract
     AccountWrapper secondAccount =
         new AccountWrapper(
             ByteString.copyFrom(ByteArray.fromHexString(SECOND_ACCOUNT_ADDRESS)),
@@ -113,22 +112,7 @@ public class ClearABIContractOperatorTest {
             Protocol.AccountType.Normal);
     dbManager.getAccountStore().put(ByteArray.fromHexString(SECOND_ACCOUNT_ADDRESS), secondAccount);
 
-    // address does not exist in accountStore
     dbManager.getAccountStore().delete(ByteArray.fromHexString(OWNER_ADDRESS_NOTEXIST));
-  }
-
-  /**
-   * Release resources.
-   */
-  @AfterClass
-  public static void destroy() {
-    Args.clearParam();
-    context.destroy();
-    if (FileUtil.deleteDir(new File(dbPath))) {
-      logger.info("Release resources successful.");
-    } else {
-      logger.info("Release resources failure.");
-    }
   }
 
   private Any getContract(String accountAddress, String contractAddress) {
@@ -281,6 +265,17 @@ public class ClearABIContractOperatorTest {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
+    }
+  }
+
+  @AfterClass
+  public static void destroy() {
+    Args.clearParam();
+    context.destroy();
+    if (FileUtil.deleteDir(new File(dbPath))) {
+      logger.info("Release resources successful.");
+    } else {
+      logger.info("Release resources failure.");
     }
   }
 }

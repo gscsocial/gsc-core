@@ -380,9 +380,6 @@ public class SetAccountIdOperatorTest {
     }
   }
 
-  /**
-   * Release resources.
-   */
   @AfterClass
   public static void destroy() {
     Args.clearParam();

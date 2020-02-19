@@ -110,20 +110,6 @@ public class TransferAssetOperatorTest {
     return false;
   }
 
-  /**
-   * Release resources.
-   */
-  @AfterClass
-  public static void destroy() {
-    Args.clearParam();
-    context.destroy();
-    if (FileUtil.deleteDir(new File(dbPath))) {
-      logger.info("Release resources successful.");
-    } else {
-      logger.info("Release resources failure.");
-    }
-  }
-
   public void createAsset(String assetName) {
     AccountWrapper ownerWrapper = dbManager.getAccountStore()
         .get(ByteArray.fromHexString(OWNER_ADDRESS));
@@ -1316,6 +1302,17 @@ public class TransferAssetOperatorTest {
       Assert.assertFalse(e instanceof ContractValidateException);
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
+    }
+  }
+
+  @AfterClass
+  public static void destroy() {
+    Args.clearParam();
+    context.destroy();
+    if (FileUtil.deleteDir(new File(dbPath))) {
+      logger.info("Release resources successful.");
+    } else {
+      logger.info("Release resources failure.");
     }
   }
 

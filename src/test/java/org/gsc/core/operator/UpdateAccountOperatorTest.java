@@ -355,10 +355,6 @@ public class UpdateAccountOperatorTest {
 //      Assert.assertFalse(e instanceof ContractExeException);
 //    }
   }
-
-  /**
-   * Release resources.
-   */
   @AfterClass
   public static void destroy() {
     Args.clearParam();

@@ -101,6 +101,7 @@ public class CreateAccountOperatorTest {
         new CreateAccountOperator(getContract(OWNER_ADDRESS_SECOND, OWNER_ADDRESS_FIRST),
             dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
+
     try {
       operator.validate();
       operator.execute(ret);

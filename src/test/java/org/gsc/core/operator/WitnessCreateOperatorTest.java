@@ -320,9 +320,6 @@ public class WitnessCreateOperatorTest {
     }
   }
 
-  /**
-   * Release resources.
-   */
   @AfterClass
   public static void destroy() {
     Args.clearParam();

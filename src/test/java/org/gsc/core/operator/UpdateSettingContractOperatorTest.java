@@ -113,20 +113,6 @@ public class UpdateSettingContractOperatorTest {
     dbManager.getAccountStore().delete(ByteArray.fromHexString(OWNER_ADDRESS_NOTEXIST));
   }
 
-  /**
-   * Release resources.
-   */
-  @AfterClass
-  public static void destroy() {
-    Args.clearParam();
-    context.destroy();
-    if (FileUtil.deleteDir(new File(dbPath))) {
-      logger.info("Release resources successful.");
-    } else {
-      logger.info("Release resources failure.");
-    }
-  }
-
   private Any getContract(String accountAddress, String contractAddress, long percent) {
     return Any.pack(
         Contract.UpdateSettingContract.newBuilder()
@@ -300,4 +286,14 @@ public class UpdateSettingContractOperatorTest {
     }
   }
 
+  @AfterClass
+  public static void destroy() {
+    Args.clearParam();
+    context.destroy();
+    if (FileUtil.deleteDir(new File(dbPath))) {
+      logger.info("Release resources successful.");
+    } else {
+      logger.info("Release resources failure.");
+    }
+  }
 }

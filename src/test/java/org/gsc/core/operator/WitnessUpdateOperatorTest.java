@@ -275,9 +275,6 @@ public class WitnessUpdateOperatorTest {
     }
   }
 
-  /**
-   * Release resources.
-   */
   @AfterClass
   public static void destroy() {
     Args.clearParam();

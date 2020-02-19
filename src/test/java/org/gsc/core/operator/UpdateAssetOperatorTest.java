@@ -95,22 +95,6 @@ public class UpdateAssetOperatorTest {
     dbManager.getAccountStore().delete(ByteArray.fromHexString(OWNER_ADDRESS_NOTEXIST));
   }
 
-  /**
-   * Release resources.
-   */
-  @AfterClass
-  public static void destroy() {
-    Args.clearParam();
-    AppT.shutdownServices();
-    AppT.shutdown();
-    context.destroy();
-    if (FileUtil.deleteDir(new File(dbPath))) {
-      logger.info("Release resources successful.");
-    } else {
-      logger.info("Release resources failure.");
-    }
-  }
-
   private Any getContract(
       String accountAddress, String description, String url, long newLimit, long newPublicLimit) {
     return Any.pack(
@@ -499,6 +483,19 @@ public class UpdateAssetOperatorTest {
     } finally {
       dbManager.getAssetIssueV2Store().delete(ByteArray.fromString(String.valueOf(tokenId)));
       dbManager.getAssetIssueStore().delete(ByteString.copyFromUtf8(NAME).toByteArray());
+    }
+  }
+
+  @AfterClass
+  public static void destroy() {
+    Args.clearParam();
+    AppT.shutdownServices();
+    AppT.shutdown();
+    context.destroy();
+    if (FileUtil.deleteDir(new File(dbPath))) {
+      logger.info("Release resources successful.");
+    } else {
+      logger.info("Release resources failure.");
     }
   }
 }

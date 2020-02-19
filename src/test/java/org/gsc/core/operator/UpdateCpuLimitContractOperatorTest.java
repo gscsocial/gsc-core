@@ -130,18 +130,6 @@ public class UpdateCpuLimitContractOperatorTest {
   /**
    * Release resources.
    */
-  @AfterClass
-  public static void destroy() {
-    Args.clearParam();
-    context.destroy();
-    if (FileUtil.deleteDir(new File(dbPath))) {
-      logger.info("Release resources successful.");
-    } else {
-      logger.info("Release resources failure.");
-    }
-//    VMConfig.setCPU_LIMIT_HARD_FORK(false);
-  }
-
   private Any getContract(String accountAddress, String contractAddress, long originCpuLimit) {
     return Any.pack(
         Contract.UpdateCpuLimitContract.newBuilder()
@@ -299,6 +287,18 @@ public class UpdateCpuLimitContractOperatorTest {
     } catch (ContractValidateException | ContractExeException e) {
       Assert.fail(e.getMessage());
     }
+  }
+
+  @AfterClass
+  public static void destroy() {
+    Args.clearParam();
+    context.destroy();
+    if (FileUtil.deleteDir(new File(dbPath))) {
+      logger.info("Release resources successful.");
+    } else {
+      logger.info("Release resources failure.");
+    }
+//    VMConfig.setCPU_LIMIT_HARD_FORK(false);
   }
 
 }

@@ -84,20 +84,6 @@ public class TransferOperatorTest {
   }
 
   /**
-   * Release resources.
-   */
-  @AfterClass
-  public static void destroy() {
-    Args.clearParam();
-    context.destroy();
-    if (FileUtil.deleteDir(new File(dbPath))) {
-      logger.info("Release resources successful.");
-    } else {
-      logger.info("Release resources failure.");
-    }
-  }
-
-  /**
    * create temp Wrapper test need.
    */
   @Before
@@ -454,5 +440,14 @@ public class TransferOperatorTest {
       dbManager.getAccountStore().delete(ByteArray.fromHexString(To_ACCOUNT_INVALID));
     }
   }
-
+  @AfterClass
+  public static void destroy() {
+    Args.clearParam();
+    context.destroy();
+    if (FileUtil.deleteDir(new File(dbPath))) {
+      logger.info("Release resources successful.");
+    } else {
+      logger.info("Release resources failure.");
+    }
+  }
 }
