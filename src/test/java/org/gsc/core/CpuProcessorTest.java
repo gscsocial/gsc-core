@@ -57,7 +57,7 @@ public class CpuProcessorTest {
   /**
    * Init data.
    */
-  @BeforeClass
+//  @BeforeClass
   public static void init() {
     dbManager = context.getBean(Manager.class);
   }
@@ -65,7 +65,7 @@ public class CpuProcessorTest {
   /**
    * create temp Wrapper test need.
    */
-  @Before
+//  @Before
   public void createWrapper() {
     AccountWrapper contractProvierWrapper =
         new AccountWrapper(
@@ -90,7 +90,7 @@ public class CpuProcessorTest {
   }
 
 
-  //todo ,replaced by smartContract later
+//  todo ,replaced by smartContract later
   private AssetIssueContract getAssetIssueContract() {
     return Contract.AssetIssueContract.newBuilder()
         .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(USER_ADDRESS)))
@@ -100,7 +100,7 @@ public class CpuProcessorTest {
         .build();
   }
 
-  @Test
+//  @Test
   public void testUseContractCreatorCpu() throws Exception {
     dbManager.getDynamicPropertiesStore().saveLatestBlockHeaderTimestamp(1526647838000L);
     dbManager.getDynamicPropertiesStore().saveTotalCpuWeight(10_000_000L);
@@ -130,7 +130,7 @@ public class CpuProcessorTest {
 
   }
 
-  @Test
+//  @Test
   public void updateAdaptiveTotalCpuLimit() {
     CpuProcessor processor = new CpuProcessor(dbManager);
 
@@ -179,7 +179,7 @@ public class CpuProcessorTest {
 /**
    * remove resources.
    */
-  @AfterClass
+//  @AfterClass
   public static void destroy() {
     Args.clearParam();
     context.destroy();
