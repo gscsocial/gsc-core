@@ -158,45 +158,6 @@ public class UpdateAccountOperatorTest {
   }
 
   //@Test
-  /*
-   * Can update name only one time.
-   */
-  public void twiceUpdateAccount() {
-    TransactionResultWrapper ret = new TransactionResultWrapper();
-    UpdateAccountOperator operator = new UpdateAccountOperator(
-        getContract(ACCOUNT_NAME, OWNER_ADDRESS), dbManager);
-    UpdateAccountOperator operator1 = new UpdateAccountOperator(
-        getContract(ACCOUNT_NAME_1, OWNER_ADDRESS), dbManager);
-    try {
-      operator.validate();
-      operator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      AccountWrapper accountWrapper = dbManager.getAccountStore()
-          .get(ByteArray.fromHexString(OWNER_ADDRESS));
-      Assert.assertEquals(ACCOUNT_NAME, accountWrapper.getAccountName().toStringUtf8());
-      Assert.assertTrue(true);
-    } catch (ContractValidateException e) {
-      Assert.assertFalse(e instanceof ContractValidateException);
-    } catch (ContractExeException e) {
-      Assert.assertFalse(e instanceof ContractExeException);
-    }
-
-    try {
-      operator1.validate();
-      operator1.execute(ret);
-      Assert.assertFalse(true);
-    } catch (ContractValidateException e) {
-      Assert.assertTrue(e instanceof ContractValidateException);
-      Assert.assertEquals("This account name already exist", e.getMessage());
-      AccountWrapper accountWrapper = dbManager.getAccountStore()
-          .get(ByteArray.fromHexString(OWNER_ADDRESS));
-      Assert.assertEquals(ACCOUNT_NAME, accountWrapper.getAccountName().toStringUtf8());
-    } catch (ContractExeException e) {
-      Assert.assertFalse(e instanceof ContractExeException);
-    }
-  }
-
-  //@Test
   public void nameAlreadyUsed() {
     TransactionResultWrapper ret = new TransactionResultWrapper();
     UpdateAccountOperator operator = new UpdateAccountOperator(
@@ -355,6 +316,46 @@ public class UpdateAccountOperatorTest {
 //      Assert.assertFalse(e instanceof ContractExeException);
 //    }
   }
+
+  //@Test
+  /*
+   * Can update name only one time.
+   */
+  public void twiceUpdateAccount() {
+    TransactionResultWrapper ret = new TransactionResultWrapper();
+    UpdateAccountOperator operator = new UpdateAccountOperator(
+            getContract(ACCOUNT_NAME, OWNER_ADDRESS), dbManager);
+    UpdateAccountOperator operator1 = new UpdateAccountOperator(
+            getContract(ACCOUNT_NAME_1, OWNER_ADDRESS), dbManager);
+    try {
+      operator.validate();
+      operator.execute(ret);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      AccountWrapper accountWrapper = dbManager.getAccountStore()
+              .get(ByteArray.fromHexString(OWNER_ADDRESS));
+      Assert.assertEquals(ACCOUNT_NAME, accountWrapper.getAccountName().toStringUtf8());
+      Assert.assertTrue(true);
+    } catch (ContractValidateException e) {
+      Assert.assertFalse(e instanceof ContractValidateException);
+    } catch (ContractExeException e) {
+      Assert.assertFalse(e instanceof ContractExeException);
+    }
+
+    try {
+      operator1.validate();
+      operator1.execute(ret);
+      Assert.assertFalse(true);
+    } catch (ContractValidateException e) {
+      Assert.assertTrue(e instanceof ContractValidateException);
+      Assert.assertEquals("This account name already exist", e.getMessage());
+      AccountWrapper accountWrapper = dbManager.getAccountStore()
+              .get(ByteArray.fromHexString(OWNER_ADDRESS));
+      Assert.assertEquals(ACCOUNT_NAME, accountWrapper.getAccountName().toStringUtf8());
+    } catch (ContractExeException e) {
+      Assert.assertFalse(e instanceof ContractExeException);
+    }
+  }
+
   @AfterClass
   public static void destroy() {
     Args.clearParam();
