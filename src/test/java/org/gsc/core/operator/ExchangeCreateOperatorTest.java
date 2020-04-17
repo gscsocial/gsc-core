@@ -221,91 +221,6 @@ public class ExchangeCreateOperatorTest {
   }
 
   /**
-   * SameTokenName close,second create Exchange, result is success.
-   */
-  @Test
-  public void sameTokenNameCloseSuccessExchangeCreate2() {
-    dbManager.getDynamicPropertiesStore().saveAllowSameTokenName(0);
-    String firstTokenId = "_";
-    long firstTokenBalance = 100_000_000_000000L;
-    String secondTokenId = "abc";
-    long secondTokenBalance = 100_000_000L;
-
-    AssetIssueWrapper assetIssueWrapper =
-        new AssetIssueWrapper(
-            AssetIssueContract.newBuilder()
-                .setName(ByteString.copyFrom(secondTokenId.getBytes()))
-                .build());
-    assetIssueWrapper.setId(String.valueOf(1L));
-    dbManager.getAssetIssueStore()
-        .put(assetIssueWrapper.getName().toByteArray(), assetIssueWrapper);
-
-    byte[] ownerAddress = ByteArray.fromHexString(OWNER_ADDRESS_FIRST);
-    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
-    accountWrapper.setBalance(200_000_000_000000L);
-    accountWrapper.addAssetAmount(secondTokenId.getBytes(), 200_000_000L);
-    dbManager.getAccountStore().put(ownerAddress, accountWrapper);
-
-    ExchangeCreateOperator operator = new ExchangeCreateOperator(getContract(
-        OWNER_ADDRESS_FIRST, firstTokenId, firstTokenBalance, secondTokenId, secondTokenBalance),
-        dbManager);
-    TransactionResultWrapper ret = new TransactionResultWrapper();
-    Assert.assertEquals(dbManager.getDynamicPropertiesStore().getLatestExchangeNum(), 0);
-    try {
-      operator.validate();
-      operator.execute(ret);
-      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
-      long id = 1;
-      Assert.assertEquals(dbManager.getDynamicPropertiesStore().getLatestExchangeNum(), id);
-      // check old version
-      ExchangeWrapper exchangeWrapper = dbManager.getExchangeStore().get(ByteArray.fromLong(id));
-      Assert.assertNotNull(exchangeWrapper);
-      Assert.assertEquals(ByteString.copyFrom(ownerAddress), exchangeWrapper.getCreatorAddress());
-      Assert.assertEquals(id, exchangeWrapper.getID());
-      Assert.assertEquals(1000000, exchangeWrapper.getCreateTime());
-      Assert.assertTrue(Arrays.equals(firstTokenId.getBytes(), exchangeWrapper.getFirstTokenId()));
-      Assert.assertEquals(firstTokenId, ByteArray.toStr(exchangeWrapper.getFirstTokenId()));
-      Assert.assertEquals(firstTokenBalance, exchangeWrapper.getFirstTokenBalance());
-      Assert.assertEquals(secondTokenId, ByteArray.toStr(exchangeWrapper.getSecondTokenId()));
-      Assert.assertEquals(secondTokenBalance, exchangeWrapper.getSecondTokenBalance());
-
-      accountWrapper = dbManager.getAccountStore().get(ownerAddress);
-      Map<String, Long> assetMap = accountWrapper.getAssetMap();
-      Assert.assertEquals(200_000_000_000000L - 1000_000000L - firstTokenBalance,
-          accountWrapper.getBalance());
-      Assert.assertEquals(100_000_000L, assetMap.get(secondTokenId).longValue());
-
-      // check V2 version
-      ExchangeWrapper exchangeWrapper1 = dbManager.getExchangeV2Store()
-          .get(ByteArray.fromLong(id));
-      Assert.assertNotNull(exchangeWrapper1);
-      Assert.assertEquals(ByteString.copyFrom(ownerAddress), exchangeWrapper1.getCreatorAddress());
-      Assert.assertEquals(id, exchangeWrapper1.getID());
-      Assert.assertEquals(1000000, exchangeWrapper1.getCreateTime());
-      secondTokenId = dbManager.getAssetIssueStore().get(secondTokenId.getBytes()).getId();
-      Assert
-          .assertTrue(Arrays.equals(firstTokenId.getBytes(), exchangeWrapper1.getFirstTokenId()));
-      Assert.assertEquals(firstTokenId, ByteArray.toStr(exchangeWrapper1.getFirstTokenId()));
-      Assert.assertEquals(firstTokenBalance, exchangeWrapper1.getFirstTokenBalance());
-      Assert.assertEquals(secondTokenId, ByteArray.toStr(exchangeWrapper1.getSecondTokenId()));
-      Assert.assertEquals(secondTokenBalance, exchangeWrapper1.getSecondTokenBalance());
-
-      accountWrapper = dbManager.getAccountStore().get(ownerAddress);
-      Map<String, Long> getAssetV2Map = accountWrapper.getAssetMapV2();
-      Assert.assertEquals(200_000_000_000000L - 1000_000000L - firstTokenBalance,
-          accountWrapper.getBalance());
-      Assert.assertEquals(100_000_000L, getAssetV2Map.get(secondTokenId).longValue());
-
-    } catch (ContractValidateException e) {
-      Assert.assertFalse(e instanceof ContractValidateException);
-    } catch (ContractExeException e) {
-      Assert.assertFalse(e instanceof ContractExeException);
-    } catch (ItemNotFoundException e) {
-      Assert.assertFalse(e instanceof ItemNotFoundException);
-    }
-  }
-
-  /**
    * Init close SameTokenName,after init data,open SameTokenName
    */
   @Test
@@ -1078,6 +993,91 @@ public class ExchangeCreateOperatorTest {
           e.getMessage());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
+    }
+  }
+
+  /**
+   * SameTokenName close,second create Exchange, result is success.
+   */
+  @Test
+  public void sameTokenNameCloseSuccessExchangeCreate2() {
+    dbManager.getDynamicPropertiesStore().saveAllowSameTokenName(0);
+    String firstTokenId = "_";
+    long firstTokenBalance = 100_000_000_000000L;
+    String secondTokenId = "abc";
+    long secondTokenBalance = 100_000_000L;
+
+    AssetIssueWrapper assetIssueWrapper =
+            new AssetIssueWrapper(
+                    AssetIssueContract.newBuilder()
+                            .setName(ByteString.copyFrom(secondTokenId.getBytes()))
+                            .build());
+    assetIssueWrapper.setId(String.valueOf(1L));
+    dbManager.getAssetIssueStore()
+            .put(assetIssueWrapper.getName().toByteArray(), assetIssueWrapper);
+
+    byte[] ownerAddress = ByteArray.fromHexString(OWNER_ADDRESS_FIRST);
+    AccountWrapper accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+    accountWrapper.setBalance(200_000_000_000000L);
+    accountWrapper.addAssetAmount(secondTokenId.getBytes(), 200_000_000L);
+    dbManager.getAccountStore().put(ownerAddress, accountWrapper);
+
+    ExchangeCreateOperator operator = new ExchangeCreateOperator(getContract(
+            OWNER_ADDRESS_FIRST, firstTokenId, firstTokenBalance, secondTokenId, secondTokenBalance),
+            dbManager);
+    TransactionResultWrapper ret = new TransactionResultWrapper();
+    Assert.assertEquals(dbManager.getDynamicPropertiesStore().getLatestExchangeNum(), 0);
+    try {
+      operator.validate();
+      operator.execute(ret);
+      Assert.assertEquals(ret.getInstance().getRet(), code.SUCESS);
+      long id = 1;
+      Assert.assertEquals(dbManager.getDynamicPropertiesStore().getLatestExchangeNum(), id);
+      // check old version
+      ExchangeWrapper exchangeWrapper = dbManager.getExchangeStore().get(ByteArray.fromLong(id));
+      Assert.assertNotNull(exchangeWrapper);
+      Assert.assertEquals(ByteString.copyFrom(ownerAddress), exchangeWrapper.getCreatorAddress());
+      Assert.assertEquals(id, exchangeWrapper.getID());
+      Assert.assertEquals(1000000, exchangeWrapper.getCreateTime());
+      Assert.assertTrue(Arrays.equals(firstTokenId.getBytes(), exchangeWrapper.getFirstTokenId()));
+      Assert.assertEquals(firstTokenId, ByteArray.toStr(exchangeWrapper.getFirstTokenId()));
+      Assert.assertEquals(firstTokenBalance, exchangeWrapper.getFirstTokenBalance());
+      Assert.assertEquals(secondTokenId, ByteArray.toStr(exchangeWrapper.getSecondTokenId()));
+      Assert.assertEquals(secondTokenBalance, exchangeWrapper.getSecondTokenBalance());
+
+      accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+      Map<String, Long> assetMap = accountWrapper.getAssetMap();
+      Assert.assertEquals(200_000_000_000000L - 1000_000000L - firstTokenBalance,
+              accountWrapper.getBalance());
+      Assert.assertEquals(100_000_000L, assetMap.get(secondTokenId).longValue());
+
+      // check V2 version
+      ExchangeWrapper exchangeWrapper1 = dbManager.getExchangeV2Store()
+              .get(ByteArray.fromLong(id));
+      Assert.assertNotNull(exchangeWrapper1);
+      Assert.assertEquals(ByteString.copyFrom(ownerAddress), exchangeWrapper1.getCreatorAddress());
+      Assert.assertEquals(id, exchangeWrapper1.getID());
+      Assert.assertEquals(1000000, exchangeWrapper1.getCreateTime());
+      secondTokenId = dbManager.getAssetIssueStore().get(secondTokenId.getBytes()).getId();
+      Assert
+              .assertTrue(Arrays.equals(firstTokenId.getBytes(), exchangeWrapper1.getFirstTokenId()));
+      Assert.assertEquals(firstTokenId, ByteArray.toStr(exchangeWrapper1.getFirstTokenId()));
+      Assert.assertEquals(firstTokenBalance, exchangeWrapper1.getFirstTokenBalance());
+      Assert.assertEquals(secondTokenId, ByteArray.toStr(exchangeWrapper1.getSecondTokenId()));
+      Assert.assertEquals(secondTokenBalance, exchangeWrapper1.getSecondTokenBalance());
+
+      accountWrapper = dbManager.getAccountStore().get(ownerAddress);
+      Map<String, Long> getAssetV2Map = accountWrapper.getAssetMapV2();
+      Assert.assertEquals(200_000_000_000000L - 1000_000000L - firstTokenBalance,
+              accountWrapper.getBalance());
+      Assert.assertEquals(100_000_000L, getAssetV2Map.get(secondTokenId).longValue());
+
+    } catch (ContractValidateException e) {
+      Assert.assertFalse(e instanceof ContractValidateException);
+    } catch (ContractExeException e) {
+      Assert.assertFalse(e instanceof ContractExeException);
+    } catch (ItemNotFoundException e) {
+      Assert.assertFalse(e instanceof ItemNotFoundException);
     }
   }
 
