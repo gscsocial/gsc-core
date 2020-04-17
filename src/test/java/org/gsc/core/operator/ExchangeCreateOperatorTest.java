@@ -74,9 +74,6 @@ public class ExchangeCreateOperatorTest {
             Wallet.getAddressPreFixString() + "548794500882809695a8a687866e06d4271a1ced";
   }
 
-  /**
-   * Init data.
-   */
   @BeforeClass
   public static void init() {
     dbManager = context.getBean(Manager.class);
