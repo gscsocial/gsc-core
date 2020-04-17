@@ -120,9 +120,6 @@ public class AssetIssueOperatorTest {
     dbManager.getAccountStore().delete(address);
   }
 
-  /**
-   * Release resources.
-   */
   @AfterClass
   public static void destroy() {
     Args.clearParam();
@@ -151,9 +148,6 @@ public class AssetIssueOperatorTest {
             .build());
   }
 
-  /**
-   * SameTokenName close, asset issue success
-   */
   @Test
   public void SameTokenNameCloseAssetIssueSuccess() {
     dbManager.getDynamicPropertiesStore().saveAllowSameTokenName(0);
@@ -197,10 +191,6 @@ public class AssetIssueOperatorTest {
     }
   }
 
-
-  /**
-   * Init close SameTokenName,after init data,open SameTokenName
-   */
   @Test
   public void oldNotUpdateAssetIssueSuccess() {
     dbManager.getDynamicPropertiesStore().saveAllowSameTokenName(0);
@@ -240,9 +230,6 @@ public class AssetIssueOperatorTest {
     }
   }
 
-  /**
-   * SameTokenName open, asset issue success
-   */
   @Test
   public void SameTokenNameOpenAssetIssueSuccess() {
     dbManager.getDynamicPropertiesStore().saveAllowSameTokenName(1);
@@ -1404,10 +1391,6 @@ public class AssetIssueOperatorTest {
     }
   }
 
-  /**
-   * 1. start time should not be null 2. end time should not be null 3. start time >=
-   * getHeadBlockTimeStamp 4. start time < end time
-   */
   @Test
   public void issueTimeTest() {
     //empty start time will throw exception
@@ -1538,7 +1521,6 @@ public class AssetIssueOperatorTest {
       dbManager.getAssetIssueStore().delete(ByteArray.fromString(NAME));
     }
 
-    //endTime < startTime, throw exception
     contract = Any.pack(Contract.AssetIssueContract.newBuilder()
         .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)))
         .setName(ByteString.copyFromUtf8(NAME))
@@ -1564,7 +1546,6 @@ public class AssetIssueOperatorTest {
       dbManager.getAssetIssueStore().delete(ByteArray.fromString(NAME));
     }
 
-    //right issue, will not throw exception
     contract = Any.pack(Contract.AssetIssueContract.newBuilder()
         .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)))
         .setName(ByteString.copyFromUtf8(NAME))
@@ -1594,9 +1575,6 @@ public class AssetIssueOperatorTest {
     }
   }
 
-  /**
-   * an account should issue asset only once
-   */
   @Test
   public void assetIssueNameTest() {
     Any contract = Any.pack(Contract.AssetIssueContract.newBuilder()
@@ -1751,9 +1729,6 @@ public class AssetIssueOperatorTest {
     }
   }
 
-  /**
-   * SameTokenName close, Invalid ownerAddress
-   */
   @Test
   public void SameTokenNameCloseInvalidOwnerAddress() {
     dbManager.getDynamicPropertiesStore().saveAllowSameTokenName(0);
@@ -1962,11 +1937,8 @@ public class AssetIssueOperatorTest {
     long nowTime = new Date().getTime();
     byte[] stats = new byte[27];
     Arrays.fill(stats, (byte) 1);
-//    dbManager.getDynamicPropertiesStore()
-//        .statsByVersion(Parameter.ForkBlockVersionConsts.CPU_LIMIT, stats);
     TransactionResultWrapper ret = new TransactionResultWrapper();
 
-    // PublicFreeAssetNetUsage must be 0!
     Any any = Any.pack(
         Contract.AssetIssueContract.newBuilder()
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)))
@@ -2024,7 +1996,6 @@ public class AssetIssueOperatorTest {
       dbManager.getAssetIssueStore().delete(ByteArray.fromString(NAME));
     }
 
-    //Invalid PublicFreeAssetNetLimit
     any = Any.pack(
         Contract.AssetIssueContract.newBuilder()
             .setOwnerAddress(ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)))

@@ -189,9 +189,6 @@ public class AccountPermissionUpdateOperatorTest {
     return Any.pack(builder.build());
   }
 
-  /**
-   * return a PermissionAddKeyContract as an invalid contract
-   */
   private Any getInvalidContract() {
     return Any.pack(
         Contract.AccountCreateContract.newBuilder()
@@ -1193,9 +1190,6 @@ public class AccountPermissionUpdateOperatorTest {
 
   }
 
-  /**
-   * Release resources.
-   */
   @AfterClass
   public static void destroy() {
     Args.clearParam();
