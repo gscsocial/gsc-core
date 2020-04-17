@@ -756,59 +756,6 @@ public class UnfreezeBalanceOperatorTest {
 
   }
 
-//  @Test
-//  public void InvalidTotalNetWeight(){
-//    long now = System.currentTimeMillis();
-//    dbManager.getDynamicPropertiesStore().saveLatestBlockHeaderTimestamp(now);
-//    dbManager.getDynamicPropertiesStore().saveTotalNetWeight(smallTatalResource);
-//
-//    AccountWrapper accountWrapper = dbManager.getAccountStore()
-//            .get(ByteArray.fromHexString(OWNER_ADDRESS));
-//    accountWrapper.setFrozen(frozenBalance, now);
-//    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
-//
-//    Assert.assertTrue(frozenBalance/1000_000L > smallTatalResource );
-//    UnfreezeBalanceOperator operator = new UnfreezeBalanceOperator(
-//            getContract(OWNER_ADDRESS), dbManager);
-//    TransactionResultWrapper ret = new TransactionResultWrapper();
-//    try {
-//      operator.validate();
-//      operator.execute(ret);
-//
-//      Assert.assertTrue(dbManager.getDynamicPropertiesStore().getTotalNetWeight() >= 0);
-//    } catch (ContractValidateException e) {
-//      Assert.assertTrue(e instanceof ContractValidateException);
-//    } catch (ContractExeException e) {
-//      Assert.assertTrue(e instanceof ContractExeException);
-//    }
-//  }
-//
-//  @Test
-//  public void InvalidTotalCpuWeight(){
-//    long now = System.currentTimeMillis();
-//    dbManager.getDynamicPropertiesStore().saveLatestBlockHeaderTimestamp(now);
-//    dbManager.getDynamicPropertiesStore().saveTotalCpuWeight(smallTatalResource);
-//
-//    AccountWrapper accountWrapper = dbManager.getAccountStore()
-//            .get(ByteArray.fromHexString(OWNER_ADDRESS));
-//    accountWrapper.setFrozenForCpu(frozenBalance, now);
-//    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
-//
-//    Assert.assertTrue(frozenBalance/1000_000L > smallTatalResource );
-//    UnfreezeBalanceOperator operator = new UnfreezeBalanceOperator(
-//            getContract(OWNER_ADDRESS, Contract.ResourceCode.CPU), dbManager);
-//    TransactionResultWrapper ret = new TransactionResultWrapper();
-//    try {
-//      operator.validate();
-//      operator.execute(ret);
-//
-//      Assert.assertTrue(dbManager.getDynamicPropertiesStore().getTotalCpuWeight() >= 0);
-//    } catch (ContractValidateException e) {
-//      Assert.assertTrue(e instanceof ContractValidateException);
-//    } catch (ContractExeException e) {
-//      Assert.assertTrue(e instanceof ContractExeException);
-//    }
-//  }
 @AfterClass
 public static void destroy() {
   Args.clearParam();
