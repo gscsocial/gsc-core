@@ -49,7 +49,7 @@ public class GenesisBlockTest {
     witness
         .setAddress(ByteArray.fromHexString(
             Wallet.getAddressPreFixString() + "448d53b2df0cd78158f6f0aecdf60c1c10b15413"));
-    witness.setUrl("http://Uranus.org");
+    witness.setUrl("http://gsc-function.org");
     witness.setVoteCount(1000L);
 
     List<Witness> witnesses = new ArrayList<>();
