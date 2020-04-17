@@ -89,7 +89,6 @@ public class AccountTest {
   @Test
   public void setAccountTypeRight() {
     account.setAccountType("Contract");
-
     Assert.assertEquals(account.getAccountTypeByString("Contract"), account.getAccountType());
   }
 

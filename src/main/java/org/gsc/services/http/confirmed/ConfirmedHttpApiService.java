@@ -145,7 +145,6 @@ public class ConfirmedHttpApiService implements Service {
             context
                     .addServlet(new ServletHolder(getTransactionCountByBlockNumServlet),
                             "/walletconfirmed/gettransactioncountbyblocknum");
-
             // for extension api
             if (args.isWalletExtensionApi()) {
                 context.addServlet(new ServletHolder(getTransactionsFromThisServlet),
@@ -154,7 +153,6 @@ public class ConfirmedHttpApiService implements Service {
                         .addServlet(new ServletHolder(getTransactionsToThisServlet),
                                 "/walletextension/gettransactionstothis");
             }
-
             context.addServlet(new ServletHolder(getNodeInfoServlet), "/wallet/getnodeinfo");
             int maxHttpConnectNumber = Args.getInstance().getMaxHttpConnectNumber();
             if (maxHttpConnectNumber > 0) {
