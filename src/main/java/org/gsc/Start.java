@@ -67,14 +67,12 @@ public class Start {
         Application application = ApplicationFactory.create(context);
         shutdown(application);
 
-        // provide full rpc and http server on the full node.
         RpcApiService rpcApiService = context.getBean(RpcApiService.class);
         application.addService(rpcApiService);
         if (cfgArgs.isWitness()) application.addService(new WitnessService(application, context));
         FullNodeHttpApiService httpApiService = context.getBean(FullNodeHttpApiService.class);
         application.addService(httpApiService);
 
-        // provide confirmed rpc and http server on the confirmed node.
         if (Args.getInstance().getStorage().getDbVersion() == 2) {
             ConfirmedRpcApiService confirmedRpcApiService = context.getBean(ConfirmedRpcApiService.class);
             application.addService(confirmedRpcApiService);

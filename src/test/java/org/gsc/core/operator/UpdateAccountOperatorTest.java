@@ -273,54 +273,9 @@ public class UpdateAccountOperatorTest {
       Assert.assertEquals("Invalid accountName", e.getMessage());
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
-    }
-//    //Too short name 7 bytes
-//    try {
-//      UpdateAccountOperator operator = new UpdateAccountOperator(
-//          getContract("testnam", OWNER_ADDRESS), dbManager);
-//      operator.validate();
-//      operator.execute(ret);
-//      Assert.assertFalse(true);
-//    } catch (ContractValidateException e) {
-//      Assert.assertTrue(e instanceof ContractValidateException);
-//      Assert.assertEquals("Invalid accountName", e.getMessage());
-//    } catch (ContractExeException e) {
-//      Assert.assertFalse(e instanceof ContractExeException);
-//    }
-//
-//    //Can't contain space
-//    try {
-//      UpdateAccountOperator operator = new UpdateAccountOperator(
-//          getContract("t e", OWNER_ADDRESS), dbManager);
-//      operator.validate();
-//      operator.execute(ret);
-//      Assert.assertFalse(true);
-//    } catch (ContractValidateException e) {
-//      Assert.assertTrue(e instanceof ContractValidateException);
-//      Assert.assertEquals("Invalid accountName", e.getMessage());
-//    } catch (ContractExeException e) {
-//      Assert.assertFalse(e instanceof ContractExeException);
-//    }
-//    //Can't contain chinese characters
-//    try {
-//      UpdateAccountOperator operator = new UpdateAccountOperator(
-//          getContract(ByteString.copyFrom(ByteArray.fromHexString("E6B58BE8AF95"))
-//              , OWNER_ADDRESS), dbManager);
-//      operator.validate();
-//      operator.execute(ret);
-//      Assert.assertFalse(true);
-//    } catch (ContractValidateException e) {
-//      Assert.assertTrue(e instanceof ContractValidateException);
-//      Assert.assertEquals("Invalid accountName", e.getMessage());
-//    } catch (ContractExeException e) {
-//      Assert.assertFalse(e instanceof ContractExeException);
-//    }
   }
 
   //@Test
-  /*
-   * Can update name only one time.
-   */
   public void twiceUpdateAccount() {
     TransactionResultWrapper ret = new TransactionResultWrapper();
     UpdateAccountOperator operator = new UpdateAccountOperator(
