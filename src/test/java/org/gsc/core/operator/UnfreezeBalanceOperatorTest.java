@@ -658,11 +658,6 @@ public class UnfreezeBalanceOperatorTest {
 
   @Test
   public void noFrozenBalance() {
-//    long now = System.currentTimeMillis();
-//    AccountWrapper accountWrapper = dbManager.getAccountStore()
-//        .get(ByteArray.fromHexString(OWNER_ADDRESS));
-//    accountWrapper.setFrozen(1_000_000_000L, now);
-//    dbManager.getAccountStore().put(accountWrapper.createDbKey(), accountWrapper);
     UnfreezeBalanceOperator operator = new UnfreezeBalanceOperator(
         getContractForNet(OWNER_ADDRESS), dbManager);
     TransactionResultWrapper ret = new TransactionResultWrapper();
@@ -731,8 +726,6 @@ public class UnfreezeBalanceOperatorTest {
     } catch (ContractExeException e) {
       Assert.assertFalse(e instanceof ContractExeException);
     }
-
-    // if had votes
     List<Vote> oldVotes = new ArrayList<Vote>();
     VotesWrapper votesWrapper = new VotesWrapper(
         ByteString.copyFrom(ByteArray.fromHexString(OWNER_ADDRESS)),
